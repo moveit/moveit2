@@ -66,10 +66,10 @@ if (fetched_trajectory)
 else
 {
   // Plan... And put it for posterity!
-  traj_cache->putTrajectory(
+  traj_cache->insertTrajectory(
       *interface, robot_name, std::move(plan_req_msg), std::move(res->result.trajectory),
       rclcpp::Duration(res->result.trajectory.joint_trajectory.points.back().time_from_start).seconds(),
-      res->result.planning_time, /*delete_worse_trajectories=*/true);
+      res->result.planning_time, /*prune_worse_trajectories=*/true);
 }
 ```
 

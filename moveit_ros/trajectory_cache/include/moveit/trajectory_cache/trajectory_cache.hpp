@@ -1,4 +1,4 @@
-// Copyright 2022 Johnson & Johnson
+// Copyright 2024 Intrinsic Innovation LLC.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+/** @file
+ * @brief Fuzzy-Matching Trajectory Cache.
+ * @author methylDragon
+ */
 
 #pragma once
 
@@ -40,9 +45,9 @@ namespace moveit_ros
 namespace trajectory_cache
 {
 
-/** \class TrajectoryCache trajectory_cache.hpp moveit/trajectory_cache/trajectory_cache.hpp
+/** @class TrajectoryCache trajectory_cache.hpp moveit/trajectory_cache/trajectory_cache.hpp
  *
- * \brief Trajectory Cache manager for MoveIt.
+ * @brief Trajectory Cache manager for MoveIt.
  *
  * This manager facilitates cache management for MoveIt 2's `MoveGroupInterface`
  * by using `warehouse_ros` to manage a database of executed trajectories, keyed
@@ -113,9 +118,9 @@ class TrajectoryCache
 {
 public:
   /**
-   * \brief Construct a TrajectoryCache.
+   * @brief Constructs a TrajectoryCache.
    *
-   * \param[in] node. An rclcpp::Node::SharedPtr, which will be used to lookup warehouse_ros parameters, log, and listen
+   * @param[in] node. An rclcpp::Node::SharedPtr, which will be used to lookup warehouse_ros parameters, log, and listen
    * for TF.
    *
    * TODO: methylDragon -
@@ -125,16 +130,16 @@ public:
   explicit TrajectoryCache(const rclcpp::Node::SharedPtr& node);
 
   /**
-   * \brief Options struct for TrajectoryCache.
+   * @brief Options struct for TrajectoryCache.
    *
-   * \property db_path. The database path.
-   * \property db_port. The database port.
-   * \property exact_match_precision. Tolerance for float precision comparison for what counts as an exact match.
+   * @property db_path. The database path.
+   * @property db_port. The database port.
+   * @property exact_match_precision. Tolerance for float precision comparison for what counts as an exact match.
    *   An exact match is when:
    *     (candidate >= value - (exact_match_precision / 2)
    *      && candidate <= value + (exact_match_precision / 2))
-   * \property num_additional_trajectories_to_preserve_when_deleting_worse. The number of additional cached trajectories
-   * to preserve when `delete_worse_trajectories` is true. It is useful to keep more than one matching trajectory to
+   * @property num_additional_trajectories_to_preserve_when_deleting_worse. The number of additional cached trajectories
+   * to preserve when `prune_worse_trajectories` is true. It is useful to keep more than one matching trajectory to
    * have alternative trajectories to handle obstacles.
    */
   struct Options
@@ -147,78 +152,78 @@ public:
   };
 
   /**
-   * \brief Initialize the TrajectoryCache.
+   * @brief Initializes the TrajectoryCache.
    *
    * This sets up the database connection, and sets any configuration parameters.
    * You must call this before calling any other method of the trajectory cache.
    *
-   * \param[in] options. An instance of TrajectoryCache::Options to initialize the cache with.
-   *   \see TrajectoryCache::Options
-   * \returns true if the database was successfully connected to.
-   * \throws When options.num_additional_trajectories_to_preserve_when_deleting_worse is less than 1.
+   * @param[in] options. An instance of TrajectoryCache::Options to initialize the cache with.
+   *   @see TrajectoryCache::Options
+   * @returns true if the database was successfully connected to.
+   * @throws When options.num_additional_trajectories_to_preserve_when_deleting_worse is less than 1.
    * */
   bool init(const Options& options);
 
   /**
-   * \brief Count the number of non-cartesian trajectories for a particular cache namespace.
+   * @brief Count the number of non-cartesian trajectories for a particular cache namespace.
    *
-   * \param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
-   * \returns The number of non-cartesian trajectories for the cache namespace.
+   * @param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
+   * @returns The number of non-cartesian trajectories for the cache namespace.
    */
   unsigned countTrajectories(const std::string& cache_namespace);
 
   /**
-   * \brief Count the number of cartesian trajectories for a particular cache namespace.
+   * @brief Count the number of cartesian trajectories for a particular cache namespace.
    *
-   * \param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
-   * \returns The number of cartesian trajectories for the cache namespace.
+   * @param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
+   * @returns The number of cartesian trajectories for the cache namespace.
    */
   unsigned countCartesianTrajectories(const std::string& cache_namespace);
 
   /**
-   * \name Getters and setters.
+   * @name Getters and setters.
    */
   /**@{*/
 
-  /// \brief Gets the database path.
+  /// @brief Gets the database path.
   std::string getDbPath();
 
-  /// \brief Gets the database port.
+  /// @brief Gets the database port.
   uint32_t getDbPort();
 
-  /// \brief Getss the exact match precision.
+  /// @brief Gets the exact match precision.
   double getExactMatchPrecision();
 
-  /// \brief Sets the exact match precision.
+  /// @brief Sets the exact match precision.
   void setExactMatchPrecision(double exact_match_precision);
 
-  /// \brief Get the number of trajectories to preserve when deleting worse trajectories.
+  /// @brief Get the number of trajectories to preserve when deleting worse trajectories.
   size_t getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse();
 
-  /// \brief Set the number of additional trajectories to preserve when deleting worse trajectories.
+  /// @brief Set the number of additional trajectories to preserve when deleting worse trajectories.
   void setNumAdditionalTrajectoriesToPreserveWhenDeletingWorse(
       size_t num_additional_trajectories_to_preserve_when_deleting_worse);
 
   /**@}*/
 
   /**
-   * \name Motion plan trajectory caching
+   * @name Motion plan trajectory caching
    */
   /**@{*/
 
   /**
-   * \brief Fetch all plans that fit within the requested tolerances for start and goal conditions, returning them as a
-   * vector, sorted by some cache column.
+   * @brief Fetches all plans that fit within the requested tolerances for start and goal conditions, returning them as
+   * a vector, sorted by some cache column.
    *
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
-   * \param[in] plan_request. The motion plan request to key the cache with.
-   * \param[in] start_tolerance. Match tolerance for cache entries for the `plan_request` start parameters.
-   * \param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
-   * \param[in] metadata_only. If true, returns only the cache entry metadata.
-   * \param[in] sort_by. The cache column to sort by, defaults to execution time.
-   * \param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
-   * \returns A vector of cache hits, sorted by the `sort_by` param.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
+   * @param[in] plan_request. The motion plan request to key the cache with.
+   * @param[in] start_tolerance. Match tolerance for cache entries for the `plan_request` start parameters.
+   * @param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
+   * @param[in] metadata_only. If true, returns only the cache entry metadata.
+   * @param[in] sort_by. The cache column to sort by, defaults to execution time.
+   * @param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
+   * @returns A vector of cache hits, sorted by the `sort_by` param.
    */
   std::vector<warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
   fetchAllMatchingTrajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
@@ -228,18 +233,18 @@ public:
                                const std::string& sort_by = "execution_time_s", bool ascending = true) const;
 
   /**
-   * \brief Fetch the best trajectory that fits within the requested tolerances for start and goal conditions, by some
+   * @brief Fetches the best trajectory that fits within the requested tolerances for start and goal conditions, by some
    * cache column.
    *
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
-   * \param[in] plan_request. The motion plan request to key the cache with.
-   * \param[in] start_tolerance. Match tolerance for cache entries for the `plan_request` start parameters.
-   * \param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
-   * \param[in] metadata_only. If true, returns only the cache entry metadata.
-   * \param[in] sort_by. The cache column to sort by, defaults to execution time.
-   * \param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
-   * \returns The best cache hit, with respect to the `sort_by` param.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
+   * @param[in] plan_request. The motion plan request to key the cache with.
+   * @param[in] start_tolerance. Match tolerance for cache entries for the `plan_request` start parameters.
+   * @param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
+   * @param[in] metadata_only. If true, returns only the cache entry metadata.
+   * @param[in] sort_by. The cache column to sort by, defaults to execution time.
+   * @param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
+   * @returns The best cache hit, with respect to the `sort_by` param.
    */
   warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr fetchBestMatchingTrajectory(
       const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
@@ -247,7 +252,7 @@ public:
       bool metadata_only = false, const std::string& sort_by = "execution_time_s", bool ascending = true) const;
 
   /**
-   * \brief Put a trajectory into the database if it is the best matching trajectory seen so far.
+   * @brief Inserts a trajectory into the database if it is the best matching trajectory seen so far.
    *
    * Trajectories are matched based off their start and goal states.
    * And are considered "better" if they are higher priority in the sorting order specified by `sort_by` than another
@@ -255,43 +260,43 @@ public:
    *
    * A trajectory is "exactly matching" if its start and goal are close enough to another trajectory.
    * The tolerance for this depends on the `exact_match_precision` arg passed in init().
-   * \see init()
+   * @see init()
    *
    * Optionally deletes all worse trajectories by default to prune the cache.
    *
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
-   * \param[in] plan_request. The motion plan request to key the cache with.
-   * \param[in] trajectory. The trajectory to put.
-   * \param[in] execution_time_s. The execution time of the trajectory, in seconds.
-   * \param[in] planning_time_s. How long the trajectory took to plan, in seconds.
-   * \param[in] delete_worse_trajectories. If true, will prune the cache by deleting all cache entries that match the
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
+   * @param[in] plan_request. The motion plan request to key the cache with.
+   * @param[in] trajectory. The trajectory to put.
+   * @param[in] execution_time_s. The execution time of the trajectory, in seconds.
+   * @param[in] planning_time_s. How long the trajectory took to plan, in seconds.
+   * @param[in] prune_worse_trajectories. If true, will prune the cache by deleting all cache entries that match the
    * `plan_request` exactly, if they are worse than the `trajectory`, even if it was not put.
-   * \returns true if the trajectory was the best seen yet and hence put into the cache.
+   * @returns true if the trajectory was the best seen yet and hence put into the cache.
    */
-  bool putTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                     const std::string& cache_namespace, const moveit_msgs::msg::MotionPlanRequest& plan_request,
-                     const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
-                     double planning_time_s, bool delete_worse_trajectories = true);
+  bool insertTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
+                        const std::string& cache_namespace, const moveit_msgs::msg::MotionPlanRequest& plan_request,
+                        const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
+                        double planning_time_s, bool prune_worse_trajectories = true);
 
   /**@}*/
 
   /**
-   * \name Cartesian trajectory caching
+   * @name Cartesian trajectory caching
    */
   /**@{*/
 
   /**
-   * \brief Construct a GetCartesianPath request.
+   * @brief Constructs a GetCartesianPath request.
    *
    * This mimics the move group computeCartesianPath signature (without path constraints).
    *
-   * \param[in] move_group. The manipulator move group, used to get its state, frames, and link.
-   * \param[in] waypoints. The cartesian waypoints to request the path for.
-   * \param[in] max_step. The value to populate into the `GetCartesianPath` request's max_step field.
-   * \param[in] jump_threshold. The value to populate into the `GetCartesianPath` request's jump_threshold field.
-   * \param[in] avoid_collisions. The value to populate into the `GetCartesianPath` request's avoid_collisions field.
-   * \returns
+   * @param[in] move_group. The manipulator move group, used to get its state, frames, and link.
+   * @param[in] waypoints. The cartesian waypoints to request the path for.
+   * @param[in] max_step. The value to populate into the `GetCartesianPath` request's max_step field.
+   * @param[in] jump_threshold. The value to populate into the `GetCartesianPath` request's jump_threshold field.
+   * @param[in] avoid_collisions. The value to populate into the `GetCartesianPath` request's avoid_collisions field.
+   * @returns
    */
   moveit_msgs::srv::GetCartesianPath::Request
   constructGetCartesianPathRequest(moveit::planning_interface::MoveGroupInterface& move_group,
@@ -299,19 +304,19 @@ public:
                                    double jump_threshold, bool avoid_collisions = true);
 
   /**
-   * \brief Fetch all cartesian trajectories that fit within the requested tolerances for start and goal conditions,
+   * @brief Fetches all cartesian trajectories that fit within the requested tolerances for start and goal conditions,
    * returning them as a vector, sorted by some cache column.
    *
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
-   * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \param[in] min_fraction. The minimum fraction required for a cache hit.
-   * \param[in] start_tolerance. Match tolerance for cache entries for the `plan_request` start parameters.
-   * \param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
-   * \param[in] metadata_only. If true, returns only the cache entry metadata.
-   * \param[in] sort_by. The cache column to sort by, defaults to execution time.
-   * \param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
-   * \returns A vector of cache hits, sorted by the `sort_by` param.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
+   * @param[in] plan_request. The cartesian plan request to key the cache with.
+   * @param[in] min_fraction. The minimum fraction required for a cache hit.
+   * @param[in] start_tolerance. Match tolerance for cache entries for the `plan_request` start parameters.
+   * @param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
+   * @param[in] metadata_only. If true, returns only the cache entry metadata.
+   * @param[in] sort_by. The cache column to sort by, defaults to execution time.
+   * @param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
+   * @returns A vector of cache hits, sorted by the `sort_by` param.
    */
   std::vector<warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
   fetchAllMatchingCartesianTrajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
@@ -322,19 +327,19 @@ public:
                                         bool ascending = true) const;
 
   /**
-   * \brief Fetch the best cartesian trajectory that fits within the requested tolerances for start and goal conditions,
-   * by some cache column.
+   * @brief Fetches the best cartesian trajectory that fits within the requested tolerances for start and goal
+   * conditions, by some cache column.
    *
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
-   * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \param[in] min_fraction. The minimum fraction required for a cache hit.
-   * \param[in] start_tolerance. Match tolerance for cache entries for the `plan_request` start parameters.
-   * \param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
-   * \param[in] metadata_only. If true, returns only the cache entry metadata.
-   * \param[in] sort_by. The cache column to sort by, defaults to execution time.
-   * \param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
-   * \returns The best cache hit, with respect to the `sort_by` param.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
+   * @param[in] plan_request. The cartesian plan request to key the cache with.
+   * @param[in] min_fraction. The minimum fraction required for a cache hit.
+   * @param[in] start_tolerance. Match tolerance for cache entries for the `plan_request` start parameters.
+   * @param[in] goal_tolerance. Match tolerance for cache entries for the `plan_request` goal parameters.
+   * @param[in] metadata_only. If true, returns only the cache entry metadata.
+   * @param[in] sort_by. The cache column to sort by, defaults to execution time.
+   * @param[in] ascending. If true, sorts in ascending order. If false, sorts in descending order.
+   * @returns The best cache hit, with respect to the `sort_by` param.
    */
   warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr fetchBestMatchingCartesianTrajectory(
       const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& cache_namespace,
@@ -343,7 +348,7 @@ public:
       bool ascending = true) const;
 
   /**
-   * \brief Put a cartesian trajectory into the database if it is the best matching cartesian trajectory seen so far.
+   * @brief Inserts a cartesian trajectory into the database if it is the best matching cartesian trajectory seen so far.
    *
    * Cartesian trajectories are matched based off their start and goal states.
    * And are considered "better" if they are higher priority in the sorting order specified by `sort_by` than another
@@ -351,46 +356,46 @@ public:
    *
    * A trajectory is "exactly matching" if its start and goal (and fraction) are close enough to another trajectory.
    * The tolerance for this depends on the `exact_match_precision` arg passed in init().
-   * \see init()
+   * @see init()
    *
    * Optionally deletes all worse cartesian trajectories by default to prune the cache.
    *
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
-   * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \param[in] trajectory. The trajectory to put.
-   * \param[in] execution_time_s. The execution time of the trajectory, in seconds.
-   * \param[in] planning_time_s. How long the trajectory took to plan, in seconds.
-   * \param[in] fraction. The fraction of the path that was computed.
-   * \param[in] delete_worse_trajectories. If true, will prune the cache by deleting all cache entries that match the
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] cache_namespace. A namespace to separate cache entries by. The name of the robot is a good choice.
+   * @param[in] plan_request. The cartesian plan request to key the cache with.
+   * @param[in] trajectory. The trajectory to put.
+   * @param[in] execution_time_s. The execution time of the trajectory, in seconds.
+   * @param[in] planning_time_s. How long the trajectory took to plan, in seconds.
+   * @param[in] fraction. The fraction of the path that was computed.
+   * @param[in] prune_worse_trajectories. If true, will prune the cache by deleting all cache entries that match the
    * `plan_request` exactly, if they are worse than `trajectory`, even if it was not put.
-   * \returns true if the trajectory was the best seen yet and hence put into the cache.
+   * @returns true if the trajectory was the best seen yet and hence put into the cache.
    */
-  bool putCartesianTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
-                              const std::string& cache_namespace,
-                              const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
-                              const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
-                              double planning_time_s, double fraction, bool delete_worse_trajectories = true);
+  bool insertCartesianTrajectory(const moveit::planning_interface::MoveGroupInterface& move_group,
+                                 const std::string& cache_namespace,
+                                 const moveit_msgs::srv::GetCartesianPath::Request& plan_request,
+                                 const moveit_msgs::msg::RobotTrajectory& trajectory, double execution_time_s,
+                                 double planning_time_s, double fraction, bool prune_worse_trajectories = true);
 
   /**@}*/
 
 private:
   /**
-   * \name Motion plan trajectory query and metadata construction
+   * @name Motion plan trajectory query and metadata construction
    */
   /**@{*/
 
   /**
-   * \brief Extract relevant parameters from a motion plan request's start parameters to populate a cache db query, with
-   * some match tolerance.
+   * @brief Extracts relevant parameters from a motion plan request's start parameters to populate a cache db query,
+   * with some match tolerance.
    *
    * These parameters will be used to look-up relevant sections of a cache element's key.
    *
-   * \param[out] query. The query to add parameters to.
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] plan_request. The motion plan request to key the cache with.
-   * \param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
-   * \returns true if successfully added to. If false, the query might have been partially modified and should not be
+   * @param[out] query. The query to add parameters to.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] plan_request. The motion plan request to key the cache with.
+   * @param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
+   * @returns true if successfully added to. If false, the query might have been partially modified and should not be
    * used.
    */
   bool extractAndAppendTrajectoryStartToQuery(warehouse_ros::Query& query,
@@ -399,16 +404,16 @@ private:
                                               double match_tolerance) const;
 
   /**
-   * \brief Extract relevant parameters from a motion plan request's goal parameters to populate a cache db query, with
+   * @brief Extracts relevant parameters from a motion plan request's goal parameters to populate a cache db query, with
    * some match tolerance.
    *
    * These parameters will be used to look-up relevant sections of a cache element's key.
    *
-   * \param[out] query. The query to add parameters to.
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] plan_request. The motion plan request to key the cache with.
-   * \param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
-   * \returns true if successfully added to. If false, the query might have been partially modified and should not be
+   * @param[out] query. The query to add parameters to.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] plan_request. The motion plan request to key the cache with.
+   * @param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
+   * @returns true if successfully added to. If false, the query might have been partially modified and should not be
    * used.
    */
   bool extractAndAppendTrajectoryGoalToQuery(warehouse_ros::Query& query,
@@ -417,15 +422,15 @@ private:
                                              double match_tolerance) const;
 
   /**
-   * \brief Extract relevant parameters from a motion plan request's start parameters to populate a cache entry's
+   * @brief Extracts relevant parameters from a motion plan request's start parameters to populate a cache entry's
    * metadata.
    *
    * These parameters will be used key the cache element.
    *
-   * \param[out] metadata. The metadata to add parameters to.
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] plan_request. The motion plan request to key the cache with.
-   * \returns true if successfully added to. If false, the metadata might have been partially modified and should not be
+   * @param[out] metadata. The metadata to add parameters to.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] plan_request. The motion plan request to key the cache with.
+   * @returns true if successfully added to. If false, the metadata might have been partially modified and should not be
    * used.
    */
   bool extractAndAppendTrajectoryStartToMetadata(warehouse_ros::Metadata& metadata,
@@ -433,15 +438,15 @@ private:
                                                  const moveit_msgs::msg::MotionPlanRequest& plan_request) const;
 
   /**
-   * \brief Extract relevant parameters from a motion plan request's goal parameters to populate a cache entry's
+   * @brief Extracts relevant parameters from a motion plan request's goal parameters to populate a cache entry's
    * metadata.
    *
    * These parameters will be used key the cache element.
    *
-   * \param[out] metadata. The metadata to add parameters to.
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] plan_request. The motion plan request to key the cache with.
-   * \returns true if successfully added to. If false, the metadata might have been partially modified and should not be
+   * @param[out] metadata. The metadata to add parameters to.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] plan_request. The motion plan request to key the cache with.
+   * @returns true if successfully added to. If false, the metadata might have been partially modified and should not be
    * used.
    */
   bool extractAndAppendTrajectoryGoalToMetadata(warehouse_ros::Metadata& metadata,
@@ -451,21 +456,21 @@ private:
   /**@}*/
 
   /**
-   * \name Cartesian trajectory query and metadata construction
+   * @name Cartesian trajectory query and metadata construction
    */
   /**@{*/
 
   /**
-   * \brief Extract relevant parameters from a cartesian plan request's start parameters to populate a cache db query,
+   * @brief Extracts relevant parameters from a cartesian plan request's start parameters to populate a cache db query,
    * with some match tolerance.
    *
    * These parameters will be used to look-up relevant sections of a cache element's key.
    *
-   * \param[out] query. The query to add parameters to.
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
-   * \returns true if successfully added to. If false, the query might have been partially modified and should not be
+   * @param[out] query. The query to add parameters to.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] plan_request. The cartesian plan request to key the cache with.
+   * @param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
+   * @returns true if successfully added to. If false, the query might have been partially modified and should not be
    * used.
    */
   bool extractAndAppendCartesianTrajectoryStartToQuery(warehouse_ros::Query& query,
@@ -474,16 +479,16 @@ private:
                                                        double match_tolerance) const;
 
   /**
-   * \brief Extract relevant parameters from a cartesian plan request's goal parameters to populate a cache db query,
+   * @brief Extracts relevant parameters from a cartesian plan request's goal parameters to populate a cache db query,
    * with some match tolerance.
    *
    * These parameters will be used to look-up relevant sections of a cache element's key.
    *
-   * \param[out] query. The query to add parameters to.
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
-   * \returns true if successfully added to. If false, the query might have been partially modified and should not be
+   * @param[out] query. The query to add parameters to.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] plan_request. The cartesian plan request to key the cache with.
+   * @param[in] match_tolerance. The match tolerance (additive with exact_match_precision) for the query.
+   * @returns true if successfully added to. If false, the query might have been partially modified and should not be
    * used.
    */
   bool extractAndAppendCartesianTrajectoryGoalToQuery(warehouse_ros::Query& query,
@@ -492,15 +497,15 @@ private:
                                                       double match_tolerance) const;
 
   /**
-   * \brief Extract relevant parameters from a cartesian plan request's goal parameters to populate a cache entry's
+   * @brief Extracts relevant parameters from a cartesian plan request's goal parameters to populate a cache entry's
    * metadata.
    *
    * These parameters will be used key the cache element.
    *
-   * \param[out] metadata. The metadata to add parameters to.
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \returns true if successfully added to. If false, the metadata might have been partially modified and should not be
+   * @param[out] metadata. The metadata to add parameters to.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] plan_request. The cartesian plan request to key the cache with.
+   * @returns true if successfully added to. If false, the metadata might have been partially modified and should not be
    * used.
    */
   bool extractAndAppendCartesianTrajectoryStartToMetadata(
@@ -508,15 +513,15 @@ private:
       const moveit_msgs::srv::GetCartesianPath::Request& plan_request) const;
 
   /**
-   * \brief Extract relevant parameters from a cartesian plan request's goal parameters to populate a cache entry's
+   * @brief Extracts relevant parameters from a cartesian plan request's goal parameters to populate a cache entry's
    * metadata.
    *
    * These parameters will be used key the cache element.
    *
-   * \param[out] metadata. The metadata to add parameters to.
-   * \param[in] move_group. The manipulator move group, used to get its state.
-   * \param[in] plan_request. The cartesian plan request to key the cache with.
-   * \returns true if successfully added to. If false, the metadata might have been partially modified and should not be
+   * @param[out] metadata. The metadata to add parameters to.
+   * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] plan_request. The cartesian plan request to key the cache with.
+   * @returns true if successfully added to. If false, the metadata might have been partially modified and should not be
    * used.
    */
   bool extractAndAppendCartesianTrajectoryGoalToMetadata(

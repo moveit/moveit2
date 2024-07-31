@@ -1,4 +1,4 @@
-# Copyright 2023 Johnson & Johnson
+# Copyright 2024 Intrinsic Innovation LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# Author: methylDragon
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
