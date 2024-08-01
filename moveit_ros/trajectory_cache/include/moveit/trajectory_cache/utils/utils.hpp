@@ -88,7 +88,7 @@ void sortOrientationConstraints(std::vector<moveit_msgs::msg::OrientationConstra
  * @param[in,out] query. The query to add features to.
  * @param[in] constraints. The constraints to extract features from.
  * @param[in] move_group. The manipulator move group, used to get its state.
- * @param[in] workspace_frame_id. The frame to restate constraints in.
+ * @param[in] reference_frame_id. The frame to restate constraints in.
  * @param[in] prefix. A prefix to add to feature keys.
  * @returns moveit::core::MoveItErrorCode::SUCCESS if successfully appended. Otherwise, will return a different error
  * code, in which case the query should not be reused.
@@ -96,7 +96,7 @@ void sortOrientationConstraints(std::vector<moveit_msgs::msg::OrientationConstra
 moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
     warehouse_ros::Query& query, std::vector<moveit_msgs::msg::Constraints> constraints,
     const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance,
-    const std::string& workspace_frame_id, const std::string& prefix);
+    const std::string& reference_frame_id, const std::string& prefix);
 
 /** @brief Extracts relevant features from a vector of moveit_msgs::msg::Constraints messages to a cache entry's
  * metadata.
@@ -114,7 +114,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
  * @param[in,out] metadata. The metadata to add features to.
  * @param[in] constraints. The constraints to extract features from.
  * @param[in] move_group. The manipulator move group, used to get its state.
- * @param[in] workspace_frame_id. The frame to restate constraints in.
+ * @param[in] reference_frame_id. The frame to restate constraints in.
  * @param[in] prefix. A prefix to add to feature keys.
  * @returns moveit::core::MoveItErrorCode::SUCCESS if successfully appended. Otherwise, will return a different error
  * code, in which case the metadata should not be reused.
@@ -123,7 +123,7 @@ moveit::core::MoveItErrorCode
 appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
                                   std::vector<moveit_msgs::msg::Constraints> constraints,
                                   const moveit::planning_interface::MoveGroupInterface& move_group,
-                                  const std::string& workspace_frame_id, const std::string& prefix);
+                                  const std::string& reference_frame_id, const std::string& prefix);
 
 // RobotState. =====================================================================================
 
