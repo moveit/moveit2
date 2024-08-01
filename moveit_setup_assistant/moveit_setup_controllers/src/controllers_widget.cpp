@@ -355,7 +355,7 @@ void ControllersWidget::deleteController()
   // Delete actual controller
   if (setup_step_->deleteController(controller_name))
   {
-    RCLCPP_INFO_STREAM(setup_step_->getLogger(), "Controller " << controller_name << " deleted succefully");
+    RCLCPP_INFO_STREAM(setup_step_->getLogger(), "Controller " << controller_name << " deleted successfully");
   }
   else
   {

@@ -48,7 +48,7 @@ namespace distance_field
  *
  * @param [in] body The body to discretize
  * @param [in] resolution The resolution at which to test
- * @param [out] points The points internal to the body are appended to thiss
+ * @param [out] points The points internal to the body are appended to this
  *                   vector.
  */
 void findInternalPointsConvex(const bodies::Body& body, double resolution, EigenSTL::vector_Vector3d& points);
