@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <warehouse_ros/message_collection.h>
@@ -49,7 +50,7 @@ std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInter
 std::string getCartesianPathRequestFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
                                            const moveit_msgs::srv::GetCartesianPath::Request& path_request);
 
-// Features. =======================================================================================
+// Queries. ========================================================================================
 
 /** @brief Appends a range inclusive query with some tolerance about some center value. */
 void queryAppendCenterWithTolerance(warehouse_ros::Query& query, const std::string& name, double center,
@@ -65,3 +66,56 @@ void sortPositionConstraints(std::vector<moveit_msgs::msg::PositionConstraint>& 
 
 /** @brief Sorts a vector of orientation constraints in-place by link name. */
 void sortOrientationConstraints(std::vector<moveit_msgs::msg::OrientationConstraint>& orientation_constraints);
+
+/** @brief Extracts relevant features from a vector of moveit_msgs::msg::Constraint messages to a fetch query, with
+ * tolerance.
+ *
+ * This will extract relevant features from the joint, position, and orientation constraints per element.
+ * This exists because many keyable messages contain constraints which should be handled similarly.
+ *
+ * WARNING: Visibility constraints are not supported.
+ *
+ * Additionally, the component constraints within each vector element are sorted to reduce cache cardinality.
+ * For the same reason, constraints with frames are restated in terms of the workspace frame.
+ *
+ * We copy the input constraints to support this.
+ *
+ * @param[in,out] query. The query to add features to.
+ * @param[in] constraints. The constraints to extract features from.
+ * @param[in] move_group. The manipulator move group, used to get its state.
+ * @param[in] workspace_frame_id. The frame to restate constraints in.
+ * @param[in] prefix. A prefix to add to feature keys.
+ * @returns moveit::core::MoveItErrorCode::SUCCESS if successfully appended. Otherwise, will return a different error
+ * code, in which case the query should not be reused.
+ */
+moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
+    warehouse_ros::Query& query, std::vector<moveit_msgs::msg::Constraints> constraints,
+    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance,
+    const std::string& workspace_frame_id, const std::string& prefix);
+
+/** @brief Extracts relevant features from a vector of moveit_msgs::msg::Constraint messages to a cache entry's
+ * metadata.
+ *
+ * This will extract relevant features from the joint, position, and orientation constraints per element.
+ * This exists because many keyable messages contain constraints which should be handled similarly.
+ *
+ * WARNING: Visibility constraints and constraint regions are not supported.
+ *
+ * Additionally, the component constraints within each vector element are sorted to reduce cache cardinality.
+ * For the same reason, constraints with frames are restated in terms of the workspace frame.
+ *
+ * We copy the input constraints to support this.
+ *
+ * @param[in,out] metadata. The metadata to add features to.
+ * @param[in] source. A FeatureSourceT to extract features from.
+ * @param[in] move_group. The manipulator move group, used to get its state.
+ * @param[in] workspace_frame_id. The frame to restate constraints in.
+ * @param[in] prefix. A prefix to add to feature keys.
+ * @returns moveit::core::MoveItErrorCode::SUCCESS if successfully appended. Otherwise, will return a different error
+ * code, in which case the metadata should not be reused.
+ */
+moveit::core::MoveItErrorCode
+appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
+                                  std::vector<moveit_msgs::msg::Constraints> constraints,
+                                  const moveit::planning_interface::MoveGroupInterface& move_group,
+                                  const std::string& workspace_frame_id, const std::string& prefix);

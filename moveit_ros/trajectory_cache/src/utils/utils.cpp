@@ -17,11 +17,13 @@
  * @author methylDragon
  */
 
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/trajectory_cache/utils/utils.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <warehouse_ros/message_collection.h>
@@ -54,7 +56,7 @@ std::string getCartesianPathRequestFrameId(const moveit::planning_interface::Mov
   }
 }
 
-// Features. =======================================================================================
+// Queries. ========================================================================================
 
 void queryAppendCenterWithTolerance(warehouse_ros::Query& query, const std::string& name, double center,
                                     double tolerance)
@@ -86,4 +88,370 @@ void sortOrientationConstraints(std::vector<moveit_msgs::msg::OrientationConstra
             [](const moveit_msgs::msg::OrientationConstraint& l, const moveit_msgs::msg::OrientationConstraint& r) {
               return l.link_name < r.link_name;
             });
+}
+
+moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
+    warehouse_ros::Query& query, std::vector<moveit_msgs::msg::Constraints> constraints,
+    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance,
+    const std::string& workspace_frame_id, const std::string& prefix)
+{
+  const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();
+
+  // Make ignored members explicit.
+
+  bool emit_position_constraint_warning = false;
+  for (auto& constraint : constraints)
+  {
+    for (auto& position_constraint : constraint.position_constraints)
+    {
+      if (!position_constraint.constraint_region.primitives.empty())
+      {
+        emit_position_constraint_warning = true;
+        break;
+      }
+    }
+    if (emit_position_constraint_warning)
+    {
+      break;
+    }
+  }
+  if (emit_position_constraint_warning)
+  {
+    RCLCPP_WARN_STREAM(moveit::getLogger("moveit.ros.trajectory_cache.features"),
+                       "Ignoring " << prefix << ".position_constraints.constraint_region: Not supported.");
+  }
+
+  bool emit_visibility_constraint_warning = false;
+  for (auto& constraint : constraints)
+  {
+    if (!constraint.visibility_constraints.empty())
+    {
+      emit_visibility_constraint_warning = true;
+      break;
+    }
+  }
+  if (emit_visibility_constraint_warning)
+  {
+    RCLCPP_WARN_STREAM(moveit::getLogger("moveit.ros.trajectory_cache.features"),
+                       "Ignoring " << prefix << ".visibility_constraints: Not supported.");
+  }
+
+  // Begin extraction.
+
+  size_t constraint_idx = 0;
+  for (auto& constraint : constraints)
+  {
+    // We sort to avoid cardinality.
+    sortJointConstraints(constraint.joint_constraints);
+    sortPositionConstraints(constraint.position_constraints);
+    sortOrientationConstraints(constraint.orientation_constraints);
+
+    std::string constraint_prefix = prefix + "_" + std::to_string(constraint_idx++);
+
+    // Joint constraints
+    size_t joint_idx = 0;
+    for (auto& joint_constraint : constraint.joint_constraints)
+    {
+      std::string meta_name = constraint_prefix + ".joint_constraints_" + std::to_string(joint_idx++);
+      query.append(meta_name + ".joint_name", joint_constraint.joint_name);
+      queryAppendCenterWithTolerance(query, meta_name + ".position", joint_constraint.position, match_tolerance);
+      query.appendGTE(meta_name + ".tolerance_above", joint_constraint.tolerance_above);
+      query.appendLTE(meta_name + ".tolerance_below", joint_constraint.tolerance_below);
+    }
+
+    // Position constraints
+    if (!constraint.position_constraints.empty())
+    {
+      // All offsets will be "frozen" and computed wrt. the workspace frame instead.
+      query.append(constraint_prefix + ".position_constraints.header.frame_id", workspace_frame_id);
+
+      size_t position_idx = 0;
+      for (auto& position_constraint : constraint.position_constraints)
+      {
+        std::string meta_name = constraint_prefix + ".position_constraints_" + std::to_string(position_idx++);
+
+        // Compute offsets wrt. to workspace frame.
+        double x_offset = 0;
+        double y_offset = 0;
+        double z_offset = 0;
+
+        if (workspace_frame_id != position_constraint.header.frame_id)
+        {
+          try
+          {
+            auto transform =
+                tf_buffer->lookupTransform(position_constraint.header.frame_id, workspace_frame_id, tf2::TimePointZero);
+
+            x_offset = transform.transform.translation.x;
+            y_offset = transform.transform.translation.y;
+            z_offset = transform.transform.translation.z;
+          }
+          catch (tf2::TransformException& ex)
+          {
+            // NOTE: methyldragon -
+            //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+            //   supported.
+            std::stringstream ss;
+            ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for translation "
+               << workspace_frame_id << " to " << position_constraint.header.frame_id << ": " << ex.what();
+            return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
+          }
+        }
+
+        query.append(meta_name + ".link_name", position_constraint.link_name);
+
+        queryAppendCenterWithTolerance(query, meta_name + ".target_point_offset.x",
+                                       x_offset + position_constraint.target_point_offset.x, match_tolerance);
+        queryAppendCenterWithTolerance(query, meta_name + ".target_point_offset.y",
+                                       y_offset + position_constraint.target_point_offset.y, match_tolerance);
+        queryAppendCenterWithTolerance(query, meta_name + ".target_point_offset.z",
+                                       z_offset + position_constraint.target_point_offset.z, match_tolerance);
+      }
+    }
+
+    // Orientation constraints
+    if (!constraint.orientation_constraints.empty())
+    {
+      // All offsets will be "frozen" and computed wrt. the workspace frame instead.
+      query.append(constraint_prefix + ".orientation_constraints.header.frame_id", workspace_frame_id);
+
+      size_t ori_idx = 0;
+      for (auto& orientation_constraint : constraint.orientation_constraints)
+      {
+        std::string meta_name = constraint_prefix + ".orientation_constraints_" + std::to_string(ori_idx++);
+
+        // Compute offsets wrt. to workspace frame.
+        geometry_msgs::msg::Quaternion quat_offset;
+        quat_offset.x = 0;
+        quat_offset.y = 0;
+        quat_offset.z = 0;
+        quat_offset.w = 1;
+
+        if (workspace_frame_id != orientation_constraint.header.frame_id)
+        {
+          try
+          {
+            auto transform = tf_buffer->lookupTransform(orientation_constraint.header.frame_id, workspace_frame_id,
+                                                        tf2::TimePointZero);
+
+            quat_offset = transform.transform.rotation;
+          }
+          catch (tf2::TransformException& ex)
+          {
+            // NOTE: methyldragon -
+            //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+            //   supported.
+            std::stringstream ss;
+            ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for orientation "
+               << workspace_frame_id << " to " << orientation_constraint.header.frame_id << ": " << ex.what();
+            return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
+          }
+        }
+
+        query.append(meta_name + ".link_name", orientation_constraint.link_name);
+
+        // Orientation of constraint frame wrt. workspace frame
+        tf2::Quaternion tf2_quat_frame_offset(quat_offset.x, quat_offset.y, quat_offset.z, quat_offset.w);
+
+        // Added offset on top of the constraint frame's orientation stated in the constraint.
+        tf2::Quaternion tf2_quat_goal_offset(orientation_constraint.orientation.x, orientation_constraint.orientation.y,
+                                             orientation_constraint.orientation.z,
+                                             orientation_constraint.orientation.w);
+
+        tf2_quat_frame_offset.normalize();
+        tf2_quat_goal_offset.normalize();
+
+        auto final_quat = tf2_quat_goal_offset * tf2_quat_frame_offset;
+        final_quat.normalize();
+
+        queryAppendCenterWithTolerance(query, meta_name + ".target_point_offset.x", final_quat.getX(), match_tolerance);
+        queryAppendCenterWithTolerance(query, meta_name + ".target_point_offset.y", final_quat.getY(), match_tolerance);
+        queryAppendCenterWithTolerance(query, meta_name + ".target_point_offset.z", final_quat.getZ(), match_tolerance);
+        queryAppendCenterWithTolerance(query, meta_name + ".target_point_offset.w", final_quat.getW(), match_tolerance);
+      }
+    }
+  }
+
+  return moveit::core::MoveItErrorCode::SUCCESS;
+}
+
+moveit::core::MoveItErrorCode
+appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
+                                  std::vector<moveit_msgs::msg::Constraints> constraints,
+                                  const moveit::planning_interface::MoveGroupInterface& move_group,
+                                  const std::string& workspace_frame_id, const std::string& prefix)
+{
+  const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();
+
+  // Make ignored members explicit
+  bool emit_position_constraint_warning = false;
+  for (auto& constraint : constraints)
+  {
+    for (auto& position_constraint : constraint.position_constraints)
+    {
+      if (!position_constraint.constraint_region.primitives.empty())
+      {
+        emit_position_constraint_warning = true;
+        break;
+      }
+    }
+    if (emit_position_constraint_warning)
+    {
+      break;
+    }
+  }
+  if (emit_position_constraint_warning)
+  {
+    RCLCPP_WARN_STREAM(moveit::getLogger("moveit.ros.trajectory_cache.features"),
+                       "Ignoring " << prefix << ".position_constraints.constraint_region: Not supported.");
+  }
+
+  bool emit_visibility_constraint_warning = false;
+  for (auto& constraint : constraints)
+  {
+    if (!constraint.visibility_constraints.empty())
+    {
+      emit_visibility_constraint_warning = true;
+      break;
+    }
+  }
+  if (emit_visibility_constraint_warning)
+  {
+    RCLCPP_WARN_STREAM(moveit::getLogger("moveit.ros.trajectory_cache.features"),
+                       "Ignoring " << prefix << ".visibility_constraints: Not supported.");
+  }
+
+  // Begin extraction.
+
+  size_t constraint_idx = 0;
+  for (auto& constraint : constraints)
+  {
+    // We sort to avoid cardinality.
+    sortJointConstraints(constraint.joint_constraints);
+    sortPositionConstraints(constraint.position_constraints);
+    sortOrientationConstraints(constraint.orientation_constraints);
+
+    std::string constraint_prefix = prefix + "_" + std::to_string(constraint_idx++);
+
+    // Joint constraints
+    size_t joint_idx = 0;
+    for (auto& joint_constraint : constraint.joint_constraints)
+    {
+      std::string meta_name = constraint_prefix + ".joint_constraints_" + std::to_string(joint_idx++);
+      metadata.append(meta_name + ".joint_name", joint_constraint.joint_name);
+      metadata.append(meta_name + ".position", joint_constraint.position);
+      metadata.append(meta_name + ".tolerance_above", joint_constraint.tolerance_above);
+      metadata.append(meta_name + ".tolerance_below", joint_constraint.tolerance_below);
+    }
+
+    // Position constraints
+    if (!constraint.position_constraints.empty())
+    {
+      // All offsets will be "frozen" and computed wrt. the workspace frame instead.
+      metadata.append(constraint_prefix + ".position_constraints.header.frame_id", workspace_frame_id);
+
+      size_t position_idx = 0;
+      for (auto& position_constraint : constraint.position_constraints)
+      {
+        std::string meta_name = constraint_prefix + ".position_constraints_" + std::to_string(position_idx++);
+
+        // Compute offsets wrt. to workspace frame.
+        double x_offset = 0;
+        double y_offset = 0;
+        double z_offset = 0;
+
+        if (workspace_frame_id != position_constraint.header.frame_id)
+        {
+          try
+          {
+            auto transform =
+                tf_buffer->lookupTransform(position_constraint.header.frame_id, workspace_frame_id, tf2::TimePointZero);
+
+            x_offset = transform.transform.translation.x;
+            y_offset = transform.transform.translation.y;
+            z_offset = transform.transform.translation.z;
+          }
+          catch (tf2::TransformException& ex)
+          {
+            // NOTE: methyldragon -
+            //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+            //   supported.
+            std::stringstream ss;
+            ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for translation "
+               << workspace_frame_id << " to " << position_constraint.header.frame_id << ": " << ex.what();
+            return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
+          }
+        }
+
+        metadata.append(meta_name + ".link_name", position_constraint.link_name);
+        metadata.append(meta_name + ".target_point_offset.x", x_offset + position_constraint.target_point_offset.x);
+        metadata.append(meta_name + ".target_point_offset.y", y_offset + position_constraint.target_point_offset.y);
+        metadata.append(meta_name + ".target_point_offset.z", z_offset + position_constraint.target_point_offset.z);
+      }
+    }
+
+    // Orientation constraints
+    if (!constraint.orientation_constraints.empty())
+    {
+      // All offsets will be "frozen" and computed wrt. the workspace frame instead.
+      metadata.append(constraint_prefix + ".orientation_constraints.header.frame_id", workspace_frame_id);
+
+      size_t ori_idx = 0;
+      for (auto& orientation_constraint : constraint.orientation_constraints)
+      {
+        std::string meta_name = constraint_prefix + ".orientation_constraints_" + std::to_string(ori_idx++);
+
+        // Compute offsets wrt. to workspace frame.
+        geometry_msgs::msg::Quaternion quat_offset;
+        quat_offset.x = 0;
+        quat_offset.y = 0;
+        quat_offset.z = 0;
+        quat_offset.w = 1;
+
+        if (workspace_frame_id != orientation_constraint.header.frame_id)
+        {
+          try
+          {
+            auto transform = tf_buffer->lookupTransform(orientation_constraint.header.frame_id, workspace_frame_id,
+                                                        tf2::TimePointZero);
+
+            quat_offset = transform.transform.rotation;
+          }
+          catch (tf2::TransformException& ex)
+          {
+            // NOTE: methyldragon -
+            //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+            //   supported.
+            std::stringstream ss;
+            ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for orientation "
+               << workspace_frame_id << " to " << orientation_constraint.header.frame_id << ": " << ex.what();
+            return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
+          }
+        }
+
+        metadata.append(meta_name + ".link_name", orientation_constraint.link_name);
+
+        // Orientation of constraint frame wrt. workspace frame
+        tf2::Quaternion tf2_quat_frame_offset(quat_offset.x, quat_offset.y, quat_offset.z, quat_offset.w);
+
+        // Added offset on top of the constraint frame's orientation stated in the constraint.
+        tf2::Quaternion tf2_quat_goal_offset(orientation_constraint.orientation.x, orientation_constraint.orientation.y,
+                                             orientation_constraint.orientation.z,
+                                             orientation_constraint.orientation.w);
+
+        tf2_quat_frame_offset.normalize();
+        tf2_quat_goal_offset.normalize();
+
+        auto final_quat = tf2_quat_goal_offset * tf2_quat_frame_offset;
+        final_quat.normalize();
+
+        metadata.append(meta_name + ".target_point_offset.x", final_quat.getX());
+        metadata.append(meta_name + ".target_point_offset.y", final_quat.getY());
+        metadata.append(meta_name + ".target_point_offset.z", final_quat.getZ());
+        metadata.append(meta_name + ".target_point_offset.w", final_quat.getW());
+      }
+    }
+  }
+
+  return moveit::core::MoveItErrorCode::SUCCESS;
 }
