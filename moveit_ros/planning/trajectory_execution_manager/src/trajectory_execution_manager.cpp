@@ -1380,6 +1380,21 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
           bool ok = false;
           try
           {
+            // De-duplicate points with the same time value.
+            // This is necessary since some controllers do not allow times that are not monotonically increasing.
+            auto& points = context.trajectory_parts_[i].joint_trajectory.points;
+            for (size_t j = 0; j < points.size(); ++j)
+            {
+              const auto t = points[j].time_from_start;
+              const auto t_next = points[j + 1].time_from_start;
+              if (t == t_next)
+              {
+                RCLCPP_WARN(logger_, "Found duplicate time points at t=%f. Removing.",
+                            static_cast<double>(t.sec) + 1e-9 * static_cast<double>(t.nanosec));
+                points.erase(points.begin() + j);
+              }
+            }
+
             ok = active_handles_[i]->sendTrajectory(context.trajectory_parts_[i]);
           }
           catch (std::exception& ex)
