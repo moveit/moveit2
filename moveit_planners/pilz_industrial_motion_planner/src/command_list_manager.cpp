@@ -117,15 +117,14 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
 
   // De-duplicate trajectory points with the same time value.
   // This is necessary since some controllers do not allow times that are not monotonically increasing.
-  for (size_t i = 0; i < res_vec.size(); ++i)
+  for (const auto& traj : res_vec)
   {
-    const auto& traj = res_vec[i];
-    for (size_t j = 0; j < traj->size() - 1; ++j)
+    for (size_t i = 0; i < traj->size() - 1; ++i)
     {
-      if (traj->getWayPointDurationFromStart(j) == traj->getWayPointDurationFromStart(j + 1))
+      if (traj->getWayPointDurationFromStart(i) == traj->getWayPointDurationFromStart(i + 1))
       {
-        RCLCPP_WARN(getLogger(), "Removed duplicate point at time=%f", traj->getWayPointDurationFromStart(j));
-        traj->removeWayPoint(j + 1);
+        RCLCPP_WARN(getLogger(), "Removed duplicate point at time=%f", traj->getWayPointDurationFromStart(i));
+        traj->removeWayPoint(i + 1);
       }
     }
   }
