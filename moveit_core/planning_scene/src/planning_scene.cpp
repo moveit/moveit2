@@ -654,7 +654,14 @@ void PlanningScene::getPlanningSceneDiffMsg(moveit_msgs::msg::PlanningScene& sce
     {
       if (it.first == OCTOMAP_NS)
       {
-        do_omap = true;
+        if (it.second == collision_detection::World::DESTROY)
+        {
+          scene_msg.world.octomap.octomap.id = "cleared";  // indicate cleared octomap
+        }
+        else
+        {
+          do_omap = true;
+        }
       }
       else if (it.second == collision_detection::World::DESTROY)
       {
@@ -1260,7 +1267,7 @@ bool PlanningScene::setPlanningSceneDiffMsg(const moveit_msgs::msg::PlanningScen
     result &= processCollisionObjectMsg(collision_object);
 
   // if an octomap was specified, replace the one we have with that one
-  if (!scene_msg.world.octomap.octomap.data.empty())
+  if (!scene_msg.world.octomap.octomap.id.empty())
     processOctomapMsg(scene_msg.world.octomap);
 
   return result;
@@ -1723,16 +1730,16 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
   shapes.reserve(num_shapes);
   shape_poses.reserve(num_shapes);
 
-  utilities::poseMsgToEigen(object.pose, object_pose);
-
   bool switch_object_pose_and_shape_pose = false;
-  if (num_shapes == 1)
+  if (num_shapes == 1 && moveit::core::isEmpty(object.pose))
   {
-    if (moveit::core::isEmpty(object.pose))
-    {
-      switch_object_pose_and_shape_pose = true;  // If the object pose is not set but the shape pose is,
-                                                 // use the shape's pose as the object pose.
-    }
+    // If the object pose is not set but the shape pose is, use the shape's pose as the object pose.
+    switch_object_pose_and_shape_pose = true;
+    object_pose.setIdentity();
+  }
+  else
+  {
+    utilities::poseMsgToEigen(object.pose, object_pose);
   }
 
   auto append = [&object_pose, &shapes, &shape_poses,
@@ -1854,6 +1861,7 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
 {
   if (world_->hasObject(object.id))
   {
+    // update object pose
     if (!object.primitives.empty() || !object.meshes.empty() || !object.planes.empty())
     {
       RCLCPP_WARN(getLogger(), "Move operation for object '%s' ignores the geometry specified in the message.",
@@ -1867,6 +1875,47 @@ bool PlanningScene::processCollisionObjectMove(const moveit_msgs::msg::Collision
 
     const Eigen::Isometry3d object_frame_transform = world_to_object_header_transform * header_to_pose_transform;
     world_->setObjectPose(object.id, object_frame_transform);
+
+    // update shape poses
+    if (!object.primitive_poses.empty() || !object.mesh_poses.empty() || !object.plane_poses.empty())
+    {
+      auto world_object = world_->getObject(object.id);  // object exists, checked earlier
+
+      std::size_t shape_size = object.primitive_poses.size() + object.mesh_poses.size() + object.plane_poses.size();
+      if (shape_size != world_object->shape_poses_.size())
+      {
+        RCLCPP_ERROR(getLogger(),
+                     "Move operation for object '%s' must have same number of geometry poses. Cannot move.",
+                     object.id.c_str());
+        return false;
+      }
+
+      // order matters -> primitive, mesh and plane
+      EigenSTL::vector_Isometry3d shape_poses;
+      for (const auto& shape_pose : object.primitive_poses)
+      {
+        shape_poses.emplace_back();
+        utilities::poseMsgToEigen(shape_pose, shape_poses.back());
+      }
+      for (const auto& shape_pose : object.mesh_poses)
+      {
+        shape_poses.emplace_back();
+        utilities::poseMsgToEigen(shape_pose, shape_poses.back());
+      }
+      for (const auto& shape_pose : object.plane_poses)
+      {
+        shape_poses.emplace_back();
+        utilities::poseMsgToEigen(shape_pose, shape_poses.back());
+      }
+
+      if (!world_->moveShapesInObject(object.id, shape_poses))
+      {
+        RCLCPP_ERROR(getLogger(), "Move operation for object '%s' internal world error. Cannot move.",
+                     object.id.c_str());
+        return false;
+      }
+    }
+
     return true;
   }
 
