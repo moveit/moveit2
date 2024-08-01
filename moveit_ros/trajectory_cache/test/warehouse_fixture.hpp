@@ -22,7 +22,6 @@
 #include <moveit/warehouse/moveit_message_storage.h>
 #include <rclcpp/rclcpp.hpp>
 
-
 /** @class WarehouseFixture
  * @brief Test fixture to spin up a node to start a warehouse_ros connection with. */
 class WarehouseFixture : public ::testing::Test

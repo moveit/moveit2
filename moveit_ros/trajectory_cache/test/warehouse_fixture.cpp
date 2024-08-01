@@ -32,7 +32,8 @@ WarehouseFixture::WarehouseFixture() : node_(rclcpp::Node::make_shared("warehous
 WarehouseFixture::~WarehouseFixture()
 {
   is_spinning_ = false;
-  if (spin_thread_.joinable()) {
+  if (spin_thread_.joinable())
+  {
     spin_thread_.join();
   }
 }
