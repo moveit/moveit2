@@ -111,7 +111,7 @@ void sortOrientationConstraints(std::vector<moveit_msgs::msg::OrientationConstra
 moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
     warehouse_ros::Query& query, std::vector<moveit_msgs::msg::Constraints> constraints,
     const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance,
-    const std::string& workspace_frame_id, const std::string& prefix)
+    const std::string& reference_frame_id, const std::string& prefix)
 {
   const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();
 
@@ -179,7 +179,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
     if (!constraint.position_constraints.empty())
     {
       // All offsets will be "frozen" and computed wrt. the workspace frame instead.
-      query.append(constraint_prefix + ".position_constraints.header.frame_id", workspace_frame_id);
+      query.append(constraint_prefix + ".position_constraints.header.frame_id", reference_frame_id);
 
       size_t position_idx = 0;
       for (auto& position_constraint : constraint.position_constraints)
@@ -191,12 +191,12 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
         double y_offset = 0;
         double z_offset = 0;
 
-        if (workspace_frame_id != position_constraint.header.frame_id)
+        if (reference_frame_id != position_constraint.header.frame_id)
         {
           try
           {
             auto transform =
-                tf_buffer->lookupTransform(position_constraint.header.frame_id, workspace_frame_id, tf2::TimePointZero);
+                tf_buffer->lookupTransform(position_constraint.header.frame_id, reference_frame_id, tf2::TimePointZero);
 
             x_offset = transform.transform.translation.x;
             y_offset = transform.transform.translation.y;
@@ -209,7 +209,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
             //   supported.
             std::stringstream ss;
             ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for translation "
-               << workspace_frame_id << " to " << position_constraint.header.frame_id << ": " << ex.what();
+               << reference_frame_id << " to " << position_constraint.header.frame_id << ": " << ex.what();
             return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
@@ -229,7 +229,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
     if (!constraint.orientation_constraints.empty())
     {
       // All offsets will be "frozen" and computed wrt. the workspace frame instead.
-      query.append(constraint_prefix + ".orientation_constraints.header.frame_id", workspace_frame_id);
+      query.append(constraint_prefix + ".orientation_constraints.header.frame_id", reference_frame_id);
 
       size_t ori_idx = 0;
       for (auto& orientation_constraint : constraint.orientation_constraints)
@@ -243,11 +243,11 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
         quat_offset.z = 0;
         quat_offset.w = 1;
 
-        if (workspace_frame_id != orientation_constraint.header.frame_id)
+        if (reference_frame_id != orientation_constraint.header.frame_id)
         {
           try
           {
-            auto transform = tf_buffer->lookupTransform(orientation_constraint.header.frame_id, workspace_frame_id,
+            auto transform = tf_buffer->lookupTransform(orientation_constraint.header.frame_id, reference_frame_id,
                                                         tf2::TimePointZero);
 
             quat_offset = transform.transform.rotation;
@@ -259,7 +259,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
             //   supported.
             std::stringstream ss;
             ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for orientation "
-               << workspace_frame_id << " to " << orientation_constraint.header.frame_id << ": " << ex.what();
+               << reference_frame_id << " to " << orientation_constraint.header.frame_id << ": " << ex.what();
             return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }

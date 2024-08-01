@@ -41,7 +41,7 @@ if(BUILD_TESTING)
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_utils_with_move_group")
 
-  # Test features library.
+  # Test constant features library.
   ament_add_gtest_executable(test_constant_features_with_move_group
                              features/test_constant_features_with_move_group.cpp)
   target_link_libraries(test_constant_features_with_move_group
@@ -52,9 +52,16 @@ if(BUILD_TESTING)
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_constant_features_with_move_group")
 
-  # ament_add_pytest_test(
-  #   test_utils_with_move_group_py "utils/test_utils.py" WORKING_DIRECTORY
-  #   "${CMAKE_CURRENT_BINARY_DIR}")
+  # Test MotionPlanRequest features library.
+  ament_add_gtest_executable(test_motion_plan_request_features_with_move_group
+                             features/test_motion_plan_request_features_with_move_group.cpp)
+  target_link_libraries(test_motion_plan_request_features_with_move_group
+                        moveit_ros_trajectory_features_lib
+                        move_group_fixture)
+  add_ros_test(gtest_with_move_group.py
+               TARGET test_motion_plan_request_features_with_move_group TIMEOUT 30 ARGS
+               "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
+               "test_executable:=test_motion_plan_request_features_with_move_group")
 
   # This test executable is run by the pytest_test, since a node is required for
   # testing move groups
