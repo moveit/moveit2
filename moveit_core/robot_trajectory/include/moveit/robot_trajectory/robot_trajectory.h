@@ -244,6 +244,17 @@ public:
 
   void swap(robot_trajectory::RobotTrajectory& other) noexcept;
 
+  /**
+   * \brief Remove a point from the trajectory
+   * \param index - the index to remove
+   */
+  RobotTrajectory& removeWayPoint(std::size_t index)
+  {
+    waypoints_.erase(waypoints_.begin() + index);
+    duration_from_previous_.erase(duration_from_previous_.begin() + index);
+    return *this;
+  }
+
   RobotTrajectory& clear()
   {
     waypoints_.clear();
