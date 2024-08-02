@@ -38,27 +38,27 @@ namespace trajectory_cache
  * The features that are extracted from the FeatureSourceT can be used to key the TrajectoryCache cache entries in a
  * fuzzy and exact manner.
  *
- * Users may derive from this class to add additional keying functionality to the cache beyond the ones provided by this
- * package.
+ * Users may implement this interface to add additional keying functionality to the cache beyond the ones provided by
+ * this package.
  *
  * @see TrajectoryCache
  *
  * Usage
  * ^^^^^
- * In order for a cache entry to be fetched using a class derived from FeaturesInterface<FeatureSourceT>, it must also
- * have been put with the same derived class, as fetching a cache entry via some features requires that the features
+ * In order for a cache entry to be fetched using an implementation of FeaturesInterface<FeatureSourceT>, it must also
+ * have been put with the same implementation, as fetching a cache entry via some features requires that the features
  * were added to the cache entry's metadata.
  *
- * This typically means adding derived instances of FeaturesInterface<FeatureSourceT> as arguments to the
- * TrajectoryCache class's insertion methods. Or by using an appropriate CacheInserterInterface<KeyT, ValueT> that
- * composes the set of FeaturesInterface<FeatureSourceT> instances you are concerned with.
+ * This typically means adding implementations of FeaturesInterface<FeatureSourceT> as arguments to the TrajectoryCache
+ * class's insertion methods. Or by using an appropriate CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT> that composes
+ * the set of FeaturesInterface<FeatureSourceT> instances you are concerned with.
  *
- * Be sure to check the appropriate CacheInserterInterface<KeyT, ValueT> implementations' docstrings to see what
- * FeaturesInterface<FeatureSourceT> they support, and make sure to only use a subset of those, unless you explicitly
- * add additional metadata by providing the appropriate additional FeaturesInterface<FeatureSourceT> instances on cache
- * insertion.
+ * Be sure to check the appropriate CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT> implementations' docstrings to see
+ * what FeaturesInterface<FeatureSourceT> they support, and make sure to only use a subset of those, unless you
+ * explicitly add additional metadata by providing the appropriate additional FeaturesInterface<FeatureSourceT>
+ * instances on cache insertion.
  *
- * @see CacheInserterInterface<KeyT, ValueT, CacheEntryT>
+ * @see CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT>
  *
  * Composite Keys
  * ^^^^^^^^^^^^^^
@@ -83,7 +83,7 @@ namespace trajectory_cache
  *
  * User-Specified Keys
  * ^^^^^^^^^^^^^^^^^^^
- * You may also derive from this class to constrain a fetch query or tag cache entry metadata with user-specified
+ * You may also implement this interface to constrain a fetch query or tag cache entry metadata with user-specified
  * parameters that do not depend on FeatureSourceT or any other arguments.
  *
  * Simply ignore any passed arguments as necessary, and ensure that the correct information is appended in the append
@@ -91,13 +91,13 @@ namespace trajectory_cache
  *
  * @see constant_features.hpp
  */
-template <class FeatureSourceT>
+template <typename FeatureSourceT>
 class FeaturesInterface
 {
 public:
   virtual ~FeaturesInterface() = default;
 
-  /** @brief Gets the name of the FeaturesInterface. */
+  /** @brief Gets the name of the features implementation. */
   virtual std::string getName() const = 0;
 
   /**

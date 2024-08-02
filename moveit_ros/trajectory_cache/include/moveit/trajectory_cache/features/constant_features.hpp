@@ -37,8 +37,8 @@ namespace trajectory_cache
 /** @class QueryOnlyEqFeature<AppendT, FeatureSourceT>
  * @brief Appends an equals query, with no metadata.
  */
-template <class AppendT, class FeatureSourceT>
-class QueryOnlyEqFeature : public FeaturesInterface<FeatureSourceT>
+template <typename AppendT, typename FeatureSourceT>
+class QueryOnlyEqFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
   QueryOnlyEqFeature(std::string name, AppendT value) : name_(name), value_(value)
@@ -82,8 +82,8 @@ private:
 /** @class QueryOnlyLTEFeature<AppendT, FeatureSourceT>
  * @brief Appends a less-than or equal-to query, with no metadata.
  */
-template <class AppendT, class FeatureSourceT>
-class QueryOnlyLTEFeature : public FeaturesInterface<FeatureSourceT>
+template <typename AppendT, typename FeatureSourceT>
+class QueryOnlyLTEFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
   QueryOnlyLTEFeature(std::string name, AppendT value) : name_(name), value_(value)
@@ -127,8 +127,8 @@ private:
 /** @class QueryOnlyGTEFeature<AppendT, FeatureSourceT>
  * @brief Appends a less-than or equal-to query, with no metadata.
  */
-template <class AppendT, class FeatureSourceT>
-class QueryOnlyGTEFeature : public FeaturesInterface<FeatureSourceT>
+template <typename AppendT, typename FeatureSourceT>
+class QueryOnlyGTEFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
   QueryOnlyGTEFeature(std::string name, AppendT value) : name_(name), value_(value)
@@ -172,8 +172,8 @@ private:
 /** @class QueryOnlyRangeInclusiveWithToleranceFeature<AppendT, FeatureSourceT>
  * @brief Appends a less-than or equal-to query, with no metadata.
  */
-template <class AppendT, class FeatureSourceT>
-class QueryOnlyRangeInclusiveWithToleranceFeature : public FeaturesInterface<FeatureSourceT>
+template <typename AppendT, typename FeatureSourceT>
+class QueryOnlyRangeInclusiveWithToleranceFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
   QueryOnlyRangeInclusiveWithToleranceFeature(std::string name, AppendT lower, AppendT upper)
@@ -221,8 +221,8 @@ private:
 /** @class MetadataOnlyFeature<AppendT, FeatureSourceT>
  * @brief Appends a single metadata value, with no query.
  */
-template <class AppendT, class FeatureSourceT>
-class MetadataOnlyFeature : public FeaturesInterface<FeatureSourceT>
+template <typename AppendT, typename FeatureSourceT>
+class MetadataOnlyFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
   MetadataOnlyFeature(std::string name, AppendT value) : name_(name), value_(value)

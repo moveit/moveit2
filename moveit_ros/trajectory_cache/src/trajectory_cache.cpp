@@ -279,31 +279,6 @@ bool TrajectoryCache::insertTrajectory(const moveit::planning_interface::MoveGro
 // CARTESIAN TRAJECTORY CACHING
 // =============================================================================
 
-moveit_msgs::srv::GetCartesianPath::Request
-TrajectoryCache::constructGetCartesianPathRequest(moveit::planning_interface::MoveGroupInterface& move_group,
-                                                  const std::vector<geometry_msgs::msg::Pose>& waypoints,
-                                                  double max_step, double jump_threshold, bool avoid_collisions)
-{
-  moveit_msgs::srv::GetCartesianPath::Request out;
-
-  move_group.constructRobotState(out.start_state);
-
-  out.group_name = move_group.getName();
-  out.max_velocity_scaling_factor = move_group.getMaxVelocityScalingFactor();
-  out.max_acceleration_scaling_factor = move_group.getMaxVelocityScalingFactor();
-
-  out.header.frame_id = move_group.getPoseReferenceFrame();
-  out.waypoints = waypoints;
-  out.max_step = max_step;
-  out.jump_threshold = jump_threshold;
-  out.path_constraints = moveit_msgs::msg::Constraints();
-  out.avoid_collisions = avoid_collisions;
-  out.link_name = move_group.getEndEffectorLink();
-  out.header.stamp = move_group.getNode()->now();
-
-  return out;
-}
-
 std::vector<MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
 TrajectoryCache::fetchAllMatchingCartesianTrajectories(const moveit::planning_interface::MoveGroupInterface& move_group,
                                                        const std::string& cache_namespace,

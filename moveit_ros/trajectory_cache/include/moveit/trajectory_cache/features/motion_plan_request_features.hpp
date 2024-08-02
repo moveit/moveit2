@@ -51,7 +51,7 @@ namespace trajectory_cache
  *     Request: (-1, -1, 1, 1)
  *     Plan in cache: (-2, -0.5, 0.5, 0.5)
  */
-class WorkspaceFeatures : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
+class WorkspaceFeatures final : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
 {
 public:
   WorkspaceFeatures();
@@ -87,7 +87,7 @@ private:
  * @see appendRobotStateJointStateAsFetchQueryWithTolerance
  * @see appendRobotStateJointStateAsInsertMetadata
  */
-class StartStateJointStateFeatures : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
+class StartStateJointStateFeatures final : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
 {
 public:
   StartStateJointStateFeatures(double match_tolerance);
@@ -128,7 +128,7 @@ private:
  *   If the max scaling factors are outside the range of (0, 1], they will be set to 1.
  *   If max_cartesian_speed is <= 0, it will be ignored instead.
  */
-class MaxSpeedAndAccelerationFeatures : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
+class MaxSpeedAndAccelerationFeatures final : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
 {
 public:
   MaxSpeedAndAccelerationFeatures();
@@ -159,7 +159,7 @@ private:
  * @see appendConstraintsAsFetchQueryWithTolerance
  * @see appendConstraintsAsInsertMetadata
  */
-class GoalConstraintsFeatures : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
+class GoalConstraintsFeatures final : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
 {
 public:
   GoalConstraintsFeatures(double match_tolerance);
@@ -195,7 +195,7 @@ private:
  * @see appendConstraintsAsFetchQueryWithTolerance
  * @see appendConstraintsAsInsertMetadata
  */
-class PathConstraintsFeatures : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
+class PathConstraintsFeatures final : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
 {
 public:
   PathConstraintsFeatures(double match_tolerance);
@@ -231,7 +231,7 @@ private:
  * @see appendConstraintsAsFetchQueryWithTolerance
  * @see appendConstraintsAsInsertMetadata
  */
-class TrajectoryConstraintsFeatures : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
+class TrajectoryConstraintsFeatures final : public FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>
 {
 public:
   TrajectoryConstraintsFeatures(double match_tolerance);
