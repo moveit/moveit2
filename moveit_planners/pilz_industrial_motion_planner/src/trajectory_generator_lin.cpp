@@ -34,6 +34,8 @@
 
 #include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
 
+#include <pilz_industrial_motion_planner/tip_frame_getter.h>
+
 #include <cassert>
 #include <sstream>
 #include <time.h>
@@ -75,7 +77,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
   {
-    info.link_name = robot_model_->getJointModelGroup(req.group_name)->getSolverInstance()->getTipFrame();
+    info.link_name = getSolverTipFrame(robot_model_->getJointModelGroup(req.group_name));
 
     if (req.goal_constraints.front().joint_constraints.size() !=
         robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size())
