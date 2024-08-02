@@ -51,7 +51,7 @@ void RobotPoses::onInit()
   // Set the planning scene
   // srdf_config_->getPlanningScene()->setName("MoveIt Planning Scene");
 
-  // Collision Detection initializtion -------------------------------
+  // Collision Detection initialization -------------------------------
 
   // Setup the request
   request_.contacts = true;

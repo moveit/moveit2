@@ -274,7 +274,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::searchIn
   // (last point of the first trajectory, first point of the second trajectory)
   Eigen::Isometry3d circ_pose = req.first_trajectory->getLastWayPoint().getFrameTransform(req.link_name);
 
-  // Searh for intersection points according to distance
+  // Search for intersection points according to distance
   if (!linearSearchIntersectionPoint(req.link_name, circ_pose.translation(), req.blend_radius, req.first_trajectory,
                                      true, first_interse_index))
   {
