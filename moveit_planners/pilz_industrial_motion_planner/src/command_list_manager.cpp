@@ -117,6 +117,8 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
 
   // De-duplicate trajectory points with the same time value.
   // This is necessary since some controllers do not allow times that are not monotonically increasing.
+  // TODO: Ideally, we would not need this code if the trajectory segments were created without
+  // duplicate time points in the first place. Leaving this note to revisit this with a more principled fix.
   for (const auto& traj : res_vec)
   {
     for (size_t i = 0; i < traj->size() - 1; ++i)
