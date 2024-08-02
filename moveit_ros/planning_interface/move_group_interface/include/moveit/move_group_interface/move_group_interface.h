@@ -160,6 +160,9 @@ public:
    * states from srdf */
   const std::vector<std::string>& getNamedTargets() const;
 
+  /** \brief Get the tf2_ros::Buffer. */
+  const std::shared_ptr<tf2_ros::Buffer>& getTF() const;
+
   /** \brief Get the RobotModel object. */
   moveit::core::RobotModelConstPtr getRobotModel() const;
 

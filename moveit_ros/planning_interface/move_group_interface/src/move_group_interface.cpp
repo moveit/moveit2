@@ -1382,6 +1382,11 @@ const std::vector<std::string>& MoveGroupInterface::getNamedTargets() const
   return impl_->getJointModelGroup()->getDefaultStateNames();
 }
 
+const std::shared_ptr<tf2_ros::Buffer>& MoveGroupInterface::getTF() const
+{
+  return impl_->getTF();
+}
+
 moveit::core::RobotModelConstPtr MoveGroupInterface::getRobotModel() const
 {
   return impl_->getRobotModel();
