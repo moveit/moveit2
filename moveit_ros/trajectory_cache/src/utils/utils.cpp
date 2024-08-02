@@ -22,13 +22,31 @@
 #include <vector>
 
 #include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/trajectory_cache/utils/utils.hpp>
+#include <moveit/robot_state/conversions.h>
+#include <moveit_msgs/msg/robot_state.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <warehouse_ros/message_collection.h>
 
+#include <moveit/trajectory_cache/utils/utils.hpp>
+
+namespace
+{
+
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.ros.trajectory_cache.features");
+}
+
+}  // namespace
+
 // Frames. =========================================================================================
+
+namespace moveit_ros
+{
+namespace trajectory_cache
+{
 
 std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
                                 const moveit_msgs::msg::WorkspaceParameters& workspace_parameters)
@@ -117,8 +135,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
   }
   if (emit_position_constraint_warning)
   {
-    RCLCPP_WARN_STREAM(moveit::getLogger("moveit.ros.trajectory_cache.features"),
-                       "Ignoring " << prefix << ".position_constraints.constraint_region: Not supported.");
+    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".position_constraints.constraint_region: Not supported.");
   }
 
   bool emit_visibility_constraint_warning = false;
@@ -132,8 +149,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
   }
   if (emit_visibility_constraint_warning)
   {
-    RCLCPP_WARN_STREAM(moveit::getLogger("moveit.ros.trajectory_cache.features"),
-                       "Ignoring " << prefix << ".visibility_constraints: Not supported.");
+    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".visibility_constraints: Not supported.");
   }
 
   // Begin extraction.
@@ -284,6 +300,7 @@ appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
   const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();
 
   // Make ignored members explicit
+
   bool emit_position_constraint_warning = false;
   for (auto& constraint : constraints)
   {
@@ -302,8 +319,7 @@ appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
   }
   if (emit_position_constraint_warning)
   {
-    RCLCPP_WARN_STREAM(moveit::getLogger("moveit.ros.trajectory_cache.features"),
-                       "Ignoring " << prefix << ".position_constraints.constraint_region: Not supported.");
+    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".position_constraints.constraint_region: Not supported.");
   }
 
   bool emit_visibility_constraint_warning = false;
@@ -317,8 +333,7 @@ appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
   }
   if (emit_visibility_constraint_warning)
   {
-    RCLCPP_WARN_STREAM(moveit::getLogger("moveit.ros.trajectory_cache.features"),
-                       "Ignoring " << prefix << ".visibility_constraints: Not supported.");
+    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".visibility_constraints: Not supported.");
   }
 
   // Begin extraction.
@@ -455,3 +470,141 @@ appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
 
   return moveit::core::MoveItErrorCode::SUCCESS;
 }
+
+// RobotState. =====================================================================================
+
+moveit::core::MoveItErrorCode appendRobotStateJointStateAsFetchQueryWithTolerance(
+    warehouse_ros::Query& query, const moveit_msgs::msg::RobotState& robot_state,
+    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance, const std::string& prefix)
+{
+  // Make ignored members explicit
+
+  if (!robot_state.multi_dof_joint_state.joint_names.empty())
+  {
+    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".multi_dof_joint_states: Not supported.");
+  }
+  if (!robot_state.attached_collision_objects.empty())
+  {
+    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".attached_collision_objects: Not supported.");
+  }
+
+  // Begin extraction.
+
+  if (robot_state.is_diff)
+  {
+    // If plan request states that the start_state is_diff, then we need to get
+    // the current state from the move_group.
+
+    // NOTE: methyldragon -
+    //   I think if is_diff is on, the joint states will not be populated in all
+    //   of the motion plan requests? If this isn't the case we might need to
+    //   apply the joint states as offsets as well.
+    //
+    // TODO: Since MoveIt also potentially does another getCurrentState() call
+    //   when planning, there is a chance that the current state in the cache
+    //   differs from the state used in MoveIt's plan.
+    //
+    //   This issue should go away once the class is used within the move group's
+    //   Plan call.
+    moveit::core::RobotStatePtr current_state = move_group.getCurrentState();
+    if (!current_state)
+    {
+      // NOTE: methyldragon -
+      //   Ideally we would restore the original state here and undo our changes, however copy of the metadata is not
+      //   supported.
+      std::stringstream ss;
+      ss << "Skipping " << prefix << " query append: " << "Could not get robot state.";
+      return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA, ss.str());
+    }
+
+    moveit_msgs::msg::RobotState current_state_msg;
+    robotStateToRobotStateMsg(*current_state, current_state_msg);
+
+    for (size_t i = 0; i < current_state_msg.joint_state.name.size(); i++)
+    {
+      query.append(prefix + ".joint_state.name_" + std::to_string(i), current_state_msg.joint_state.name.at(i));
+      queryAppendCenterWithTolerance(query, prefix + ".joint_state.position_" + std::to_string(i),
+                                     current_state_msg.joint_state.position.at(i), match_tolerance);
+    }
+  }
+  else
+  {
+    for (size_t i = 0; i < robot_state.joint_state.name.size(); i++)
+    {
+      query.append(prefix + ".joint_state.name_" + std::to_string(i), robot_state.joint_state.name.at(i));
+      queryAppendCenterWithTolerance(query, prefix + ".joint_state.position_" + std::to_string(i),
+                                     robot_state.joint_state.position.at(i), match_tolerance);
+    }
+  }
+
+  return moveit::core::MoveItErrorCode::SUCCESS;
+}
+
+moveit::core::MoveItErrorCode appendRobotStateJointStateAsInsertMetadata(
+    warehouse_ros::Metadata& metadata, const moveit_msgs::msg::RobotState& robot_state,
+    const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& prefix)
+{
+  // Make ignored members explicit
+
+  if (!robot_state.multi_dof_joint_state.joint_names.empty())
+  {
+    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".multi_dof_joint_states: Not supported.");
+  }
+  if (!robot_state.attached_collision_objects.empty())
+  {
+    RCLCPP_WARN_STREAM(getLogger(), "Ignoring " << prefix << ".attached_collision_objects: Not supported.");
+  }
+
+  // Begin extraction.
+
+  if (robot_state.is_diff)
+  {
+    // If plan request states that the start_state is_diff, then we need to get
+    // the current state from the move_group.
+
+    // NOTE: methyldragon -
+    //   I think if is_diff is on, the joint states will not be populated in all
+    //   of the motion plan requests? If this isn't the case we might need to
+    //   apply the joint states as offsets as well.
+    //
+    // TODO: Since MoveIt also potentially does another getCurrentState() call
+    //   when planning, there is a chance that the current state in the cache
+    //   differs from the state used in MoveIt's plan.
+    //
+    //   This issue should go away once the class is used within the move group's
+    //   Plan call.
+    moveit::core::RobotStatePtr current_state = move_group.getCurrentState();
+    if (!current_state)
+    {
+      // NOTE: methyldragon -
+      //   Ideally we would restore the original state here and undo our changes, however copy of the metadata is not
+      //   supported.
+      std::stringstream ss;
+      ss << "Skipping " << prefix << " metadata append: " << "Could not get robot state.";
+      return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA, ss.str());
+    }
+
+    moveit_msgs::msg::RobotState current_state_msg;
+    robotStateToRobotStateMsg(*current_state, current_state_msg);
+
+    for (size_t i = 0; i < current_state_msg.joint_state.name.size(); i++)
+    {
+      metadata.append(prefix + ".joint_state.name_" + std::to_string(i), current_state_msg.joint_state.name.at(i));
+      metadata.append(prefix + ".joint_state.position_" + std::to_string(i),
+                      current_state_msg.joint_state.position.at(i));
+    }
+  }
+  else
+  {
+    for (size_t i = 0; i < robot_state.joint_state.name.size(); i++)
+    {
+      metadata.append(prefix + ".joint_state.name_" + std::to_string(i), robot_state.joint_state.name.at(i));
+      metadata.append(prefix + ".joint_state.position_" + std::to_string(i), robot_state.joint_state.position.at(i));
+    }
+  }
+
+  return moveit::core::MoveItErrorCode::SUCCESS;
+}
+
+}  // namespace trajectory_cache
+}  // namespace moveit_ros

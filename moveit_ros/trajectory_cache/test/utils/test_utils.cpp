@@ -44,19 +44,19 @@ TEST_F(WarehouseFixture, QueryAppendCenterWithToleranceWorks)
   coll.insert(geometry_msgs::msg::Point(), metadata);
 
   Query::Ptr unrelated_query = coll.createQuery();
-  queryAppendCenterWithTolerance(*unrelated_query, "unrnelated_metadata", 1.0, 10.0);
+  moveit_ros::trajectory_cache::queryAppendCenterWithTolerance(*unrelated_query, "unrnelated_metadata", 1.0, 10.0);
   EXPECT_TRUE(coll.queryList(unrelated_query).empty());
 
   Query::Ptr related_query_too_low = coll.createQuery();
-  queryAppendCenterWithTolerance(*related_query_too_low, "test_metadata", 4.45, 1.0);
+  moveit_ros::trajectory_cache::queryAppendCenterWithTolerance(*related_query_too_low, "test_metadata", 4.45, 1.0);
   EXPECT_TRUE(coll.queryList(related_query_too_low).empty());
 
   Query::Ptr related_query_too_high = coll.createQuery();
-  queryAppendCenterWithTolerance(*related_query_too_high, "test_metadata", 5.55, 1.0);
+  moveit_ros::trajectory_cache::queryAppendCenterWithTolerance(*related_query_too_high, "test_metadata", 5.55, 1.0);
   EXPECT_TRUE(coll.queryList(related_query_too_high).empty());
 
   Query::Ptr related_query_in_range = coll.createQuery();
-  queryAppendCenterWithTolerance(*related_query_in_range, "test_metadata", 5.0, 1.0);
+  moveit_ros::trajectory_cache::queryAppendCenterWithTolerance(*related_query_in_range, "test_metadata", 5.0, 1.0);
   EXPECT_EQ(coll.queryList(related_query_in_range).size(), 1);
 }
 
@@ -69,7 +69,7 @@ TEST(TestUtils, ConstraintSortingWorks)
     moveit_msgs::msg::JointConstraint jc2;
     jc2.joint_name = "joint1";
     std::vector<moveit_msgs::msg::JointConstraint> joint_constraints = { jc1, jc2 };
-    sortJointConstraints(joint_constraints);
+    moveit_ros::trajectory_cache::sortJointConstraints(joint_constraints);
 
     EXPECT_EQ(joint_constraints[0].joint_name, "joint1");
     EXPECT_EQ(joint_constraints[1].joint_name, "joint2");
@@ -82,7 +82,7 @@ TEST(TestUtils, ConstraintSortingWorks)
     moveit_msgs::msg::PositionConstraint pc2;
     pc2.link_name = "link1";
     std::vector<moveit_msgs::msg::PositionConstraint> position_constraints = { pc1, pc2 };
-    sortPositionConstraints(position_constraints);
+    moveit_ros::trajectory_cache::sortPositionConstraints(position_constraints);
     EXPECT_EQ(position_constraints[0].link_name, "link1");
     EXPECT_EQ(position_constraints[1].link_name, "link2");
   }
@@ -94,7 +94,7 @@ TEST(TestUtils, ConstraintSortingWorks)
     moveit_msgs::msg::OrientationConstraint oc2;
     oc2.link_name = "link1";
     std::vector<moveit_msgs::msg::OrientationConstraint> orientation_constraints = { oc1, oc2 };
-    sortOrientationConstraints(orientation_constraints);
+    moveit_ros::trajectory_cache::sortOrientationConstraints(orientation_constraints);
     EXPECT_EQ(orientation_constraints[0].link_name, "link1");
     EXPECT_EQ(orientation_constraints[1].link_name, "link2");
   }

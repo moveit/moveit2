@@ -29,19 +29,21 @@ namespace
 TEST_F(MoveGroupFixture, GetWorkspaceFrameIdWorks)
 {
   moveit_msgs::msg::WorkspaceParameters workspace_parameters;
-  EXPECT_EQ(getWorkspaceFrameId(*move_group_, workspace_parameters), move_group_->getRobotModel()->getModelFrame());
+  EXPECT_EQ(moveit_ros::trajectory_cache::getWorkspaceFrameId(*move_group_, workspace_parameters),
+            move_group_->getRobotModel()->getModelFrame());
 
   workspace_parameters.header.frame_id = "test_frame";
-  EXPECT_EQ(getWorkspaceFrameId(*move_group_, workspace_parameters), "test_frame");
+  EXPECT_EQ(moveit_ros::trajectory_cache::getWorkspaceFrameId(*move_group_, workspace_parameters), "test_frame");
 }
 
 TEST_F(MoveGroupFixture, GetCartesianPathRequestFrameId)
 {
   moveit_msgs::srv::GetCartesianPath::Request path_request;
-  EXPECT_EQ(getCartesianPathRequestFrameId(*move_group_, path_request), move_group_->getPoseReferenceFrame());
+  EXPECT_EQ(moveit_ros::trajectory_cache::getCartesianPathRequestFrameId(*move_group_, path_request),
+            move_group_->getPoseReferenceFrame());
 
   path_request.header.frame_id = "test_frame";
-  EXPECT_EQ(getCartesianPathRequestFrameId(*move_group_, path_request), "test_frame");
+  EXPECT_EQ(moveit_ros::trajectory_cache::getCartesianPathRequestFrameId(*move_group_, path_request), "test_frame");
 }
 
 }  // namespace
