@@ -287,23 +287,6 @@ public:
   /**@{*/
 
   /**
-   * @brief Constructs a GetCartesianPath request.
-   *
-   * This mimics the move group computeCartesianPath signature (without path constraints).
-   *
-   * @param[in] move_group. The manipulator move group, used to get its state, frames, and link.
-   * @param[in] waypoints. The cartesian waypoints to request the path for.
-   * @param[in] max_step. The value to populate into the `GetCartesianPath` request's max_step field.
-   * @param[in] jump_threshold. The value to populate into the `GetCartesianPath` request's jump_threshold field.
-   * @param[in] avoid_collisions. The value to populate into the `GetCartesianPath` request's avoid_collisions field.
-   * @returns
-   */
-  moveit_msgs::srv::GetCartesianPath::Request
-  constructGetCartesianPathRequest(moveit::planning_interface::MoveGroupInterface& move_group,
-                                   const std::vector<geometry_msgs::msg::Pose>& waypoints, double max_step,
-                                   double jump_threshold, bool avoid_collisions = true);
-
-  /**
    * @brief Fetches all cartesian trajectories that fit within the requested tolerances for start and goal conditions,
    * returning them as a vector, sorted by some cache column.
    *

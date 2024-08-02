@@ -21,11 +21,13 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/trajectory_cache/trajectory_cache.hpp>
+#include <moveit/trajectory_cache/utils/utils.hpp>
 
 #include <atomic>
 #include <thread>
 
 using moveit::planning_interface::MoveGroupInterface;
+using moveit_ros::trajectory_cache::constructGetCartesianPathRequest;
 using moveit_ros::trajectory_cache::TrajectoryCache;
 
 const std::string ROBOT_NAME = "panda";
@@ -585,7 +587,7 @@ void testCartesianTrajectories(const std::shared_ptr<MoveGroupInterface>& move_g
   int test_jump = 2;
   auto test_waypoints = getDummyWaypoints();
   auto cartesian_plan_req_under_test =
-      cache->constructGetCartesianPathRequest(*move_group, test_waypoints, test_step, test_jump, false);
+      constructGetCartesianPathRequest(*move_group, test_waypoints, test_step, test_jump, false);
 
   checkAndEmit(cartesian_plan_req_under_test.waypoints == test_waypoints &&
                    static_cast<int>(cartesian_plan_req_under_test.max_step) == test_step &&
@@ -600,7 +602,7 @@ void testCartesianTrajectories(const std::shared_ptr<MoveGroupInterface>& move_g
 
   // Plain start
   auto waypoints = getDummyWaypoints();
-  auto cartesian_plan_req = cache->constructGetCartesianPathRequest(*move_group, waypoints, 1, 1, false);
+  auto cartesian_plan_req = constructGetCartesianPathRequest(*move_group, waypoints, 1, 1, false);
   cartesian_plan_req.start_state.multi_dof_joint_state.joint_names.clear();
   cartesian_plan_req.start_state.multi_dof_joint_state.transforms.clear();
   cartesian_plan_req.start_state.multi_dof_joint_state.twist.clear();

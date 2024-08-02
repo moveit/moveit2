@@ -16,7 +16,10 @@
  * @author methylDragon
  */
 
+#include <memory>
+
 #include <gtest/gtest.h>
+#include <warehouse_ros/message_collection.h>
 
 #include <geometry_msgs/msg/point.hpp>
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -26,6 +29,8 @@
 
 namespace
 {
+
+using ::geometry_msgs::msg::Point;
 
 using ::warehouse_ros::MessageCollection;
 using ::warehouse_ros::Metadata;
@@ -40,21 +45,20 @@ using ::moveit_ros::trajectory_cache::MetadataOnlyFeature;
 
 TEST_F(MoveGroupFixture, MetadataOnlyFeature)
 {
-  MessageCollection<geometry_msgs::msg::Point> coll =
-      db_->openCollection<geometry_msgs::msg::Point>("test_db", "test_collection");
+  MessageCollection<Point> coll = db_->openCollection<Point>("test_db", "test_collection");
 
   Query::Ptr query = coll.createQuery();
   Metadata::Ptr metadata = coll.createMetadata();
   ASSERT_EQ(metadata->lookupFieldNames().size(), 0);
 
-  geometry_msgs::msg::Point msg;
+  Point msg;
 
   /// MetadataOnlyFeature.
 
-  MetadataOnlyFeature<std::string, geometry_msgs::msg::Point> string_metadata_feature("string_metadata", "test_string");
-  MetadataOnlyFeature<double, geometry_msgs::msg::Point> double_metadata_feature("double_metadata", 1.0);
-  MetadataOnlyFeature<int, geometry_msgs::msg::Point> int_metadata_feature("int_metadata", 2);
-  MetadataOnlyFeature<bool, geometry_msgs::msg::Point> bool_metadata_feature("bool_metadata", true);
+  MetadataOnlyFeature<std::string, Point> string_metadata_feature("string_metadata", "test_string");
+  MetadataOnlyFeature<double, Point> double_metadata_feature("double_metadata", 1.0);
+  MetadataOnlyFeature<int, Point> int_metadata_feature("int_metadata", 2);
+  MetadataOnlyFeature<bool, Point> bool_metadata_feature("bool_metadata", true);
 
   // Names.
   EXPECT_EQ(string_metadata_feature.getName(), "MetadataOnlyFeature.string_metadata");
@@ -92,18 +96,17 @@ TEST_F(MoveGroupFixture, MetadataOnlyFeature)
 
 TEST_F(MoveGroupFixture, QueryOnlyEqFeature)
 {
-  MessageCollection<geometry_msgs::msg::Point> coll =
-      db_->openCollection<geometry_msgs::msg::Point>("test_db", "test_collection");
+  MessageCollection<Point> coll = db_->openCollection<Point>("test_db", "test_collection");
 
   Metadata::Ptr metadata = coll.createMetadata();
   metadata->append("test_metadata", "test_metadata");
 
-  geometry_msgs::msg::Point msg;
+  Point msg;
   coll.insert(msg, metadata);
 
-  QueryOnlyEqFeature<std::string, geometry_msgs::msg::Point> eq_feature("test_metadata", "test_metadata");
-  QueryOnlyEqFeature<std::string, geometry_msgs::msg::Point> unrelated_eq_feature("unrelated", "test_metadata");
-  QueryOnlyEqFeature<std::string, geometry_msgs::msg::Point> mismatched_eq_feature("test_metadata", "mismatched");
+  QueryOnlyEqFeature<std::string, Point> eq_feature("test_metadata", "test_metadata");
+  QueryOnlyEqFeature<std::string, Point> unrelated_eq_feature("unrelated", "test_metadata");
+  QueryOnlyEqFeature<std::string, Point> mismatched_eq_feature("test_metadata", "mismatched");
 
   // Names.
   EXPECT_EQ(eq_feature.getName(), "QueryOnlyEqFeature.test_metadata");
@@ -152,23 +155,22 @@ TEST_F(MoveGroupFixture, QueryOnlyEqFeature)
 
 TEST_F(MoveGroupFixture, QueryOnlyGTEFeature)
 {
-  MessageCollection<geometry_msgs::msg::Point> coll =
-      db_->openCollection<geometry_msgs::msg::Point>("test_db", "test_collection");
+  MessageCollection<Point> coll = db_->openCollection<Point>("test_db", "test_collection");
 
   Metadata::Ptr metadata = coll.createMetadata();
   metadata->append("test_metadata", 5.0);
 
-  geometry_msgs::msg::Point msg;
+  Point msg;
   coll.insert(msg, metadata);
 
   metadata = coll.createMetadata();
   metadata->append("unrelated", 5.0);
   coll.insert(msg, metadata);
 
-  QueryOnlyGTEFeature<double, geometry_msgs::msg::Point> gte_feature("test_metadata", 4.0);
-  QueryOnlyGTEFeature<double, geometry_msgs::msg::Point> gte_eq_feature("test_metadata", 5.0);
-  QueryOnlyGTEFeature<double, geometry_msgs::msg::Point> unrelated_gte_feature("unrelated", 6.0);
-  QueryOnlyGTEFeature<double, geometry_msgs::msg::Point> mismatched_gte_feature("test_metadata", 6.0);
+  QueryOnlyGTEFeature<double, Point> gte_feature("test_metadata", 4.0);
+  QueryOnlyGTEFeature<double, Point> gte_eq_feature("test_metadata", 5.0);
+  QueryOnlyGTEFeature<double, Point> unrelated_gte_feature("unrelated", 6.0);
+  QueryOnlyGTEFeature<double, Point> mismatched_gte_feature("test_metadata", 6.0);
 
   // Names.
   EXPECT_EQ(gte_feature.getName(), "QueryOnlyGTEFeature.test_metadata");
@@ -230,19 +232,18 @@ TEST_F(MoveGroupFixture, QueryOnlyGTEFeature)
 
 TEST_F(MoveGroupFixture, QueryOnlyLTEFeature)
 {
-  MessageCollection<geometry_msgs::msg::Point> coll =
-      db_->openCollection<geometry_msgs::msg::Point>("test_db", "test_collection");
+  MessageCollection<Point> coll = db_->openCollection<Point>("test_db", "test_collection");
 
   Metadata::Ptr metadata = coll.createMetadata();
   metadata->append("test_metadata", 5.0);
 
-  geometry_msgs::msg::Point msg;
+  Point msg;
   coll.insert(msg, metadata);
 
-  QueryOnlyLTEFeature<double, geometry_msgs::msg::Point> lte_feature("test_metadata", 6.0);
-  QueryOnlyLTEFeature<double, geometry_msgs::msg::Point> lte_eq_feature("test_metadata", 5.0);
-  QueryOnlyLTEFeature<double, geometry_msgs::msg::Point> unrelated_lte_feature("unrelated", 6.0);
-  QueryOnlyLTEFeature<double, geometry_msgs::msg::Point> mismatched_lte_feature("test_metadata", 4.0);
+  QueryOnlyLTEFeature<double, Point> lte_feature("test_metadata", 6.0);
+  QueryOnlyLTEFeature<double, Point> lte_eq_feature("test_metadata", 5.0);
+  QueryOnlyLTEFeature<double, Point> unrelated_lte_feature("unrelated", 6.0);
+  QueryOnlyLTEFeature<double, Point> mismatched_lte_feature("test_metadata", 4.0);
 
   // Names.
   EXPECT_EQ(lte_feature.getName(), "QueryOnlyLTEFeature.test_metadata");
@@ -301,28 +302,21 @@ TEST_F(MoveGroupFixture, QueryOnlyLTEFeature)
 
 TEST_F(MoveGroupFixture, QueryOnlyRangeInclusiveWithToleranceFeature)
 {
-  MessageCollection<geometry_msgs::msg::Point> coll =
-      db_->openCollection<geometry_msgs::msg::Point>("test_db", "test_collection");
+  MessageCollection<Point> coll = db_->openCollection<Point>("test_db", "test_collection");
 
   Metadata::Ptr metadata = coll.createMetadata();
   metadata->append("test_metadata", 5.0);
 
-  geometry_msgs::msg::Point msg;
+  Point msg;
   coll.insert(msg, metadata);
 
-  QueryOnlyRangeInclusiveWithToleranceFeature<double, geometry_msgs::msg::Point> exact_range_feature("test_metadata",
-                                                                                                     5.0, 5.0);
-  QueryOnlyRangeInclusiveWithToleranceFeature<double, geometry_msgs::msg::Point> lower_range_feature("test_metadata",
-                                                                                                     4.0, 5.0);
-  QueryOnlyRangeInclusiveWithToleranceFeature<double, geometry_msgs::msg::Point> upper_range_feature("test_metadata",
-                                                                                                     5.0, 6.0);
-  QueryOnlyRangeInclusiveWithToleranceFeature<double, geometry_msgs::msg::Point> over_range_feature("test_metadata",
-                                                                                                    4.5, 5.5);
+  QueryOnlyRangeInclusiveWithToleranceFeature<double, Point> exact_range_feature("test_metadata", 5.0, 5.0);
+  QueryOnlyRangeInclusiveWithToleranceFeature<double, Point> lower_range_feature("test_metadata", 4.0, 5.0);
+  QueryOnlyRangeInclusiveWithToleranceFeature<double, Point> upper_range_feature("test_metadata", 5.0, 6.0);
+  QueryOnlyRangeInclusiveWithToleranceFeature<double, Point> over_range_feature("test_metadata", 4.5, 5.5);
 
-  QueryOnlyRangeInclusiveWithToleranceFeature<double, geometry_msgs::msg::Point> unrelated_range_feature("unrelated",
-                                                                                                         5.5, 6.0);
-  QueryOnlyRangeInclusiveWithToleranceFeature<double, geometry_msgs::msg::Point> mismatched_range_feature(
-      "test_metadata", 5.5, 6.0);
+  QueryOnlyRangeInclusiveWithToleranceFeature<double, Point> unrelated_range_feature("unrelated", 5.5, 6.0);
+  QueryOnlyRangeInclusiveWithToleranceFeature<double, Point> mismatched_range_feature("test_metadata", 5.5, 6.0);
 
   // Names.
   EXPECT_EQ(exact_range_feature.getName(), "QueryOnlyRangeInclusiveWithToleranceFeature.test_metadata");

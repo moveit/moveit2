@@ -29,6 +29,7 @@ set(TRAJECTORY_CACHE_DEPENDENCIES
     warehouse_ros)
 
 set(TRAJECTORY_CACHE_LIBRARIES moveit_ros_trajectory_cache_utils_lib
+                               moveit_ros_trajectory_cache_features_lib
                                moveit_ros_trajectory_cache_lib)
 
 # Utils library
@@ -42,16 +43,17 @@ ament_target_dependencies(moveit_ros_trajectory_cache_utils_lib
                           ${TRAJECTORY_CACHE_DEPENDENCIES})
 
 # Features library
-add_library(moveit_ros_trajectory_features_lib
-            src/features/motion_plan_request_features.cpp)
-generate_export_header(moveit_ros_trajectory_features_lib)
-target_link_libraries(moveit_ros_trajectory_features_lib
+add_library(moveit_ros_trajectory_cache_features_lib
+            src/features/motion_plan_request_features.cpp
+            src/features/get_cartesian_path_request_features.cpp)
+generate_export_header(moveit_ros_trajectory_cache_features_lib)
+target_link_libraries(moveit_ros_trajectory_cache_features_lib
                       moveit_ros_trajectory_cache_utils_lib)
 target_include_directories(
-  moveit_ros_trajectory_features_lib
+  moveit_ros_trajectory_cache_features_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
-ament_target_dependencies(moveit_ros_trajectory_features_lib
+ament_target_dependencies(moveit_ros_trajectory_cache_features_lib
                           ${TRAJECTORY_CACHE_DEPENDENCIES})
 
 # Trajectory cache library

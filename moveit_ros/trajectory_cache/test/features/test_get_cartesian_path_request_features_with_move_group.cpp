@@ -15,9 +15,9 @@
 /** @file
  * @author methylDragon
  *
- * Sanity tests for the moveit_msgs::msg::MotionPlanRequest feature extractors.
+ * Sanity tests for the moveit_msgs::srv::GetCartesianPath::Request feature extractors.
  *
- * @see motion_plan_request_features.hpp
+ * @see get_cartesian_path_request_features.hpp
  *
  * WARNING:
  *   These tests currently do not cover the implementation details, they are just the first sanity check for
@@ -33,10 +33,11 @@
 #include <warehouse_ros/message_collection.h>
 
 #include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/trajectory_cache/features/features_interface.hpp>
-#include <moveit/trajectory_cache/features/motion_plan_request_features.hpp>
+#include <moveit/trajectory_cache/features/get_cartesian_path_request_features.hpp>
+#include <moveit/trajectory_cache/utils/utils.hpp>
 
 #include "../move_group_fixture.hpp"
 
@@ -47,39 +48,44 @@ using ::warehouse_ros::MessageCollection;
 using ::warehouse_ros::Metadata;
 using ::warehouse_ros::Query;
 
-using ::moveit_msgs::msg::MotionPlanRequest;
+using ::moveit_msgs::srv::GetCartesianPath;
+
+using ::moveit_ros::trajectory_cache::constructGetCartesianPathRequest;
 using ::moveit_ros::trajectory_cache::FeaturesInterface;
 
-using ::moveit_ros::trajectory_cache::GoalConstraintsFeatures;
-using ::moveit_ros::trajectory_cache::MaxSpeedAndAccelerationFeatures;
-using ::moveit_ros::trajectory_cache::PathConstraintsFeatures;
-using ::moveit_ros::trajectory_cache::StartStateJointStateFeatures;
-using ::moveit_ros::trajectory_cache::TrajectoryConstraintsFeatures;
-using ::moveit_ros::trajectory_cache::WorkspaceFeatures;
+using ::moveit_ros::trajectory_cache::CartesianMaxSpeedAndAccelerationFeatures;
+using ::moveit_ros::trajectory_cache::CartesianMaxStepAndJumpThresholdFeatures;
+using ::moveit_ros::trajectory_cache::CartesianPathConstraintsFeatures;
+using ::moveit_ros::trajectory_cache::CartesianStartStateJointStateFeatures;
+using ::moveit_ros::trajectory_cache::CartesianWaypointsFeatures;
+using ::moveit_ros::trajectory_cache::CartesianWorkspaceFeatures;
 
-TEST_F(MoveGroupFixture, MotionPlanRequestRoundTrip)
+TEST_F(MoveGroupFixture, GetCartesianPathRequestRoundTrip)
 {
   // Test cases.
   double match_tolerance = 0.001;
 
-  std::vector<std::unique_ptr<FeaturesInterface<MotionPlanRequest>>> features_under_test;
+  std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>> features_under_test;
 
-  features_under_test.push_back(std::make_unique<GoalConstraintsFeatures>(match_tolerance));
-  features_under_test.push_back(std::make_unique<MaxSpeedAndAccelerationFeatures>());
-  features_under_test.push_back(std::make_unique<PathConstraintsFeatures>(match_tolerance));
-  features_under_test.push_back(std::make_unique<StartStateJointStateFeatures>(match_tolerance));
-  features_under_test.push_back(std::make_unique<TrajectoryConstraintsFeatures>(match_tolerance));
-  features_under_test.push_back(std::make_unique<WorkspaceFeatures>());
+  features_under_test.push_back(std::make_unique<CartesianMaxSpeedAndAccelerationFeatures>());
+  features_under_test.push_back(std::make_unique<CartesianMaxStepAndJumpThresholdFeatures>());
+  features_under_test.push_back(std::make_unique<CartesianPathConstraintsFeatures>(match_tolerance));
+  features_under_test.push_back(std::make_unique<CartesianStartStateJointStateFeatures>(match_tolerance));
+  features_under_test.push_back(std::make_unique<CartesianWaypointsFeatures>(match_tolerance));
+  features_under_test.push_back(std::make_unique<CartesianWorkspaceFeatures>());
 
   // Setup.
-  ASSERT_TRUE(move_group_->setPoseTarget(move_group_->getRandomPose()));
-  MotionPlanRequest msg;
-  move_group_->constructMotionPlanRequest(msg);
+  std::vector<geometry_msgs::msg::Pose> waypoints = { move_group_->getRandomPose().pose,
+                                                      move_group_->getRandomPose().pose };
+
+  GetCartesianPath::Request msg = constructGetCartesianPathRequest(*move_group_, waypoints, /*max_step=*/1.0,
+                                                                   /*jump_threshold=*/0.0, /*avoid_collisions=*/false);
 
   // Core test.
   for (auto& feature : features_under_test)
   {
-    MessageCollection<MotionPlanRequest> coll = db_->openCollection<MotionPlanRequest>("test_db", feature->getName());
+    MessageCollection<GetCartesianPath::Request> coll =
+        db_->openCollection<GetCartesianPath::Request>("test_db", feature->getName());
 
     SCOPED_TRACE(feature->getName());
 
