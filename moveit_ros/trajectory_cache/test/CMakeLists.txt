@@ -41,7 +41,7 @@ if(BUILD_TESTING)
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_utils_with_move_group")
 
-# Features =====================================================================
+  # Features ===================================================================
 
   # Test constant features library.
   ament_add_gtest_executable(test_constant_features_with_move_group
@@ -76,9 +76,22 @@ if(BUILD_TESTING)
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_motion_plan_request_features_with_move_group")
 
-# Cache Insert Policies ========================================================
+  # Cache Insert Policies ======================================================
 
-# Integration Tests ============================================================
+  # Test AlwaysInsertNeverPrunePolicy library.
+  ament_add_gtest_executable(test_always_insert_never_prune_policy_with_move_group
+                             cache_insert_policies/test_always_insert_never_prune_policy_with_move_group.cpp)
+  target_link_libraries(test_always_insert_never_prune_policy_with_move_group
+                        moveit_ros_trajectory_cache_cache_insert_policies_lib
+                        moveit_ros_trajectory_cache_features_lib
+                        moveit_ros_trajectory_cache_utils_lib
+                        move_group_fixture)
+  add_ros_test(gtest_with_move_group.py
+               TARGET test_always_insert_never_prune_policy_with_move_group TIMEOUT 30 ARGS
+               "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
+               "test_executable:=test_always_insert_never_prune_policy_with_move_group")
+
+  # Integration Tests ==========================================================
 
   # This test executable is run by the pytest_test, since a node is required for
   # testing move groups
