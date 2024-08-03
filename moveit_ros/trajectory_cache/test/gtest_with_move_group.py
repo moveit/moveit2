@@ -101,7 +101,7 @@ def generate_test_description():
             robot_state_publisher,
             ros2_control_node,
             *load_controllers,
-            launch.actions.TimerAction(period=0.1, actions=[gtest_node]),
+            launch.actions.TimerAction(period=1.0, actions=[gtest_node]),
             launch_testing.actions.ReadyToTest(),
         ]
     ), {
