@@ -35,6 +35,14 @@ namespace moveit_ros
 namespace trajectory_cache
 {
 
+using ::warehouse_ros::Metadata;
+using ::warehouse_ros::Query;
+
+using ::moveit::core::MoveItErrorCode;
+using ::moveit::planning_interface::MoveGroupInterface;
+
+using ::moveit_msgs::msg::MotionPlanRequest;
+
 // "Start" features. ===============================================================================
 
 // WorkspaceFeatures.
@@ -48,16 +56,16 @@ std::string WorkspaceFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode WorkspaceFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode WorkspaceFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query, const MotionPlanRequest& source,
+                                                                   const MoveGroupInterface& move_group,
+                                                                   double exact_match_precision) const
 {
   return appendFeaturesAsExactFetchQuery(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode WorkspaceFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double /*exact_match_precision*/) const
+MoveItErrorCode WorkspaceFeatures::appendFeaturesAsExactFetchQuery(Query& query, const MotionPlanRequest& source,
+                                                                   const MoveGroupInterface& move_group,
+                                                                   double /*exact_match_precision*/) const
 {
   query.append(name_ + ".group_name", source.group_name);
   query.append(name_ + ".workspace_parameters.header.frame_id",
@@ -68,12 +76,11 @@ moveit::core::MoveItErrorCode WorkspaceFeatures::appendFeaturesAsExactFetchQuery
   query.appendLTE(name_ + ".workspace_parameters.max_corner.x", source.workspace_parameters.max_corner.x);
   query.appendLTE(name_ + ".workspace_parameters.max_corner.y", source.workspace_parameters.max_corner.y);
   query.appendLTE(name_ + ".workspace_parameters.max_corner.z", source.workspace_parameters.max_corner.z);
-  return moveit::core::MoveItErrorCode::SUCCESS;
+  return MoveItErrorCode::SUCCESS;
 };
 
-moveit::core::MoveItErrorCode WorkspaceFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode WorkspaceFeatures::appendFeaturesAsInsertMetadata(Metadata& metadata, const MotionPlanRequest& source,
+                                                                  const MoveGroupInterface& move_group) const
 {
   metadata.append(name_ + ".group_name", source.group_name);
   metadata.append(name_ + ".workspace_parameters.header.frame_id",
@@ -84,7 +91,7 @@ moveit::core::MoveItErrorCode WorkspaceFeatures::appendFeaturesAsInsertMetadata(
   metadata.append(name_ + ".workspace_parameters.max_corner.x", source.workspace_parameters.max_corner.x);
   metadata.append(name_ + ".workspace_parameters.max_corner.y", source.workspace_parameters.max_corner.y);
   metadata.append(name_ + ".workspace_parameters.max_corner.z", source.workspace_parameters.max_corner.z);
-  return moveit::core::MoveItErrorCode::SUCCESS;
+  return MoveItErrorCode::SUCCESS;
 };
 
 // StartStateJointStateFeatures.
@@ -99,30 +106,31 @@ std::string StartStateJointStateFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode StartStateJointStateFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode StartStateJointStateFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query,
+                                                                              const MotionPlanRequest& source,
+                                                                              const MoveGroupInterface& move_group,
+                                                                              double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, match_tolerance_ + exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode StartStateJointStateFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode StartStateJointStateFeatures::appendFeaturesAsExactFetchQuery(Query& query,
+                                                                              const MotionPlanRequest& source,
+                                                                              const MoveGroupInterface& move_group,
+                                                                              double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode StartStateJointStateFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode StartStateJointStateFeatures::appendFeaturesAsInsertMetadata(Metadata& metadata,
+                                                                             const MotionPlanRequest& source,
+                                                                             const MoveGroupInterface& move_group) const
 {
   return appendRobotStateJointStateAsInsertMetadata(metadata, source.start_state, move_group, name_ + ".start_state");
 };
 
-moveit::core::MoveItErrorCode StartStateJointStateFeatures::appendFeaturesAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance) const
+MoveItErrorCode StartStateJointStateFeatures::appendFeaturesAsFetchQueryWithTolerance(
+    Query& query, const MotionPlanRequest& source, const MoveGroupInterface& move_group, double match_tolerance) const
 {
   return appendRobotStateJointStateAsFetchQueryWithTolerance(query, source.start_state, move_group, match_tolerance,
                                                              name_ + ".start_state");
@@ -141,16 +149,18 @@ std::string MaxSpeedAndAccelerationFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode MaxSpeedAndAccelerationFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode MaxSpeedAndAccelerationFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query,
+                                                                                 const MotionPlanRequest& source,
+                                                                                 const MoveGroupInterface& move_group,
+                                                                                 double exact_match_precision) const
 {
   return appendFeaturesAsExactFetchQuery(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode MaxSpeedAndAccelerationFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& /*move_group*/, double /*exact_match_precision*/) const
+MoveItErrorCode
+MaxSpeedAndAccelerationFeatures::appendFeaturesAsExactFetchQuery(Query& query, const MotionPlanRequest& source,
+                                                                 const MoveGroupInterface& /*move_group*/,
+                                                                 double /*exact_match_precision*/) const
 {
   if (source.max_velocity_scaling_factor <= 0 || source.max_velocity_scaling_factor > 1.0)
   {
@@ -176,12 +186,12 @@ moveit::core::MoveItErrorCode MaxSpeedAndAccelerationFeatures::appendFeaturesAsE
     query.appendLTE(name_ + ".max_cartesian_speed", source.max_cartesian_speed);
   }
 
-  return moveit::core::MoveItErrorCode::SUCCESS;
+  return MoveItErrorCode::SUCCESS;
 };
 
-moveit::core::MoveItErrorCode MaxSpeedAndAccelerationFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& /*move_group*/) const
+MoveItErrorCode
+MaxSpeedAndAccelerationFeatures::appendFeaturesAsInsertMetadata(Metadata& metadata, const MotionPlanRequest& source,
+                                                                const MoveGroupInterface& /*move_group*/) const
 {
   if (source.max_velocity_scaling_factor <= 0 || source.max_velocity_scaling_factor > 1.0)
   {
@@ -207,7 +217,7 @@ moveit::core::MoveItErrorCode MaxSpeedAndAccelerationFeatures::appendFeaturesAsI
     metadata.append(name_ + ".max_cartesian_speed", source.max_cartesian_speed);
   }
 
-  return moveit::core::MoveItErrorCode::SUCCESS;
+  return MoveItErrorCode::SUCCESS;
 };
 
 // GoalConstraintsFeatures.
@@ -222,32 +232,33 @@ std::string GoalConstraintsFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode GoalConstraintsFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode GoalConstraintsFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query, const MotionPlanRequest& source,
+                                                                         const MoveGroupInterface& move_group,
+                                                                         double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, match_tolerance_ + exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode GoalConstraintsFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode GoalConstraintsFeatures::appendFeaturesAsExactFetchQuery(Query& query, const MotionPlanRequest& source,
+                                                                         const MoveGroupInterface& move_group,
+                                                                         double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode GoalConstraintsFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode GoalConstraintsFeatures::appendFeaturesAsInsertMetadata(Metadata& metadata,
+                                                                        const MotionPlanRequest& source,
+                                                                        const MoveGroupInterface& move_group) const
 {
   std::string workspace_id = getWorkspaceFrameId(move_group, source.workspace_parameters);
   return appendConstraintsAsInsertMetadata(metadata, source.goal_constraints, move_group, workspace_id,
                                            name_ + ".goal_constraints");
 };
 
-moveit::core::MoveItErrorCode GoalConstraintsFeatures::appendFeaturesAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance) const
+MoveItErrorCode GoalConstraintsFeatures::appendFeaturesAsFetchQueryWithTolerance(Query& query,
+                                                                                 const MotionPlanRequest& source,
+                                                                                 const MoveGroupInterface& move_group,
+                                                                                 double match_tolerance) const
 {
   std::string workspace_id = getWorkspaceFrameId(move_group, source.workspace_parameters);
   return appendConstraintsAsFetchQueryWithTolerance(query, source.goal_constraints, move_group, match_tolerance,
@@ -266,32 +277,33 @@ std::string PathConstraintsFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode PathConstraintsFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode PathConstraintsFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query, const MotionPlanRequest& source,
+                                                                         const MoveGroupInterface& move_group,
+                                                                         double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, match_tolerance_ + exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode PathConstraintsFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode PathConstraintsFeatures::appendFeaturesAsExactFetchQuery(Query& query, const MotionPlanRequest& source,
+                                                                         const MoveGroupInterface& move_group,
+                                                                         double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode PathConstraintsFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode PathConstraintsFeatures::appendFeaturesAsInsertMetadata(Metadata& metadata,
+                                                                        const MotionPlanRequest& source,
+                                                                        const MoveGroupInterface& move_group) const
 {
   std::string workspace_id = getWorkspaceFrameId(move_group, source.workspace_parameters);
   return appendConstraintsAsInsertMetadata(metadata, { source.path_constraints }, move_group, workspace_id,
                                            name_ + ".path_constraints");
 };
 
-moveit::core::MoveItErrorCode PathConstraintsFeatures::appendFeaturesAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance) const
+MoveItErrorCode PathConstraintsFeatures::appendFeaturesAsFetchQueryWithTolerance(Query& query,
+                                                                                 const MotionPlanRequest& source,
+                                                                                 const MoveGroupInterface& move_group,
+                                                                                 double match_tolerance) const
 {
   std::string workspace_id = getWorkspaceFrameId(move_group, source.workspace_parameters);
   return appendConstraintsAsFetchQueryWithTolerance(query, { source.path_constraints }, move_group, match_tolerance,
@@ -310,32 +322,33 @@ std::string TrajectoryConstraintsFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode TrajectoryConstraintsFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode TrajectoryConstraintsFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query,
+                                                                               const MotionPlanRequest& source,
+                                                                               const MoveGroupInterface& move_group,
+                                                                               double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, match_tolerance_ + exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode TrajectoryConstraintsFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode TrajectoryConstraintsFeatures::appendFeaturesAsExactFetchQuery(Query& query,
+                                                                               const MotionPlanRequest& source,
+                                                                               const MoveGroupInterface& move_group,
+                                                                               double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode TrajectoryConstraintsFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode
+TrajectoryConstraintsFeatures::appendFeaturesAsInsertMetadata(Metadata& metadata, const MotionPlanRequest& source,
+                                                              const MoveGroupInterface& move_group) const
 {
   std::string workspace_id = getWorkspaceFrameId(move_group, source.workspace_parameters);
   return appendConstraintsAsInsertMetadata(metadata, source.trajectory_constraints.constraints, move_group,
                                            workspace_id, name_ + ".trajectory_constraints.constraints");
 };
 
-moveit::core::MoveItErrorCode TrajectoryConstraintsFeatures::appendFeaturesAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, const moveit_msgs::msg::MotionPlanRequest& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance) const
+MoveItErrorCode TrajectoryConstraintsFeatures::appendFeaturesAsFetchQueryWithTolerance(
+    Query& query, const MotionPlanRequest& source, const MoveGroupInterface& move_group, double match_tolerance) const
 {
   std::string workspace_id = getWorkspaceFrameId(move_group, source.workspace_parameters);
   return appendConstraintsAsFetchQueryWithTolerance(query, source.trajectory_constraints.constraints, move_group,

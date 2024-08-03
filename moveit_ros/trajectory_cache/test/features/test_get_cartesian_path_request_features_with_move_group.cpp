@@ -96,8 +96,10 @@ TEST_F(MoveGroupFixture, GetCartesianPathRequestRoundTrip)
     EXPECT_TRUE(feature->appendFeaturesAsInsertMetadata(*metadata, msg, *move_group_));
     coll.insert(msg, metadata);
 
-    EXPECT_TRUE(feature->appendFeaturesAsFuzzyFetchQuery(*fuzzy_query, msg, *move_group_, 0.0));
-    EXPECT_TRUE(feature->appendFeaturesAsExactFetchQuery(*exact_query, msg, *move_group_, 0.0));
+    EXPECT_TRUE(
+        feature->appendFeaturesAsFuzzyFetchQuery(*fuzzy_query, msg, *move_group_, /*exact_match_precision=*/0.0001));
+    EXPECT_TRUE(
+        feature->appendFeaturesAsExactFetchQuery(*exact_query, msg, *move_group_, /*exact_match_precision=*/0.0001));
 
     EXPECT_EQ(coll.queryList(fuzzy_query).size(), 1);
     EXPECT_EQ(coll.queryList(exact_query).size(), 1);

@@ -108,6 +108,7 @@ public:
    * @param[in,out] query. The query to add features to.
    * @param[in] source. A FeatureSourceT to extract features from.
    * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] exact_match_precision. Tolerance for float precision comparison for what counts as an exact match.
    * @returns moveit::core::MoveItErrorCode::SUCCESS if successfully appended. Otherwise, will return a different error
    * code, in which case the query should not be reused.
    */
@@ -124,6 +125,7 @@ public:
    * @param[in,out] query. The query to add features to.
    * @param[in] source. A FeatureSourceT to extract features from.
    * @param[in] move_group. The manipulator move group, used to get its state.
+   * @param[in] exact_match_precision. Tolerance for float precision comparison for what counts as an exact match.
    * @returns moveit::core::MoveItErrorCode::SUCCESS if successfully appended. Otherwise, will return a different error
    * code, in which case the query should not be reused.
    */
