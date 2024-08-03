@@ -48,7 +48,15 @@ namespace moveit_ros
 namespace trajectory_cache
 {
 
-std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
+using ::warehouse_ros::Metadata;
+using ::warehouse_ros::Query;
+
+using ::moveit::core::MoveItErrorCode;
+using ::moveit::planning_interface::MoveGroupInterface;
+
+using ::moveit_msgs::srv::GetCartesianPath;
+
+std::string getWorkspaceFrameId(const MoveGroupInterface& move_group,
                                 const moveit_msgs::msg::WorkspaceParameters& workspace_parameters)
 {
   if (workspace_parameters.header.frame_id.empty())
@@ -61,8 +69,8 @@ std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInter
   }
 }
 
-std::string getCartesianPathRequestFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
-                                           const moveit_msgs::srv::GetCartesianPath::Request& path_request)
+std::string getCartesianPathRequestFrameId(const MoveGroupInterface& move_group,
+                                           const GetCartesianPath::Request& path_request)
 {
   if (path_request.header.frame_id.empty())
   {
@@ -76,12 +84,12 @@ std::string getCartesianPathRequestFrameId(const moveit::planning_interface::Mov
 
 // Request Construction. ===========================================================================
 
-moveit_msgs::srv::GetCartesianPath::Request
-constructGetCartesianPathRequest(moveit::planning_interface::MoveGroupInterface& move_group,
-                                 const std::vector<geometry_msgs::msg::Pose>& waypoints, double max_step,
-                                 double jump_threshold, bool avoid_collisions)
+GetCartesianPath::Request constructGetCartesianPathRequest(MoveGroupInterface& move_group,
+                                                           const std::vector<geometry_msgs::msg::Pose>& waypoints,
+                                                           double max_step, double jump_threshold,
+                                                           bool avoid_collisions)
 {
-  moveit_msgs::srv::GetCartesianPath::Request out;
+  GetCartesianPath::Request out;
 
   move_group.constructRobotState(out.start_state);
 
@@ -103,8 +111,7 @@ constructGetCartesianPathRequest(moveit::planning_interface::MoveGroupInterface&
 
 // Queries. ========================================================================================
 
-void queryAppendCenterWithTolerance(warehouse_ros::Query& query, const std::string& name, double center,
-                                    double tolerance)
+void queryAppendCenterWithTolerance(Query& query, const std::string& name, double center, double tolerance)
 {
   query.appendRangeInclusive(name, center - tolerance / 2, center + tolerance / 2);
 }
@@ -135,10 +142,10 @@ void sortOrientationConstraints(std::vector<moveit_msgs::msg::OrientationConstra
             });
 }
 
-moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, std::vector<moveit_msgs::msg::Constraints> constraints,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance,
-    const std::string& reference_frame_id, const std::string& prefix)
+moveit::core::MoveItErrorCode
+appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs::msg::Constraints> constraints,
+                                           const MoveGroupInterface& move_group, double match_tolerance,
+                                           const std::string& reference_frame_id, const std::string& prefix)
 {
   const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();
 
@@ -237,7 +244,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
             std::stringstream ss;
             ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for translation "
                << reference_frame_id << " to " << position_constraint.header.frame_id << ": " << ex.what();
-            return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
+            return MoveItErrorCode(MoveItErrorCode::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
 
@@ -287,7 +294,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
             std::stringstream ss;
             ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for orientation "
                << reference_frame_id << " to " << orientation_constraint.header.frame_id << ": " << ex.what();
-            return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
+            return MoveItErrorCode(MoveItErrorCode::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
 
@@ -318,11 +325,11 @@ moveit::core::MoveItErrorCode appendConstraintsAsFetchQueryWithTolerance(
   return moveit::core::MoveItErrorCode::SUCCESS;
 }
 
-moveit::core::MoveItErrorCode
-appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
-                                  std::vector<moveit_msgs::msg::Constraints> constraints,
-                                  const moveit::planning_interface::MoveGroupInterface& move_group,
-                                  const std::string& workspace_frame_id, const std::string& prefix)
+moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metadata,
+                                                                std::vector<moveit_msgs::msg::Constraints> constraints,
+                                                                const MoveGroupInterface& move_group,
+                                                                const std::string& workspace_frame_id,
+                                                                const std::string& prefix)
 {
   const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();
 
@@ -421,7 +428,7 @@ appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
             std::stringstream ss;
             ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for translation "
                << workspace_frame_id << " to " << position_constraint.header.frame_id << ": " << ex.what();
-            return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
+            return MoveItErrorCode(MoveItErrorCode::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
 
@@ -467,7 +474,7 @@ appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
             std::stringstream ss;
             ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for orientation "
                << workspace_frame_id << " to " << orientation_constraint.header.frame_id << ": " << ex.what();
-            return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
+            return MoveItErrorCode(MoveItErrorCode::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
 
@@ -500,9 +507,10 @@ appendConstraintsAsInsertMetadata(warehouse_ros::Metadata& metadata,
 
 // RobotState. =====================================================================================
 
-moveit::core::MoveItErrorCode appendRobotStateJointStateAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, const moveit_msgs::msg::RobotState& robot_state,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance, const std::string& prefix)
+moveit::core::MoveItErrorCode
+appendRobotStateJointStateAsFetchQueryWithTolerance(Query& query, const moveit_msgs::msg::RobotState& robot_state,
+                                                    const MoveGroupInterface& move_group, double match_tolerance,
+                                                    const std::string& prefix)
 {
   // Make ignored members explicit
 
@@ -541,7 +549,7 @@ moveit::core::MoveItErrorCode appendRobotStateJointStateAsFetchQueryWithToleranc
       //   supported.
       std::stringstream ss;
       ss << "Skipping " << prefix << " query append: " << "Could not get robot state.";
-      return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA, ss.str());
+      return MoveItErrorCode(MoveItErrorCode::UNABLE_TO_AQUIRE_SENSOR_DATA, ss.str());
     }
 
     moveit_msgs::msg::RobotState current_state_msg;
@@ -567,9 +575,9 @@ moveit::core::MoveItErrorCode appendRobotStateJointStateAsFetchQueryWithToleranc
   return moveit::core::MoveItErrorCode::SUCCESS;
 }
 
-moveit::core::MoveItErrorCode appendRobotStateJointStateAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::msg::RobotState& robot_state,
-    const moveit::planning_interface::MoveGroupInterface& move_group, const std::string& prefix)
+moveit::core::MoveItErrorCode
+appendRobotStateJointStateAsInsertMetadata(Metadata& metadata, const moveit_msgs::msg::RobotState& robot_state,
+                                           const MoveGroupInterface& move_group, const std::string& prefix)
 {
   // Make ignored members explicit
 
@@ -608,7 +616,7 @@ moveit::core::MoveItErrorCode appendRobotStateJointStateAsInsertMetadata(
       //   supported.
       std::stringstream ss;
       ss << "Skipping " << prefix << " metadata append: " << "Could not get robot state.";
-      return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::UNABLE_TO_AQUIRE_SENSOR_DATA, ss.str());
+      return MoveItErrorCode(MoveItErrorCode::UNABLE_TO_AQUIRE_SENSOR_DATA, ss.str());
     }
 
     moveit_msgs::msg::RobotState current_state_msg;

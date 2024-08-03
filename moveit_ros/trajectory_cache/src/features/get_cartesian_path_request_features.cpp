@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /** @file
- * @brief Implementation of moveit_msgs::srv::GetCartesianPath::Request features to key the trajectory cache on.
+ * @brief Implementation of GetCartesianPath::Request features to key the trajectory cache on.
  * @see FeaturesInterface<FeatureSourceT>
  *
  * @author methylDragon
@@ -35,6 +35,14 @@ namespace moveit_ros
 namespace trajectory_cache
 {
 
+using ::warehouse_ros::Metadata;
+using ::warehouse_ros::Query;
+
+using ::moveit::core::MoveItErrorCode;
+using ::moveit::planning_interface::MoveGroupInterface;
+
+using ::moveit_msgs::srv::GetCartesianPath;
+
 // "Start" features. ===============================================================================
 
 // CartesianWorkspaceFeatures.
@@ -48,25 +56,27 @@ std::string CartesianWorkspaceFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode CartesianWorkspaceFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode CartesianWorkspaceFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query,
+                                                                            const GetCartesianPath::Request& source,
+                                                                            const MoveGroupInterface& move_group,
+                                                                            double exact_match_precision) const
 {
   return appendFeaturesAsExactFetchQuery(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianWorkspaceFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double /*exact_match_precision*/) const
+MoveItErrorCode CartesianWorkspaceFeatures::appendFeaturesAsExactFetchQuery(Query& query,
+                                                                            const GetCartesianPath::Request& source,
+                                                                            const MoveGroupInterface& move_group,
+                                                                            double /*exact_match_precision*/) const
 {
   query.append(name_ + ".group_name", source.group_name);
   query.append(name_ + ".header.frame_id", getCartesianPathRequestFrameId(move_group, source));
   return moveit::core::MoveItErrorCode::SUCCESS;
 };
 
-moveit::core::MoveItErrorCode CartesianWorkspaceFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode CartesianWorkspaceFeatures::appendFeaturesAsInsertMetadata(Metadata& metadata,
+                                                                           const GetCartesianPath::Request& source,
+                                                                           const MoveGroupInterface& move_group) const
 {
   metadata.append(name_ + ".group_name", source.group_name);
   metadata.append(name_ + ".header.frame_id", getCartesianPathRequestFrameId(move_group, source));
@@ -85,30 +95,29 @@ std::string CartesianStartStateJointStateFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode CartesianStartStateJointStateFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode CartesianStartStateJointStateFeatures::appendFeaturesAsFuzzyFetchQuery(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group,
+    double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, match_tolerance_ + exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianStartStateJointStateFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode CartesianStartStateJointStateFeatures::appendFeaturesAsExactFetchQuery(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group,
+    double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianStartStateJointStateFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode CartesianStartStateJointStateFeatures::appendFeaturesAsInsertMetadata(
+    Metadata& metadata, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group) const
 {
   return appendRobotStateJointStateAsInsertMetadata(metadata, source.start_state, move_group, name_ + ".start_state");
 };
 
-moveit::core::MoveItErrorCode CartesianStartStateJointStateFeatures::appendFeaturesAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance) const
+MoveItErrorCode CartesianStartStateJointStateFeatures::appendFeaturesAsFetchQueryWithTolerance(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group,
+    double match_tolerance) const
 {
   return appendRobotStateJointStateAsFetchQueryWithTolerance(query, source.start_state, move_group, match_tolerance,
                                                              name_ + ".start_state");
@@ -128,16 +137,16 @@ std::string CartesianMaxSpeedAndAccelerationFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode CartesianMaxSpeedAndAccelerationFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode CartesianMaxSpeedAndAccelerationFeatures::appendFeaturesAsFuzzyFetchQuery(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group,
+    double exact_match_precision) const
 {
   return appendFeaturesAsExactFetchQuery(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianMaxSpeedAndAccelerationFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& /*move_group*/, double /*exact_match_precision*/) const
+MoveItErrorCode CartesianMaxSpeedAndAccelerationFeatures::appendFeaturesAsExactFetchQuery(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& /*move_group*/,
+    double /*exact_match_precision*/) const
 {
   if (source.max_velocity_scaling_factor <= 0 || source.max_velocity_scaling_factor > 1.0)
   {
@@ -166,9 +175,8 @@ moveit::core::MoveItErrorCode CartesianMaxSpeedAndAccelerationFeatures::appendFe
   return moveit::core::MoveItErrorCode::SUCCESS;
 };
 
-moveit::core::MoveItErrorCode CartesianMaxSpeedAndAccelerationFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& /*move_group*/) const
+MoveItErrorCode CartesianMaxSpeedAndAccelerationFeatures::appendFeaturesAsInsertMetadata(
+    Metadata& metadata, const GetCartesianPath::Request& source, const MoveGroupInterface& /*move_group*/) const
 {
   if (source.max_velocity_scaling_factor <= 0 || source.max_velocity_scaling_factor > 1.0)
   {
@@ -209,16 +217,16 @@ std::string CartesianMaxStepAndJumpThresholdFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode CartesianMaxStepAndJumpThresholdFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode CartesianMaxStepAndJumpThresholdFeatures::appendFeaturesAsFuzzyFetchQuery(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group,
+    double exact_match_precision) const
 {
   return appendFeaturesAsExactFetchQuery(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianMaxStepAndJumpThresholdFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& /*move_group*/, double /*exact_match_precision*/) const
+MoveItErrorCode CartesianMaxStepAndJumpThresholdFeatures::appendFeaturesAsExactFetchQuery(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& /*move_group*/,
+    double /*exact_match_precision*/) const
 {
   query.appendLTE(name_ + ".max_step", source.max_step);
 
@@ -238,9 +246,8 @@ moveit::core::MoveItErrorCode CartesianMaxStepAndJumpThresholdFeatures::appendFe
   return moveit::core::MoveItErrorCode::SUCCESS;
 };
 
-moveit::core::MoveItErrorCode CartesianMaxStepAndJumpThresholdFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& /*move_group*/) const
+MoveItErrorCode CartesianMaxStepAndJumpThresholdFeatures::appendFeaturesAsInsertMetadata(
+    Metadata& metadata, const GetCartesianPath::Request& source, const MoveGroupInterface& /*move_group*/) const
 {
   metadata.append(name_ + ".max_step", source.max_step);
 
@@ -272,23 +279,25 @@ std::string CartesianWaypointsFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query,
+                                                                            const GetCartesianPath::Request& source,
+                                                                            const MoveGroupInterface& move_group,
+                                                                            double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, match_tolerance_ + exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsExactFetchQuery(Query& query,
+                                                                            const GetCartesianPath::Request& source,
+                                                                            const MoveGroupInterface& move_group,
+                                                                            double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsInsertMetadata(Metadata& metadata,
+                                                                           const GetCartesianPath::Request& source,
+                                                                           const MoveGroupInterface& move_group) const
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, source);
   std::string base_frame = move_group.getRobotModel()->getModelFrame();
@@ -362,9 +371,9 @@ moveit::core::MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsInsert
   return moveit::core::MoveItErrorCode::SUCCESS;
 };
 
-moveit::core::MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance) const
+MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsFetchQueryWithTolerance(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group,
+    double match_tolerance) const
 {
   std::string path_request_frame_id = getCartesianPathRequestFrameId(move_group, source);
   std::string base_frame = move_group.getRobotModel()->getModelFrame();
@@ -450,32 +459,33 @@ std::string CartesianPathConstraintsFeatures::getName() const
   return name_;
 }
 
-moveit::core::MoveItErrorCode CartesianPathConstraintsFeatures::appendFeaturesAsFuzzyFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode
+CartesianPathConstraintsFeatures::appendFeaturesAsFuzzyFetchQuery(Query& query, const GetCartesianPath::Request& source,
+                                                                  const MoveGroupInterface& move_group,
+                                                                  double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, match_tolerance_ + exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianPathConstraintsFeatures::appendFeaturesAsExactFetchQuery(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double exact_match_precision) const
+MoveItErrorCode
+CartesianPathConstraintsFeatures::appendFeaturesAsExactFetchQuery(Query& query, const GetCartesianPath::Request& source,
+                                                                  const MoveGroupInterface& move_group,
+                                                                  double exact_match_precision) const
 {
   return appendFeaturesAsFetchQueryWithTolerance(query, source, move_group, exact_match_precision);
 };
 
-moveit::core::MoveItErrorCode CartesianPathConstraintsFeatures::appendFeaturesAsInsertMetadata(
-    warehouse_ros::Metadata& metadata, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group) const
+MoveItErrorCode CartesianPathConstraintsFeatures::appendFeaturesAsInsertMetadata(
+    Metadata& metadata, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group) const
 {
   return appendConstraintsAsInsertMetadata(metadata, { source.path_constraints }, move_group,
                                            getCartesianPathRequestFrameId(move_group, source),
                                            name_ + ".path_constraints");
 };
 
-moveit::core::MoveItErrorCode CartesianPathConstraintsFeatures::appendFeaturesAsFetchQueryWithTolerance(
-    warehouse_ros::Query& query, const moveit_msgs::srv::GetCartesianPath::Request& source,
-    const moveit::planning_interface::MoveGroupInterface& move_group, double match_tolerance) const
+MoveItErrorCode CartesianPathConstraintsFeatures::appendFeaturesAsFetchQueryWithTolerance(
+    Query& query, const GetCartesianPath::Request& source, const MoveGroupInterface& move_group,
+    double match_tolerance) const
 {
   return appendConstraintsAsFetchQueryWithTolerance(query, { source.path_constraints }, move_group, match_tolerance,
                                                     getCartesianPathRequestFrameId(move_group, source),
