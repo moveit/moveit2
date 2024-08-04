@@ -78,7 +78,7 @@ if(BUILD_TESTING)
 
   # Cache Insert Policies ======================================================
 
-  # Test AlwaysInsertNeverPrunePolicy library.
+  # Test always_insert_never_prune policies library.
   ament_add_gtest_executable(test_always_insert_never_prune_policy_with_move_group
                              cache_insert_policies/test_always_insert_never_prune_policy_with_move_group.cpp)
   target_link_libraries(test_always_insert_never_prune_policy_with_move_group

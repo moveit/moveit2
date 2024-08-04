@@ -13,8 +13,9 @@
 // limitations under the License.
 
 /** @file
- * @brief A cache insertion policy that always decides to insert and never decides to prune.
- *
+ * @brief A cache insertion policy that always decides to insert and never decides to prune for
+ * cartesian path requests.
+
  * This is mainly for explanatory purposes.
  * @see CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT>
  *
@@ -27,7 +28,6 @@
 
 #include <warehouse_ros/message_collection.h>
 #include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/trajectory_cache/cache_insert_policies/cache_insert_policy_interface.hpp>
@@ -38,91 +38,7 @@ namespace moveit_ros
 namespace trajectory_cache
 {
 
-// =================================================================================================
-// AlwaysInsertNeverPrunePolicy.
-// =================================================================================================
-// moveit_msgs::msg::MotionPlanRequest <=> moveit::planning_interface::MoveGroupInterface::Plan
-
-/** @class AlwaysInsertNeverPrunePolicy
- *
- * @brief A cache insertion policy that always decides to insert and never decides to prune for motion plan requests.
- *
- * Supported Metadata and Features
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * Appends the following additional metadata, which can be used for querying and sorting:
- *   - execution_time_s
- *   - planning_time_s
- *
- * Usable with the motion plan request features:
- *   - WorkspaceFeatures
- *   - StartStateJointStateFeatures
- *   - MaxSpeedAndAccelerationFeatures
- *   - GoalConstraintsFeatures
- *   - PathConstraintsFeatures
- *   - TrajectoryConstraintsFeatures
- *
- * @see motion_plan_request_features.hpp
- * @see FeaturesInterface<FeatureSourceT>
- *
- * Matches, Pruning, and Insertion
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * A matching cache entry is one that exactly matches on every one of the features above.
- *
- * The sort order is ordered on execution_time_s in ascending order (so loweest execution time first).
- * This policy never indicates that pruning should happen, and always indicates that insertion should happen.
- */
-class AlwaysInsertNeverPrunePolicy final
-  : public CacheInsertPolicyInterface<moveit_msgs::msg::MotionPlanRequest,
-                                      moveit::planning_interface::MoveGroupInterface::Plan,
-                                      moveit_msgs::msg::RobotTrajectory>
-{
-public:
-  /** @brief Configures and returns a vector of feature extractors that can be used with this policy. */
-  static std::vector<std::unique_ptr<FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>>>
-  getSupportedFeatures(double start_tolerance, double goal_tolerance);
-
-  AlwaysInsertNeverPrunePolicy();
-
-  std::string getName() const override;
-
-  moveit::core::MoveItErrorCode
-  checkCacheInsertInputs(const moveit::planning_interface::MoveGroupInterface& move_group,
-                         const warehouse_ros::MessageCollection<moveit_msgs::msg::RobotTrajectory>& coll,
-                         const moveit_msgs::msg::MotionPlanRequest& key,
-                         const moveit::planning_interface::MoveGroupInterface::Plan& value) override;
-
-  std::vector<warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
-  fetchMatchingEntries(const moveit::planning_interface::MoveGroupInterface& move_group,
-                       const warehouse_ros::MessageCollection<moveit_msgs::msg::RobotTrajectory>& coll,
-                       const moveit_msgs::msg::MotionPlanRequest& key,
-                       const moveit::planning_interface::MoveGroupInterface::Plan& value,
-                       double exact_match_precision) override;
-
-  bool prunePredicate(
-      const moveit::planning_interface::MoveGroupInterface& move_group, const moveit_msgs::msg::MotionPlanRequest& key,
-      const moveit::planning_interface::MoveGroupInterface::Plan& value,
-      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matched_entry) override;
-
-  bool insertPredicate(const moveit::planning_interface::MoveGroupInterface& move_group,
-                       const moveit_msgs::msg::MotionPlanRequest& key,
-                       const moveit::planning_interface::MoveGroupInterface::Plan& value) override;
-
-  moveit::core::MoveItErrorCode
-  appendInsertMetadata(warehouse_ros::Metadata& metadata,
-                       const moveit::planning_interface::MoveGroupInterface& move_group,
-                       const moveit_msgs::msg::MotionPlanRequest& key,
-                       const moveit::planning_interface::MoveGroupInterface::Plan& value) override;
-
-  void reset() override;
-
-private:
-  const std::string name_;
-};
-
-// =================================================================================================
-// AlwaysInsertNeverPrunePolicy.
-// =================================================================================================
-// moveit_msgs::srv::GetCartesianPath::Request <=> moveit_msgs::srv::GetCartesianPath::Response
+// moveit_msgs::srv::GetCartesianPath::Request <=> moveit_msgs::srv::GetCartesianPath::Response ====
 
 /** @class CartesianAlwaysInsertNeverPrunePolicy
  *

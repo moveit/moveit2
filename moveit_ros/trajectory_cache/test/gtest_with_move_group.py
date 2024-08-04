@@ -1,17 +1,15 @@
 import os
-import launch
 import unittest
-import launch_ros
 import launch_testing
-from ament_index_python.packages import get_package_share_directory
-from moveit_configs_utils import MoveItConfigsBuilder
-from launch_param_builder import ParameterBuilder
 
 from ament_index_python.packages import get_package_share_directory
+from moveit_configs_utils import MoveItConfigsBuilder
+
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess
-from launch_pytest.tools import process as process_tools
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction
 from launch_ros.actions import Node
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_testing.actions import ReadyToTest
 
 from moveit_configs_utils import MoveItConfigsBuilder
 
@@ -76,11 +74,11 @@ def generate_test_description():
             )
         ]
 
-    gtest_node = launch_ros.actions.Node(
-        executable=launch.substitutions.PathJoinSubstitution(
+    gtest_node = Node(
+        executable=PathJoinSubstitution(
             [
-                launch.substitutions.LaunchConfiguration("test_binary_dir"),
-                launch.substitutions.LaunchConfiguration("test_executable"),
+                LaunchConfiguration("test_binary_dir"),
+                LaunchConfiguration("test_executable"),
             ]
         ),
         parameters=[
@@ -89,20 +87,20 @@ def generate_test_description():
         output="screen",
     )
 
-    return launch.LaunchDescription(
+    return LaunchDescription(
         [
-            launch.actions.DeclareLaunchArgument(
+            DeclareLaunchArgument(
                 name="test_binary_dir",
                 description="Binary directory of package "
                 "containing test executables",
             ),
-            run_move_group_node,
             static_tf,
             robot_state_publisher,
             ros2_control_node,
             *load_controllers,
-            launch.actions.TimerAction(period=1.0, actions=[gtest_node]),
-            launch_testing.actions.ReadyToTest(),
+            TimerAction(period=1.0, actions=[run_move_group_node]),
+            TimerAction(period=3.0, actions=[gtest_node]),
+            ReadyToTest(),
         ]
     ), {
         "gtest_node": gtest_node,
