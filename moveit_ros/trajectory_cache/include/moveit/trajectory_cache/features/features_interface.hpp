@@ -30,41 +30,42 @@ namespace trajectory_cache
 /** @interface FeaturesInterface<FeatureSourceT>
  * @headerfile features_interface.hpp "moveit/trajectory_cache/features/features_interface.hpp"
  *
- * @brief Abstract class for extracting features from arbitrary type FeatureSourceT to append to warehouse_ros::Query
- * and warehouse_ros::Metadata for keying TrajectoryCache entries with.
+ * @brief Abstract class for extracting features from arbitrary type FeatureSourceT to append to
+ * warehouse_ros::Query and warehouse_ros::Metadata for keying TrajectoryCache entries with.
  *
  * @tparam FeatureSourceT. The object to extract features from.
  *
- * The features that are extracted from the FeatureSourceT can be used to key the TrajectoryCache cache entries in a
- * fuzzy and exact manner.
+ * The features that are extracted from the FeatureSourceT can be used to key the TrajectoryCache
+ * cache entries in a fuzzy and exact manner.
  *
- * Users may implement this interface to add additional keying functionality to the cache beyond the ones provided by
- * this package.
+ * Users may implement this interface to add additional keying functionality to the cache beyond the
+ * ones provided by this package.
  *
  * @see TrajectoryCache
  *
  * Usage
  * ^^^^^
- * In order for a cache entry to be fetched using an implementation of FeaturesInterface<FeatureSourceT>, it must also
- * have been put with the same implementation, as fetching a cache entry via some features requires that the features
- * were added to the cache entry's metadata.
+ * In order for a cache entry to be fetched using an implementation of FeaturesInterface<FeatureSourceT>,
+ * it must also have been put with the same implementation, as fetching a cache entry via some
+ * features requires that the features were added to the cache entry's metadata.
  *
- * This typically means adding implementations of FeaturesInterface<FeatureSourceT> as arguments to the TrajectoryCache
- * class's insertion methods. Or by using an appropriate CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT> that composes
- * the set of FeaturesInterface<FeatureSourceT> instances you are concerned with.
+ * This typically means adding implementations of FeaturesInterface<FeatureSourceT> as arguments to
+ * the TrajectoryCache class's insertion methods. Or by using an appropriate CacheInsertPolicyInterface<KeyT, ValueT,
+ * CacheEntryT> that composes the set of FeaturesInterface<FeatureSourceT> instances you are concerned with.
  *
- * Be sure to check the appropriate CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT> implementations' docstrings to see
- * what FeaturesInterface<FeatureSourceT> they support, and make sure to only use a subset of those, unless you
- * explicitly add additional metadata by providing the appropriate additional FeaturesInterface<FeatureSourceT>
- * instances on cache insertion.
+ * Be sure to check the appropriate CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT>
+ * implementations' docstrings to see what FeaturesInterface<FeatureSourceT> they support, and make
+ * sure to only use a subset of those, unless you explicitly add additional metadata by providing
+ * the appropriate additional FeaturesInterface<FeatureSourceT> instances on cache insertion.
  *
  * @see CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT>
  *
  * Composite Keys
  * ^^^^^^^^^^^^^^
- * Multiple unique instances of FeaturesInterface<FeatureSourceT> can be used together to express composite key
- * expressions, allowing you to constrain your match on a larger set of metadata (provided the metadata was added to the
- * cache entry by a superset of the same set of FeaturesInterface<FeatureSourceT> instances used to fetch).
+ * Multiple unique instances of FeaturesInterface<FeatureSourceT> can be used together to express
+ * composite key expressions, allowing you to constrain your match on a larger set of metadata
+ * (provided the metadata was added to the cache entry by a superset of the same set of
+ * FeaturesInterface<FeatureSourceT> instances used to fetch).
  *
  * For example, the following can be used together to more completely key a cache entry:
  *   - A FeaturesInterface that appends workspace information
@@ -76,18 +77,19 @@ namespace trajectory_cache
  *   - A FeaturesInterface that appends robot joint state
  *
  * WARNING:
- *   Care must be taken to ensure that there are no collisions between the names of the query or metadata being added
- *   amongst the different FeaturesInterface<FeatureSourceT> interfaces being used together.
+ *   Care must be taken to ensure that there are no collisions between the names of the query or
+ *   metadata being added amongst the different FeaturesInterface<FeatureSourceT> interfaces being
+ *   used together.
  *
  *   A good way of preventing this is adding a prefix.
  *
  * User-Specified Keys
  * ^^^^^^^^^^^^^^^^^^^
- * You may also implement this interface to constrain a fetch query or tag cache entry metadata with user-specified
- * parameters that do not depend on FeatureSourceT or any other arguments.
+ * You may also implement this interface to constrain a fetch query or tag cache entry metadata with
+ * user-specified parameters that do not depend on FeatureSourceT or any other arguments.
  *
- * Simply ignore any passed arguments as necessary, and ensure that the correct information is appended in the append
- * implementations as appropriate.
+ * Simply ignore any passed arguments as necessary, and ensure that the correct information is
+ * appended in the append implementations as appropriate.
  *
  * @see constant_features.hpp
  */
