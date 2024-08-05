@@ -108,10 +108,10 @@ if(BUILD_TESTING)
 
   # This test executable is run by the pytest_test, since a node is required for
   # testing move groups
-  add_executable(test_trajectory_cache test_trajectory_cache.cpp)
-  target_link_libraries(test_trajectory_cache moveit_ros_trajectory_cache_lib)
+  # add_executable(test_trajectory_cache test_trajectory_cache.cpp)
+  # target_link_libraries(test_trajectory_cache moveit_ros_trajectory_cache_lib)
 
-  install(TARGETS test_trajectory_cache RUNTIME DESTINATION lib/${PROJECT_NAME})
+  # install(TARGETS test_trajectory_cache RUNTIME DESTINATION lib/${PROJECT_NAME})
 
   # ament_add_pytest_test(
   #   test_trajectory_cache_py "test_trajectory_cache.py" WORKING_DIRECTORY

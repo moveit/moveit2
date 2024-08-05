@@ -23,6 +23,7 @@
 
 #include <warehouse_ros/message_collection.h>
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 
 #include <moveit/trajectory_cache/features/features_interface.hpp>
