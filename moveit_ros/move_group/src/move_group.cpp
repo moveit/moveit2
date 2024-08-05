@@ -297,10 +297,12 @@ int main(int argc, char** argv)
       file_stream.open(path, std::fstream::in);
       if (!file_stream.is_open() || !ps->loadGeometryFromStream(file_stream))
       {
-        RCLCPP_ERROR(nh->get_logger(),
-                     ("Failed to load the planning scene geometry from the file specified by the "
-                      "`default_planning_scene` parameter. The `default_planning_scene` parameter was set to %s.",
-                      path.c_str()));
+        RCLCPP_ERROR(nh->get_logger(), std::string("Failed to load the planning scene geometry from the file specified "
+                                                   "by the `default_planning_scene` parameter. The "
+                                                   "`default_planning_scene` parameter was set to ")
+                                           .append(path)
+                                           .append(".")
+                                           .c_str());
       }
       return 0;
     }
