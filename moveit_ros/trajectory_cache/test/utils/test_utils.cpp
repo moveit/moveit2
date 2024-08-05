@@ -24,7 +24,7 @@
 #include <moveit_msgs/msg/orientation_constraint.hpp>
 #include <moveit_msgs/msg/position_constraint.hpp>
 
-#include "../warehouse_fixture.hpp"
+#include "../fixtures/warehouse_fixture.hpp"
 
 namespace
 {
