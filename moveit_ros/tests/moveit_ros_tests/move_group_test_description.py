@@ -7,7 +7,7 @@ from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
 
 
-def generate_move_group_test_description(moveit_config_dict):
+def generate_move_group_test_description(moveit_config_dict, move_group_gtest):
     # Start the actual move_group node/action server
     move_group_node = launch_ros.actions.Node(
         package="moveit_ros_move_group",
@@ -72,17 +72,6 @@ def generate_move_group_test_description(moveit_config_dict):
         name="robot_state_publisher",
         output="both",
         parameters=[moveit_config_dict["robot_description"]],
-    )
-
-    move_group_gtest = launch_ros.actions.Node(
-        executable=launch.substitutions.PathJoinSubstitution(
-            [
-                launch.substitutions.LaunchConfiguration("test_binary_dir"),
-                "move_group_api_test",
-            ]
-        ),
-        parameters=[moveit_config_dict],
-        output="screen",
     )
 
     return launch.LaunchDescription(

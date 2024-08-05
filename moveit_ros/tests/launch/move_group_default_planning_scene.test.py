@@ -31,7 +31,18 @@ def generate_test_description():
         get_package_share_directory("moveit_ros_tests"), "data", "scene.txt"
     )
 
-    return generate_move_group_test_description(moveit_config_dict)
+    move_group_gtest = launch_ros.actions.Node(
+        executable=launch.substitutions.PathJoinSubstitution(
+            [
+                launch.substitutions.LaunchConfiguration("test_binary_dir"),
+                "move_group_default_planning_scene_test",
+            ]
+        ),
+        parameters=[moveit_config_dict],
+        output="screen",
+    )
+
+    return generate_move_group_test_description(moveit_config_dict, move_group_gtest)
 
 
 class TestGTestWaitForCompletion(unittest.TestCase):

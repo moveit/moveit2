@@ -8,6 +8,7 @@ moveit_package()
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(moveit_ros_planning REQUIRED)
   find_package(rclcpp REQUIRED)
   find_package(ros_testing REQUIRED)
 
@@ -19,7 +20,8 @@ if(BUILD_TESTING)
 
   ament_add_gtest_executable(move_group_default_planning_scene_test
                              src/move_group_default_planning_scene_test.cpp)
-  ament_target_dependencies(move_group_default_planning_scene_test rclcpp)
+  ament_target_dependencies(move_group_default_planning_scene_test rclcpp
+                            moveit_ros_planning)
   add_ros_test(launch/move_group_default_planning_scene.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()

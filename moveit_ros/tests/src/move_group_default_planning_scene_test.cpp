@@ -38,9 +38,27 @@
 
 #include <gtest/gtest.h>
 #include <rclcpp/rclcpp.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
 
 TEST(MoveGroup, testDefaultPlanningScene)
 {
+  // PlanningSceneMonitor is used for getting the robot joint state and calculating the Cartesian pose for a given link.
+  auto node = std::make_shared<rclcpp::Node>("move_group_test");
+  auto planning_scene_monitor =
+      std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, "robot_description");
+  planning_scene_monitor->requestPlanningSceneState();
+  planning_scene::PlanningScenePtr ps = planning_scene_monitor->getPlanningScene();
+
+  // ensure the planning scene and world are not null
+  ASSERT_NE(ps, nullptr);
+  ASSERT_NE(ps->getWorld(), nullptr);
+
+  // check that geometry in test file matches the currecnt values
+  std::unordered_set<std::string> expected_ids = { "Box_0", "Cylinder_0" };
+  for (const auto& id : ps->getWorld()->getObjectIds())
+  {
+    EXPECT_NE(expected_ids.find(id), expected_ids.end());
+  }
 }
 
 int main(int argc, char** argv)

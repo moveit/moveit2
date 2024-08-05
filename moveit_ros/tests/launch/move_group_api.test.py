@@ -26,8 +26,20 @@ def generate_test_description():
         )
         .to_moveit_configs()
     )
+    move_group_gtest = launch_ros.actions.Node(
+        executable=launch.substitutions.PathJoinSubstitution(
+            [
+                launch.substitutions.LaunchConfiguration("test_binary_dir"),
+                "move_group_api_test",
+            ]
+        ),
+        parameters=[moveit_config.to_dict()],
+        output="screen",
+    )
 
-    return generate_move_group_test_description(moveit_config.to_dict())
+    return generate_move_group_test_description(
+        moveit_config.to_dict(), move_group_gtest
+    )
 
 
 class TestGTestWaitForCompletion(unittest.TestCase):

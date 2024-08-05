@@ -303,8 +303,9 @@ int main(int argc, char** argv)
                                            .append(path)
                                            .append(".")
                                            .c_str());
+
+        return 0;
       }
-      return 0;
     }
     bool debug = false;
     for (int i = 1; i < argc; ++i)
