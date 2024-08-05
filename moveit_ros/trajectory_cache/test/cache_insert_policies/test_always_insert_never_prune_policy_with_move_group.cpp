@@ -23,6 +23,7 @@
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/trajectory_cache/cache_insert_policies/always_insert_never_prune_policy.hpp>
@@ -218,12 +219,16 @@ TEST_F(MoveGroupFixture, AlwaysInsertNeverPrunePolicyWorks)
       ASSERT_EQ(*feature_fetch[i], *policy_fetch[i]);
 
       // Policy is never prune.
-      EXPECT_FALSE(
-          policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, msg_plan_pair.second, policy_fetch[i]));
+      std::string prune_reason;
+      EXPECT_FALSE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, msg_plan_pair.second,
+                                                   policy_fetch[i], &prune_reason));
+      EXPECT_FALSE(prune_reason.empty());
     }
 
     // Policy is always insert.
-    EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, msg_plan_pair.second));
+    std::string insert_reason;
+    EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, msg_plan_pair.second, &insert_reason));
+    EXPECT_FALSE(insert_reason.empty());
 
     policy.reset();
   }
@@ -413,12 +418,16 @@ TEST_F(MoveGroupFixture, CartesianAlwaysInsertNeverPrunePolicyWorks)
       ASSERT_EQ(*feature_fetch[i], *policy_fetch[i]);
 
       // Policy is never prune.
-      EXPECT_FALSE(
-          policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, msg_plan_pair.second, policy_fetch[i]));
+      std::string prune_reason;
+      EXPECT_FALSE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, msg_plan_pair.second,
+                                                   policy_fetch[i], &prune_reason));
+      EXPECT_FALSE(prune_reason.empty());
     }
 
     // Policy is always insert.
-    EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, msg_plan_pair.second));
+    std::string insert_reason;
+    EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, msg_plan_pair.second, &insert_reason));
+    EXPECT_FALSE(insert_reason.empty());
 
     policy.reset();
   }

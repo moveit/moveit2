@@ -30,6 +30,7 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/trajectory_cache/cache_insert_policies/best_seen_execution_time_policy.hpp>
@@ -177,15 +178,63 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> BestSeenExecutionTim
 
 bool BestSeenExecutionTimePolicy::shouldPruneMatchingEntry(
     const MoveGroupInterface& /*move_group*/, const MotionPlanRequest& /*key*/, const MoveGroupInterface::Plan& value,
-    const MessageWithMetadata<RobotTrajectory>::ConstPtr& matching_entry)
+    const MessageWithMetadata<RobotTrajectory>::ConstPtr& matching_entry, std::string* reason)
 {
-  return matching_entry->lookupDouble(EXECUTION_TIME) >= getExecutionTime(value.trajectory);
+  double matching_entry_execution_time_s = matching_entry->lookupDouble(EXECUTION_TIME);
+  double candidate_execution_time_s = getExecutionTime(value.trajectory);
+
+  if (matching_entry_execution_time_s >= candidate_execution_time_s)
+  {
+    if (reason != nullptr)
+    {
+      std::stringstream ss;
+      ss << "Matching trajectory execution_time_s `" << matching_entry_execution_time_s << "s` "
+         << "is worse than candidate trajectory's execution_time_s `" << candidate_execution_time_s << "s`";
+      *reason = ss.str();
+    }
+    return true;
+  }
+  else
+  {
+    if (reason != nullptr)
+    {
+      std::stringstream ss;
+      ss << "Matching trajectory execution_time_s `" << matching_entry_execution_time_s << "s` "
+         << "is better than candidate trajectory's execution_time_s `" << candidate_execution_time_s << "s`";
+      *reason = ss.str();
+    }
+    return false;
+  }
 }
 
 bool BestSeenExecutionTimePolicy::shouldInsert(const MoveGroupInterface& /*move_group*/,
-                                               const MotionPlanRequest& /*key*/, const MoveGroupInterface::Plan& value)
+                                               const MotionPlanRequest& /*key*/, const MoveGroupInterface::Plan& value,
+                                               std::string* reason)
 {
-  return getExecutionTime(value.trajectory) < best_seen_execution_time_;
+  double execution_time_s = getExecutionTime(value.trajectory);
+
+  if (execution_time_s < best_seen_execution_time_)
+  {
+    if (reason != nullptr)
+    {
+      std::stringstream ss;
+      ss << "New trajectory execution_time_s `" << execution_time_s << "s` "
+         << "is better than best trajectory's execution_time_s `" << best_seen_execution_time_ << "s`";
+      *reason = ss.str();
+    }
+    return true;
+  }
+  else
+  {
+    if (reason != nullptr)
+    {
+      std::stringstream ss;
+      ss << "New trajectory execution_time `" << execution_time_s << "s` "
+         << "is worse than best trajectory's execution_time `" << best_seen_execution_time_ << "s`";
+      *reason = ss.str();
+    }
+    return false;
+  }
 }
 
 MoveItErrorCode BestSeenExecutionTimePolicy::appendInsertMetadata(Metadata& metadata,
@@ -328,16 +377,64 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> CartesianBestSeenExe
 
 bool CartesianBestSeenExecutionTimePolicy::shouldPruneMatchingEntry(
     const MoveGroupInterface& /*move_group*/, const GetCartesianPath::Request& /*key*/,
-    const GetCartesianPath::Response& value, const MessageWithMetadata<RobotTrajectory>::ConstPtr& matching_entry)
+    const GetCartesianPath::Response& value, const MessageWithMetadata<RobotTrajectory>::ConstPtr& matching_entry,
+    std::string* reason)
 {
-  return matching_entry->lookupDouble(EXECUTION_TIME) >= getExecutionTime(value.solution);
+  double matching_entry_execution_time_s = matching_entry->lookupDouble(EXECUTION_TIME);
+  double candidate_execution_time_s = getExecutionTime(value.solution);
+
+  if (matching_entry_execution_time_s >= candidate_execution_time_s)
+  {
+    if (reason != nullptr)
+    {
+      std::stringstream ss;
+      ss << "Matching trajectory execution_time_s `" << matching_entry_execution_time_s << "s` "
+         << "is worse than candidate trajectory's execution_time_s `" << candidate_execution_time_s << "s`";
+      *reason = ss.str();
+    }
+    return true;
+  }
+  else
+  {
+    if (reason != nullptr)
+    {
+      std::stringstream ss;
+      ss << "Matching trajectory execution_time_s `" << matching_entry_execution_time_s << "s` "
+         << "is better than candidate trajectory's execution_time_s `" << candidate_execution_time_s << "s`";
+      *reason = ss.str();
+    }
+    return false;
+  }
 }
 
 bool CartesianBestSeenExecutionTimePolicy::shouldInsert(const MoveGroupInterface& /*move_group*/,
                                                         const GetCartesianPath::Request& /*key*/,
-                                                        const GetCartesianPath::Response& value)
+                                                        const GetCartesianPath::Response& value, std::string* reason)
 {
-  return getExecutionTime(value.solution) < best_seen_execution_time_;
+  double execution_time_s = getExecutionTime(value.solution);
+
+  if (execution_time_s < best_seen_execution_time_)
+  {
+    if (reason != nullptr)
+    {
+      std::stringstream ss;
+      ss << "New cartesian trajectory execution_time_s `" << execution_time_s << "s` "
+         << "is better than best cartesian trajectory's execution_time_s `" << best_seen_execution_time_ << "s`";
+      *reason = ss.str();
+    }
+    return true;
+  }
+  else
+  {
+    if (reason != nullptr)
+    {
+      std::stringstream ss;
+      ss << "New cartesian trajectory execution_time `" << execution_time_s << "s` "
+         << "is worse than best cartesian trajectory's execution_time `" << best_seen_execution_time_ << "s`";
+      *reason = ss.str();
+    }
+    return false;
+  }
 }
 
 MoveItErrorCode CartesianBestSeenExecutionTimePolicy::appendInsertMetadata(Metadata& metadata,

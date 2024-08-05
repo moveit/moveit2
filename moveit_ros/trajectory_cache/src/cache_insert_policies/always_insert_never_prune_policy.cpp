@@ -29,6 +29,7 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/trajectory_cache/cache_insert_policies/always_insert_never_prune_policy.hpp>
@@ -167,15 +168,24 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> AlwaysInsertNeverPru
 
 bool AlwaysInsertNeverPrunePolicy::shouldPruneMatchingEntry(
     const MoveGroupInterface& /*move_group*/, const MotionPlanRequest& /*key*/,
-    const MoveGroupInterface::Plan& /*value*/, const MessageWithMetadata<RobotTrajectory>::ConstPtr& /*matching_entry*/)
+    const MoveGroupInterface::Plan& /*value*/, const MessageWithMetadata<RobotTrajectory>::ConstPtr& /*matching_entry*/,
+    std::string* reason)
 {
+  if (reason != nullptr)
+  {
+    *reason = "Never prune.";
+  }
   return false;  // Never prune.
 }
 
 bool AlwaysInsertNeverPrunePolicy::shouldInsert(const MoveGroupInterface& /*move_group*/,
                                                 const MotionPlanRequest& /*key*/,
-                                                const MoveGroupInterface::Plan& /*value*/)
+                                                const MoveGroupInterface::Plan& /*value*/, std::string* reason)
 {
+  if (reason != nullptr)
+  {
+    *reason = "Always insert.";
+  }
   return true;  // Always insert.
 }
 
@@ -311,15 +321,24 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> CartesianAlwaysInser
 bool CartesianAlwaysInsertNeverPrunePolicy::shouldPruneMatchingEntry(
     const MoveGroupInterface& /*move_group*/, const GetCartesianPath::Request& /*key*/,
     const GetCartesianPath::Response& /*value*/,
-    const MessageWithMetadata<RobotTrajectory>::ConstPtr& /*matching_entry*/)
+    const MessageWithMetadata<RobotTrajectory>::ConstPtr& /*matching_entry*/, std::string* reason)
 {
+  if (reason != nullptr)
+  {
+    *reason = "Never prune.";
+  }
   return false;  // Never prune.
 }
 
 bool CartesianAlwaysInsertNeverPrunePolicy::shouldInsert(const MoveGroupInterface& /*move_group*/,
                                                          const GetCartesianPath::Request& /*key*/,
-                                                         const GetCartesianPath::Response& /*value*/)
+                                                         const GetCartesianPath::Response& /*value*/,
+                                                         std::string* reason)
 {
+  if (reason != nullptr)
+  {
+    *reason = "Always insert.";
+  }
   return true;  // Always insert.
 }
 

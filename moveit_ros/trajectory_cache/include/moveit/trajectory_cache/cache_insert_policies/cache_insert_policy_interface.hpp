@@ -174,11 +174,14 @@ public:
    * @param[in] key. The object used to key the insertion candidate with.
    * @param[in] value. The object that the TrajectoryCache was passed to insert.
    * @param[in] matching_entry. The matched cache entry to be possibly pruned.
+   * @param[out] reason. The reason for the returned result.
    * @returns True if the cache entry should be pruned.
    */
-  virtual bool shouldPruneMatchingEntry(
-      const moveit::planning_interface::MoveGroupInterface& move_group, const KeyT& key, const ValueT& value,
-      const typename warehouse_ros::MessageWithMetadata<CacheEntryT>::ConstPtr& matching_entry) = 0;
+  virtual bool
+  shouldPruneMatchingEntry(const moveit::planning_interface::MoveGroupInterface& move_group, const KeyT& key,
+                           const ValueT& value,
+                           const typename warehouse_ros::MessageWithMetadata<CacheEntryT>::ConstPtr& matching_entry,
+                           std::string* reason) = 0;
 
   /** @brief Returns whether the insertion candidate should be inserted into the cache.
    *
@@ -188,10 +191,11 @@ public:
    * @param[in] move_group. The manipulator move group, used to get its state.
    * @param[in] key. The object used to key the insertion candidate with.
    * @param[in] value. The object that the TrajectoryCache was passed to insert.
+   * @param[out] reason. The reason for the returned result.
    * @returns True if the insertion candidate should be inserted into the cache.
    */
   virtual bool shouldInsert(const moveit::planning_interface::MoveGroupInterface& move_group, const KeyT& key,
-                            const ValueT& value) = 0;
+                            const ValueT& value, std::string* reason) = 0;
 
   /** @brief Appends the insert metadata with the features supported by the policy.
    *

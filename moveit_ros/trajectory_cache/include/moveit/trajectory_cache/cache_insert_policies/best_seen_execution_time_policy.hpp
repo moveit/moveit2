@@ -28,6 +28,7 @@
 #include <warehouse_ros/message_collection.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/trajectory_cache/cache_insert_policies/cache_insert_policy_interface.hpp>
@@ -115,11 +116,13 @@ public:
   bool shouldPruneMatchingEntry(
       const moveit::planning_interface::MoveGroupInterface& move_group, const moveit_msgs::msg::MotionPlanRequest& key,
       const moveit::planning_interface::MoveGroupInterface::Plan& value,
-      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matching_entry) override;
+      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matching_entry,
+      std::string* reason = nullptr) override;
 
   bool shouldInsert(const moveit::planning_interface::MoveGroupInterface& move_group,
                     const moveit_msgs::msg::MotionPlanRequest& key,
-                    const moveit::planning_interface::MoveGroupInterface::Plan& value) override;
+                    const moveit::planning_interface::MoveGroupInterface::Plan& value,
+                    std::string* reason = nullptr) override;
 
   moveit::core::MoveItErrorCode
   appendInsertMetadata(warehouse_ros::Metadata& metadata,
@@ -217,11 +220,12 @@ public:
   bool shouldPruneMatchingEntry(
       const moveit::planning_interface::MoveGroupInterface& move_group,
       const moveit_msgs::srv::GetCartesianPath::Request& key, const moveit_msgs::srv::GetCartesianPath::Response& value,
-      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matching_entry) override;
+      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matching_entry,
+      std::string* reason = nullptr) override;
 
   bool shouldInsert(const moveit::planning_interface::MoveGroupInterface& move_group,
                     const moveit_msgs::srv::GetCartesianPath::Request& key,
-                    const moveit_msgs::srv::GetCartesianPath::Response& value) override;
+                    const moveit_msgs::srv::GetCartesianPath::Response& value, std::string* reason = nullptr) override;
 
   moveit::core::MoveItErrorCode appendInsertMetadata(warehouse_ros::Metadata& metadata,
                                                      const moveit::planning_interface::MoveGroupInterface& move_group,

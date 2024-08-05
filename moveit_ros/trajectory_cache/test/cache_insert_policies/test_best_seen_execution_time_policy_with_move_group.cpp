@@ -23,6 +23,7 @@
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/trajectory_cache/cache_insert_policies/best_seen_execution_time_policy.hpp>
@@ -397,8 +398,8 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
   // We also test the predicates here.
   std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>> features =
       CartesianBestSeenExecutionTimePolicy::getSupportedFeatures(/*start_tolerance=*/0.025,
-                                                                  /*goal_tolerance=*/0.001,
-                                                                  /*min_fraction=*/0.0);
+                                                                 /*goal_tolerance=*/0.001,
+                                                                 /*min_fraction=*/0.0);
 
   for (const auto& msg_plan_pair : { std::make_pair(msg, plan), std::make_pair(another_msg, another_plan) })
   {
@@ -428,12 +429,26 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
       shorter_plan.solution.joint_trajectory.points.back().time_from_start.nanosec = 100;
 
       // Should prune matched plan if execution time is longer than candidate.
-      EXPECT_FALSE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, longer_plan, policy_fetch[i]));
-      EXPECT_TRUE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, shorter_plan, policy_fetch[i]));
+      std::string longer_prune_reason;
+      std::string shorter_prune_reason;
+
+      EXPECT_FALSE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, longer_plan, policy_fetch[i],
+                                                   &longer_prune_reason));
+      EXPECT_TRUE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, shorter_plan, policy_fetch[i],
+                                                  &shorter_prune_reason));
+
+      EXPECT_FALSE(longer_prune_reason.empty());
+      EXPECT_FALSE(shorter_prune_reason.empty());
 
       // Should insert candidate plan if execution time is best seen.
-      EXPECT_FALSE(policy.shouldInsert(*move_group_, msg_plan_pair.first, longer_plan));
-      EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, shorter_plan));
+      std::string longer_insert_reason;
+      std::string shorter_insert_reason;
+
+      EXPECT_FALSE(policy.shouldInsert(*move_group_, msg_plan_pair.first, longer_plan, &longer_insert_reason));
+      EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, shorter_plan, &shorter_insert_reason));
+
+      EXPECT_FALSE(longer_insert_reason.empty());
+      EXPECT_FALSE(shorter_insert_reason.empty());
     }
 
     policy.reset();
