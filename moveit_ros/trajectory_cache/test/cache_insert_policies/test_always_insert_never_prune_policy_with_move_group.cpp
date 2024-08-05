@@ -218,11 +218,12 @@ TEST_F(MoveGroupFixture, AlwaysInsertNeverPrunePolicyWorks)
       ASSERT_EQ(*feature_fetch[i], *policy_fetch[i]);
 
       // Policy is never prune.
-      EXPECT_FALSE(policy.prunePredicate(*move_group_, msg_plan_pair.first, msg_plan_pair.second, policy_fetch[i]));
+      EXPECT_FALSE(
+          policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, msg_plan_pair.second, policy_fetch[i]));
     }
 
     // Policy is always insert.
-    EXPECT_TRUE(policy.insertPredicate(*move_group_, msg_plan_pair.first, msg_plan_pair.second));
+    EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, msg_plan_pair.second));
 
     policy.reset();
   }
@@ -412,11 +413,12 @@ TEST_F(MoveGroupFixture, CartesianAlwaysInsertNeverPrunePolicyWorks)
       ASSERT_EQ(*feature_fetch[i], *policy_fetch[i]);
 
       // Policy is never prune.
-      EXPECT_FALSE(policy.prunePredicate(*move_group_, msg_plan_pair.first, msg_plan_pair.second, policy_fetch[i]));
+      EXPECT_FALSE(
+          policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, msg_plan_pair.second, policy_fetch[i]));
     }
 
     // Policy is always insert.
-    EXPECT_TRUE(policy.insertPredicate(*move_group_, msg_plan_pair.first, msg_plan_pair.second));
+    EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, msg_plan_pair.second));
 
     policy.reset();
   }

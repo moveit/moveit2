@@ -98,14 +98,14 @@ public:
                        const moveit::planning_interface::MoveGroupInterface::Plan& value,
                        double exact_match_precision) override;
 
-  bool prunePredicate(
+  bool shouldPruneMatchingEntry(
       const moveit::planning_interface::MoveGroupInterface& move_group, const moveit_msgs::msg::MotionPlanRequest& key,
       const moveit::planning_interface::MoveGroupInterface::Plan& value,
-      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matched_entry) override;
+      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matching_entry) override;
 
-  bool insertPredicate(const moveit::planning_interface::MoveGroupInterface& move_group,
-                       const moveit_msgs::msg::MotionPlanRequest& key,
-                       const moveit::planning_interface::MoveGroupInterface::Plan& value) override;
+  bool shouldInsert(const moveit::planning_interface::MoveGroupInterface& move_group,
+                    const moveit_msgs::msg::MotionPlanRequest& key,
+                    const moveit::planning_interface::MoveGroupInterface::Plan& value) override;
 
   moveit::core::MoveItErrorCode
   appendInsertMetadata(warehouse_ros::Metadata& metadata,
@@ -121,7 +121,7 @@ private:
 };
 
 // =================================================================================================
-// AlwaysInsertNeverPrunePolicy.
+// CartesianAlwaysInsertNeverPrunePolicy.
 // =================================================================================================
 // moveit_msgs::srv::GetCartesianPath::Request <=> moveit_msgs::srv::GetCartesianPath::Response
 
@@ -129,13 +129,15 @@ private:
  *
  * @brief A cache insertion policy that always decides to insert and never decides to prune for cartesian path requests.
  *
+ * Supported Metadata and Features
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  * Appends the following additional metadata, which can be used for querying and sorting:
  *   - fraction
  *   - execution_time_s
  *
  * NOTE:
- *   Planning time is not available. If you want to use it, add it as an additional MetadataOnly feature in the
- *   cache insert call.
+ *   Planning time is not available. If you want to use it, add it as an additional MetadataOnly
+ *   feature in the cache insert call.
  *
  * Compatible with the get cartesian path request features:
  *   - CartesianWorkspaceFeatures
@@ -151,7 +153,8 @@ private:
  *
  * Matches, Pruning, and Insertion
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * A matching cache entry is one that exactly matches on every one of the features above, and fraction.
+ * A matching cache entry is one that exactly matches on every one of the features above, and
+ * fraction.
  *
  * The sort order is ordered on execution_time_s in ascending order (so loweest execution time first).
  * This policy never indicates that pruning should happen, and always indicates that insertion should happen.
@@ -182,14 +185,14 @@ public:
                        const moveit_msgs::srv::GetCartesianPath::Response& value,
                        double exact_match_precision) override;
 
-  bool prunePredicate(
+  bool shouldPruneMatchingEntry(
       const moveit::planning_interface::MoveGroupInterface& move_group,
       const moveit_msgs::srv::GetCartesianPath::Request& key, const moveit_msgs::srv::GetCartesianPath::Response& value,
-      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matched_entry) override;
+      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matching_entry) override;
 
-  bool insertPredicate(const moveit::planning_interface::MoveGroupInterface& move_group,
-                       const moveit_msgs::srv::GetCartesianPath::Request& key,
-                       const moveit_msgs::srv::GetCartesianPath::Response& value) override;
+  bool shouldInsert(const moveit::planning_interface::MoveGroupInterface& move_group,
+                    const moveit_msgs::srv::GetCartesianPath::Request& key,
+                    const moveit_msgs::srv::GetCartesianPath::Response& value) override;
 
   moveit::core::MoveItErrorCode appendInsertMetadata(warehouse_ros::Metadata& metadata,
                                                      const moveit::planning_interface::MoveGroupInterface& move_group,
