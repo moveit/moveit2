@@ -105,10 +105,10 @@ MoveItErrorCode AlwaysInsertNeverPrunePolicy::checkCacheInsertInputs(const MoveG
                                                                      const MotionPlanRequest& key,
                                                                      const MoveGroupInterface::Plan& value)
 {
-  std::string workspace_frame_id = getWorkspaceFrameId(move_group, key.workspace_parameters);
+  std::string frame_id = getWorkspaceFrameId(move_group, key.workspace_parameters);
 
   // Check key.
-  if (workspace_frame_id.empty())
+  if (frame_id.empty())
   {
     return MoveItErrorCode(MoveItErrorCode::INVALID_MOTION_PLAN,
                            name_ + ": Skipping insert: Workspace frame ID cannot be empty.");
@@ -138,11 +138,11 @@ MoveItErrorCode AlwaysInsertNeverPrunePolicy::checkCacheInsertInputs(const MoveG
     return MoveItErrorCode(MoveItErrorCode::INVALID_MOTION_PLAN,
                            name_ + ": Skipping insert: Trajectory frame ID cannot be empty.");
   }
-  if (workspace_frame_id != value.trajectory.joint_trajectory.header.frame_id)
+  if (frame_id != value.trajectory.joint_trajectory.header.frame_id)
   {
     std::stringstream ss;
-    ss << "Skipping insert: Plan request frame (" << workspace_frame_id << ") does not match plan frame ("
-       << value.trajectory.joint_trajectory.header.frame_id << ").";
+    ss << "Skipping insert: Plan request frame `" << frame_id << "` does not match plan frame `"
+       << value.trajectory.joint_trajectory.header.frame_id << "`.";
     return MoveItErrorCode(MoveItErrorCode::INVALID_MOTION_PLAN, ss.str());
   }
 
@@ -165,16 +165,16 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> AlwaysInsertNeverPru
   return coll.queryList(query, /*metadata_only=*/true);
 }
 
-bool AlwaysInsertNeverPrunePolicy::prunePredicate(
+bool AlwaysInsertNeverPrunePolicy::shouldPruneMatchingEntry(
     const MoveGroupInterface& /*move_group*/, const MotionPlanRequest& /*key*/,
-    const MoveGroupInterface::Plan& /*value*/, const MessageWithMetadata<RobotTrajectory>::ConstPtr& /*matched_entry*/)
+    const MoveGroupInterface::Plan& /*value*/, const MessageWithMetadata<RobotTrajectory>::ConstPtr& /*matching_entry*/)
 {
   return false;  // Never prune.
 }
 
-bool AlwaysInsertNeverPrunePolicy::insertPredicate(const MoveGroupInterface& /*move_group*/,
-                                                   const MotionPlanRequest& /*key*/,
-                                                   const MoveGroupInterface::Plan& /*value*/)
+bool AlwaysInsertNeverPrunePolicy::shouldInsert(const MoveGroupInterface& /*move_group*/,
+                                                const MotionPlanRequest& /*key*/,
+                                                const MoveGroupInterface::Plan& /*value*/)
 {
   return true;  // Always insert.
 }
@@ -188,7 +188,7 @@ MoveItErrorCode AlwaysInsertNeverPrunePolicy::appendInsertMetadata(Metadata& met
   {
     if (MoveItErrorCode ret = feature->appendFeaturesAsInsertMetadata(metadata, key, move_group); !ret)
     {
-      return {};
+      return ret;
     }
   }
 
@@ -248,10 +248,10 @@ MoveItErrorCode CartesianAlwaysInsertNeverPrunePolicy::checkCacheInsertInputs(
     const MoveGroupInterface& move_group, const MessageCollection<RobotTrajectory>& /*coll*/,
     const GetCartesianPath::Request& key, const GetCartesianPath::Response& value)
 {
-  std::string workspace_frame_id = getCartesianPathRequestFrameId(move_group, key);
+  std::string frame_id = getCartesianPathRequestFrameId(move_group, key);
 
   // Check key.
-  if (workspace_frame_id.empty())
+  if (frame_id.empty())
   {
     return MoveItErrorCode(MoveItErrorCode::INVALID_MOTION_PLAN,
                            name_ + ": Skipping insert: Workspace frame ID cannot be empty.");
@@ -281,11 +281,11 @@ MoveItErrorCode CartesianAlwaysInsertNeverPrunePolicy::checkCacheInsertInputs(
     return MoveItErrorCode(MoveItErrorCode::INVALID_MOTION_PLAN,
                            name_ + ": Skipping insert: Trajectory frame ID cannot be empty.");
   }
-  if (workspace_frame_id != value.solution.joint_trajectory.header.frame_id)
+  if (frame_id != value.solution.joint_trajectory.header.frame_id)
   {
     std::stringstream ss;
-    ss << "Skipping insert: Plan request frame (" << workspace_frame_id << ") does not match plan frame ("
-       << value.solution.joint_trajectory.header.frame_id << ").";
+    ss << "Skipping insert: Plan request frame `" << frame_id << "` does not match plan frame `"
+       << value.solution.joint_trajectory.header.frame_id << "`.";
     return MoveItErrorCode(MoveItErrorCode::INVALID_MOTION_PLAN, ss.str());
   }
 
@@ -308,17 +308,17 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> CartesianAlwaysInser
   return coll.queryList(query, /*metadata_only=*/true);
 }
 
-bool CartesianAlwaysInsertNeverPrunePolicy::prunePredicate(
+bool CartesianAlwaysInsertNeverPrunePolicy::shouldPruneMatchingEntry(
     const MoveGroupInterface& /*move_group*/, const GetCartesianPath::Request& /*key*/,
     const GetCartesianPath::Response& /*value*/,
-    const MessageWithMetadata<RobotTrajectory>::ConstPtr& /*matched_entry*/)
+    const MessageWithMetadata<RobotTrajectory>::ConstPtr& /*matching_entry*/)
 {
   return false;  // Never prune.
 }
 
-bool CartesianAlwaysInsertNeverPrunePolicy::insertPredicate(const MoveGroupInterface& /*move_group*/,
-                                                            const GetCartesianPath::Request& /*key*/,
-                                                            const GetCartesianPath::Response& /*value*/)
+bool CartesianAlwaysInsertNeverPrunePolicy::shouldInsert(const MoveGroupInterface& /*move_group*/,
+                                                         const GetCartesianPath::Request& /*key*/,
+                                                         const GetCartesianPath::Response& /*value*/)
 {
   return true;  // Always insert.
 }
@@ -332,7 +332,7 @@ MoveItErrorCode CartesianAlwaysInsertNeverPrunePolicy::appendInsertMetadata(Meta
   {
     if (MoveItErrorCode ret = feature->appendFeaturesAsInsertMetadata(metadata, key, move_group); !ret)
     {
-      return {};
+      return ret;
     }
   }
 

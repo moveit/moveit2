@@ -59,7 +59,8 @@ ament_target_dependencies(moveit_ros_trajectory_cache_features_lib
 
 # Cache insert policies library
 add_library(moveit_ros_trajectory_cache_cache_insert_policies_lib
-            src/cache_insert_policies/always_insert_never_prune_policy.cpp)
+            src/cache_insert_policies/always_insert_never_prune_policy.cpp
+            src/cache_insert_policies/best_seen_execution_time_policy.cpp)
 generate_export_header(moveit_ros_trajectory_cache_cache_insert_policies_lib)
 target_link_libraries(moveit_ros_trajectory_cache_cache_insert_policies_lib
                       moveit_ros_trajectory_cache_utils_lib)

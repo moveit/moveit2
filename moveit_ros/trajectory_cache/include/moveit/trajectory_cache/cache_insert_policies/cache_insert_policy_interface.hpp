@@ -88,7 +88,7 @@ namespace trajectory_cache
  * ^^^^^^^^^^^^^^^^^^^^^
  * Pruning is a two step process:
  *   1. Fetch all "matching" cache entries, as defined by the policy
- *   2. From the fetched "matching" entries, subject each to the `prunePredicate` method, again
+ *   2. From the fetched "matching" entries, subject each to the `shouldPruneMatchingEntry` method, again
  *      defined by the policy.
  *
  * This allows a user to define a policy to match and prune on any arbitrary properties of
@@ -114,9 +114,9 @@ namespace trajectory_cache
  * The TrajectoryCache will call the following interface methods in the following order:
  *   1. sanitize, once
  *   2. fetchMatchingEntries, once
- *   3. prunePredicate, once per fetched entry from fetchMatchingEntries
- *   4. insertPredicate, once
- *   5. appendInsertMetadata, once, if insertPredicate returns true
+ *   3. shouldPruneMatchingEntry, once per fetched entry from fetchMatchingEntries
+ *   4. shouldInsert, once
+ *   5. appendInsertMetadata, once, if shouldInsert returns true
  *   6. reset, once, at the end.
  */
 template <typename KeyT, typename ValueT, typename CacheEntryT>
@@ -148,10 +148,10 @@ public:
    * message data.
    *
    * The policy should also make the decision about how to sort them.
-   * The order in which cache entries are presented to the prunePredicate will be the order of cache
+   * The order in which cache entries are presented to the shouldPruneMatchingEntry will be the order of cache
    * entries returned by this function.
    *
-   * @see CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT>#prunePredicate
+   * @see CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT>#shouldPruneMatchingEntry
    *
    * @param[in] move_group. The manipulator move group, used to get its state.
    * @param[in] coll. The cache database to fetch messages from.
@@ -173,12 +173,12 @@ public:
    * @param[in] move_group. The manipulator move group, used to get its state.
    * @param[in] key. The object used to key the insertion candidate with.
    * @param[in] value. The object that the TrajectoryCache was passed to insert.
-   * @param[in] matched_entry. The matched cache entry to be possibly pruned.
+   * @param[in] matching_entry. The matched cache entry to be possibly pruned.
    * @returns True if the cache entry should be pruned.
    */
-  virtual bool
-  prunePredicate(const moveit::planning_interface::MoveGroupInterface& move_group, const KeyT& key, const ValueT& value,
-                 const typename warehouse_ros::MessageWithMetadata<CacheEntryT>::ConstPtr& matched_entry) = 0;
+  virtual bool shouldPruneMatchingEntry(
+      const moveit::planning_interface::MoveGroupInterface& move_group, const KeyT& key, const ValueT& value,
+      const typename warehouse_ros::MessageWithMetadata<CacheEntryT>::ConstPtr& matching_entry) = 0;
 
   /** @brief Returns whether the insertion candidate should be inserted into the cache.
    *
@@ -190,8 +190,8 @@ public:
    * @param[in] value. The object that the TrajectoryCache was passed to insert.
    * @returns True if the insertion candidate should be inserted into the cache.
    */
-  virtual bool insertPredicate(const moveit::planning_interface::MoveGroupInterface& move_group, const KeyT& key,
-                               const ValueT& value) = 0;
+  virtual bool shouldInsert(const moveit::planning_interface::MoveGroupInterface& move_group, const KeyT& key,
+                            const ValueT& value) = 0;
 
   /** @brief Appends the insert metadata with the features supported by the policy.
    *
