@@ -47,6 +47,7 @@ using ::moveit_msgs::msg::RobotTrajectory;
 using ::moveit_msgs::srv::GetCartesianPath;
 
 using ::moveit_ros::trajectory_cache::BestSeenExecutionTimePolicy;
+using ::moveit_ros::trajectory_cache::CartesianBestSeenExecutionTimePolicy;
 using ::moveit_ros::trajectory_cache::constructGetCartesianPathRequest;
 using ::moveit_ros::trajectory_cache::FeaturesInterface;
 
@@ -222,6 +223,209 @@ TEST_F(MoveGroupFixture, BestSeenExecutionTimePolicyWorks)
       auto shorter_plan = msg_plan_pair.second;
       shorter_plan.trajectory.joint_trajectory.points.back().time_from_start.sec = 0;
       shorter_plan.trajectory.joint_trajectory.points.back().time_from_start.nanosec = 100;
+
+      // Should prune matched plan if execution time is longer than candidate.
+      EXPECT_FALSE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, longer_plan, policy_fetch[i]));
+      EXPECT_TRUE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, shorter_plan, policy_fetch[i]));
+
+      // Should insert candidate plan if execution time is best seen.
+      EXPECT_FALSE(policy.shouldInsert(*move_group_, msg_plan_pair.first, longer_plan));
+      EXPECT_TRUE(policy.shouldInsert(*move_group_, msg_plan_pair.first, shorter_plan));
+    }
+
+    policy.reset();
+  }
+}
+
+// =================================================================================================
+// CartesianBestSeenExecutionTimePolicy.
+// =================================================================================================
+
+TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyChecks)
+{
+  // Setup.
+  CartesianBestSeenExecutionTimePolicy policy;
+
+  MessageCollection<RobotTrajectory> coll = db_->openCollection<RobotTrajectory>("test_db", policy.getName());
+
+  GetCartesianPath::Request valid_msg;
+  GetCartesianPath::Response valid_plan;
+  valid_plan.fraction = -1;
+
+  do
+  {
+    std::vector<geometry_msgs::msg::Pose> waypoints;
+    waypoints.push_back(move_group_->getCurrentPose().pose);
+    waypoints.push_back(move_group_->getRandomPose().pose);
+
+    valid_msg =
+        constructGetCartesianPathRequest(*move_group_, std::move(waypoints), /*max_step=*/0.01, /*jump_threshold=*/0.0);
+    valid_plan.fraction = move_group_->computeCartesianPath(valid_msg.waypoints, valid_msg.max_step,
+                                                            valid_msg.jump_threshold, valid_plan.solution);
+  } while (valid_plan.fraction <= 0);  // Sometimes the plan fails with the random pose.
+
+  // Valid case, as control.
+  {
+    MoveItErrorCode ret = policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, valid_plan);
+    ASSERT_TRUE(ret) << ret.message;
+  }
+
+  // We can't test workspace ID frame empty.
+  // But it technically should be unreachable as long as the robot description is correct.
+
+  // No waypoints.
+  {
+    GetCartesianPath::Request msg = valid_msg;
+    GetCartesianPath::Response plan = valid_plan;
+    msg.waypoints.clear();
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+  }
+
+  // Empty joint trajectory points.
+  {
+    GetCartesianPath::Request msg = valid_msg;
+    GetCartesianPath::Response plan = valid_plan;
+    plan.solution.joint_trajectory.points.clear();
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+  }
+
+  // Empty joint trajectory names.
+  {
+    GetCartesianPath::Request msg = valid_msg;
+    GetCartesianPath::Response plan = valid_plan;
+    plan.solution.joint_trajectory.joint_names.clear();
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+  }
+
+  // Multi-DOF trajectory plan.
+  {
+    GetCartesianPath::Request msg = valid_msg;
+    GetCartesianPath::Response plan = valid_plan;
+    plan.solution.multi_dof_joint_trajectory.points.emplace_back();
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+  }
+
+  // Trajectory frame ID empty.
+  {
+    GetCartesianPath::Request msg = valid_msg;
+    GetCartesianPath::Response plan = valid_plan;
+    plan.solution.joint_trajectory.header.frame_id = "";
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+  }
+
+  // Mismatched frames.
+  {
+    GetCartesianPath::Request msg = valid_msg;
+    GetCartesianPath::Response plan = valid_plan;
+    msg.header.frame_id = "panda_link0";
+    plan.solution.joint_trajectory.header.frame_id = "clearly_a_different_frame";
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+  }
+}
+
+TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
+{
+  CartesianBestSeenExecutionTimePolicy policy;
+
+  MessageCollection<RobotTrajectory> coll = db_->openCollection<RobotTrajectory>("test_db", policy.getName());
+  ASSERT_EQ(coll.count(), 0);
+
+  // Setup. Get valid entries to insert.
+  GetCartesianPath::Request msg;
+  GetCartesianPath::Response plan;
+  plan.fraction = -1;
+
+  GetCartesianPath::Request another_msg;
+  GetCartesianPath::Response another_plan;
+  another_plan.fraction = -1;
+
+  do
+  {
+    std::vector<geometry_msgs::msg::Pose> waypoints;
+    waypoints.push_back(move_group_->getCurrentPose().pose);
+    waypoints.push_back(move_group_->getRandomPose().pose);
+
+    msg =
+        constructGetCartesianPathRequest(*move_group_, std::move(waypoints), /*max_step=*/0.01, /*jump_threshold=*/0.0);
+    plan.fraction = move_group_->computeCartesianPath(msg.waypoints, msg.max_step, msg.jump_threshold, plan.solution);
+  } while (plan.fraction <= -1);  // Sometimes the plan fails with the random pose.
+
+  do
+  {
+    std::vector<geometry_msgs::msg::Pose> waypoints;
+    waypoints.push_back(move_group_->getCurrentPose().pose);
+    waypoints.push_back(move_group_->getRandomPose().pose);
+
+    another_msg =
+        constructGetCartesianPathRequest(*move_group_, std::move(waypoints), /*max_step=*/0.01, /*jump_threshold=*/0.0);
+    another_plan.fraction = move_group_->computeCartesianPath(another_msg.waypoints, another_msg.max_step,
+                                                              another_msg.jump_threshold, another_plan.solution);
+  } while (another_plan.fraction <= -1);  // Sometimes the plan fails with the random pose.
+
+  // Ensure that the entries are valid.
+  {
+    MoveItErrorCode ret = policy.checkCacheInsertInputs(*move_group_, coll, msg, plan);
+    ASSERT_TRUE(ret) << ret.message;
+  }
+  {
+    MoveItErrorCode ret = policy.checkCacheInsertInputs(*move_group_, coll, another_msg, another_plan);
+    ASSERT_TRUE(ret) << ret.message;
+  }
+
+  // Core test. ====================================================================================
+  // NOTE: Be mindful that the policy is stateful.
+
+  // Insert messages and check if policy-specific additional metadata are added.
+  size_t count = 0;
+  for (const auto& msg_plan_pair : { std::make_pair(msg, plan), std::make_pair(another_msg, another_plan) })
+  {
+    Metadata::Ptr metadata = coll.createMetadata();
+    EXPECT_TRUE(policy.appendInsertMetadata(*metadata, *move_group_, msg_plan_pair.first, msg_plan_pair.second));
+    EXPECT_TRUE(metadata->lookupField("execution_time_s"));
+    EXPECT_TRUE(metadata->lookupField("fraction"));
+
+    // We add two to test the prune predicate, as appropriate.
+    coll.insert(msg_plan_pair.second.solution, metadata);
+    coll.insert(msg_plan_pair.second.solution, metadata);
+    count += 2;
+    ASSERT_EQ(coll.count(), count);
+  }
+
+  // Fetch with features from getSupportedFeatures and fetchMatchingEntries.
+  // In this case the results should also match with fetchMatchingEntries.
+  //
+  // We also test the predicates here.
+  std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>> features =
+      CartesianBestSeenExecutionTimePolicy::getSupportedFeatures(/*start_tolerance=*/0.025,
+                                                                  /*goal_tolerance=*/0.001,
+                                                                  /*min_fraction=*/0.0);
+
+  for (const auto& msg_plan_pair : { std::make_pair(msg, plan), std::make_pair(another_msg, another_plan) })
+  {
+    Query::Ptr query = coll.createQuery();
+    for (const auto& feature : features)
+    {
+      ASSERT_TRUE(feature->appendFeaturesAsExactFetchQuery(*query, msg_plan_pair.first, *move_group_,
+                                                           /*exact_match_precision=*/0.0001));
+    }
+
+    std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> feature_fetch =
+        coll.queryList(query, /*metadata_only=*/true);
+    std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> policy_fetch = policy.fetchMatchingEntries(
+        *move_group_, coll, msg_plan_pair.first, msg_plan_pair.second, /*exact_match_precision=*/0.0001);
+
+    ASSERT_EQ(feature_fetch.size(), 2);
+    ASSERT_EQ(policy_fetch.size(), 2);
+    for (size_t i = 0; i < feature_fetch.size(); ++i)
+    {
+      ASSERT_EQ(*feature_fetch[i], *policy_fetch[i]);
+
+      auto longer_plan = msg_plan_pair.second;
+      longer_plan.solution.joint_trajectory.points.back().time_from_start.sec *= 10;
+
+      auto shorter_plan = msg_plan_pair.second;
+      shorter_plan.solution.joint_trajectory.points.back().time_from_start.sec = 0;
+      shorter_plan.solution.joint_trajectory.points.back().time_from_start.nanosec = 100;
 
       // Should prune matched plan if execution time is longer than candidate.
       EXPECT_FALSE(policy.shouldPruneMatchingEntry(*move_group_, msg_plan_pair.first, longer_plan, policy_fetch[i]));
