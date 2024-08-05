@@ -24,8 +24,11 @@ def generate_test_description():
         )
         .to_moveit_configs()
     )
+    moveit_config_dict = moveit_config.to_dict()
+    moveit_config_dict['default_planning_scene'] = os.path.join(get_package_share_directory('moveit_ros_tests'), 'data',
+                                                                'scene.txt')
 
-    return generate_move_group_test_description(moveit_config.to_dict())
+    return generate_move_group_test_description()
 
 
 class TestGTestWaitForCompletion(unittest.TestCase):

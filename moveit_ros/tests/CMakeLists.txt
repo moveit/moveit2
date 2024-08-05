@@ -17,3 +17,5 @@ if(BUILD_TESTING)
   add_ros_test(launch/move_group_api.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()
+
+install(DIRECTORY data DESTINATION share/${PROJECT_NAME})
