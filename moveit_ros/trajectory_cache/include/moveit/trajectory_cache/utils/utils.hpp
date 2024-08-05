@@ -55,6 +55,11 @@ std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInter
 std::string getCartesianPathRequestFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
                                            const moveit_msgs::srv::GetCartesianPath::Request& path_request);
 
+// Execution Time. =================================================================================
+
+/** @brief Returns the execution time of the trajectory in double seconds. */
+double getExecutionTime(const moveit_msgs::msg::RobotTrajectory& trajectory);
+
 // Request Construction. ===========================================================================
 
 /**
