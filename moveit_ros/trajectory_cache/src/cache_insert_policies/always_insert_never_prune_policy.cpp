@@ -193,8 +193,7 @@ MoveItErrorCode AlwaysInsertNeverPrunePolicy::appendInsertMetadata(Metadata& met
   }
 
   // Append ValueT metadata.
-  metadata.append(EXECUTION_TIME,
-                  rclcpp::Duration(value.trajectory.joint_trajectory.points.back().time_from_start).seconds());
+  metadata.append(EXECUTION_TIME, getExecutionTime(value.trajectory));
   metadata.append(PLANNING_TIME, value.planning_time);
 
   return MoveItErrorCode::SUCCESS;
@@ -338,8 +337,7 @@ MoveItErrorCode CartesianAlwaysInsertNeverPrunePolicy::appendInsertMetadata(Meta
   }
 
   // Append ValueT metadata.
-  metadata.append(EXECUTION_TIME,
-                  rclcpp::Duration(value.solution.joint_trajectory.points.back().time_from_start).seconds());
+  metadata.append(EXECUTION_TIME, getExecutionTime(value.solution));
   metadata.append(FRACTION, value.fraction);
 
   return MoveItErrorCode::SUCCESS;

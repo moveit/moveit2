@@ -82,6 +82,12 @@ std::string getCartesianPathRequestFrameId(const MoveGroupInterface& move_group,
   }
 }
 
+// Execution Time. =================================================================================
+
+double getExecutionTime(const moveit_msgs::msg::RobotTrajectory& trajectory) {
+  return rclcpp::Duration(trajectory.joint_trajectory.points.back().time_from_start).seconds();
+}
+
 // Request Construction. ===========================================================================
 
 GetCartesianPath::Request constructGetCartesianPathRequest(MoveGroupInterface& move_group,

@@ -60,6 +60,15 @@ TEST_F(WarehouseFixture, QueryAppendCenterWithToleranceWorks)
   EXPECT_EQ(coll.queryList(related_query_in_range).size(), 1);
 }
 
+TEST(TestUtils, GetExecutionTimeWorks) {
+  moveit_msgs::msg::RobotTrajectory trajectory;
+  trajectory.joint_trajectory.points.resize(2);
+  trajectory.joint_trajectory.points[0].time_from_start = rclcpp::Duration::from_seconds(1.0);
+  trajectory.joint_trajectory.points[1].time_from_start = rclcpp::Duration::from_seconds(2.0);
+
+  EXPECT_EQ(moveit_ros::trajectory_cache::getExecutionTime(trajectory), 2.0);
+}
+
 TEST(TestUtils, ConstraintSortingWorks)
 {
   // Joint constraints.
