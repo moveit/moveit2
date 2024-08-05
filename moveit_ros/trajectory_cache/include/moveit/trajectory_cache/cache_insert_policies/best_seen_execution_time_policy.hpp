@@ -13,8 +13,8 @@
 // limitations under the License.
 
 /** @file
- * @brief A cache insertion policy that only decides to insert if the motion plan is the one with the shortest execution
- * time seen so far amongst exactly matching MotionPlanRequests.
+ * @brief A cache insertion policy that only decides to insert if the motion plan is the one with
+ * the shortest execution time seen so far amongst exactly matching MotionPlanRequests.
  *
  * @see CacheInsertPolicyInterface<KeyT, ValueT, CacheEntryT>
  *
@@ -39,13 +39,14 @@ namespace trajectory_cache
 {
 
 // =================================================================================================
-// moveit_msgs::msg::MotionPlanRequest <=> moveit::planning_interface::MoveGroupInterface::Plan
+// BestSeenExecutionTimePolicy.
 // =================================================================================================
+// moveit_msgs::msg::MotionPlanRequest <=> moveit::planning_interface::MoveGroupInterface::Plan
 
 /** @class BestSeenExecutionTimePolicy
  *
- * @brief A cache insertion policy that only decides to insert if the motion plan is the one with the shortest execution
- * time seen so far amongst exactly matching MotionPlanRequests.
+ * @brief A cache insertion policy that only decides to insert if the motion plan is the one with
+ * the shortest execution time seen so far amongst exactly matching MotionPlanRequests.
  *
  * Supported Metadata and Features
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -66,20 +67,21 @@ namespace trajectory_cache
  *
  * Matches and Pruning
  * ^^^^^^^^^^^^^^^^^^^
- * A matching cache entry is one that has a MotionPlanRequest that exactly matches on every one of the features above.
+ * A matching cache entry is one that has a MotionPlanRequest that exactly matches on every one of
+ * the features above.
  *
  * The sort order is ordered on execution_time_s in ascending order (so loweest execution time first).
  *
- * This policy indicates that pruning should happen if there are any exactly matching plans that are worse than the
- * insertion candidate.
+ * This policy indicates that pruning should happen if there are any exactly matching plans that are
+ * worse than the insertion candidate.
  *
- * REMINDER: The TrajectoryCache still decides to honor the prune indication or not, based off the parameters passed to
- * the insert call.
+ * REMINDER: The TrajectoryCache still decides to honor the prune indication or not, based off the
+ * parameters passed to the insert call.
  *
  * Insertion
  * ^^^^^^^^^
- * This policy indicates that insertion should happen if the candidate plan is the best seen in terms of shortest
- * execution time than other plans with exactly matching MotionPlanRequest requests.
+ * This policy indicates that insertion should happen if the candidate plan is the best seen in
+ * terms of shortest execution time than other plans with exactly matching MotionPlanRequest requests.
  *
  * This policy aggregates state in the fetchMatchingEntries call to facilitate this.
  */
@@ -130,6 +132,108 @@ public:
 private:
   const std::string name_;
   std::vector<std::unique_ptr<FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>>> exact_matching_supported_features_;
+
+  double best_seen_execution_time_;
+};
+
+// =================================================================================================
+// CartesianBestSeenExecutionTimePolicy.
+// =================================================================================================
+// moveit_msgs::srv::GetCartesianPath::Request <=> moveit_msgs::srv::GetCartesianPath::Response
+
+/** @class CartesianBestSeenExecutionTimePolicy
+ *
+ * @brief A cache insertion policy that only decides to insert if the motion plan is the one with
+ * the shortest execution time seen so far amongst exactly matching GetCartesianPath requests.
+ *
+ * Supported Metadata and Features
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ * Appends the following additional metadata, which can be used for querying and sorting:
+ *   - fraction
+ *   - execution_time_s
+ *
+ * NOTE:
+ *   Planning time is not available. If you want to use it, add it as an additional MetadataOnly
+ *   feature in the cache insert call.
+ *
+ * Compatible with the get cartesian path request features:
+ *   - CartesianWorkspaceFeatures
+ *   - CartesianStartStateJointStateFeatures
+ *   - CartesianMaxSpeedAndAccelerationFeatures
+ *   - CartesianMaxStepAndJumpThresholdFeatures
+ *   - CartesianWaypointsFeatures
+ *   - CartesianPathConstraintsFeatures
+ *
+ * @see get_cartesian_path_request_features.hpp
+ * @see constant_features.hpp
+ * @see FeaturesInterface<FeatureSourceT>
+ *
+ * Matches and Pruning
+ * ^^^^^^^^^^^^^^^^^^^
+ * A matching cache entry is one that has a GetCartesianPath request that exactly matches on every
+ * one of the features above.
+ *
+ * The sort order is ordered on execution_time_s in ascending order (so loweest execution time first).
+ *
+ * This policy indicates that pruning should happen if there are any exactly matching plans that are
+ * worse than the insertion candidate.
+ *
+ * REMINDER: The TrajectoryCache still decides to honor the prune indication or not, based off the
+ * parameters passed to the insert call.
+ *
+ * Insertion
+ * ^^^^^^^^^
+ * This policy indicates that insertion should happen if the candidate plan is the best seen in
+ * terms of shortest execution time than other plans with exactly matching GetCartesianPath requests.
+ *
+ * This policy aggregates state in the fetchMatchingEntries call to facilitate this.
+ */
+class CartesianBestSeenExecutionTimePolicy final
+  : public CacheInsertPolicyInterface<moveit_msgs::srv::GetCartesianPath::Request,
+                                      moveit_msgs::srv::GetCartesianPath::Response, moveit_msgs::msg::RobotTrajectory>
+{
+public:
+  /** @brief Configures and returns a vector of feature extractors that can be used with this policy. */
+  static std::vector<std::unique_ptr<FeaturesInterface<moveit_msgs::srv::GetCartesianPath::Request>>>
+  getSupportedFeatures(double start_tolerance, double goal_tolerance, double min_fraction);
+
+  CartesianBestSeenExecutionTimePolicy();
+
+  std::string getName() const override;
+
+  moveit::core::MoveItErrorCode
+  checkCacheInsertInputs(const moveit::planning_interface::MoveGroupInterface& move_group,
+                         const warehouse_ros::MessageCollection<moveit_msgs::msg::RobotTrajectory>& coll,
+                         const moveit_msgs::srv::GetCartesianPath::Request& key,
+                         const moveit_msgs::srv::GetCartesianPath::Response& value) override;
+
+  std::vector<warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr>
+  fetchMatchingEntries(const moveit::planning_interface::MoveGroupInterface& move_group,
+                       const warehouse_ros::MessageCollection<moveit_msgs::msg::RobotTrajectory>& coll,
+                       const moveit_msgs::srv::GetCartesianPath::Request& key,
+                       const moveit_msgs::srv::GetCartesianPath::Response& value,
+                       double exact_match_precision) override;
+
+  bool shouldPruneMatchingEntry(
+      const moveit::planning_interface::MoveGroupInterface& move_group,
+      const moveit_msgs::srv::GetCartesianPath::Request& key, const moveit_msgs::srv::GetCartesianPath::Response& value,
+      const warehouse_ros::MessageWithMetadata<moveit_msgs::msg::RobotTrajectory>::ConstPtr& matching_entry) override;
+
+  bool shouldInsert(const moveit::planning_interface::MoveGroupInterface& move_group,
+                    const moveit_msgs::srv::GetCartesianPath::Request& key,
+                    const moveit_msgs::srv::GetCartesianPath::Response& value) override;
+
+  moveit::core::MoveItErrorCode appendInsertMetadata(warehouse_ros::Metadata& metadata,
+                                                     const moveit::planning_interface::MoveGroupInterface& move_group,
+                                                     const moveit_msgs::srv::GetCartesianPath::Request& key,
+                                                     const moveit_msgs::srv::GetCartesianPath::Response& value) override;
+
+  void reset() override;
+
+private:
+  const std::string name_;
+  std::vector<std::unique_ptr<FeaturesInterface<moveit_msgs::srv::GetCartesianPath::Request>>>
+      exact_matching_supported_features_;
 
   double best_seen_execution_time_;
 };
