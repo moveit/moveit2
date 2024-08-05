@@ -117,6 +117,7 @@ public:
 
 private:
   const std::string name_;
+  std::vector<std::unique_ptr<FeaturesInterface<moveit_msgs::msg::MotionPlanRequest>>> exact_matching_supported_features_;
 };
 
 // =================================================================================================
@@ -199,6 +200,8 @@ public:
 
 private:
   const std::string name_;
+  std::vector<std::unique_ptr<FeaturesInterface<moveit_msgs::srv::GetCartesianPath::Request>>>
+      exact_matching_supported_features_;
 };
 
 }  // namespace trajectory_cache

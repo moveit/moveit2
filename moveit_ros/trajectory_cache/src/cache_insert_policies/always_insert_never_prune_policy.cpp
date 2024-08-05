@@ -72,6 +72,9 @@ static const std::string PLANNING_TIME = "planning_time_s";
 
 AlwaysInsertNeverPrunePolicy::AlwaysInsertNeverPrunePolicy() : name_("AlwaysInsertNeverPrunePolicy")
 {
+  exact_matching_supported_features_ =
+      std::move(AlwaysInsertNeverPrunePolicy::getSupportedFeatures(/*start_tolerance=*/0.0,
+                                                                   /*goal_tolerance=*/0.0));
 }
 
 std::vector<std::unique_ptr<FeaturesInterface<MotionPlanRequest>>>
@@ -151,50 +154,14 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> AlwaysInsertNeverPru
     const MoveGroupInterface::Plan& /*value*/, double exact_match_precision)
 {
   Query::Ptr query = coll.createQuery();
-
-  // We avoid the heap allocation from getSupportedFeatures() for performance reasons.
-  // Furthermore, we set match_precision to zero because we want "exact" matches.
-
-  // Start.
-  if (MoveItErrorCode ret =
-          WorkspaceFeatures().appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
+  for (const auto& feature : exact_matching_supported_features_)
   {
-    return {};
-  };
-  if (MoveItErrorCode ret = StartStateJointStateFeatures(/*match_precision=*/0.0)
-                                .appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  };
-
-  // Goal.
-  if (MoveItErrorCode ret = MaxSpeedAndAccelerationFeatures().appendFeaturesAsExactFetchQuery(*query, key, move_group,
-                                                                                              exact_match_precision);
-      !ret)
-  {
-    return {};
-  };
-  if (MoveItErrorCode ret = GoalConstraintsFeatures(/*match_precision=*/0.0)
-                                .appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  };
-  if (MoveItErrorCode ret = PathConstraintsFeatures(/*match_precision=*/0.0)
-                                .appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  };
-  if (MoveItErrorCode ret = TrajectoryConstraintsFeatures(/*match_precision=*/0.0)
-                                .appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  };
-
+    if (MoveItErrorCode ret = feature->appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
+        !ret)
+    {
+      return {};
+    }
+  }
   return coll.queryList(query, /*metadata_only=*/true);
 }
 
@@ -217,44 +184,12 @@ MoveItErrorCode AlwaysInsertNeverPrunePolicy::appendInsertMetadata(Metadata& met
                                                                    const MotionPlanRequest& key,
                                                                    const MoveGroupInterface::Plan& value)
 {
-  // Extract and append features.
-  // We avoid the heap allocation from getSupportedFeatures() for performance reasons.
-
-  // Start features.
-  if (MoveItErrorCode ret = WorkspaceFeatures().appendFeaturesAsInsertMetadata(metadata, key, move_group); !ret)
+  for (const auto& feature : exact_matching_supported_features_)
   {
-    return ret;
-  }
-  if (MoveItErrorCode ret =
-          StartStateJointStateFeatures(/*match_tolerance=*/0).appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
-  }
-
-  // Goal features.
-  if (MoveItErrorCode ret = MaxSpeedAndAccelerationFeatures().appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
-  }
-  if (MoveItErrorCode ret =
-          GoalConstraintsFeatures(/*match_tolerance=*/0).appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
-  }
-  if (MoveItErrorCode ret =
-          PathConstraintsFeatures(/*match_tolerance=*/0).appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
-  }
-  if (MoveItErrorCode ret =
-          TrajectoryConstraintsFeatures(/*match_tolerance=*/0).appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
+    if (MoveItErrorCode ret = feature->appendFeaturesAsInsertMetadata(metadata, key, move_group); !ret)
+    {
+      return {};
+    }
   }
 
   // Append ValueT metadata.
@@ -278,6 +213,9 @@ void AlwaysInsertNeverPrunePolicy::reset()
 CartesianAlwaysInsertNeverPrunePolicy::CartesianAlwaysInsertNeverPrunePolicy()
   : name_("CartesianAlwaysInsertNeverPrunePolicy")
 {
+  exact_matching_supported_features_ = std::move(
+      CartesianAlwaysInsertNeverPrunePolicy::getSupportedFeatures(/*start_tolerance=*/0.0,
+                                                                  /*goal_tolerance=*/0.0, /*min_fraction=*/0.0));
 }
 
 std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>>
@@ -360,50 +298,14 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> CartesianAlwaysInser
     const GetCartesianPath::Request& key, const GetCartesianPath::Response& /*value*/, double exact_match_precision)
 {
   Query::Ptr query = coll.createQuery();
-
-  // We avoid the heap allocation from getSupportedFeatures() for performance reasons.
-  // Furthermore, we set match_precision to zero because we want "exact" matches.
-
-  // Start.
-  if (MoveItErrorCode ret =
-          CartesianWorkspaceFeatures().appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
+  for (const auto& feature : exact_matching_supported_features_)
   {
-    return {};
+    if (MoveItErrorCode ret = feature->appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
+        !ret)
+    {
+      return {};
+    }
   }
-  if (MoveItErrorCode ret = CartesianStartStateJointStateFeatures(/*match_precision=*/0.0)
-                                .appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  }
-
-  // Goal.
-  if (MoveItErrorCode ret = CartesianMaxSpeedAndAccelerationFeatures().appendFeaturesAsExactFetchQuery(
-          *query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  }
-  if (MoveItErrorCode ret = CartesianMaxStepAndJumpThresholdFeatures().appendFeaturesAsExactFetchQuery(
-          *query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  }
-  if (MoveItErrorCode ret = CartesianWaypointsFeatures(/*match_precision=*/0.0)
-                                .appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  }
-  if (MoveItErrorCode ret = CartesianPathConstraintsFeatures(/*match_precision=*/0.0)
-                                .appendFeaturesAsExactFetchQuery(*query, key, move_group, exact_match_precision);
-      !ret)
-  {
-    return {};
-  }
-
   return coll.queryList(query, /*metadata_only=*/true);
 }
 
@@ -427,45 +329,12 @@ MoveItErrorCode CartesianAlwaysInsertNeverPrunePolicy::appendInsertMetadata(Meta
                                                                             const GetCartesianPath::Request& key,
                                                                             const GetCartesianPath::Response& value)
 {
-  // Extract and append features.
-  // We avoid the heap allocation from getSupportedFeatures() for performance reasons.
-
-  // Start features.
-  if (MoveItErrorCode ret = CartesianWorkspaceFeatures().appendFeaturesAsInsertMetadata(metadata, key, move_group); !ret)
+  for (const auto& feature : exact_matching_supported_features_)
   {
-    return ret;
-  }
-  if (MoveItErrorCode ret = CartesianStartStateJointStateFeatures(/*match_tolerance=*/0)
-                                .appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
-  }
-
-  // Goal features.
-  if (MoveItErrorCode ret =
-          CartesianMaxSpeedAndAccelerationFeatures().appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
-  }
-  if (MoveItErrorCode ret =
-          CartesianMaxStepAndJumpThresholdFeatures().appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
-  }
-  if (MoveItErrorCode ret =
-          CartesianWaypointsFeatures(/*match_tolerance=*/0).appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
-  }
-  if (MoveItErrorCode ret = CartesianPathConstraintsFeatures(/*match_tolerance=*/0)
-                                .appendFeaturesAsInsertMetadata(metadata, key, move_group);
-      !ret)
-  {
-    return ret;
+    if (MoveItErrorCode ret = feature->appendFeaturesAsInsertMetadata(metadata, key, move_group); !ret)
+    {
+      return {};
+    }
   }
 
   // Append ValueT metadata.
