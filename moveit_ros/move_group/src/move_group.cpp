@@ -35,8 +35,6 @@
 /* Author: Ioan Sucan */
 
 #include <memory>
-#include <bits/fs_path.h>
-#include <filesystem>
 #include <set>
 
 #include <boost/tokenizer.hpp>
@@ -290,15 +288,21 @@ int main(int argc, char** argv)
   // Initialize MoveItCpp
   const auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(nh, moveit_cpp_options);
   const auto planning_scene_monitor = moveit_cpp->getPlanningSceneMonitorNonConst();
-  auto ps = planning_scene_monitor->getPlanningScene();
-  if (ps)
+  if (auto ps = planning_scene_monitor->getPlanningScene())
   {
     if (nh->has_parameter("default_planning_scene"))
     {
       std::string path = nh->get_parameter("default_planning_scene").as_string();
-      std::fstream fs;
-      fs.open(path, std::fstream::in);
-      ps->loadGeometryFromStream(fs);
+      std::fstream file_stream;
+      file_stream.open(path, std::fstream::in);
+      if (!file_stream.is_open() || !ps->loadGeometryFromStream(file_stream))
+      {
+        RCLCPP_ERROR(nh->get_logger(),
+                     ("Failed to load the planning scene geometry from the file specified by the "
+                      "`default_planning_scene` parameter. The `default_planning_scene` parameter was set to %s.",
+                      path.c_str()));
+      }
+      return 0;
     }
     bool debug = false;
     for (int i = 1; i < argc; ++i)
