@@ -5,7 +5,9 @@ import launch_ros
 import launch_testing
 from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
-from move_group_test_description import generate_move_group_test_description
+from moveit_ros_tests.move_group_test_description import (
+    generate_move_group_test_description,
+)
 
 
 def generate_test_description():
@@ -25,10 +27,11 @@ def generate_test_description():
         .to_moveit_configs()
     )
     moveit_config_dict = moveit_config.to_dict()
-    moveit_config_dict['default_planning_scene'] = os.path.join(get_package_share_directory('moveit_ros_tests'), 'data',
-                                                                'scene.txt')
+    moveit_config_dict["default_planning_scene"] = os.path.join(
+        get_package_share_directory("moveit_ros_tests"), "data", "scene.txt"
+    )
 
-    return generate_move_group_test_description()
+    return generate_move_group_test_description(moveit_config_dict)
 
 
 class TestGTestWaitForCompletion(unittest.TestCase):

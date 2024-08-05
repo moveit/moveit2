@@ -71,7 +71,7 @@ def generate_move_group_test_description(moveit_config_dict):
         executable="robot_state_publisher",
         name="robot_state_publisher",
         output="both",
-        parameters=[moveit_config.robot_description],
+        parameters=[moveit_config_dict["robot_description"]],
     )
 
     move_group_gtest = launch_ros.actions.Node(
@@ -81,7 +81,7 @@ def generate_move_group_test_description(moveit_config_dict):
                 "move_group_api_test",
             ]
         ),
-        parameters=[moveit_config.to_dict()],
+        parameters=[moveit_config_dict],
         output="screen",
     )
 
@@ -90,7 +90,7 @@ def generate_move_group_test_description(moveit_config_dict):
             launch.actions.DeclareLaunchArgument(
                 name="test_binary_dir",
                 description="Binary directory of package "
-                            "containing test executables",
+                "containing test executables",
             ),
             static_tf_node,
             robot_state_publisher,
