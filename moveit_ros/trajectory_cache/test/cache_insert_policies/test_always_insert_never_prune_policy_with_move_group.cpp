@@ -30,7 +30,7 @@
 #include <moveit/trajectory_cache/features/features_interface.hpp>
 #include <moveit/trajectory_cache/utils/utils.hpp>
 
-#include "../move_group_fixture.hpp"
+#include "../fixtures/move_group_fixture.hpp"
 
 namespace
 {

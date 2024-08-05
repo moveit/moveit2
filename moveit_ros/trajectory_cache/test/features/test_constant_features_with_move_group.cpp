@@ -25,7 +25,7 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/trajectory_cache/features/constant_features.hpp>
 
-#include "../move_group_fixture.hpp"
+#include "../fixtures/move_group_fixture.hpp"
 
 namespace
 {

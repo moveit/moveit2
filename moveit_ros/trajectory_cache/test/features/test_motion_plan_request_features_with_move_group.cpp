@@ -38,7 +38,7 @@
 #include <moveit/trajectory_cache/features/features_interface.hpp>
 #include <moveit/trajectory_cache/features/motion_plan_request_features.hpp>
 
-#include "../move_group_fixture.hpp"
+#include "../fixtures/move_group_fixture.hpp"
 
 namespace
 {

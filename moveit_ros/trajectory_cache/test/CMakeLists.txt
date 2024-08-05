@@ -6,7 +6,7 @@ if(BUILD_TESTING)
   find_package(warehouse_ros_sqlite REQUIRED)
 
   # Fixtures.
-  add_library(warehouse_fixture warehouse_fixture.cpp)
+  add_library(warehouse_fixture fixtures/warehouse_fixture.cpp)
   target_include_directories(
     warehouse_fixture
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
@@ -15,7 +15,7 @@ if(BUILD_TESTING)
                             ament_cmake_gtest
                             warehouse_ros_sqlite)
 
-  add_library(move_group_fixture move_group_fixture.cpp)
+  add_library(move_group_fixture fixtures/move_group_fixture.cpp)
   target_include_directories(
     move_group_fixture
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
@@ -36,7 +36,7 @@ if(BUILD_TESTING)
   target_link_libraries(test_utils_with_move_group
                         moveit_ros_trajectory_cache_utils_lib
                         move_group_fixture)
-  add_ros_test(gtest_with_move_group.py
+  add_ros_test(fixtures/gtest_with_move_group.py
                TARGET test_utils_with_move_group TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_utils_with_move_group")
@@ -49,7 +49,7 @@ if(BUILD_TESTING)
   target_link_libraries(test_constant_features_with_move_group
                         moveit_ros_trajectory_cache_utils_lib
                         move_group_fixture)
-  add_ros_test(gtest_with_move_group.py
+  add_ros_test(fixtures/gtest_with_move_group.py
                TARGET test_constant_features_with_move_group TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_constant_features_with_move_group")
@@ -60,7 +60,7 @@ if(BUILD_TESTING)
   target_link_libraries(test_get_cartesian_path_request_features_with_move_group
                         moveit_ros_trajectory_cache_features_lib
                         move_group_fixture)
-  add_ros_test(gtest_with_move_group.py
+  add_ros_test(fixtures/gtest_with_move_group.py
                TARGET test_get_cartesian_path_request_features_with_move_group TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_get_cartesian_path_request_features_with_move_group")
@@ -71,7 +71,7 @@ if(BUILD_TESTING)
   target_link_libraries(test_motion_plan_request_features_with_move_group
                         moveit_ros_trajectory_cache_features_lib
                         move_group_fixture)
-  add_ros_test(gtest_with_move_group.py
+  add_ros_test(fixtures/gtest_with_move_group.py
                TARGET test_motion_plan_request_features_with_move_group TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_motion_plan_request_features_with_move_group")
@@ -86,7 +86,7 @@ if(BUILD_TESTING)
                         moveit_ros_trajectory_cache_features_lib
                         moveit_ros_trajectory_cache_utils_lib
                         move_group_fixture)
-  add_ros_test(gtest_with_move_group.py
+  add_ros_test(fixtures/gtest_with_move_group.py
                TARGET test_always_insert_never_prune_policy_with_move_group TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_always_insert_never_prune_policy_with_move_group")
@@ -99,7 +99,7 @@ if(BUILD_TESTING)
                         moveit_ros_trajectory_cache_features_lib
                         moveit_ros_trajectory_cache_utils_lib
                         move_group_fixture)
-  add_ros_test(gtest_with_move_group.py
+  add_ros_test(fixtures/gtest_with_move_group.py
                TARGET test_best_seen_execution_time_policy_with_move_group TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
                "test_executable:=test_best_seen_execution_time_policy_with_move_group")
