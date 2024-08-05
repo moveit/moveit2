@@ -18,15 +18,22 @@ if(BUILD_TESTING)
   add_ros_test(launch/move_group_api.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
+  # run default_planning_scene test isolated test to avoid interference
+  find_package(ament_cmake_ros REQUIRED)
   ament_add_gtest_executable(move_group_default_planning_scene_test
                              src/move_group_default_planning_scene_test.cpp)
   ament_target_dependencies(move_group_default_planning_scene_test rclcpp
                             moveit_ros_planning)
-  add_ros_test(launch/move_group_default_planning_scene.test.py TIMEOUT 30 ARGS
-               "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
-endif()
+  ament_add_ros_isolated_pytest_test(
+    move_group_default_planning_scene_test
+    launch/move_group_default_planning_scene.py TIMEOUT 30 WORKING_DIRECTORY
+    ${CMAKE_CURRENT_BINARY_DIR})
 
-ament_python_install_package(moveit_ros_tests)
-install(DIRECTORY data DESTINATION share/${PROJECT_NAME})
+  # install Python helper script and test
+  ament_python_install_package(moveit_ros_tests)
+  install(DIRECTORY data DESTINATION share/${PROJECT_NAME})
+  install(TARGETS move_group_default_planning_scene_test
+          RUNTIME DESTINATION lib/${PROJECT_NAME})
+endif()
 
 ament_package()

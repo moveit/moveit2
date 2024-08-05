@@ -76,11 +76,6 @@ def generate_move_group_test_description(moveit_config_dict, move_group_gtest):
 
     return launch.LaunchDescription(
         [
-            launch.actions.DeclareLaunchArgument(
-                name="test_binary_dir",
-                description="Binary directory of package "
-                "containing test executables",
-            ),
             static_tf_node,
             robot_state_publisher,
             move_group_node,

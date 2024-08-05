@@ -1,4 +1,6 @@
 import os
+import sys
+
 import launch
 import unittest
 import launch_ros
@@ -8,8 +10,11 @@ from moveit_configs_utils import MoveItConfigsBuilder
 from moveit_ros_tests.move_group_test_description import (
     generate_move_group_test_description,
 )
+import launch_testing
+import pytest
 
 
+@pytest.mark.launch_test
 def generate_test_description():
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
@@ -32,12 +37,8 @@ def generate_test_description():
     )
 
     move_group_gtest = launch_ros.actions.Node(
-        executable=launch.substitutions.PathJoinSubstitution(
-            [
-                launch.substitutions.LaunchConfiguration("test_binary_dir"),
-                "move_group_default_planning_scene_test",
-            ]
-        ),
+        package="moveit_ros_tests",
+        executable="move_group_default_planning_scene_test",
         parameters=[moveit_config_dict],
         output="screen",
     )
@@ -45,14 +46,8 @@ def generate_test_description():
     return generate_move_group_test_description(moveit_config_dict, move_group_gtest)
 
 
-class TestGTestWaitForCompletion(unittest.TestCase):
-    # Waits for test to complete, then waits a bit to make sure result files are generated
-    def test_gtest_run_complete(self, move_group_gtest):
-        self.proc_info.assertWaitForShutdown(move_group_gtest, timeout=4000.0)
-
-
 @launch_testing.post_shutdown_test()
-class TestGTestProcessPostShutdown(unittest.TestCase):
-    # Checks if the test has been completed with acceptable exit codes (successful codes)
-    def test_gtest_pass(self, proc_info, move_group_gtest):
+class TestProcessOutput(unittest.TestCase):
+    def test_exit_code(self, proc_info, move_group_gtest):
+        # Check that process exits with code 0: no error
         launch_testing.asserts.assertExitCodes(proc_info, process=move_group_gtest)
