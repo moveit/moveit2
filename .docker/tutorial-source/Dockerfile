@@ -1,11 +1,15 @@
 # syntax = docker/dockerfile:1.3
 
 # ghcr.io/moveit/moveit2:main-${ROS_DISTRO}-tutorial-source
-# Source build of the repos file from the tutorail site
+# Source build of the repos file from the tutorial site
 
 ARG ROS_DISTRO=rolling
+ARG GZ_VERSION=harmonic
+
 FROM moveit/moveit2:${ROS_DISTRO}-ci
 LABEL maintainer Tyler Weaver tyler@picknik.ai
+
+ARG GZ_VERSION
 
 # Export ROS_UNDERLAY for downstream docker containers
 ENV ROS_UNDERLAY /root/ws_moveit/install
@@ -17,6 +21,11 @@ COPY . src/moveit2
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
 RUN --mount=type=cache,target=/root/.ccache/,sharing=locked \
+        # Install Gazebo, which is needed by some dependencies.
+        sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list' && \
+        wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add - && \
+        sudo apt update && \
+        sudo apt-get install -y "gz-${GZ_VERSION}" && \
         # Enable ccache
         PATH=/usr/lib/ccache:$PATH && \
         # Checkout the tutorial repo
