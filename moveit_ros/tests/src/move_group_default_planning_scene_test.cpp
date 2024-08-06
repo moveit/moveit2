@@ -46,7 +46,9 @@ TEST(MoveGroup, testDefaultPlanningScene)
   auto node = std::make_shared<rclcpp::Node>("move_group_test");
   auto planning_scene_monitor =
       std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node, "robot_description");
-  planning_scene_monitor->requestPlanningSceneState();
+  ASSERT_TRUE(planning_scene_monitor->requestPlanningSceneState()) << "Failed to get planning scene";
+  rclcpp::sleep_for(std::chrono::seconds(5));
+  ASSERT_TRUE(planning_scene_monitor->requestPlanningSceneState()) << "Failed to get planning scene";
   planning_scene::PlanningScenePtr ps = planning_scene_monitor->getPlanningScene();
 
   // ensure the planning scene and world are not null

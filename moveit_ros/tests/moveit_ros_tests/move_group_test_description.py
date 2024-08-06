@@ -71,7 +71,7 @@ def generate_move_group_test_description(moveit_config_dict, move_group_gtest):
         executable="robot_state_publisher",
         name="robot_state_publisher",
         output="both",
-        parameters=[moveit_config_dict["robot_description"]],
+        parameters=[{"robot_description": moveit_config_dict["robot_description"]}],
     )
 
     return launch.LaunchDescription(

@@ -16,16 +16,15 @@ if(BUILD_TESTING)
   include_directories(include)
   ament_add_gtest_executable(move_group_api_test src/move_group_api_test.cpp)
   ament_target_dependencies(move_group_api_test rclcpp)
-  add_ros_test(launch/move_group_api.py TIMEOUT 30)
+  add_ros_test(launch/move_group_api.py TIMEOUT 30 ENV "ROS_DOMAIN_ID=2")
 
   ament_add_gtest_executable(move_group_default_planning_scene_test
                              src/move_group_default_planning_scene_test.cpp)
   ament_target_dependencies(move_group_default_planning_scene_test rclcpp
                             moveit_ros_planning)
   # run default_planning_scene test isolated test to avoid interference
-  ament_add_ros_isolated_pytest_test(
-    move_group_default_planning_scene
-    launch/move_group_default_planning_scene.py TIMEOUT 30)
+  add_ros_test(launch/move_group_default_planning_scene.py TIMEOUT 30 ENV
+               "ROS_DOMAIN_ID=2")
 
   # install Python helper script and test
   ament_python_install_package(moveit_ros_tests)
