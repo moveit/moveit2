@@ -206,7 +206,7 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> TrajectoryCache::fet
   for (const auto& feature : features)
   {
     if (MoveItErrorCode ret =
-            feature->appendFeaturesAsExactFetchQuery(*query, plan_request, move_group,
+            feature->appendFeaturesAsFuzzyFetchQuery(*query, plan_request, move_group,
                                                      /*exact_match_precision=*/options_.exact_match_precision);
         !ret)
     {
@@ -344,7 +344,7 @@ std::vector<MessageWithMetadata<RobotTrajectory>::ConstPtr> TrajectoryCache::fet
   for (const auto& feature : features)
   {
     if (MoveItErrorCode ret =
-            feature->appendFeaturesAsExactFetchQuery(*query, plan_request, move_group,
+            feature->appendFeaturesAsFuzzyFetchQuery(*query, plan_request, move_group,
                                                      /*exact_match_precision=*/options_.exact_match_precision);
         !ret)
     {
@@ -391,7 +391,7 @@ bool TrajectoryCache::insertCartesianTrajectory(
     const std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>>& additional_features)
 {
   MessageCollection<RobotTrajectory> coll =
-      db_->openCollection<RobotTrajectory>("move_group_trajectory_cache", cache_namespace);
+      db_->openCollection<RobotTrajectory>("move_group_cartesian_trajectory_cache", cache_namespace);
 
   // Check pre-preconditions.
   if (MoveItErrorCode ret = cache_insert_policy.checkCacheInsertInputs(move_group, coll, plan_request, plan); !ret)
