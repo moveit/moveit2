@@ -32,12 +32,8 @@ def generate_test_description():
         description="Binary directory of package " "containing test executables",
     )
     move_group_gtest = launch_ros.actions.Node(
-        executable=launch.substitutions.PathJoinSubstitution(
-            [
-                launch.substitutions.LaunchConfiguration("test_binary_dir"),
-                "move_group_api_test",
-            ]
-        ),
+        package="moveit_ros_tests",
+        executable="move_group_api_test",
         parameters=[moveit_config.to_dict()],
         output="screen",
     )

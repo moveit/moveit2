@@ -1,5 +1,4 @@
 import os
-import sys
 
 import launch
 import unittest
@@ -46,8 +45,14 @@ def generate_test_description():
     return generate_move_group_test_description(moveit_config_dict, move_group_gtest)
 
 
+class TestGTestWaitForCompletion(unittest.TestCase):
+    # Waits for test to complete, then waits a bit to make sure result files are generated
+    def test_gtest_run_complete(self, move_group_gtest):
+        self.proc_info.assertWaitForShutdown(move_group_gtest, timeout=4000.0)
+
+
 @launch_testing.post_shutdown_test()
-class TestProcessOutput(unittest.TestCase):
-    def test_exit_code(self, proc_info, move_group_gtest):
-        # Check that process exits with code 0: no error
+class TestGTestProcessPostShutdown(unittest.TestCase):
+    # Checks if the test has been completed with acceptable exit codes (successful codes)
+    def test_gtest_pass(self, proc_info, move_group_gtest):
         launch_testing.asserts.assertExitCodes(proc_info, process=move_group_gtest)

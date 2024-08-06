@@ -50,14 +50,15 @@ TEST(MoveGroup, testDefaultPlanningScene)
   planning_scene::PlanningScenePtr ps = planning_scene_monitor->getPlanningScene();
 
   // ensure the planning scene and world are not null
-  ASSERT_NE(ps, nullptr);
-  ASSERT_NE(ps->getWorld(), nullptr);
+  ASSERT_NE(ps, nullptr) << "PlanningScene was null";
+  ASSERT_NE(ps->getWorld(), nullptr) << "PlanningScene->getWorld() was null";
 
   // check that geometry in test file matches the currecnt values
   std::unordered_set<std::string> expected_ids = { "Box_0", "Cylinder_0" };
+  EXPECT_EQ(ps->getWorld()->getObjectIds().size(), 2ul);
   for (const auto& id : ps->getWorld()->getObjectIds())
   {
-    EXPECT_NE(expected_ids.find(id), expected_ids.end());
+    EXPECT_NE(expected_ids.find(id), expected_ids.end()) << "Unexpected object id";
   }
 }
 
