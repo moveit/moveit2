@@ -295,7 +295,8 @@ int main(int argc, char** argv)
       std::string path = nh->get_parameter("default_planning_scene").as_string();
       std::fstream file_stream;
       file_stream.open(path, std::fstream::in);
-      if (!file_stream.is_open() || !ps->loadGeometryFromStream(file_stream))
+      planning_scene_monitor::LockedPlanningSceneRW locked_ps(planning_scene_monitor);
+      if (!file_stream.is_open() || !locked_ps->loadGeometryFromStream(file_stream))
       {
         RCLCPP_ERROR(nh->get_logger(), std::string("Failed to load the planning scene geometry from the file specified "
                                                    "by the `default_planning_scene` parameter. The "
