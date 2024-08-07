@@ -34,6 +34,8 @@
 
 /* Author: David V. Lu!! */
 
+#include <algorithm>
+
 #include <moveit/rdf_loader/synchronized_string_parameter.h>
 
 namespace rdf_loader
@@ -120,7 +122,7 @@ bool SynchronizedStringParameter::shouldPublish()
 
 bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration& timeout)
 {
-  const auto nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
+  const auto nd_name = sanitizeNodeName(std::string(node_->get_name()).append("_ssp_").append(name_));
   const auto temp_node = std::make_shared<rclcpp::Node>(nd_name);
   string_subscriber_ = temp_node->create_subscription<std_msgs::msg::String>(
       name_,
@@ -156,4 +158,15 @@ void SynchronizedStringParameter::stringCallback(const std_msgs::msg::String::Co
   }
   content_ = msg->data;
 }
+
+/* static */
+std::string SynchronizedStringParameter::sanitizeNodeName(const std::string& node_name)
+{
+  // Sanitize the node name containing characters other than alphanumerics or '_'.
+  std::string sanitized_name(node_name);
+  std::replace_if(
+      sanitized_name.begin(), sanitized_name.end(), [](const char c) { return !(isalnum(c) || c == '_'); }, '_');
+  return sanitized_name;
+}
+
 }  // namespace rdf_loader
