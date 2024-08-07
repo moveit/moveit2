@@ -250,8 +250,9 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
             //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
             //   supported.
             std::stringstream ss;
-            ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for translation "
-               << reference_frame_id << " to " << position_constraint.header.frame_id << ": " << ex.what();
+            ss << "Skipping " << prefix << " metadata append: "
+               << "Could not get transform for translation " << reference_frame_id << " to "
+               << position_constraint.header.frame_id << ": " << ex.what();
             return MoveItErrorCode(MoveItErrorCode::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
@@ -300,8 +301,9 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
             //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
             //   supported.
             std::stringstream ss;
-            ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for orientation "
-               << reference_frame_id << " to " << orientation_constraint.header.frame_id << ": " << ex.what();
+            ss << "Skipping " << prefix << " metadata append: "
+               << "Could not get transform for orientation " << reference_frame_id << " to "
+               << orientation_constraint.header.frame_id << ": " << ex.what();
             return MoveItErrorCode(MoveItErrorCode::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
@@ -434,8 +436,9 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
             //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
             //   supported.
             std::stringstream ss;
-            ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for translation "
-               << workspace_frame_id << " to " << position_constraint.header.frame_id << ": " << ex.what();
+            ss << "Skipping " << prefix << " metadata append: "
+               << "Could not get transform for translation " << workspace_frame_id << " to "
+               << position_constraint.header.frame_id << ": " << ex.what();
             return MoveItErrorCode(MoveItErrorCode::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
@@ -480,8 +483,9 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
             //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
             //   supported.
             std::stringstream ss;
-            ss << "Skipping " << prefix << " metadata append: " << "Could not get transform for orientation "
-               << workspace_frame_id << " to " << orientation_constraint.header.frame_id << ": " << ex.what();
+            ss << "Skipping " << prefix << " metadata append: "
+               << "Could not get transform for orientation " << workspace_frame_id << " to "
+               << orientation_constraint.header.frame_id << ": " << ex.what();
             return MoveItErrorCode(MoveItErrorCode::FRAME_TRANSFORM_FAILURE, ss.str());
           }
         }
@@ -556,7 +560,8 @@ appendRobotStateJointStateAsFetchQueryWithTolerance(Query& query, const moveit_m
       //   Ideally we would restore the original state here and undo our changes, however copy of the metadata is not
       //   supported.
       std::stringstream ss;
-      ss << "Skipping " << prefix << " query append: " << "Could not get robot state.";
+      ss << "Skipping " << prefix << " query append: "
+         << "Could not get robot state.";
       return MoveItErrorCode(MoveItErrorCode::UNABLE_TO_AQUIRE_SENSOR_DATA, ss.str());
     }
 
@@ -623,7 +628,8 @@ appendRobotStateJointStateAsInsertMetadata(Metadata& metadata, const moveit_msgs
       //   Ideally we would restore the original state here and undo our changes, however copy of the metadata is not
       //   supported.
       std::stringstream ss;
-      ss << "Skipping " << prefix << " metadata append: " << "Could not get robot state.";
+      ss << "Skipping " << prefix << " metadata append: "
+         << "Could not get robot state.";
       return MoveItErrorCode(MoveItErrorCode::UNABLE_TO_AQUIRE_SENSOR_DATA, ss.str());
     }
 

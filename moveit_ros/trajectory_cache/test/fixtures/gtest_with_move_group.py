@@ -34,8 +34,7 @@ def generate_test_description():
         package="tf2_ros",
         executable="static_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0",
-                   "0.0", "0.0", "world", "panda_link0"],
+        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "panda_link0"],
     )
 
     robot_state_publisher = Node(
@@ -67,8 +66,7 @@ def generate_test_description():
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(
-                    controller)],
+                cmd=["ros2 run controller_manager spawner {}".format(controller)],
                 shell=True,
                 output="log",
             )
@@ -81,9 +79,7 @@ def generate_test_description():
                 LaunchConfiguration("test_executable"),
             ]
         ),
-        parameters=[
-            moveit_config.to_dict()
-        ],
+        parameters=[moveit_config.to_dict()],
         output="screen",
     )
 

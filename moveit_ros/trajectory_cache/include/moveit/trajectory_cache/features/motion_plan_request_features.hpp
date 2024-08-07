@@ -155,7 +155,7 @@ private:
 };
 
 /** @class GoalConstraintsFeatures
- * @brief Extracts features fom the `goal_constraints` field in the plan request.
+ * @brief Extracts features from the `goal_constraints` field in the plan request.
  *
  * @see appendConstraintsAsFetchQueryWithTolerance
  * @see appendConstraintsAsInsertMetadata
@@ -191,7 +191,7 @@ private:
 };
 
 /** @class PathConstraintsFeatures
- * @brief Extracts features fom the `path_constraints` field in the plan request.
+ * @brief Extracts features from the `path_constraints` field in the plan request.
  *
  * @see appendConstraintsAsFetchQueryWithTolerance
  * @see appendConstraintsAsInsertMetadata
@@ -227,7 +227,7 @@ private:
 };
 
 /** @class TrajectoryConstraintsFeatures
- * @brief Extracts features fom the `trajectory_constraints` field in the plan request.
+ * @brief Extracts features from the `trajectory_constraints` field in the plan request.
  *
  * @see appendConstraintsAsFetchQueryWithTolerance
  * @see appendConstraintsAsInsertMetadata

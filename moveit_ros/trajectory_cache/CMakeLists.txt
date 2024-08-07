@@ -28,10 +28,11 @@ set(TRAJECTORY_CACHE_DEPENDENCIES
     trajectory_msgs
     warehouse_ros)
 
-set(TRAJECTORY_CACHE_LIBRARIES moveit_ros_trajectory_cache_utils_lib
-                               moveit_ros_trajectory_cache_features_lib
-                               moveit_ros_trajectory_cache_cache_insert_policies_lib
-                               moveit_ros_trajectory_cache_lib)
+set(TRAJECTORY_CACHE_LIBRARIES
+    moveit_ros_trajectory_cache_utils_lib
+    moveit_ros_trajectory_cache_features_lib
+    moveit_ros_trajectory_cache_cache_insert_policies_lib
+    moveit_ros_trajectory_cache_lib)
 
 # Utils library
 add_library(moveit_ros_trajectory_cache_utils_lib src/utils/utils.cpp)
@@ -44,9 +45,10 @@ ament_target_dependencies(moveit_ros_trajectory_cache_utils_lib
                           ${TRAJECTORY_CACHE_DEPENDENCIES})
 
 # Features library
-add_library(moveit_ros_trajectory_cache_features_lib
-            src/features/motion_plan_request_features.cpp
-            src/features/get_cartesian_path_request_features.cpp)
+add_library(
+  moveit_ros_trajectory_cache_features_lib
+  src/features/motion_plan_request_features.cpp
+  src/features/get_cartesian_path_request_features.cpp)
 generate_export_header(moveit_ros_trajectory_cache_features_lib)
 target_link_libraries(moveit_ros_trajectory_cache_features_lib
                       moveit_ros_trajectory_cache_utils_lib)
@@ -58,13 +60,15 @@ ament_target_dependencies(moveit_ros_trajectory_cache_features_lib
                           ${TRAJECTORY_CACHE_DEPENDENCIES})
 
 # Cache insert policies library
-add_library(moveit_ros_trajectory_cache_cache_insert_policies_lib
-            src/cache_insert_policies/always_insert_never_prune_policy.cpp
-            src/cache_insert_policies/best_seen_execution_time_policy.cpp)
+add_library(
+  moveit_ros_trajectory_cache_cache_insert_policies_lib
+  src/cache_insert_policies/always_insert_never_prune_policy.cpp
+  src/cache_insert_policies/best_seen_execution_time_policy.cpp)
 generate_export_header(moveit_ros_trajectory_cache_cache_insert_policies_lib)
-target_link_libraries(moveit_ros_trajectory_cache_cache_insert_policies_lib
-                      moveit_ros_trajectory_cache_features_lib
-                      moveit_ros_trajectory_cache_utils_lib)
+target_link_libraries(
+  moveit_ros_trajectory_cache_cache_insert_policies_lib
+  moveit_ros_trajectory_cache_features_lib
+  moveit_ros_trajectory_cache_utils_lib)
 target_include_directories(
   moveit_ros_trajectory_cache_cache_insert_policies_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -75,10 +79,11 @@ ament_target_dependencies(moveit_ros_trajectory_cache_cache_insert_policies_lib
 # Trajectory cache library
 add_library(moveit_ros_trajectory_cache_lib SHARED src/trajectory_cache.cpp)
 generate_export_header(moveit_ros_trajectory_cache_lib)
-target_link_libraries(moveit_ros_trajectory_cache_lib
-                      moveit_ros_trajectory_cache_cache_insert_policies_lib
-                      moveit_ros_trajectory_cache_features_lib
-                      moveit_ros_trajectory_cache_utils_lib)
+target_link_libraries(
+  moveit_ros_trajectory_cache_lib
+  moveit_ros_trajectory_cache_cache_insert_policies_lib
+  moveit_ros_trajectory_cache_features_lib
+  moveit_ros_trajectory_cache_utils_lib)
 target_include_directories(
   moveit_ros_trajectory_cache_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
