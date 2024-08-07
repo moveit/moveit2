@@ -75,9 +75,8 @@ static const std::string PLANNING_TIME = "planning_time_s";
 BestSeenExecutionTimePolicy::BestSeenExecutionTimePolicy()
   : name_("BestSeenExecutionTimePolicy"), best_seen_execution_time_(std::numeric_limits<double>::infinity())
 {
-  exact_matching_supported_features_ =
-      std::move(BestSeenExecutionTimePolicy::getSupportedFeatures(/*start_tolerance=*/0.0,
-                                                                  /*goal_tolerance=*/0.0));
+  exact_matching_supported_features_ = BestSeenExecutionTimePolicy::getSupportedFeatures(/*start_tolerance=*/0.0,
+                                                                                         /*goal_tolerance=*/0.0);
 }
 
 std::vector<std::unique_ptr<FeaturesInterface<MotionPlanRequest>>>
@@ -271,9 +270,9 @@ void BestSeenExecutionTimePolicy::reset()
 CartesianBestSeenExecutionTimePolicy::CartesianBestSeenExecutionTimePolicy()
   : name_("CartesianBestSeenExecutionTimePolicy"), best_seen_execution_time_(std::numeric_limits<double>::infinity())
 {
-  exact_matching_supported_features_ = std::move(
+  exact_matching_supported_features_ =
       CartesianBestSeenExecutionTimePolicy::getSupportedFeatures(/*start_tolerance=*/0.0,
-                                                                 /*goal_tolerance=*/0.0, /*min_fraction=*/0.0));
+                                                                 /*goal_tolerance=*/0.0, /*min_fraction=*/0.0);
 }
 
 std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>>

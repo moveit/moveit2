@@ -169,7 +169,7 @@ private:
 };
 
 /** @class CartesianWaypointsFeatures
- * @brief Extracts features fom the `waypoints` and `link_name` field in the plan request.
+ * @brief Extracts features from the `waypoints` and `link_name` field in the plan request.
  *
  * `link_name` is extracted here because it is what the waypoints are stated with reference to.
  * Additionally, the waypoints will be restated in the robot's model frame.
@@ -210,7 +210,7 @@ private:
 };
 
 /** @class CartesianPathConstraintsFeatures
- * @brief Extracts features fom the `path_constraints` field in the plan request.
+ * @brief Extracts features from the `path_constraints` field in the plan request.
  *
  * @see appendConstraintsAsFetchQueryWithTolerance
  * @see appendConstraintsAsInsertMetadata

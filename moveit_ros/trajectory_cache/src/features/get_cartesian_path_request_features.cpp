@@ -334,8 +334,9 @@ MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsInsertMetadata(Metad
       //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
       //   supported.
       std::stringstream ss;
-      ss << "Skipping " << name_ << " metadata append: " << "Could not get transform for translation " << base_frame
-         << " to " << path_request_frame_id << ": " << ex.what();
+      ss << "Skipping " << name_ << " metadata append: "
+         << "Could not get transform for translation " << base_frame << " to " << path_request_frame_id << ": "
+         << ex.what();
       return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
     }
   }
@@ -410,8 +411,9 @@ MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsFetchQueryWithTolera
       //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
       //   supported.
       std::stringstream ss;
-      ss << "Skipping " << name_ << " query append: " << "Could not get transform for translation " << base_frame
-         << " to " << path_request_frame_id << ": " << ex.what();
+      ss << "Skipping " << name_ << " query append: "
+         << "Could not get transform for translation " << base_frame << " to " << path_request_frame_id << ": "
+         << ex.what();
       return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
     }
   }

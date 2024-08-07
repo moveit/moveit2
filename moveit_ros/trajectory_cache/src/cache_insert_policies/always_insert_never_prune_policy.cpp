@@ -73,9 +73,8 @@ static const std::string PLANNING_TIME = "planning_time_s";
 
 AlwaysInsertNeverPrunePolicy::AlwaysInsertNeverPrunePolicy() : name_("AlwaysInsertNeverPrunePolicy")
 {
-  exact_matching_supported_features_ =
-      std::move(AlwaysInsertNeverPrunePolicy::getSupportedFeatures(/*start_tolerance=*/0.0,
-                                                                   /*goal_tolerance=*/0.0));
+  exact_matching_supported_features_ = AlwaysInsertNeverPrunePolicy::getSupportedFeatures(/*start_tolerance=*/0.0,
+                                                                                          /*goal_tolerance=*/0.0);
 }
 
 std::vector<std::unique_ptr<FeaturesInterface<MotionPlanRequest>>>
@@ -222,9 +221,9 @@ void AlwaysInsertNeverPrunePolicy::reset()
 CartesianAlwaysInsertNeverPrunePolicy::CartesianAlwaysInsertNeverPrunePolicy()
   : name_("CartesianAlwaysInsertNeverPrunePolicy")
 {
-  exact_matching_supported_features_ = std::move(
+  exact_matching_supported_features_ =
       CartesianAlwaysInsertNeverPrunePolicy::getSupportedFeatures(/*start_tolerance=*/0.0,
-                                                                  /*goal_tolerance=*/0.0, /*min_fraction=*/0.0));
+                                                                  /*goal_tolerance=*/0.0, /*min_fraction=*/0.0);
 }
 
 std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>>
