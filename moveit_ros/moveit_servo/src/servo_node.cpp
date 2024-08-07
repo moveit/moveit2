@@ -303,6 +303,8 @@ void ServoNode::servoLoop()
   }
   KinematicState current_state = servo_->getCurrentRobotState();
   last_commanded_state_ = current_state;
+  // Ensure the filter is up to date
+  servo_->resetSmoothing(current_state);
 
   // Get the robot state and joint model group info.
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
