@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, humble, iron]
+        ROS_DISTRO: [rolling, humble, iron, jazzy]
     runs-on: ubuntu-latest
     permissions:
       packages: write
