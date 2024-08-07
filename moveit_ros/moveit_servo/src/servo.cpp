@@ -158,7 +158,6 @@ void Servo::setSmoothingPlugin()
     RCLCPP_ERROR(logger_, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
-  resetSmoothing(getCurrentRobotState());
 }
 
 void Servo::doSmoothing(KinematicState& state)
@@ -526,9 +525,6 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     // Adjust joint position based on scaled down velocity
     target_state.positions = current_state.positions + (target_state.velocities * servo_params_.publish_period);
 
-    // Apply smoothing to the positions if a smoother was provided.
-    doSmoothing(target_state);
-
     // Apply collision scaling to the joint position delta
     target_state.positions =
         current_state.positions + collision_velocity_scale_ * (target_state.positions - current_state.positions);
@@ -548,8 +544,8 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     }
   }
 
-  // Update internal state of filter with final calculated command.
-  resetSmoothing(target_state);
+  // Apply smoothing to the positions if a smoother was provided.
+  doSmoothing(target_state);
 
   return target_state;
 }
@@ -665,9 +661,6 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
     // set target velocity
     target_state.velocities *= 0.0;
 
-    // apply smoothing: this will change target position/velocity to make slow down gradual
-    doSmoothing(target_state);
-
     // scale velocity in case of obstacle
     target_state.velocities *= collision_velocity_scale_;
 
@@ -681,7 +674,9 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
     }
   }
 
-  resetSmoothing(target_state);
+  // apply smoothing: this will change target position/velocity to make slow down gradual
+  doSmoothing(target_state);
+
   return std::make_pair(stopped, target_state);
 }
 
