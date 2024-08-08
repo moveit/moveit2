@@ -643,8 +643,21 @@ std::optional<PoseCommand> Servo::toPlanningFrame(const PoseCommand& command, co
   return PoseCommand{ planning_frame, planning_to_command_tf * command.pose };
 }
 
-KinematicState Servo::getCurrentRobotState() const
+KinematicState Servo::getCurrentRobotState(bool block_for_current_state) const
 {
+  if (block_for_current_state)
+  {
+    bool have_current_state = false;
+    while (rclcpp::ok() && !have_current_state)
+    {
+      have_current_state = planning_scene_monitor_->getStateMonitor()->waitForCurrentState(
+          rclcpp::Clock(RCL_ROS_TIME).now(), ROBOT_STATE_WAIT_TIME /* s */);
+      if (!have_current_state)
+      {
+        RCLCPP_WARN(logger_, "Waiting for the current state");
+      }
+    }
+  }
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   return extractRobotState(robot_state, servo_params_.move_group_name);
 }
