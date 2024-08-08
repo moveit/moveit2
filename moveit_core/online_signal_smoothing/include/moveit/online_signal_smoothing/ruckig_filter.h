@@ -82,15 +82,23 @@ public:
              const Eigen::VectorXd& accelerations) override;
 
 private:
+  /**
+   * A utility to print Ruckig's internal state
+   */
+  void printRuckigState();
+
+  /**
+   * A utility to get velocity/acceleration/jerk bounds from the robot model
+   */
+  void getVelAccelJerkBounds();
+
   rclcpp::Node::SharedPtr node_;
-  void getDefaultJointVelAccelBounds();
-
+  /** \brief Parameters loaded from yaml file at runtime */
   online_signal_smoothing::Params params_;
-
   size_t num_joints_;
+  /** \brief The robot model contains the vel/accel/jerk limits that Ruckig requires */
   moveit::core::RobotModelConstPtr robot_model_;
-
-  bool have_initial_ruckig_output_ = false;
+  bool have_initial_ruckig_output_;
   std::optional<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_;
   std::optional<ruckig::InputParameter<ruckig::DynamicDOFs>> ruckig_input_;
   std::optional<ruckig::OutputParameter<ruckig::DynamicDOFs>> ruckig_output_;

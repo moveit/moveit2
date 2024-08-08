@@ -118,9 +118,11 @@ public:
 
   /**
    * \brief Get the current state of the robot as given by planning scene monitor.
+   * This may block if a current robot state is not available immediately.
+   * @param block_for_current_state If true, we explicitly wait for a new robot state
    * @return The current state of the robot.
    */
-  KinematicState getCurrentRobotState() const;
+  KinematicState getCurrentRobotState(bool block_for_current_state) const;
 
   /**
    * \brief Smoothly halt at a commanded state when command goes stale.
