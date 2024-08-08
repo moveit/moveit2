@@ -186,19 +186,19 @@ public:
   /**@{*/
 
   /// @brief Gets the database path.
-  std::string getDbPath();
+  std::string getDbPath() const;
 
   /// @brief Gets the database port.
-  uint32_t getDbPort();
+  uint32_t getDbPort() const;
 
   /// @brief Gets the exact match precision.
-  double getExactMatchPrecision();
+  double getExactMatchPrecision() const;
 
   /// @brief Sets the exact match precision.
   void setExactMatchPrecision(double exact_match_precision);
 
   /// @brief Get the number of trajectories to preserve when deleting worse trajectories.
-  size_t getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse();
+  size_t getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse() const;
 
   /// @brief Set the number of additional trajectories to preserve when deleting worse trajectories.
   void setNumAdditionalTrajectoriesToPreserveWhenDeletingWorse(
