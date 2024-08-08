@@ -78,9 +78,9 @@ using ::moveit_ros::trajectory_cache::FeaturesInterface;
 namespace
 {
 
-static const std::string EXECUTION_TIME = "execution_time_s";
-static const std::string FRACTION = "fraction";
-static const std::string PLANNING_TIME = "planning_time_s";
+const std::string EXECUTION_TIME = "execution_time_s";
+const std::string FRACTION = "fraction";
+const std::string PLANNING_TIME = "planning_time_s";
 
 }  // namespace
 

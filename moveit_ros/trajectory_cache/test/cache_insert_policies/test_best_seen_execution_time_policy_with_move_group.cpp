@@ -17,6 +17,7 @@
  */
 
 #include <memory>
+#include <utility>
 
 #include <gtest/gtest.h>
 #include <warehouse_ros/message_collection.h>
@@ -85,41 +86,36 @@ TEST_F(MoveGroupFixture, BestSeenExecutionTimePolicy)
   // No goal.
   {
     MotionPlanRequest msg = valid_msg;
-    MoveGroupInterface::Plan plan = valid_plan;
     msg.goal_constraints.clear();
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, valid_plan));
   }
 
   // Empty joint trajectory points.
   {
-    MotionPlanRequest msg = valid_msg;
     MoveGroupInterface::Plan plan = valid_plan;
     plan.trajectory.joint_trajectory.points.clear();
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, plan));
   }
 
   // Empty joint trajectory names.
   {
-    MotionPlanRequest msg = valid_msg;
     MoveGroupInterface::Plan plan = valid_plan;
     plan.trajectory.joint_trajectory.joint_names.clear();
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, plan));
   }
 
   // Multi-DOF trajectory plan.
   {
-    MotionPlanRequest msg = valid_msg;
     MoveGroupInterface::Plan plan = valid_plan;
     plan.trajectory.multi_dof_joint_trajectory.points.emplace_back();
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, plan));
   }
 
   // Trajectory frame ID empty.
   {
-    MotionPlanRequest msg = valid_msg;
     MoveGroupInterface::Plan plan = valid_plan;
     plan.trajectory.joint_trajectory.header.frame_id = "";
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, plan));
   }
 
   // Mismatched frames.
@@ -153,14 +149,16 @@ TEST_F(MoveGroupFixture, BestSeenExecutionTimePolicyWorks)
     ASSERT_TRUE(move_group_->setPoseTarget(move_group_->getRandomPose()));
     move_group_->constructMotionPlanRequest(msg);
     ret = move_group_->plan(plan);
-  } while (!ret);  // Sometimes the plan fails with the random pose.
+  } while (!ret && plan.trajectory.joint_trajectory.points.empty());  // Sometimes the plan fails with the random pose.
 
   do
   {
     ASSERT_TRUE(move_group_->setPoseTarget(move_group_->getRandomPose()));
     move_group_->constructMotionPlanRequest(another_msg);
     another_ret = move_group_->plan(another_plan);
-  } while (another_msg == msg && !another_ret);  // Also, sometimes the random pose happens to be the same.
+  } while (another_msg == msg && !another_ret &&
+           another_plan.trajectory.joint_trajectory.points
+               .empty());  // Also, sometimes the random pose happens to be the same.
 
   // Ensure that the entries are valid.
   {
@@ -259,8 +257,7 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyChecks)
     waypoints.push_back(move_group_->getCurrentPose().pose);
     waypoints.push_back(move_group_->getRandomPose().pose);
 
-    valid_msg =
-        constructGetCartesianPathRequest(*move_group_, std::move(waypoints), /*max_step=*/0.01, /*jump_threshold=*/0.0);
+    valid_msg = constructGetCartesianPathRequest(*move_group_, waypoints, /*max_step=*/0.01, /*jump_threshold=*/0.0);
     valid_plan.fraction = move_group_->computeCartesianPath(valid_msg.waypoints, valid_msg.max_step,
                                                             valid_msg.jump_threshold, valid_plan.solution);
   } while (valid_plan.fraction <= 0);  // Sometimes the plan fails with the random pose.
@@ -277,41 +274,36 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyChecks)
   // No waypoints.
   {
     GetCartesianPath::Request msg = valid_msg;
-    GetCartesianPath::Response plan = valid_plan;
     msg.waypoints.clear();
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, valid_plan));
   }
 
   // Empty joint trajectory points.
   {
-    GetCartesianPath::Request msg = valid_msg;
     GetCartesianPath::Response plan = valid_plan;
     plan.solution.joint_trajectory.points.clear();
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, plan));
   }
 
   // Empty joint trajectory names.
   {
-    GetCartesianPath::Request msg = valid_msg;
     GetCartesianPath::Response plan = valid_plan;
     plan.solution.joint_trajectory.joint_names.clear();
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, plan));
   }
 
   // Multi-DOF trajectory plan.
   {
-    GetCartesianPath::Request msg = valid_msg;
     GetCartesianPath::Response plan = valid_plan;
     plan.solution.multi_dof_joint_trajectory.points.emplace_back();
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, plan));
   }
 
   // Trajectory frame ID empty.
   {
-    GetCartesianPath::Request msg = valid_msg;
     GetCartesianPath::Response plan = valid_plan;
     plan.solution.joint_trajectory.header.frame_id = "";
-    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, msg, plan));
+    EXPECT_FALSE(policy.checkCacheInsertInputs(*move_group_, coll, valid_msg, plan));
   }
 
   // Mismatched frames.
@@ -346,8 +338,7 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
     waypoints.push_back(move_group_->getCurrentPose().pose);
     waypoints.push_back(move_group_->getRandomPose().pose);
 
-    msg =
-        constructGetCartesianPathRequest(*move_group_, std::move(waypoints), /*max_step=*/0.01, /*jump_threshold=*/0.0);
+    msg = constructGetCartesianPathRequest(*move_group_, waypoints, /*max_step=*/0.01, /*jump_threshold=*/0.0);
     plan.fraction = move_group_->computeCartesianPath(msg.waypoints, msg.max_step, msg.jump_threshold, plan.solution);
   } while (plan.fraction <= -1);  // Sometimes the plan fails with the random pose.
 
@@ -357,8 +348,7 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
     waypoints.push_back(move_group_->getCurrentPose().pose);
     waypoints.push_back(move_group_->getRandomPose().pose);
 
-    another_msg =
-        constructGetCartesianPathRequest(*move_group_, std::move(waypoints), /*max_step=*/0.01, /*jump_threshold=*/0.0);
+    another_msg = constructGetCartesianPathRequest(*move_group_, waypoints, /*max_step=*/0.01, /*jump_threshold=*/0.0);
     another_plan.fraction = move_group_->computeCartesianPath(another_msg.waypoints, another_msg.max_step,
                                                               another_msg.jump_threshold, another_plan.solution);
   } while (another_plan.fraction <= -1);  // Sometimes the plan fails with the random pose.

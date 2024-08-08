@@ -155,7 +155,7 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
                                            const MoveGroupInterface& move_group, double match_tolerance,
                                            const std::string& reference_frame_id, const std::string& prefix)
 {
-  const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();
+  const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();  // NOLINT: Deliberate lifetime extension.
 
   // Make ignored members explicit.
 
@@ -341,7 +341,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
                                                                 const std::string& workspace_frame_id,
                                                                 const std::string& prefix)
 {
-  const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();
+  const std::shared_ptr<tf2_ros::Buffer> tf_buffer = move_group.getTF();  // NOLINT: Deliberate lifetime extensino.
 
   // Make ignored members explicit
 

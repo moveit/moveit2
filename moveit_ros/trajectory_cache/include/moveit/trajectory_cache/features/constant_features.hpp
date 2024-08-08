@@ -25,6 +25,8 @@
 
 #pragma once
 
+#include <utility>
+
 #include <moveit/trajectory_cache/features/features_interface.hpp>
 
 namespace moveit_ros
@@ -41,7 +43,7 @@ template <typename AppendT, typename FeatureSourceT>
 class QueryOnlyEqFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
-  QueryOnlyEqFeature(std::string name, AppendT value) : name_(name), value_(value)
+  QueryOnlyEqFeature(std::string name, AppendT value) : name_(std::move(name)), value_(value)
   {
   }
 
@@ -86,7 +88,7 @@ template <typename AppendT, typename FeatureSourceT>
 class QueryOnlyLTEFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
-  QueryOnlyLTEFeature(std::string name, AppendT value) : name_(name), value_(value)
+  QueryOnlyLTEFeature(std::string name, AppendT value) : name_(std::move(name)), value_(value)
   {
   }
 
@@ -131,7 +133,7 @@ template <typename AppendT, typename FeatureSourceT>
 class QueryOnlyGTEFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
-  QueryOnlyGTEFeature(std::string name, AppendT value) : name_(name), value_(value)
+  QueryOnlyGTEFeature(std::string name, AppendT value) : name_(std::move(name)), value_(value)
   {
   }
 
@@ -177,7 +179,7 @@ class QueryOnlyRangeInclusiveWithToleranceFeature final : public FeaturesInterfa
 {
 public:
   QueryOnlyRangeInclusiveWithToleranceFeature(std::string name, AppendT lower, AppendT upper)
-    : name_(name), lower_(lower), upper_(upper)
+    : name_(std::move(name)), lower_(lower), upper_(upper)
   {
   }
 
@@ -225,7 +227,7 @@ template <typename AppendT, typename FeatureSourceT>
 class MetadataOnlyFeature final : public FeaturesInterface<FeatureSourceT>
 {
 public:
-  MetadataOnlyFeature(std::string name, AppendT value) : name_(name), value_(value)
+  MetadataOnlyFeature(std::string name, AppendT value) : name_(std::move(name)), value_(value)
   {
   }
 

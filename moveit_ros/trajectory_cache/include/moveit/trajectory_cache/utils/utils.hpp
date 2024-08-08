@@ -38,7 +38,7 @@ namespace trajectory_cache
 
 /** @brief Gets workspace frame ID.
  * If workspace_parameters has no frame ID, fetch it from move_group.
- * 
+ *
  * It makes sense to use getPoseReferenceFrame() in the absence of a frame ID in the request because
  * the same method is used to populate the header frame ID in the MoveGroupInterface's
  * computeCartesianPath() method, which this function is associated with.
@@ -48,7 +48,7 @@ std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInter
 
 /** @brief Gets cartesian path request frame ID.
  * If path_request has no frame ID, fetch it from move_group.
- * 
+ *
  * It makes sense to use getPoseReferenceFrame() in the absence of a frame ID in the request because
  * the same method is used to populate the header frame ID in the MoveGroupInterface's
  * computeCartesianPath() method, which this function is associated with.
