@@ -79,16 +79,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
-  // Load the smoothing plugin
-  if (servo_params_.use_smoothing)
-  {
-    setSmoothingPlugin();
-  }
-  else
-  {
-    RCLCPP_WARN(logger_, "No smoothing plugin loaded");
-  }
-
   // Create the collision checker and start collision checking.
   collision_monitor_ =
       std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, std::ref(collision_velocity_scale_));
@@ -125,6 +115,17 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     joint_name_to_index_maps_.insert(
         std::make_pair<std::string, JointNameToMoveGroupIndexMap>(std::string(sub_group_name), std::move(new_map)));
   }
+
+  // Load the smoothing plugin
+  if (servo_params_.use_smoothing)
+  {
+    setSmoothingPlugin();
+  }
+  else
+  {
+    RCLCPP_WARN(logger_, "No smoothing plugin loaded");
+  }
+
   RCLCPP_INFO_STREAM(logger_, "Servo initialized successfully");
 }
 
@@ -643,8 +644,18 @@ std::optional<PoseCommand> Servo::toPlanningFrame(const PoseCommand& command, co
   return PoseCommand{ planning_frame, planning_to_command_tf * command.pose };
 }
 
-KinematicState Servo::getCurrentRobotState() const
+KinematicState Servo::getCurrentRobotState(bool block_for_current_state) const
 {
+  bool have_current_state = false;
+  while (rclcpp::ok() && !have_current_state)
+  {
+    have_current_state = planning_scene_monitor_->getStateMonitor()->waitForCurrentState(
+        rclcpp::Clock(RCL_ROS_TIME).now(), ROBOT_STATE_WAIT_TIME /* s */);
+    if (!have_current_state)
+    {
+      RCLCPP_WARN(logger_, "Waiting for the current state");
+    }
+  }
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   return extractRobotState(robot_state, servo_params_.move_group_name);
 }
