@@ -171,7 +171,7 @@ void initMoveitPy(py::module& m)
            Returns the planning scene monitor.
            )")
 
-      .def("get_trajactory_execution_manager", &moveit_cpp::MoveItCpp::getTrajectoryExecutionManagerNonConst,
+      .def("get_trajectory_execution_manager", &moveit_cpp::MoveItCpp::getTrajectoryExecutionManagerNonConst,
            py::return_value_policy::reference,
            R"(
            Returns the trajectory execution manager.
