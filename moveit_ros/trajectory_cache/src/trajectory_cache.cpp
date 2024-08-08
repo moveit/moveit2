@@ -135,17 +135,17 @@ unsigned TrajectoryCache::countCartesianTrajectories(const std::string& cache_na
 // GETTERS AND SETTERS
 // =============================================================================
 
-std::string TrajectoryCache::getDbPath()
+std::string TrajectoryCache::getDbPath() const
 {
   return options_.db_path;
 }
 
-uint32_t TrajectoryCache::getDbPort()
+uint32_t TrajectoryCache::getDbPort() const
 {
   return options_.db_port;
 }
 
-double TrajectoryCache::getExactMatchPrecision()
+double TrajectoryCache::getExactMatchPrecision() const
 {
   return options_.exact_match_precision;
 }
@@ -155,7 +155,7 @@ void TrajectoryCache::setExactMatchPrecision(double exact_match_precision)
   options_.exact_match_precision = exact_match_precision;
 }
 
-size_t TrajectoryCache::getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse()
+size_t TrajectoryCache::getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse() const
 {
   return options_.num_additional_trajectories_to_preserve_when_deleting_worse;
 }
