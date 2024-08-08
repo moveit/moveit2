@@ -97,6 +97,8 @@ A trajectory cache helps:
 - Allows for consistent predictable behavior of used together with a stochastic planner
   - It effectively allows you to "freeze" a move
 
+These benefits come from the fact that the cache acts as a lookup table of plans that were already made for a given scenario and constraints, allowing the cache to be substituted for a planner call. The reuse of cached plans then allow you to get predictable execution behavior.
+
 A user may also choose when to leverage the cache (e.g. when planning moves from a static "home" position, or repetitive/cartesian moves) to get these benefits.
 
 Additionally, because the cache class has the ability to sort by planned execution time, over sufficient runs, the stochastic plans eventually converge to better and better plans (execution time wise).
