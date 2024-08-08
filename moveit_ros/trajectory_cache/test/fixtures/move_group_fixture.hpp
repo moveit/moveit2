@@ -31,7 +31,7 @@ class MoveGroupFixture : public ::testing::Test
 {
 public:
   MoveGroupFixture();
-  ~MoveGroupFixture();
+  ~MoveGroupFixture() override;
 
 protected:
   void SetUp() override;

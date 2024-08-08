@@ -28,7 +28,7 @@ class WarehouseFixture : public ::testing::Test
 {
 public:
   WarehouseFixture();
-  ~WarehouseFixture();
+  ~WarehouseFixture() override;
 
 protected:
   void SetUp() override;

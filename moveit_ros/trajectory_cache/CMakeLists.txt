@@ -91,8 +91,6 @@ target_include_directories(
 ament_target_dependencies(moveit_ros_trajectory_cache_lib
                           ${TRAJECTORY_CACHE_DEPENDENCIES})
 
-# ==============================================================================
-
 install(
   TARGETS ${TRAJECTORY_CACHE_LIBRARIES}
   EXPORT moveit_ros_trajectory_cacheTargets
@@ -111,6 +109,7 @@ foreach(lib_target ${TRAJECTORY_CACHE_LIBRARIES})
 endforeach()
 
 add_subdirectory(test)
+
 ament_export_targets(moveit_ros_trajectory_cacheTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${TRAJECTORY_CACHE_DEPENDENCIES})
 ament_package()
