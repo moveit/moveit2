@@ -41,6 +41,10 @@ using warehouse_ros::Query;
 // Utils =======================================================================
 
 // Ensure we always have a workspace frame ID.
+//
+// It makes sense to use getModelFrame() in the absence of a workspace parameter frame ID because the same method is
+// used to populate the workspace header frame ID in the MoveGroupInterface's setWorkspace() method, which this function
+// is associated with.
 std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
                                 const moveit_msgs::msg::WorkspaceParameters& workspace_parameters)
 {
@@ -55,6 +59,9 @@ std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInter
 }
 
 // Ensure we always have a cartesian path request frame ID.
+//
+// It makes sense to use getPoseReferenceFrame() in the absence of a frame ID in the request because the same method is
+// used to populate the header frame ID in the MoveGroupInterface's computeCartesianPath() method, which this function is associated with.
 std::string getCartesianPathRequestFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
                                            const moveit_msgs::srv::GetCartesianPath::Request& path_request)
 {
