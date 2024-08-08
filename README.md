@@ -1,4 +1,4 @@
-<img src="https://moveit.ros.org/assets/logo/moveit_logo-black.png" alt="MoveIt Logo" width="200"/>
+<img src="https://moveit.picknik.ai/main/_static/rolling-small.png" alt="MoveIt Logo" width="200"/>
 
 The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the ROS 1 repository see [MoveIt 1](https://github.com/moveit/moveit). For the commercially supported version see [MoveIt Pro](http://picknik.ai/pro).
 
