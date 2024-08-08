@@ -103,7 +103,7 @@ public:
 
   MOVEIT_STRUCT_FORWARD(Plan);
 
-  /// The representation of a motion plan (as ROS messasges)
+  /// The representation of a motion plan (as ROS messages)
   struct Plan
   {
     /// The full starting state used for planning
@@ -159,6 +159,9 @@ public:
   /** \brief Get the names of the named robot states available as targets, both either remembered states or default
    * states from srdf */
   const std::vector<std::string>& getNamedTargets() const;
+
+  /** \brief Get the tf2_ros::Buffer. */
+  const std::shared_ptr<tf2_ros::Buffer>& getTF() const;
 
   /** \brief Get the RobotModel object. */
   moveit::core::RobotModelConstPtr getRobotModel() const;
@@ -236,12 +239,18 @@ public:
       If the value is greater than 1, it is set to 1.0. */
   void setMaxVelocityScalingFactor(double max_velocity_scaling_factor);
 
+  /** \brief Get the max velocity scaling factor set by setMaxVelocityScalingFactor(). */
+  double getMaxVelocityScalingFactor() const;
+
   /** \brief Set a scaling factor for optionally reducing the maximum joint acceleration.
       Allowed values are in (0,1]. The maximum joint acceleration specified
       in the robot model is multiplied by the factor. If the value is 0, it is set to
       the default value, which is defined in joint_limits.yaml of the moveit_config.
       If the value is greater than 1, it is set to 1.0. */
   void setMaxAccelerationScalingFactor(double max_acceleration_scaling_factor);
+
+  /** \brief Get the max acceleration scaling factor set by setMaxAccelerationScalingFactor(). */
+  double getMaxAccelerationScalingFactor() const;
 
   /** \brief Get the number of seconds set by setPlanningTime() */
   double getPlanningTime() const;
@@ -810,6 +819,14 @@ public:
 
   /** \brief How often is the system allowed to move the camera to update environment model when looking */
   void setLookAroundAttempts(int32_t attempts);
+
+  /** \brief Build a RobotState message for use with plan() or computeCartesianPath()
+   *  If the move_group has a custom set start state, this method will use that as the robot state.
+   *
+   *  Otherwise, the robot state will be with `is_diff` set to true, causing it to be an offset from the current state
+   *  of the robot at time of the state's use.
+   */
+  void constructRobotState(moveit_msgs::msg::RobotState& state);
 
   /** \brief Build the MotionPlanRequest that would be sent to the move_group action with plan() or move() and store it
       in \e request */

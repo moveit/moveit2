@@ -359,9 +359,19 @@ public:
     setMaxScalingFactor(max_velocity_scaling_factor_, value, "velocity_scaling_factor", 0.1);
   }
 
+  double getMaxVelocityScalingFactor() const
+  {
+    return max_velocity_scaling_factor_;
+  }
+
   void setMaxAccelerationScalingFactor(double value)
   {
     setMaxScalingFactor(max_acceleration_scaling_factor_, value, "acceleration_scaling_factor", 0.1);
+  }
+
+  double getMaxAccelerationScalingFactor() const
+  {
+    return max_acceleration_scaling_factor_;
   }
 
   void setMaxScalingFactor(double& variable, const double target_value, const char* factor_name, double fallback_value)
@@ -857,14 +867,7 @@ public:
     auto req = std::make_shared<moveit_msgs::srv::GetCartesianPath::Request>();
     moveit_msgs::srv::GetCartesianPath::Response::SharedPtr response;
 
-    if (considered_start_state_)
-    {
-      moveit::core::robotStateToRobotStateMsg(*considered_start_state_, req->start_state);
-    }
-    else
-    {
-      req->start_state.is_diff = true;
-    }
+    constructRobotState(req->start_state);
 
     req->group_name = opt_.group_name;
     req->header.frame_id = getPoseReferenceFrame();
@@ -1008,6 +1011,18 @@ public:
     return allowed_planning_time_;
   }
 
+  void constructRobotState(moveit_msgs::msg::RobotState& state) const
+  {
+    if (considered_start_state_)
+    {
+      moveit::core::robotStateToRobotStateMsg(*considered_start_state_, state);
+    }
+    else
+    {
+      state.is_diff = true;
+    }
+  }
+
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request) const
   {
     request.group_name = opt_.group_name;
@@ -1019,14 +1034,7 @@ public:
     request.planner_id = planner_id_;
     request.workspace_parameters = workspace_parameters_;
 
-    if (considered_start_state_)
-    {
-      moveit::core::robotStateToRobotStateMsg(*considered_start_state_, request.start_state);
-    }
-    else
-    {
-      request.start_state.is_diff = true;
-    }
+    constructRobotState(request.start_state);
 
     if (active_target_ == JOINT)
     {
@@ -1373,6 +1381,11 @@ const std::vector<std::string>& MoveGroupInterface::getNamedTargets() const
   return impl_->getJointModelGroup()->getDefaultStateNames();
 }
 
+const std::shared_ptr<tf2_ros::Buffer>& MoveGroupInterface::getTF() const
+{
+  return impl_->getTF();
+}
+
 moveit::core::RobotModelConstPtr MoveGroupInterface::getRobotModel() const
 {
   return impl_->getRobotModel();
@@ -1440,9 +1453,19 @@ void MoveGroupInterface::setMaxVelocityScalingFactor(double max_velocity_scaling
   impl_->setMaxVelocityScalingFactor(max_velocity_scaling_factor);
 }
 
+double MoveGroupInterface::getMaxVelocityScalingFactor() const
+{
+  return impl_->getMaxVelocityScalingFactor();
+}
+
 void MoveGroupInterface::setMaxAccelerationScalingFactor(double max_acceleration_scaling_factor)
 {
   impl_->setMaxAccelerationScalingFactor(max_acceleration_scaling_factor);
+}
+
+double MoveGroupInterface::getMaxAccelerationScalingFactor() const
+{
+  return impl_->getMaxAccelerationScalingFactor();
 }
 
 moveit::core::MoveItErrorCode MoveGroupInterface::asyncMove()
@@ -2321,6 +2344,11 @@ bool MoveGroupInterface::attachObject(const std::string& object, const std::stri
 bool MoveGroupInterface::detachObject(const std::string& name)
 {
   return impl_->detachObject(name);
+}
+
+void MoveGroupInterface::constructRobotState(moveit_msgs::msg::RobotState& state)
+{
+  impl_->constructRobotState(state);
 }
 
 void MoveGroupInterface::constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& goal_out)

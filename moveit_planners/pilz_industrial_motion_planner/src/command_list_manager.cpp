@@ -112,7 +112,26 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
                               // therefore: "i-1".
                               (i > 0 ? radii.at(i - 1) : 0.));
   }
-  return plan_comp_builder_.build();
+
+  const auto res_vec = plan_comp_builder_.build();
+
+  // De-duplicate trajectory points with the same time value.
+  // This is necessary since some controllers do not allow times that are not monotonically increasing.
+  // TODO: Ideally, we would not need this code if the trajectory segments were created without
+  // duplicate time points in the first place. Leaving this note to revisit this with a more principled fix.
+  for (const auto& traj : res_vec)
+  {
+    for (size_t i = 0; i < traj->size() - 1; ++i)
+    {
+      if (traj->getWayPointDurationFromStart(i) == traj->getWayPointDurationFromStart(i + 1))
+      {
+        RCLCPP_WARN(getLogger(), "Removed duplicate point at time=%f", traj->getWayPointDurationFromStart(i));
+        traj->removeWayPoint(i + 1);
+      }
+    }
+  }
+
+  return res_vec;
 }
 
 bool CommandListManager::checkRadiiForOverlap(const robot_trajectory::RobotTrajectory& traj_A, const double radii_A,
