@@ -213,7 +213,7 @@ public:
    *   An exact match is when:
    *     (candidate >= value - (exact_match_precision / 2)
    *      && candidate <= value + (exact_match_precision / 2))
-   * @property num_additional_trajectories_to_preserve_when_deleting_worse. The number of additional cached trajectories
+   * @property num_additional_trajectories_to_preserve_when_pruning_worse. The number of additional cached trajectories
    * to preserve when `prune_worse_trajectories` is true. It is useful to keep more than one matching trajectory to
    * have alternative trajectories to handle obstacles.
    */
@@ -223,7 +223,7 @@ public:
     uint32_t db_port = 0;
 
     double exact_match_precision = 1e-6;
-    size_t num_additional_trajectories_to_preserve_when_deleting_worse = 1;
+    size_t num_additional_trajectories_to_preserve_when_pruning_worse = 1;
   };
 
   /**
@@ -273,12 +273,12 @@ public:
   /** @brief Sets the exact match precision. */
   void setExactMatchPrecision(double exact_match_precision);
 
-  /** @brief Get the number of trajectories to preserve when deleting worse trajectories. */
-  size_t getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse() const;
+  /** @brief Get the number of trajectories to preserve when pruning worse trajectories. */
+  size_t getNumAdditionalTrajectoriesToPreserveWhenPruningWorse() const;
 
-  /** @brief Set the number of additional trajectories to preserve when deleting worse trajectories. */
-  void setNumAdditionalTrajectoriesToPreserveWhenDeletingWorse(
-      size_t num_additional_trajectories_to_preserve_when_deleting_worse);
+  /** @brief Set the number of additional trajectories to preserve when pruning worse trajectories. */
+  void setNumAdditionalTrajectoriesToPreserveWhenPruningWorse(
+      size_t num_additional_trajectories_to_preserve_when_pruning_worse);
 
   /**@}*/
 

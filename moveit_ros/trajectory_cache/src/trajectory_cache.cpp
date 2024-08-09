@@ -178,16 +178,16 @@ void TrajectoryCache::setExactMatchPrecision(double exact_match_precision)
   options_.exact_match_precision = exact_match_precision;
 }
 
-size_t TrajectoryCache::getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse() const
+size_t TrajectoryCache::getNumAdditionalTrajectoriesToPreserveWhenPruningWorse() const
 {
-  return options_.num_additional_trajectories_to_preserve_when_deleting_worse;
+  return options_.num_additional_trajectories_to_preserve_when_pruning_worse;
 }
 
-void TrajectoryCache::setNumAdditionalTrajectoriesToPreserveWhenDeletingWorse(
-    size_t num_additional_trajectories_to_preserve_when_deleting_worse)
+void TrajectoryCache::setNumAdditionalTrajectoriesToPreserveWhenPruningWorse(
+    size_t num_additional_trajectories_to_preserve_when_pruning_worse)
 {
-  options_.num_additional_trajectories_to_preserve_when_deleting_worse =
-      num_additional_trajectories_to_preserve_when_deleting_worse;
+  options_.num_additional_trajectories_to_preserve_when_pruning_worse =
+      num_additional_trajectories_to_preserve_when_pruning_worse;
 }
 
 // =================================================================================================
@@ -271,7 +271,7 @@ bool TrajectoryCache::insertTrajectory(
     for (const auto& matching_entry : matching_entries)
     {
       std::string prune_reason;
-      if (++preserved_count > options_.num_additional_trajectories_to_preserve_when_deleting_worse &&
+      if (++preserved_count > options_.num_additional_trajectories_to_preserve_when_pruning_worse &&
           cache_insert_policy.shouldPruneMatchingEntry(move_group, plan_request, plan, matching_entry, &prune_reason))
       {
         int delete_id = matching_entry->lookupInt("id");
@@ -411,7 +411,7 @@ bool TrajectoryCache::insertCartesianTrajectory(
     for (const auto& matching_entry : matching_entries)
     {
       std::string prune_reason;
-      if (++preserved_count > options_.num_additional_trajectories_to_preserve_when_deleting_worse &&
+      if (++preserved_count > options_.num_additional_trajectories_to_preserve_when_pruning_worse &&
           cache_insert_policy.shouldPruneMatchingEntry(move_group, plan_request, plan, matching_entry, &prune_reason))
       {
         int delete_id = matching_entry->lookupInt("id");

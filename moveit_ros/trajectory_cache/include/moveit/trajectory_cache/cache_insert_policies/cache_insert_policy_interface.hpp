@@ -88,8 +88,8 @@ namespace trajectory_cache
  * ^^^^^^^^^^^^^^^^^^^^^
  * Pruning is a two step process:
  *   1. Fetch all "matching" cache entries, as defined by the policy
- *   2. From the fetched "matching" entries, subject each to the `shouldPruneMatchingEntry` method, again
- *      defined by the policy.
+ *   2. From the fetched "matching" entries, subject each to the `shouldPruneMatchingEntry` method,
+ *      again defined by the policy.
  *
  * This allows a user to define a policy to match and prune on any arbitrary properties of
  * the cache entries and insertion candidate.
