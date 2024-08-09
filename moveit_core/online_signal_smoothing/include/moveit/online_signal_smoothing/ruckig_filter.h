@@ -89,8 +89,9 @@ private:
 
   /**
    * A utility to get velocity/acceleration/jerk bounds from the robot model
+   * @return true if all bounds are defined
    */
-  void getVelAccelJerkBounds();
+  bool getVelAccelJerkBounds();
 
   rclcpp::Node::SharedPtr node_;
   /** \brief Parameters loaded from yaml file at runtime */
@@ -105,6 +106,6 @@ private:
 
   std::vector<double> joint_velocity_bounds_;
   std::vector<double> joint_acceleration_bounds_;
-  std::vector<double> joint_jerk_bounds_;
+  std::optional<std::vector<double>> joint_jerk_bounds_;
 };
 }  // namespace online_signal_smoothing
