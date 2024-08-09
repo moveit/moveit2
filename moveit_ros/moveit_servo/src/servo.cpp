@@ -79,16 +79,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
-  // Load the smoothing plugin
-  if (servo_params_.use_smoothing)
-  {
-    setSmoothingPlugin();
-  }
-  else
-  {
-    RCLCPP_WARN(logger_, "No smoothing plugin loaded");
-  }
-
   // Create the collision checker and start collision checking.
   collision_monitor_ =
       std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, std::ref(collision_velocity_scale_));
@@ -125,6 +115,17 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     joint_name_to_index_maps_.insert(
         std::make_pair<std::string, JointNameToMoveGroupIndexMap>(std::string(sub_group_name), std::move(new_map)));
   }
+
+  // Load the smoothing plugin
+  if (servo_params_.use_smoothing)
+  {
+    setSmoothingPlugin();
+  }
+  else
+  {
+    RCLCPP_WARN(logger_, "No smoothing plugin loaded");
+  }
+
   RCLCPP_INFO_STREAM(logger_, "Servo initialized successfully");
 }
 
@@ -158,7 +159,6 @@ void Servo::setSmoothingPlugin()
     RCLCPP_ERROR(logger_, "Smoothing plugin could not be initialized");
     std::exit(EXIT_FAILURE);
   }
-  resetSmoothing(getCurrentRobotState());
 }
 
 void Servo::doSmoothing(KinematicState& state)
@@ -526,9 +526,6 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     // Adjust joint position based on scaled down velocity
     target_state.positions = current_state.positions + (target_state.velocities * servo_params_.publish_period);
 
-    // Apply smoothing to the positions if a smoother was provided.
-    doSmoothing(target_state);
-
     // Apply collision scaling to the joint position delta
     target_state.positions =
         current_state.positions + collision_velocity_scale_ * (target_state.positions - current_state.positions);
@@ -548,8 +545,8 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     }
   }
 
-  // Update internal state of filter with final calculated command.
-  resetSmoothing(target_state);
+  // Apply smoothing to the positions if a smoother was provided.
+  doSmoothing(target_state);
 
   return target_state;
 }
@@ -647,8 +644,21 @@ std::optional<PoseCommand> Servo::toPlanningFrame(const PoseCommand& command, co
   return PoseCommand{ planning_frame, planning_to_command_tf * command.pose };
 }
 
-KinematicState Servo::getCurrentRobotState() const
+KinematicState Servo::getCurrentRobotState(bool block_for_current_state) const
 {
+  if (block_for_current_state)
+  {
+    bool have_current_state = false;
+    while (rclcpp::ok() && !have_current_state)
+    {
+      have_current_state = planning_scene_monitor_->getStateMonitor()->waitForCurrentState(
+          rclcpp::Clock(RCL_ROS_TIME).now(), ROBOT_STATE_WAIT_TIME /* s */);
+      if (!have_current_state)
+      {
+        RCLCPP_WARN(logger_, "Waiting for the current state");
+      }
+    }
+  }
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   return extractRobotState(robot_state, servo_params_.move_group_name);
 }
@@ -665,9 +675,6 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
     // set target velocity
     target_state.velocities *= 0.0;
 
-    // apply smoothing: this will change target position/velocity to make slow down gradual
-    doSmoothing(target_state);
-
     // scale velocity in case of obstacle
     target_state.velocities *= collision_velocity_scale_;
 
@@ -681,7 +688,9 @@ std::pair<bool, KinematicState> Servo::smoothHalt(const KinematicState& halt_sta
     }
   }
 
-  resetSmoothing(target_state);
+  // apply smoothing: this will change target position/velocity to make slow down gradual
+  doSmoothing(target_state);
+
   return std::make_pair(stopped, target_state);
 }
 

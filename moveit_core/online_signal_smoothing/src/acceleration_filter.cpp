@@ -34,7 +34,6 @@
 
 #include <moveit/online_signal_smoothing/acceleration_filter.h>
 #include <rclcpp/logging.hpp>
-#include <Eigen/Sparse>
 
 // Disable -Wold-style-cast because all _THROTTLE macros trigger this
 #pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -345,5 +344,4 @@ bool AccelerationLimitedPlugin::reset(const Eigen::VectorXd& positions, const Ei
 }  // namespace online_signal_smoothing
 
 #include <pluginlib/class_list_macros.hpp>
-
 PLUGINLIB_EXPORT_CLASS(online_signal_smoothing::AccelerationLimitedPlugin, online_signal_smoothing::SmoothingBaseClass)
