@@ -68,16 +68,12 @@ bool RuckigFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::
   ruckig_input.max_acceleration = joint_acceleration_bounds_;
   ruckig_input.current_position = std::vector<double>(num_joints_, 0.0);
   ruckig_input.current_velocity = std::vector<double>(num_joints_, 0.0);
-  ruckig_input.current_acceleration = std::vector<double>(num_joints_, 0.0);
 
   // These quantities can be omitted if jerk limits are not applied
   if (joint_jerk_bounds_)
   {
     ruckig_input.max_jerk = *joint_jerk_bounds_;
-  }
-  else
-  {
-    ruckig_input.max_jerk = std::vector<double>(num_joints_, 0.0);
+    ruckig_input.current_acceleration = std::vector<double>(num_joints_, 0.0);
   }
 
   ruckig_input_ = ruckig_input;
@@ -104,23 +100,30 @@ bool RuckigFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd
       ruckig_input_->current_velocity = ruckig_output_->new_velocity;
     }
   }
-  else
-  {
-    // TODO
-    ;
-  }
 
   // Update Ruckig target state
   // This assumes stationary at the target (zero vel, zero accel)
   ruckig_input_->target_position = std::vector<double>(positions.data(), positions.data() + positions.size());
   ruckig_input_->target_velocity = std::vector<double>(num_joints_, 0);
-  ruckig_input_->target_acceleration = std::vector<double>(num_joints_, 0);
   if (!joint_jerk_bounds_)
   {
+    ruckig_input_->target_acceleration = std::vector<double>(num_joints_, 0);
     ruckig_input_->current_acceleration = std::vector<double>(num_joints_, 0.0);
   }
 
   // Call the Ruckig algorithm
+  try
+  {
+    ruckig_->validate_input(*ruckig_input_, true, true);
+  }
+  catch (const std::runtime_error& error)
+  {
+    RCLCPP_ERROR_STREAM(getLogger(), "Invalid Ruckig input. " << error.what() << std::endl);
+  }
+  if (!ruckig_->validate_input(*ruckig_input_, true, true))
+  {
+    std::cerr << "Invalid input!" << std::endl;
+  }
   ruckig::Result ruckig_result = ruckig_->update(*ruckig_input_, *ruckig_output_);
 
   // Finished means the target state can be reached in this timestep.
