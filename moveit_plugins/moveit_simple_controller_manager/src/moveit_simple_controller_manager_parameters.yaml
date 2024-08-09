@@ -1,0 +1,103 @@
+moveit_simple_controller_manager:
+  controller_names: {
+    type: string_array,
+    default_value: [],
+    description: "List of controllers for MoveIt's controller manager",
+    validation: {
+      not_empty<>: []
+    }
+  }
+  __map_controller_names:
+    action_ns: {
+      type: string,
+      default_value: "",
+      description: "Action namespace for the controller. The action topic names will start with `/controller_name/action_ns`",
+      validation: {
+        not_empty<>: []
+      }
+    }
+    type: {
+      type: string,
+      default_value: "",
+      description: "Controller type. FollowJointTrajectory or GripperCommand",
+      validation: {
+        not_empty<>: []
+      }
+    }
+    make_default: {
+      type: bool,
+      default_value: false,
+      description: "This param was originally named default. Marking a controller as
+       default makes MoveIt prefer this controller when multiple options are available.",
+      validation: {
+        not_empty<>: []
+      }
+    }
+    joints: {
+      type: string_array,
+      default_value: [],
+      description: "list of joints to actuate",
+      validation: {
+        not_empty<>: []
+      }
+    }
+    # parameters for gripper controllers
+    max_effort: {
+      type: double,
+      default_value: 0.0,
+      description: "Max Effort. Parameter to be set if using GripperCommand"
+    }
+    parallel: {
+      type: bool,
+      default_value: false,
+      description: "Parallel gripper require exactly two joints. If true, specify only two joints. Parameter to be set if using GripperCommand"
+    }
+    command_joint: {
+      type: string,
+      default_value: "",
+      description: "If not parallel, set the joint to command. Parameter to be set if using GripperCommand"
+    }
+    allow_failure: {
+      type: bool,
+      default_value: false,
+      description: "Parameter to be set if using GripperCommand"
+    }
+    # parameters for follow joint trajectory controllers
+    goal_time_tolerance: {
+      type: double,
+      default_value: 0.0,
+      description: "Parameter to be set if using FollowJointTrajectory"
+    }
+    # __map_joints:
+    #   path_tolerance:
+    #     position: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #     velocity: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #     acceleration: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #   goal_tolerance:
+    #     position: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #     velocity: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
+    #     acceleration: {
+    #       type: double,
+    #       default_value: 0.0,
+    #       description: "Parameter to be set if using FollowJointTrajectory"
+    #     }
