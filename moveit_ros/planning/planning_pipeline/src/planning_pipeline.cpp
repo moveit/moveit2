@@ -37,6 +37,9 @@
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <fmt/format.h>
 #include <moveit/utils/logger.hpp>
+#include <chrono>
+#include <ratio>
+#include <stdexcept>
 
 namespace
 {
@@ -267,19 +270,32 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
   // ---------------------------------
   // Solve the motion planning problem
   // ---------------------------------
-
   planning_interface::MotionPlanRequest mutable_request = req;
   try
   {
+    using clock = std::chrono::system_clock;
+    const auto plan_start_time = clock::now();
+    const double allowed_planning_time = req.allowed_planning_time;
+
     // Call plan request adapter chain
     for (const auto& req_adapter : planning_request_adapter_vector_)
     {
       assert(req_adapter);
       RCLCPP_INFO(node_->get_logger(), "Calling PlanningRequestAdapter '%s'", req_adapter->getDescription().c_str());
-      const auto status = req_adapter->adapt(planning_scene, mutable_request);
+      auto status = req_adapter->adapt(planning_scene, mutable_request);
       res.error_code = status.val;
+
       // Publish progress
       publishPipelineState(mutable_request, res, req_adapter->getDescription());
+
+      // check for timeout (mainly for sanity check since adapters are fast)
+      if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+      {
+        status.message =
+            "Failed to finish planning within allowed planning time ( " + std::to_string(allowed_planning_time) + "s )";
+        res.error_code = moveit::core::MoveItErrorCode::TIMED_OUT;
+      }
+
       // If adapter does not succeed, break chain and return false
       if (!res.error_code)
       {
@@ -292,9 +308,15 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
     }
 
     // Call planners
-    for (const auto& planner_name : pipeline_parameters_.planning_plugins)
+    for (size_t i = 0; i < pipeline_parameters_.planning_plugins.size(); i++)
     {
-      const auto& planner = planner_map_.at(planner_name);
+      // modify planner request to notice plugins of their corresponding max_allowed_time
+      // NOTE: currently just evenly distributing the remaining time among the remaining planners
+      mutable_request.allowed_planning_time =
+          (allowed_planning_time - std::chrono::duration<double>(clock::now() - plan_start_time).count()) /
+          (pipeline_parameters_.planning_plugins.size() - i);
+
+      const auto& planner = planner_map_.at(pipeline_parameters_.planning_plugins.at(i));
       // Update reference trajectory with latest solution (if available)
       if (res.trajectory)
       {
@@ -319,6 +341,12 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       context->solve(res);
       publishPipelineState(mutable_request, res, planner->getDescription());
 
+      // check for overall timeout
+      if (std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+      {
+        res.error_code = moveit::core::MoveItErrorCode::TIMED_OUT;
+      }
+
       // If planner does not succeed, break chain and return false
       if (!res.error_code)
       {
@@ -332,6 +360,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
     // Call plan response adapter chain
     if (res.error_code)
     {
+      auto start_time = clock::now();
       // Call plan request adapter chain
       for (const auto& res_adapter : planning_response_adapter_vector_)
       {
@@ -339,6 +368,15 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         RCLCPP_INFO(node_->get_logger(), "Calling PlanningResponseAdapter '%s'", res_adapter->getDescription().c_str());
         res_adapter->adapt(planning_scene, mutable_request, res);
         publishPipelineState(mutable_request, res, res_adapter->getDescription());
+
+        // check for timeout
+        // NOTE: reserving 10ms here
+        if (std::chrono::duration<double>(clock::now() - start_time).count() >= 10.0 * 1e-3 &&
+            std::chrono::duration<double>(clock::now() - plan_start_time).count() >= allowed_planning_time)
+        {
+          res.error_code = moveit::core::MoveItErrorCode::TIMED_OUT;
+        }
+
         // If adapter does not succeed, break chain and return false
         if (!res.error_code)
         {
