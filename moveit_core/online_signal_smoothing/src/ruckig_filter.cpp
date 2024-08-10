@@ -61,20 +61,16 @@ bool RuckigFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::
   auto param_listener = online_signal_smoothing::ParamListener(node_);
   params_ = param_listener.get_params();
 
-  // Ruckig needs the joint vel/accel bounds, jerk bounds are optional
-  getVelAccelJerkBounds();
+  // Ruckig needs the joint vel/accel bounds
+  // TODO: Ruckig says the jerk bounds can be optional. We require them, for now.
   ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input(num_joints_);
-  ruckig_input.max_velocity = joint_velocity_bounds_;
-  ruckig_input.max_acceleration = joint_acceleration_bounds_;
+  if (!getVelAccelJerkBounds(ruckig_input.max_velocity, ruckig_input.max_acceleration, ruckig_input.max_jerk))
+  {
+    return false;
+  }
   ruckig_input.current_position = std::vector<double>(num_joints_, 0.0);
   ruckig_input.current_velocity = std::vector<double>(num_joints_, 0.0);
-
-  // These quantities can be omitted if jerk limits are not applied
-  if (joint_jerk_bounds_)
-  {
-    ruckig_input.max_jerk = *joint_jerk_bounds_;
-    ruckig_input.current_acceleration = std::vector<double>(num_joints_, 0.0);
-  }
+  ruckig_input.current_acceleration = std::vector<double>(num_joints_, 0.0);
 
   ruckig_input_ = ruckig_input;
 
@@ -90,40 +86,14 @@ bool RuckigFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd
 {
   if (have_initial_ruckig_output_)
   {
-    if (joint_jerk_bounds_)
-    {
-      ruckig_output_->pass_to_input(*ruckig_input_);
-    }
-    else
-    {
-      ruckig_input_->current_position = ruckig_output_->new_position;
-      ruckig_input_->current_velocity = ruckig_output_->new_velocity;
-    }
+    ruckig_output_->pass_to_input(*ruckig_input_);
   }
 
   // Update Ruckig target state
   // This assumes stationary at the target (zero vel, zero accel)
   ruckig_input_->target_position = std::vector<double>(positions.data(), positions.data() + positions.size());
-  ruckig_input_->target_velocity = std::vector<double>(num_joints_, 0);
-  if (!joint_jerk_bounds_)
-  {
-    ruckig_input_->target_acceleration = std::vector<double>(num_joints_, 0);
-    ruckig_input_->current_acceleration = std::vector<double>(num_joints_, 0.0);
-  }
 
   // Call the Ruckig algorithm
-  try
-  {
-    ruckig_->validate_input(*ruckig_input_, true, true);
-  }
-  catch (const std::runtime_error& error)
-  {
-    RCLCPP_ERROR_STREAM(getLogger(), "Invalid Ruckig input. " << error.what() << std::endl);
-  }
-  if (!ruckig_->validate_input(*ruckig_input_, true, true))
-  {
-    std::cerr << "Invalid input!" << std::endl;
-  }
   ruckig::Result ruckig_result = ruckig_->update(*ruckig_input_, *ruckig_output_);
 
   // Finished means the target state can be reached in this timestep.
@@ -160,21 +130,22 @@ bool RuckigFilterPlugin::reset(const Eigen::VectorXd& positions, const Eigen::Ve
   // Initialize Ruckig
   ruckig_input_->current_position = std::vector<double>(positions.data(), positions.data() + positions.size());
   ruckig_input_->current_velocity = std::vector<double>(velocities.data(), velocities.data() + velocities.size());
-  if (joint_jerk_bounds_)
-  {
-    ruckig_input_->current_acceleration =
-        std::vector<double>(accelerations.data(), accelerations.data() + accelerations.size());
-  }
+  ruckig_input_->current_acceleration =
+      std::vector<double>(accelerations.data(), accelerations.data() + accelerations.size());
 
   have_initial_ruckig_output_ = false;
   return true;
 }
 
-bool RuckigFilterPlugin::getVelAccelJerkBounds()
+bool RuckigFilterPlugin::getVelAccelJerkBounds(std::vector<double>& joint_velocity_bounds,
+                                               std::vector<double>& joint_acceleration_bounds,
+                                               std::vector<double>& joint_jerk_bounds)
 {
+  joint_velocity_bounds.clear();
+  joint_acceleration_bounds.clear();
+  joint_jerk_bounds.clear();
+
   auto joint_model_group = robot_model_->getJointModelGroup(params_.planning_group_name);
-  bool have_all_jerk_bounds = true;
-  std::vector<double> jerk_bounds;
   for (const auto& joint : joint_model_group->getActiveJointModels())
   {
     const auto& bound = joint->getVariableBounds(joint->getName());
@@ -182,7 +153,7 @@ bool RuckigFilterPlugin::getVelAccelJerkBounds()
     if (bound.velocity_bounded_)
     {
       // Assume symmetric limits
-      joint_velocity_bounds_.push_back(bound.max_velocity_);
+      joint_velocity_bounds.push_back(bound.max_velocity_);
     }
     else
     {
@@ -193,35 +164,26 @@ bool RuckigFilterPlugin::getVelAccelJerkBounds()
     if (bound.acceleration_bounded_)
     {
       // Assume symmetric limits
-      joint_acceleration_bounds_.push_back(bound.max_acceleration_);
+      joint_acceleration_bounds.push_back(bound.max_acceleration_);
     }
     else
     {
       RCLCPP_WARN(getLogger(), "No joint acceleration limit defined. Very large accelerations will be "
                                "possible.");
-      joint_acceleration_bounds_.push_back(DBL_MAX);
+      joint_acceleration_bounds.push_back(DBL_MAX);
     }
 
     if (bound.jerk_bounded_)
     {
       // Assume symmetric limits
-      jerk_bounds.push_back(bound.max_jerk_);
+      joint_jerk_bounds.push_back(bound.max_jerk_);
     }
-    // else, joint_jerk_bounds_ will be a std::nullopt and Ruckig doesn't apply jerk limits
+    // else, return false
     else
     {
-      have_all_jerk_bounds = false;
+      RCLCPP_WARN(getLogger(), "No joint jerk limit was defined. The output from Ruckig will not be jerk-limited.");
+      return false;
     }
-  }
-
-  if (!have_all_jerk_bounds)
-  {
-    joint_jerk_bounds_ = std::nullopt;
-    RCLCPP_WARN(getLogger(), "No joint jerk limit was defined. The output from Ruckig will not be jerk-limited.");
-  }
-  else
-  {
-    joint_jerk_bounds_ = jerk_bounds;
   }
 
   return true;

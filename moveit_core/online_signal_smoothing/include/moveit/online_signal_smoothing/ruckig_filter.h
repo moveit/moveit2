@@ -91,7 +91,8 @@ private:
    * A utility to get velocity/acceleration/jerk bounds from the robot model
    * @return true if all bounds are defined
    */
-  bool getVelAccelJerkBounds();
+  bool getVelAccelJerkBounds(std::vector<double>& joint_velocity_bounds, std::vector<double>& joint_acceleration_bounds,
+                             std::vector<double>& joint_jerk_bounds);
 
   rclcpp::Node::SharedPtr node_;
   /** \brief Parameters loaded from yaml file at runtime */
@@ -103,9 +104,5 @@ private:
   std::optional<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_;
   std::optional<ruckig::InputParameter<ruckig::DynamicDOFs>> ruckig_input_;
   std::optional<ruckig::OutputParameter<ruckig::DynamicDOFs>> ruckig_output_;
-
-  std::vector<double> joint_velocity_bounds_;
-  std::vector<double> joint_acceleration_bounds_;
-  std::optional<std::vector<double>> joint_jerk_bounds_;
 };
 }  // namespace online_signal_smoothing
