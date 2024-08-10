@@ -438,7 +438,12 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     debug_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
     debug_msg.step = w * sizeof(float);
     debug_msg.data.resize(img_size * sizeof(float));
-    mesh_filter_->getModelDepth(reinterpret_cast<double*>(&debug_msg.data[0]));
+    std::vector<float> tmp_debug_msg_data;
+    tmp_debug_msg_data.resize(img_size * sizeof(float));
+    mesh_filter_->getModelDepth(reinterpret_cast<double*>(&tmp_debug_msg_data[0]));
+    for (int i = 0; i < debug_msg.data.size(); i++) {
+      debug_msg.data[i] = static_cast<unsigned short>(tmp_debug_msg_data[i] * 1000 + 0.5);
+    }
     pub_model_depth_image_.publish(debug_msg, *info_msg);
 
     sensor_msgs::msg::Image filtered_depth_msg;
@@ -449,7 +454,12 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     filtered_depth_msg.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
     filtered_depth_msg.step = w * sizeof(float);
     filtered_depth_msg.data.resize(img_size * sizeof(float));
-    mesh_filter_->getFilteredDepth(reinterpret_cast<double*>(&filtered_depth_msg.data[0]));
+    std::vector<float> tmp_filtered_depth_msg_data;
+    tmp_filtered_depth_msg_data.resize(img_size * sizeof(float));
+    mesh_filter_->getFilteredDepth(reinterpret_cast<double*>(&tmp_filtered_depth_msg_data[0]));
+    for (int i = 0; i < filtered_depth_msg.data.size(); i++) {
+      filtered_depth_msg.data[i] = static_cast<unsigned short>(tmp_filtered_depth_msg_data[i] * 1000 + 0.5);
+    }
     pub_filtered_depth_image_.publish(filtered_depth_msg, *info_msg);
 
     sensor_msgs::msg::Image label_msg;
@@ -460,7 +470,12 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     label_msg.encoding = sensor_msgs::image_encodings::RGBA8;
     label_msg.step = w * sizeof(unsigned int);
     label_msg.data.resize(img_size * sizeof(unsigned int));
-    mesh_filter_->getFilteredLabels(reinterpret_cast<unsigned int*>(&label_msg.data[0]));
+    std::vector<float> tmp_label_msg_data;
+    tmp_label_msg_data.resize(img_size * sizeof(unsigned int));
+    mesh_filter_->getFilteredLabels(reinterpret_cast<unsigned int*>(&tmp_label_msg_data[0]));
+    for (int i = 0; i < filtered_depth_msg.data.size(); i++) {
+      label_msg.data[i] = static_cast<unsigned short>(tmp_label_msg_data[i]);
+    }
 
     pub_filtered_label_image_.publish(label_msg, *info_msg);
   }
