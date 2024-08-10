@@ -93,10 +93,9 @@ protected:
     switch_input_client_ =
         servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("/servo_node/switch_command_type");
 
-    waitForService();
-
     executor_.add_node(servo_test_node_);
     executor_thread_ = std::thread([this]() { executor_.spin(); });
+    waitForService();
   }
 
   void TearDown() override
@@ -120,7 +119,7 @@ protected:
         std::exit(EXIT_FAILURE);
       }
 
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
     RCLCPP_INFO(logger, "MoveIt Servo input switching service ready!");
   }
@@ -133,7 +132,7 @@ protected:
 
     while (rclcpp::ok() && state_count_ == 0)
     {
-      rclcpp::sleep_for(std::chrono::milliseconds(500));
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
       auto elapsed_time = servo_test_node_->now() - start_time;
       if (elapsed_time >= wait_timeout)
       {

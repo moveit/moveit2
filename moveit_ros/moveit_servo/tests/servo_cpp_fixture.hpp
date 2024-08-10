@@ -64,6 +64,19 @@ protected:
 
     servo_test_instance_ =
         std::make_shared<moveit_servo::Servo>(servo_test_node_, servo_param_listener_, planning_scene_monitor_);
+
+    executor_.add_node(servo_test_node_);
+    executor_thread_ = std::thread([this]() { executor_.spin(); });
+  }
+
+  void TearDown() override
+  {
+    executor_.remove_node(servo_test_node_);
+    executor_.cancel();
+    if (executor_thread_.joinable())
+    {
+      executor_thread_.join();
+    }
   }
 
   /// Helper function to get the current pose of a specified frame.
@@ -73,6 +86,11 @@ protected:
   }
 
   std::shared_ptr<rclcpp::Node> servo_test_node_;
+
+  // Executor and a thread to run the executor.
+  rclcpp::executors::SingleThreadedExecutor executor_;
+  std::thread executor_thread_;
+
   std::shared_ptr<const servo::ParamListener> servo_param_listener_;
   servo::Params servo_params_;
   std::shared_ptr<moveit_servo::Servo> servo_test_instance_;

@@ -98,7 +98,7 @@ TEST_F(ServoRosFixture, testJointJog)
     jog_cmd.header.stamp = servo_test_node_->now();
     joint_jog_publisher->publish(jog_cmd);
     count++;
-    rclcpp::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
 
   ASSERT_GE(traj_count_, NUM_COMMANDS);
@@ -137,7 +137,7 @@ TEST_F(ServoRosFixture, testTwist)
     twist_cmd.header.stamp = servo_test_node_->now();
     twist_publisher->publish(twist_cmd);
     count++;
-    rclcpp::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
 
   ASSERT_GE(traj_count_, NUM_COMMANDS);
@@ -178,7 +178,7 @@ TEST_F(ServoRosFixture, testPose)
     pose_cmd.header.stamp = servo_test_node_->now();
     pose_publisher->publish(pose_cmd);
     count++;
-    rclcpp::sleep_for(std::chrono::milliseconds(200));
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
   }
 
   ASSERT_GE(traj_count_, NUM_COMMANDS);
