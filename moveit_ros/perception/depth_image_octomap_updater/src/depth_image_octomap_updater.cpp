@@ -441,7 +441,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     std::vector<float> tmp_debug_msg_data;
     tmp_debug_msg_data.resize(img_size * sizeof(float));
     mesh_filter_->getModelDepth(reinterpret_cast<double*>(&tmp_debug_msg_data[0]));
-    for (int i = 0; i < debug_msg.data.size(); i++)
+    for (std::size_t i = 0; i < debug_msg.data.size(); ++i)
     {
       debug_msg.data[i] = static_cast<unsigned short>(tmp_debug_msg_data[i] * 1000 + 0.5);
     }
@@ -458,7 +458,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     std::vector<float> tmp_filtered_depth_msg_data;
     tmp_filtered_depth_msg_data.resize(img_size * sizeof(float));
     mesh_filter_->getFilteredDepth(reinterpret_cast<double*>(&tmp_filtered_depth_msg_data[0]));
-    for (int i = 0; i < filtered_depth_msg.data.size(); i++)
+    for (std::size_t i = 0; i < filtered_depth_msg.data.size(); ++i)
     {
       filtered_depth_msg.data[i] = static_cast<unsigned short>(tmp_filtered_depth_msg_data[i] * 1000 + 0.5);
     }
@@ -475,7 +475,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     std::vector<float> tmp_label_msg_data;
     tmp_label_msg_data.resize(img_size * sizeof(unsigned int));
     mesh_filter_->getFilteredLabels(reinterpret_cast<unsigned int*>(&tmp_label_msg_data[0]));
-    for (int i = 0; i < filtered_depth_msg.data.size(); i++)
+    for (std::size_t i = 0; i < filtered_depth_msg.data.size(); ++i)
     {
       label_msg.data[i] = static_cast<unsigned short>(tmp_label_msg_data[i]);
     }
