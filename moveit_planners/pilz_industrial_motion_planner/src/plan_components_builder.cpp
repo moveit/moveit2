@@ -97,14 +97,8 @@ void PlanComponentsBuilder::blend(const planning_scene::PlanningSceneConstPtr& p
 
   // Append the new trajectory elements
   appendWithStrictTimeIncrease(*(traj_cont_.back()), *blend_response.first_trajectory);
-  for (size_t i = 0; i < traj_cont_.back()->getWayPointCount(); ++i) {
-    std::cout << "PRE-BLEND TRAJ CONT IDX " << i << ", dt = " << traj_cont_.back()->getWayPointDurationFromStart(i) << std::endl;
-  }
-  // traj_cont_.back()->append(*blend_response.blend_trajectory, 0.0);
   appendWithStrictTimeIncrease(*(traj_cont_.back()), *blend_response.blend_trajectory);
-  for (size_t i = 0; i < traj_cont_.back()->getWayPointCount(); ++i) {
-    std::cout << "POST-BLEND TRAJ CONT IDX " << i << ", dt = " << traj_cont_.back()->getWayPointDurationFromStart(i) << std::endl;
-  }
+
   // Store the last new trajectory element for future processing
   traj_tail_ = blend_response.second_trajectory;  // first for next blending segment
 }
