@@ -414,7 +414,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         if sensors_path.exists():
             sensors_data = load_yaml(sensors_path)
             # TODO(mikeferguson): remove the second part of this check once
-            # https://github.com/ros-planning/moveit_resources/pull/141 has made through buildfarm
+            # https://github.com/moveit/moveit_resources/pull/141 has made through buildfarm
             if len(sensors_data["sensors"]) > 0 and sensors_data["sensors"][0]:
                 self.__moveit_configs.sensors_3d = sensors_data
         return self

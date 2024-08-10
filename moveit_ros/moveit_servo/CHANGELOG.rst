@@ -2,6 +2,34 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* remove intraprocess comm warning (`#2752 <https://github.com/moveit/moveit2/issues/2752>`_)
+* Fix error message text in servo.cpp (`#2769 <https://github.com/moveit/moveit2/issues/2769>`_)
+* Fix launch parameters in Servo demos (`#2735 <https://github.com/moveit/moveit2/issues/2735>`_)
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* [Servo] Fix collision checking with attached objects (`#2747 <https://github.com/moveit/moveit2/issues/2747>`_)
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Attempt to use SCHED_FIFO for Servo regardless of RT kernel (`#2653 <https://github.com/moveit/moveit2/issues/2653>`_)
+  * Attempt to use SCHED_FIFO for Servo regardless of RT kernel
+  * Update warning message if Servo fails to use SCHED_FIFO
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_ros/moveit_servo/src/servo_node.cpp
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  ---------
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+* Acceleration Limited Smoothing Plugin for Servo (`#2651 <https://github.com/moveit/moveit2/issues/2651>`_)
+* Contributors: Marc Bestmann, Nathan Brooks, Paul Gesel, Robert Haschke, Sebastian Castro, Sebastian Jahr, Stephanie Eng, Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * Add command queue to servo to account for latency (`#2594 <https://github.com/ros-planning/moveit2/issues/2594>`_)

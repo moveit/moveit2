@@ -542,7 +542,7 @@ void PlanningSceneMonitor::getMonitoredTopics(std::vector<std::string>& topics) 
   if (collision_object_subscriber_)
   {
     // TODO (anasarrak) This has been changed to subscriber on Moveit, look at
-    // https://github.com/ros-planning/moveit/pull/1406/files/cb9488312c00e9c8949d89b363766f092330954d#diff-fb6e26ecc9a73d59dbdae3f3e08145e6
+    // https://github.com/moveit/moveit/pull/1406/files/cb9488312c00e9c8949d89b363766f092330954d#diff-fb6e26ecc9a73d59dbdae3f3e08145e6
     topics.push_back(collision_object_subscriber_->get_topic_name());
   }
   if (planning_scene_world_subscriber_)
@@ -728,7 +728,21 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     RCLCPP_DEBUG(logger_, "scene update %f robot stamp: %f", fmod(last_update_time_.seconds(), 10.),
                  fmod(last_robot_motion_time_.seconds(), 10.));
     old_scene_name = scene_->getName();
-    result = scene_->usePlanningSceneMsg(scene);
+
+    if (!scene.is_diff && parent_scene_)
+    {
+      // clear maintained (diff) scene_ and set the full new scene in parent_scene_ instead
+      scene_->clearDiffs();
+      result = parent_scene_->setPlanningSceneMsg(scene);
+      // There were no callbacks for individual object changes, so rebuild the octree masks
+      excludeAttachedBodiesFromOctree();
+      excludeWorldObjectsFromOctree();
+    }
+    else
+    {
+      result = scene_->usePlanningSceneMsg(scene);
+    }
+
     if (octomap_monitor_)
     {
       if (!scene.is_diff && scene.world.octomap.octomap.data.empty())
@@ -740,23 +754,6 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     }
     robot_model_ = scene_->getRobotModel();
 
-    // if we just reset the scene completely but we were maintaining diffs, we need to fix that
-    if (!scene.is_diff && parent_scene_)
-    {
-      // the scene is now decoupled from the parent, since we just reset it
-      scene_->setAttachedBodyUpdateCallback(moveit::core::AttachedBodyCallback());
-      scene_->setCollisionObjectUpdateCallback(collision_detection::World::ObserverCallbackFn());
-      parent_scene_ = scene_;
-      scene_ = parent_scene_->diff();
-      scene_const_ = scene_;
-      scene_->setAttachedBodyUpdateCallback([this](moveit::core::AttachedBody* body, bool attached) {
-        currentStateAttachedBodyUpdateCallback(body, attached);
-      });
-      scene_->setCollisionObjectUpdateCallback(
-          [this](const collision_detection::World::ObjectConstPtr& object, collision_detection::World::Action action) {
-            currentWorldObjectUpdateCallback(object, action);
-          });
-    }
     if (octomap_monitor_)
     {
       excludeAttachedBodiesFromOctree();  // in case updates have happened to the attached bodies, put them in
@@ -869,7 +866,7 @@ void PlanningSceneMonitor::excludeRobotLinksFromOctree()
   bool warned = false;
   for (const moveit::core::LinkModel* link : links)
   {
-    std::vector<shapes::ShapeConstPtr> shapes = link->getShapes();  // copy shared ptrs on purpuse
+    std::vector<shapes::ShapeConstPtr> shapes = link->getShapes();  // copy shared ptrs on purpose
     for (std::size_t j = 0; j < shapes.size(); ++j)
     {
       // merge mesh vertices up to 0.1 mm apart

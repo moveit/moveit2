@@ -2,6 +2,32 @@
 Changelog for package moveit_planners_stomp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.10.0 (2024-06-13)
+-------------------
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* missing destination path (`#2668 <https://github.com/moveit/moveit2/issues/2668>`_)
+* Fix penalty-based cost function in STOMP (`#2625 <https://github.com/moveit/moveit2/issues/2625>`_)
+  * Fix penalty-based cost function in STOMP
+  This adds several test cases for STOMP's noise generation and cost
+  functions, and provides the following fixes:
+  * out-of-bounds vector access when tail states of trajectory are invalid
+  * smoothed costs overriding values of previous invalid groups
+  * missing validity check of last state in trajectory
+  * inability to disable cost function interpolation steps
+  * total cost of trajectory not summing up to sum of state penalties
+  * bug in Gaussian producing infinite values with invalid start states
+  * Improve documentation
+  ---------
+* Contributors: Henning Kayser, Robert Haschke, Sarvajith Adyanthaya, Sebastian Jahr, Tyler Weaver
+
 2.9.0 (2024-01-09)
 ------------------
 * Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)

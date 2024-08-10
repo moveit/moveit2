@@ -36,7 +36,9 @@
 
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
 #include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_trajectory/robot_trajectory.h>
 #include <geometric_shapes/check_isometry.h>
+#include <memory>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/logger.hpp>
 
@@ -51,6 +53,7 @@ static const double DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN = 0.5;  // allow 0.5
                                                                     // after scaling)
 static const double DEFAULT_CONTROLLER_GOAL_DURATION_SCALING =
     1.1;  // allow the execution of a trajectory to take more time than expected (scaled by a value > 1)
+static const bool DEFAULT_CONTROL_MULTI_DOF_JOINT_VARIABLES = false;
 
 TrajectoryExecutionManager::TrajectoryExecutionManager(const rclcpp::Node::SharedPtr& node,
                                                        const moveit::core::RobotModelConstPtr& robot_model,
@@ -97,6 +100,7 @@ void TrajectoryExecutionManager::initialize()
   execution_velocity_scaling_ = 1.0;
   allowed_start_tolerance_ = 0.01;
   wait_for_trajectory_completion_ = true;
+  control_multi_dof_joint_variables_ = DEFAULT_CONTROL_MULTI_DOF_JOINT_VARIABLES;
 
   allowed_execution_duration_scaling_ = DEFAULT_CONTROLLER_GOAL_DURATION_SCALING;
   allowed_goal_duration_margin_ = DEFAULT_CONTROLLER_GOAL_DURATION_MARGIN;
@@ -163,7 +167,7 @@ void TrajectoryExecutionManager::initialize()
         rclcpp::NodeOptions opt;
         opt.allow_undeclared_parameters(true);
         opt.automatically_declare_parameters_from_overrides(true);
-        controller_mgr_node_.reset(new rclcpp::Node("moveit_simple_controller_manager", opt));
+        controller_mgr_node_ = std::make_shared<rclcpp::Node>("moveit_simple_controller_manager", opt);
 
         auto all_params = node_->get_node_parameters_interface()->get_parameter_overrides();
         for (const auto& param : all_params)
@@ -203,6 +207,8 @@ void TrajectoryExecutionManager::initialize()
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_goal_duration_margin",
                                       allowed_goal_duration_margin_);
   controller_mgr_node_->get_parameter("trajectory_execution.allowed_start_tolerance", allowed_start_tolerance_);
+  controller_mgr_node_->get_parameter("trajectory_execution.control_multi_dof_joint_variables",
+                                      control_multi_dof_joint_variables_);
 
   if (manage_controllers_)
   {
@@ -383,8 +389,45 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& t
     return false;
   }
 
+  // Optionally, convert multi dof waypoints to joint states and replace trajectory for execution
+  std::optional<moveit_msgs::msg::RobotTrajectory> replaced_trajectory;
+  if (control_multi_dof_joint_variables_ && !trajectory.multi_dof_joint_trajectory.points.empty())
+  {
+    // We convert the trajectory message into a RobotTrajectory first,
+    // since the conversion to a combined JointTrajectory depends on the local variables
+    // of the Multi-DOF joint types.
+    moveit::core::RobotState reference_state(robot_model_);
+    reference_state.setToDefaultValues();
+    robot_trajectory::RobotTrajectory tmp_trajectory(robot_model_);
+    tmp_trajectory.setRobotTrajectoryMsg(reference_state, trajectory);
+
+    // Combine all joints for filtering the joint trajectory waypoints
+    std::vector<std::string> all_trajectory_joints = trajectory.joint_trajectory.joint_names;
+    for (const auto& mdof_joint : trajectory.multi_dof_joint_trajectory.joint_names)
+    {
+      all_trajectory_joints.push_back(mdof_joint);
+    }
+
+    // Convert back to single joint trajectory including the MDOF joint variables, e.g. position/x, position/y, ...
+    const auto joint_trajectory =
+        robot_trajectory::toJointTrajectory(tmp_trajectory, true /* include_mdof_joints */, all_trajectory_joints);
+
+    // Check success of conversion
+    // This should never happen when using MoveIt's interfaces, but users can pass anything into TEM::push() directly
+    if (!joint_trajectory.has_value())
+    {
+      RCLCPP_ERROR(logger_, "Failed to convert multi-DOF trajectory to joint trajectory, aborting execution!");
+      return false;
+    }
+
+    // Create a new robot trajectory message that only contains the combined joint trajectory
+    RCLCPP_DEBUG(logger_, "Successfully converted multi-DOF trajectory to joint trajectory for execution.");
+    replaced_trajectory = moveit_msgs::msg::RobotTrajectory();
+    replaced_trajectory->joint_trajectory = joint_trajectory.value();
+  }
+
   TrajectoryExecutionContext* context = new TrajectoryExecutionContext();
-  if (configure(*context, trajectory, controllers))
+  if (configure(*context, replaced_trajectory.value_or(trajectory), controllers))
   {
     if (verbose_)
     {
@@ -737,12 +780,12 @@ bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::Ro
   std::set<std::string> actuated_joints_single;
   for (const std::string& joint_name : trajectory.joint_trajectory.joint_names)
   {
-    const moveit::core::JointModel* jm = robot_model_->getJointModel(joint_name);
+    const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_name);
     if (jm)
     {
       if (jm->isPassive() || jm->getMimic() != nullptr || jm->getType() == moveit::core::JointModel::FIXED)
         continue;
-      actuated_joints_single.insert(jm->getName());
+      actuated_joints_single.insert(joint_name);
     }
   }
 
@@ -882,7 +925,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
     RCLCPP_WARN(logger_, "Failed to validate trajectory: couldn't receive full current joint state within 1s");
     return false;
   }
-
+  moveit::core::RobotState reference_state(*current_state);
   for (const auto& trajectory : context.trajectory_parts_)
   {
     if (!trajectory.joint_trajectory.points.empty())
@@ -896,30 +939,47 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
         return false;
       }
 
-      for (std::size_t i = 0, end = joint_names.size(); i < end; ++i)
+      std::set<const moveit::core::JointModel*> joints;
+      for (const auto& joint_name : joint_names)
       {
-        const moveit::core::JointModel* jm = current_state->getJointModel(joint_names[i]);
+        const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_name);
         if (!jm)
         {
-          RCLCPP_ERROR_STREAM(logger_, "Unknown joint in trajectory: " << joint_names[i]);
+          RCLCPP_ERROR_STREAM(logger_, "Unknown joint in trajectory: " << joint_name);
           return false;
         }
 
-        double cur_position = current_state->getJointPositions(jm)[0];
-        double traj_position = positions[i];
-        // normalize positions and compare
-        jm->enforcePositionBounds(&cur_position);
-        jm->enforcePositionBounds(&traj_position);
-        if (jm->distance(&cur_position, &traj_position) > allowed_start_tolerance_)
+        joints.insert(jm);
+      }
+
+      // Copy all variable positions to reference state, and then compare start state joint distance within bounds
+      // Note on multi-DOF joints: Instead of comparing the translation and rotation distances like it's done for
+      // the multi-dof trajectory, this check will use the joint's internal distance implementation instead.
+      // This is more accurate, but may require special treatment for cases like the diff drive's turn path geometry.
+      reference_state.setVariablePositions(joint_names, positions);
+
+      for (const auto joint : joints)
+      {
+        reference_state.enforcePositionBounds(joint);
+        current_state->enforcePositionBounds(joint);
+        if (reference_state.distance(*current_state, joint) > allowed_start_tolerance_)
         {
           RCLCPP_ERROR(logger_,
-                       "\nInvalid Trajectory: start point deviates from current robot state more than %g"
-                       "\njoint '%s': expected: %g, current: %g",
-                       allowed_start_tolerance_, joint_names[i].c_str(), traj_position, cur_position);
+                       "Invalid Trajectory: start point deviates from current robot state more than %g at joint '%s'."
+                       "\nEnable DEBUG for detailed state info.",
+                       allowed_start_tolerance_, joint->getName().c_str());
+          RCLCPP_DEBUG(logger_, "| Joint | Expected | Current |");
+          for (const auto& joint_name : joint_names)
+          {
+            RCLCPP_DEBUG(logger_, "| %s | %g | %g |", joint_name.c_str(),
+                         reference_state.getVariablePosition(joint_name),
+                         current_state->getVariablePosition(joint_name));
+          }
           return false;
         }
       }
     }
+
     if (!trajectory.multi_dof_joint_trajectory.points.empty())
     {
       // Check multi-dof trajectory
@@ -980,7 +1040,7 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
   std::set<std::string> actuated_joints;
 
   auto is_actuated = [this](const std::string& joint_name) -> bool {
-    const moveit::core::JointModel* jm = robot_model_->getJointModel(joint_name);
+    const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_name);
     return (jm && !jm->isPassive() && !jm->getMimic() && jm->getType() != moveit::core::JointModel::FIXED);
   };
   for (const std::string& joint_name : trajectory.multi_dof_joint_trajectory.joint_names)
@@ -1048,7 +1108,13 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
       {
         if (known_controllers_.find(controller) == known_controllers_.end())
         {
-          RCLCPP_ERROR(logger_, "Controller '%s' is not known", controller.c_str());
+          std::stringstream stream;
+          for (const auto& controller : known_controllers_)
+          {
+            stream << " `" << controller.first << '`';
+          }
+          RCLCPP_ERROR_STREAM(logger_,
+                              "Controller " << controller << " is not known. Known controllers: " << stream.str());
           return false;
         }
       }
@@ -1078,6 +1144,13 @@ bool TrajectoryExecutionManager::configure(TrajectoryExecutionContext& context,
     }
   }
   RCLCPP_ERROR(logger_, "Known controllers and their joints:\n%s", ss2.str().c_str());
+
+  if (!trajectory.multi_dof_joint_trajectory.joint_names.empty())
+  {
+    RCLCPP_WARN(logger_, "Hint: You can control multi-dof waypoints as joint trajectory by setting "
+                         "`trajectory_execution.control_multi_dof_joint_variables=True`");
+  }
+
   return false;
 }
 
@@ -1523,11 +1596,12 @@ bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionCon
 
       for (std::size_t i = 0; i < n && !moved; ++i)
       {
-        const moveit::core::JointModel* jm = cur_state->getJointModel(joint_names[i]);
+        const moveit::core::JointModel* jm = robot_model_->getJointOfVariable(joint_names[i]);
         if (!jm)
           continue;  // joint vanished from robot state (shouldn't happen), but we don't care
 
-        if (fabs(cur_state->getJointPositions(jm)[0] - prev_state->getJointPositions(jm)[0]) > allowed_start_tolerance_)
+        if (fabs(jm->distance(cur_state->getJointPositions(jm), prev_state->getJointPositions(jm))) >
+            allowed_start_tolerance_)
         {
           moved = true;
           no_motion_count = 0;

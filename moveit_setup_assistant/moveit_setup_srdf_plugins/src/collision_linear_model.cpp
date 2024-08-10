@@ -260,8 +260,8 @@ void SortFilterProxyModel::setShowAll(bool show_all)
 bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
 {
   CollisionLinearModel* m = qobject_cast<CollisionLinearModel*>(sourceModel());
-  if (!(show_all_ || m->reason(source_row) <= ALWAYS ||
-        m->data(m->index(source_row, 2), Qt::CheckStateRole) == Qt::Checked))
+  if (!show_all_ && m->reason(source_row) > ALWAYS &&
+      m->data(m->index(source_row, 2), Qt::CheckStateRole) != Qt::Checked)
     return false;  // not accepted due to check state
 
   const QRegExp regexp = filterRegExp();

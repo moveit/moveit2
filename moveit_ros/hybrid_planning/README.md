@@ -1,5 +1,5 @@
 # Hybrid Planning
-A Hybrid Planning architecture. You can find more information in the project's issues[#300](https://github.com/ros-planning/moveit2/issues/300), [#433](https://github.com/ros-planning/moveit2/issues/433) and on the [MoveIt 2 roadmap](https://moveit.ros.org/documentation/contributing/roadmap/). Furthermore, there is an extensive tutorial available [here](https://github.com/ros-planning/moveit2_tutorials/pull/97).
+A Hybrid Planning architecture. You can find more information in the project's issues[#300](https://github.com/moveit/moveit2/issues/300), [#433](https://github.com/moveit/moveit2/issues/433) and on the [MoveIt 2 roadmap](https://moveit.ros.org/documentation/contributing/roadmap/). Furthermore, there is an extensive tutorial available [here](https://github.com/moveit/moveit2_tutorials/pull/97).
 
 ## Getting started
 To start the demo run:

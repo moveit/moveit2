@@ -43,13 +43,21 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/logger.hpp>
 
-// TODO(henningkayser): Switch to boost/timer/progress_display.hpp with Boost 1.72
-// boost/progress.hpp is deprecated and will be replaced by boost/timer/progress_display.hpp in Boost 1.72.
-// Until then we need to suppress the deprecation warning.
-#define BOOST_ALLOW_DEPRECATED_HEADERS
 #include <boost/regex.hpp>
+
+#if __has_include(<boost/timer/progress_display.hpp>)
+#include <boost/timer/progress_display.hpp>
+using boost_progress_display = boost::timer::progress_display;
+#else
+// boost < 1.72
+#define BOOST_TIMER_ENABLE_DEPRECATED 1
 #include <boost/progress.hpp>
-#undef BOOST_ALLOW_DEPRECATED_HEADERS
+#undef BOOST_TIMER_ENABLE_DEPRECATED
+using boost_progress_display = boost::progress_display;
+#endif
+
+#include <boost/math/constants/constants.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <math.h>
 #include <limits>
@@ -776,7 +784,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
   }
   num_planners += options.parallel_planning_pipelines.size();
 
-  boost::progress_display progress(num_planners * options.runs, std::cout);
+  boost_progress_display progress(num_planners * options.runs, std::cout);
 
   // Iterate through all planning pipelines
   auto planning_pipelines = moveit_cpp_->getPlanningPipelines();

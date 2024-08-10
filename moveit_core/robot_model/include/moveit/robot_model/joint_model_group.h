@@ -406,7 +406,7 @@ public:
   void interpolate(const double* from, const double* to, double t, double* state) const;
 
   /** \brief Get the number of variables that describe this joint group. This includes variables necessary for mimic
-      joints, so will always be >= the number of items returned by getActiveVariableNames() */
+      joints, so will always be >= getActiveVariableCount() */
   unsigned int getVariableCount() const
   {
     return variable_count_;
@@ -585,6 +585,21 @@ public:
   /** \brief Computes the indices of joint variables given a vector of joint names to look up */
   bool computeJointVariableIndices(const std::vector<std::string>& joint_names,
                                    std::vector<size_t>& joint_bijection) const;
+
+  /**
+   * @brief Get the lower and upper position limits of all active variables in the group.
+   *
+   * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the lower and upper joint limits for all active variables.
+   */
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits() const;
+
+  /**
+   * @brief Gets the pair of maximum joint velocities/accelerations for a given group. Asserts that the group contains
+   * only single-variable joints,
+   * @details In case of asymmetric velocity or acceleration limits, this function will return the most limiting component.
+   * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the velocity and acceleration limits
+   */
+  [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getMaxVelocitiesAndAccelerationBounds() const;
 
 protected:
   /** \brief Update the variable values for the state of a group with respect to the mimic joints. This only updates
