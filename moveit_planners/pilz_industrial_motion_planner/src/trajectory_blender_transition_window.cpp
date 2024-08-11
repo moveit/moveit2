@@ -67,7 +67,11 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
   std::size_t second_intersection_index;
   if (!searchIntersectionPoints(req, first_intersection_index, second_intersection_index))
   {
+<<<<<<< HEAD
     RCLCPP_ERROR(LOGGER, "Blend radius to large.");
+=======
+    RCLCPP_ERROR(getLogger(), "Blend radius too large.");
+>>>>>>> 4fad0d0de (Fix Pilz blending times... the right way (#2961))
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
@@ -124,6 +128,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
 
   // append the blend trajectory
   res.blend_trajectory->setRobotTrajectoryMsg(req.first_trajectory->getFirstWayPoint(), blend_joint_trajectory);
+
   // copy the points [second_intersection_index, len] from the second trajectory
   for (size_t i = second_intersection_index + 1; i < req.second_trajectory->getWayPointCount(); ++i)
   {
