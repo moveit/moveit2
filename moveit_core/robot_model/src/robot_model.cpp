@@ -1365,7 +1365,7 @@ const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel*
 {
   if (!link)
   {
-    RCLCPP_ERROR(get_logger(), "Cannot determine rigidly connected parent link because input link is nullptr");
+    RCLCPP_ERROR(getLogger(), "Cannot determine rigidly connected parent link because input link is nullptr");
     return link;
   }
   const moveit::core::LinkModel* parent_link = link->getParentLinkModel();
