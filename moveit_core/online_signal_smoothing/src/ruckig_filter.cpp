@@ -52,31 +52,29 @@ rclcpp::Logger getLogger()
 bool RuckigFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
                                     size_t num_joints)
 {
-  node_ = node;
-  num_joints_ = num_joints;
   robot_model_ = robot_model;
-  have_initial_ruckig_output_ = false;
 
   // get node parameters and store in member variables
-  auto param_listener = online_signal_smoothing::ParamListener(node_);
+  auto param_listener = online_signal_smoothing::ParamListener(node);
   params_ = param_listener.get_params();
 
   // Ruckig needs the joint vel/accel bounds
   // TODO: Ruckig says the jerk bounds can be optional. We require them, for now.
-  ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input(num_joints_);
+  ruckig::InputParameter<ruckig::DynamicDOFs> ruckig_input(num_joints);
   if (!getVelAccelJerkBounds(ruckig_input.max_velocity, ruckig_input.max_acceleration, ruckig_input.max_jerk))
   {
     return false;
   }
-  ruckig_input.current_position = std::vector<double>(num_joints_, 0.0);
-  ruckig_input.current_velocity = std::vector<double>(num_joints_, 0.0);
-  ruckig_input.current_acceleration = std::vector<double>(num_joints_, 0.0);
+  ruckig_input.current_position = std::vector<double>(num_joints, 0.0);
+  ruckig_input.current_velocity = std::vector<double>(num_joints, 0.0);
+  ruckig_input.current_acceleration = std::vector<double>(num_joints, 0.0);
+  ruckig_input.synchronization = ruckig::Synchronization::Phase;
 
   ruckig_input_ = ruckig_input;
 
-  ruckig_output_.emplace(ruckig::OutputParameter<ruckig::DynamicDOFs>(num_joints_));
+  ruckig_output_.emplace(ruckig::OutputParameter<ruckig::DynamicDOFs>(num_joints));
 
-  ruckig_.emplace(ruckig::Ruckig<ruckig::DynamicDOFs>(num_joints_, params_.update_period));
+  ruckig_.emplace(ruckig::Ruckig<ruckig::DynamicDOFs>(num_joints, params_.update_period));
 
   return true;
 }
@@ -84,6 +82,12 @@ bool RuckigFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::
 bool RuckigFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities,
                                      Eigen::VectorXd& accelerations)
 {
+  if (!ruckig_input_ || !ruckig_output_ || !ruckig_)
+  {
+    RCLCPP_ERROR_STREAM(getLogger(), "The Ruckig smoother was not initialized");
+    return false;
+  }
+
   if (have_initial_ruckig_output_)
   {
     ruckig_output_->pass_to_input(*ruckig_input_);
@@ -141,6 +145,12 @@ bool RuckigFilterPlugin::getVelAccelJerkBounds(std::vector<double>& joint_veloci
                                                std::vector<double>& joint_acceleration_bounds,
                                                std::vector<double>& joint_jerk_bounds)
 {
+  if (!robot_model_)
+  {
+    RCLCPP_ERROR(getLogger(), "The robot model was not initialized.");
+    return false;
+  }
+
   joint_velocity_bounds.clear();
   joint_acceleration_bounds.clear();
   joint_jerk_bounds.clear();
@@ -157,8 +167,8 @@ bool RuckigFilterPlugin::getVelAccelJerkBounds(std::vector<double>& joint_veloci
     }
     else
     {
-      RCLCPP_ERROR(getLogger(), "No joint velocity limit defined. Exiting for safety.");
-      std::exit(EXIT_FAILURE);
+      RCLCPP_ERROR_STREAM(getLogger(), "No joint velocity limit defined for " << joint->getName() << ".");
+      return false;
     }
 
     if (bound.acceleration_bounded_)
@@ -168,9 +178,8 @@ bool RuckigFilterPlugin::getVelAccelJerkBounds(std::vector<double>& joint_veloci
     }
     else
     {
-      RCLCPP_WARN(getLogger(), "No joint acceleration limit defined. Very large accelerations will be "
-                               "possible.");
-      joint_acceleration_bounds.push_back(DBL_MAX);
+      RCLCPP_WARN_STREAM(getLogger(), "No joint acceleration limit defined for " << joint->getName() << ".");
+      return false;
     }
 
     if (bound.jerk_bounded_)
@@ -181,7 +190,8 @@ bool RuckigFilterPlugin::getVelAccelJerkBounds(std::vector<double>& joint_veloci
     // else, return false
     else
     {
-      RCLCPP_WARN(getLogger(), "No joint jerk limit was defined. The output from Ruckig will not be jerk-limited.");
+      RCLCPP_WARN_STREAM(getLogger(), "No joint jerk limit was defined for "
+                                          << joint->getName() << ". The output from Ruckig will not be jerk-limited.");
       return false;
     }
   }

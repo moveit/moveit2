@@ -94,13 +94,11 @@ private:
   bool getVelAccelJerkBounds(std::vector<double>& joint_velocity_bounds, std::vector<double>& joint_acceleration_bounds,
                              std::vector<double>& joint_jerk_bounds);
 
-  rclcpp::Node::SharedPtr node_;
   /** \brief Parameters loaded from yaml file at runtime */
   online_signal_smoothing::Params params_;
-  size_t num_joints_;
   /** \brief The robot model contains the vel/accel/jerk limits that Ruckig requires */
   moveit::core::RobotModelConstPtr robot_model_;
-  bool have_initial_ruckig_output_;
+  bool have_initial_ruckig_output_ = false;
   std::optional<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_;
   std::optional<ruckig::InputParameter<ruckig::DynamicDOFs>> ruckig_input_;
   std::optional<ruckig::OutputParameter<ruckig::DynamicDOFs>> ruckig_output_;
