@@ -75,7 +75,6 @@ protected:
   {
     // Create a node to be given to Servo.
     servo_test_node_ = std::make_shared<rclcpp::Node>("moveit_servo_test");
-    executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
 
     status_ = moveit_servo::StatusCode::INVALID;
 
@@ -96,13 +95,14 @@ protected:
 
     waitForService();
 
-    executor_->add_node(servo_test_node_);
-    executor_thread_ = std::thread([this]() { executor_->spin(); });
+    executor_.add_node(servo_test_node_);
+    executor_thread_ = std::thread([this]() { executor_.spin(); });
   }
 
   void TearDown() override
   {
-    executor_->cancel();
+    executor_.remove_node(servo_test_node_);
+    executor_.cancel();
     if (executor_thread_.joinable())
     {
       executor_thread_.join();
@@ -122,7 +122,7 @@ protected:
 
       rclcpp::sleep_for(std::chrono::milliseconds(500));
     }
-    RCLCPP_INFO(logger, "SERVICE READY");
+    RCLCPP_INFO(logger, "MoveIt Servo input switching service ready!");
   }
 
   void waitForJointStates()
@@ -150,7 +150,7 @@ protected:
   std::shared_ptr<rclcpp::Node> servo_test_node_;
 
   // Executor and a thread to run the executor.
-  rclcpp::Executor::SharedPtr executor_;
+  rclcpp::executors::SingleThreadedExecutor executor_;
   std::thread executor_thread_;
 
   rclcpp::Subscription<moveit_msgs::msg::ServoStatus>::SharedPtr status_subscriber_;
