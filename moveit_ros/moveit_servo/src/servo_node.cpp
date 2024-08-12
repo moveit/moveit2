@@ -315,6 +315,7 @@ void ServoNode::servoLoop()
     // Skip processing if servoing is disabled.
     if (servo_paused_)
     {
+      servo_->resetSmoothing(current_state);
       servo_frequency.sleep();
       continue;
     }
