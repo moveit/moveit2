@@ -1357,21 +1357,21 @@ LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
   {
     *has_link = false;  // Report failure via argument
   }
-  else
-  {  // Otherwise print error
-    RCLCPP_ERROR(getLogger(), "Link '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
-  }
+  RCLCPP_ERROR(getLogger(), "Link '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
   return nullptr;
 }
 
 const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link)
 {
   if (!link)
+  {
+    RCLCPP_ERROR(get_logger(), "Cannot determine rigidly connected parent link because input link is nullptr");
     return link;
+  }
   const moveit::core::LinkModel* parent_link = link->getParentLinkModel();
   const moveit::core::JointModel* joint = link->getParentJointModel();
 
-  while (parent_link && joint->getType() == moveit::core::JointModel::FIXED)
+  while (parent_link && joint && joint->getType() == moveit::core::JointModel::FIXED)
   {
     link = parent_link;
     joint = link->getParentJointModel();
