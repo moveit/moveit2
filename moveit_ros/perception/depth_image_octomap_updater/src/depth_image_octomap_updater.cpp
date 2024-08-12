@@ -460,9 +460,7 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
     label_msg.encoding = sensor_msgs::image_encodings::RGBA8;
     label_msg.step = w * sizeof(unsigned int);
     label_msg.data.resize(img_size * sizeof(unsigned int));
-    std::vector<float> tmp_label_msg_data;
-    tmp_label_msg_data.resize(img_size * sizeof(unsigned int));
-    mesh_filter_->getFilteredLabels(reinterpret_cast<unsigned int*>(&tmp_label_msg_data[0]));
+    mesh_filter_->getFilteredLabels(reinterpret_cast<unsigned int*>(&label_msg.data[0]));
 
     pub_filtered_label_image_.publish(label_msg, *info_msg);
   }
