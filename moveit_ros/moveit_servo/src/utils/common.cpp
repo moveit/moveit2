@@ -415,7 +415,6 @@ std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const
   std::vector<size_t> variable_indices_to_halt;
 
   // Now get the scaling factor from joint velocity limits.
-  size_t joint_idx = 0;
   size_t variable_idx = 0;
   for (const auto& joint_bound : joint_bounds)
   {
