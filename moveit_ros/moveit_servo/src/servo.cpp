@@ -267,7 +267,7 @@ bool Servo::validateParams(const servo::Params& servo_params)
         logger_, "The parameter 'joint_limit_margins' must have either a single element or the same number of "
                  "elements as the degrees of freedom in the active joint group. The size of 'joint_limit_margins' is '"
                      << servo_params.joint_limit_margins.size() << "' but the number of degrees of freedom in group '"
-                     << servo_params.move_group_name << "' is '" << num_dofs << "'" << check_yaml_string);
+                     << servo_params.move_group_name << "' is '" << num_dofs << "'." << check_yaml_string);
     params_valid = false;
   }
 
