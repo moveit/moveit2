@@ -327,7 +327,7 @@ servo:
   joint_limit_margins: {
     type: double_array,
     default_value: [0.1],
-    description: "Added as a buffer to joint limits [radians]. If moving quickly, make this larger. Can be of size 1, which applies the margin to all joints, or the same size as the number of degrees of freedom of the active joint group.",
+    description: "Added as a buffer to joint variable position bounds [in that joint variable's respective units]. Can be of size 1, which applies the margin to all joints, or the same size as the number of degrees of freedom of the active joint group. If moving quickly, make these values larger.",
     validation: {
       lower_element_bounds<>: 0.0
     }
@@ -336,7 +336,7 @@ servo:
   override_velocity_scaling_factor: {
     type: double,
     default_value: 0.0,
-    description: "Scaling factor when servo overrides the velocity (eg: near singularities)",
+    description: "Scaling factor when servo overrides the velocity (e.g, near singularities)",
     validation: {
       bounds<>: [0.0, 1.0]
     }
