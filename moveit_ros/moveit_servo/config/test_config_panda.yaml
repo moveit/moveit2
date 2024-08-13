@@ -37,13 +37,15 @@ smoothing_filter_plugin_name: "online_signal_smoothing::ButterworthFilterPlugin"
 is_primary_planning_scene_monitor: true
 
 ## MoveIt properties
-move_group_name:  panda_arm  # Often 'manipulator' or 'arm'
+move_group_name: panda_arm  # Often 'manipulator' or 'arm'
 
 ## Configure handling of singularities and joint limits
-lower_singularity_threshold:  17.0  # Start decelerating when the condition number hits this (close to singularity)
+lower_singularity_threshold: 17.0  # Start decelerating when the condition number hits this (close to singularity)
 hard_stop_singularity_threshold: 30.0 # Stop when the condition number hits this
-joint_limit_margins: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]  # added as a buffer to joint limits [radians or meters]. If moving quickly, make this larger.
 leaving_singularity_threshold_multiplier: 2.0 # Multiply the hard stop limit by this when leaving singularity (see https://github.com/moveit/moveit2/pull/620)
+# Added as a buffer to joint limits [radians or meters]. If moving quickly, make this larger.
+# Can be of size 1, which applies the margin to all joints, or the same size as the number of degrees of freedom of the active joint group.
+joint_limit_margins: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
 ## Topic names
 cartesian_command_in_topic: ~/delta_twist_cmds  # Topic for incoming Cartesian twist commands

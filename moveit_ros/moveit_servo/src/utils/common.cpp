@@ -408,24 +408,33 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
   return min_scaling_factor;
 }
 
-std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                              const moveit::core::JointBoundsVector& joint_bounds, const std::vector<double>& margins)
+std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+                                         const moveit::core::JointBoundsVector& joint_bounds,
+                                         const std::vector<double>& margins)
 {
-  std::vector<int> joint_idxs_to_halt;
-  for (size_t i = 0; i < joint_bounds.size(); i++)
+  std::vector<size_t> variable_idxs_to_halt;
+
+  // Now get the scaling factor from joint velocity limits.
+  size_t idx = 0;
+  for (const auto& joint_bound : joint_bounds)
   {
-    const auto joint_bound = (joint_bounds[i])->front();
-    if (joint_bound.position_bounded_)
+    for (const auto& variable_bound : *joint_bound)
     {
-      const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margins[i]);
-      const bool positive_bound = velocities[i] > 0 && positions[i] > (joint_bound.max_position_ - margins[i]);
-      if (negative_bound || positive_bound)
+      if (variable_bound.position_bounded_)
       {
-        joint_idxs_to_halt.push_back(i);
+        const bool approaching_negative_bound =
+            velocities[idx] < 0 && positions[idx] < (variable_bound.min_position_ + margins[idx]);
+        const bool approaching_positive_bound =
+            velocities[idx] > 0 && positions[idx] > (variable_bound.max_position_ - margins[idx]);
+        if (approaching_negative_bound || approaching_positive_bound)
+        {
+          variable_idxs_to_halt.push_back(idx);
+        }
       }
+      ++idx;
     }
   }
-  return joint_idxs_to_halt;
+  return variable_idxs_to_halt;
 }
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/

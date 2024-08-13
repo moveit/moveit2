@@ -182,7 +182,7 @@ void Servo::setCollisionChecking(const bool check_collision)
   check_collision ? collision_monitor_->start() : collision_monitor_->stop();
 }
 
-bool Servo::validateParams(const servo::Params& servo_params) const
+bool Servo::validateParams(const servo::Params& servo_params)
 {
   bool params_valid = true;
   auto robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
@@ -247,30 +247,27 @@ bool Servo::validateParams(const servo::Params& servo_params) const
                                      << servo_params.move_group_name << "'" << check_yaml_string);
     params_valid = false;
   }
-  if (servo_params.joint_limit_margins.size() !=
-      robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount())
+
+  const auto num_dofs = robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount();
+  if (servo_params.joint_limit_margins.size() == 1u)
+  {
+    joint_limit_margins_.clear();
+    for (size_t idx = 0; idx < num_dofs; ++idx)
+    {
+      joint_limit_margins_.push_back(servo_params.joint_limit_margins[0]);
+    }
+  }
+  else if (servo_params.joint_limit_margins.size() == num_dofs)
+  {
+    joint_limit_margins_ = servo_params.joint_limit_margins;
+  }
+  else
   {
     RCLCPP_ERROR_STREAM(
-        logger_,
-        "The parameter 'joint_limit_margins' must have the same number of elements as the number of joints in the "
-        "move group.  The size of 'joint_limit_margins' is '"
-            << servo_params.joint_limit_margins.size() << "' but the number of joints of the move group '"
-            << servo_params.move_group_name << "' is '"
-            << robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount() << "'"
-            << check_yaml_string);
-
-    params_valid = false;
-  }
-  if (servo_params.joint_limit_margins.size() !=
-      robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount())
-  {
-    RCLCPP_ERROR(logger_,
-                 "Parameter 'joint_limit_margins' must have the same number of elements as the number of joints in the "
-                 "move_group. "
-                 "Size of 'joint_limit_margins' is '%li', but number of joints in '%s' is '%i'. "
-                 "Check the parameters YAML file used to launch this node.",
-                 servo_params.joint_limit_margins.size(), servo_params.move_group_name.c_str(),
-                 robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveVariableCount());
+        logger_, "The parameter 'joint_limit_margins' must have either a single element or the same number of "
+                 "elements as the degrees of freedom in the active joint group. The size of 'joint_limit_margins' is '"
+                     << servo_params.joint_limit_margins.size() << "' but the number of degrees of freedom in group '"
+                     << servo_params.move_group_name << "' is '" << num_dofs << "'" << check_yaml_string);
     params_valid = false;
   }
 
@@ -337,14 +334,14 @@ void Servo::setCommandType(const CommandType& command_type)
   expected_command_type_ = command_type;
 }
 
-KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
-                                 const KinematicState& target_state) const
+KinematicState Servo::haltJoints(const std::vector<size_t>& joint_variables_to_halt,
+                                 const KinematicState& current_state, const KinematicState& target_state) const
 {
   KinematicState bounded_state(target_state.joint_names.size());
   bounded_state.joint_names = target_state.joint_names;
 
   std::stringstream halting_joint_names;
-  for (const int idx : joints_to_halt)
+  for (const auto idx : joint_variables_to_halt)
   {
     halting_joint_names << bounded_state.joint_names[idx] + " ";
   }
@@ -364,7 +361,7 @@ KinematicState Servo::haltJoints(const std::vector<int>& joints_to_halt, const K
     // Halt only the joints that are out of bounds
     bounded_state.positions = target_state.positions;
     bounded_state.velocities = target_state.velocities;
-    for (const int idx : joints_to_halt)
+    for (const auto idx : joint_variables_to_halt)
     {
       bounded_state.positions[idx] = current_state.positions[idx];
       bounded_state.velocities[idx] = 0.0;
@@ -536,15 +533,15 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     // Compute velocities based on smoothed joint positions
     target_state.velocities = (target_state.positions - current_state.positions) / servo_params_.publish_period;
 
-    // Check if any joints are going past joint position limits
-    const std::vector<int> joints_to_halt =
-        jointsToHalt(target_state.positions, target_state.velocities, joint_bounds, servo_params_.joint_limit_margins);
+    // Check if any joints are going past joint position limits.
+    const std::vector<size_t> joint_variables_to_halt =
+        jointVariablesToHalt(target_state.positions, target_state.velocities, joint_bounds, joint_limit_margins_);
 
     // Apply halting if any joints need to be halted.
-    if (!joints_to_halt.empty())
+    if (!joint_variables_to_halt.empty())
     {
       servo_status_ = StatusCode::JOINT_BOUND;
-      target_state = haltJoints(joints_to_halt, current_state, target_state);
+      target_state = haltJoints(joint_variables_to_halt, current_state, target_state);
     }
   }
 
