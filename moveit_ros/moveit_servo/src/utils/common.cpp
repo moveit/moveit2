@@ -408,14 +408,15 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
   return min_scaling_factor;
 }
 
-std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                                         const moveit::core::JointBoundsVector& joint_bounds,
-                                         const std::vector<double>& margins)
+std::vector<size_t> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+                                 const moveit::core::JointBoundsVector& joint_bounds,
+                                 const std::vector<double>& margins)
 {
-  std::vector<size_t> variable_idxs_to_halt;
+  std::vector<size_t> joint_indices_to_halt;
 
   // Now get the scaling factor from joint velocity limits.
-  size_t idx = 0;
+  size_t joint_idx = 0;
+  size_t variable_idx = 0;
   for (const auto& joint_bound : joint_bounds)
   {
     for (const auto& variable_bound : *joint_bound)
@@ -423,18 +424,22 @@ std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const
       if (variable_bound.position_bounded_)
       {
         const bool approaching_negative_bound =
-            velocities[idx] < 0 && positions[idx] < (variable_bound.min_position_ + margins[idx]);
+            velocities[variable_idx] < 0 &&
+            positions[variable_idx] < (variable_bound.min_position_ + margins[variable_idx]);
         const bool approaching_positive_bound =
-            velocities[idx] > 0 && positions[idx] > (variable_bound.max_position_ - margins[idx]);
+            velocities[variable_idx] > 0 &&
+            positions[variable_idx] > (variable_bound.max_position_ - margins[variable_idx]);
         if (approaching_negative_bound || approaching_positive_bound)
         {
-          variable_idxs_to_halt.push_back(idx);
+          joint_indices_to_halt.push_back(joint_idx);
+          break;  // No need to add the same joint index more than once.
         }
       }
-      ++idx;
+      ++variable_idx;
     }
+    ++joint_idx;
   }
-  return variable_idxs_to_halt;
+  return joint_indices_to_halt;
 }
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/

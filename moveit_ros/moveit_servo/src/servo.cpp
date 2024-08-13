@@ -334,14 +334,14 @@ void Servo::setCommandType(const CommandType& command_type)
   expected_command_type_ = command_type;
 }
 
-KinematicState Servo::haltJoints(const std::vector<size_t>& joint_variables_to_halt,
-                                 const KinematicState& current_state, const KinematicState& target_state) const
+KinematicState Servo::haltJoints(const std::vector<size_t>& joint_indices_to_halt, const KinematicState& current_state,
+                                 const KinematicState& target_state) const
 {
   KinematicState bounded_state(target_state.joint_names.size());
   bounded_state.joint_names = target_state.joint_names;
 
   std::stringstream halting_joint_names;
-  for (const auto idx : joint_variables_to_halt)
+  for (const auto idx : joint_indices_to_halt)
   {
     halting_joint_names << bounded_state.joint_names[idx] + " ";
   }
@@ -361,7 +361,7 @@ KinematicState Servo::haltJoints(const std::vector<size_t>& joint_variables_to_h
     // Halt only the joints that are out of bounds
     bounded_state.positions = target_state.positions;
     bounded_state.velocities = target_state.velocities;
-    for (const auto idx : joint_variables_to_halt)
+    for (const auto idx : joint_indices_to_halt)
     {
       bounded_state.positions[idx] = current_state.positions[idx];
       bounded_state.velocities[idx] = 0.0;
@@ -534,14 +534,14 @@ KinematicState Servo::getNextJointState(const moveit::core::RobotStatePtr& robot
     target_state.velocities = (target_state.positions - current_state.positions) / servo_params_.publish_period;
 
     // Check if any joints are going past joint position limits.
-    const std::vector<size_t> joint_variables_to_halt =
-        jointVariablesToHalt(target_state.positions, target_state.velocities, joint_bounds, joint_limit_margins_);
+    const std::vector<size_t> joint_indices_to_halt =
+        jointsToHalt(target_state.positions, target_state.velocities, joint_bounds, joint_limit_margins_);
 
     // Apply halting if any joints need to be halted.
-    if (!joint_variables_to_halt.empty())
+    if (!joint_indices_to_halt.empty())
     {
       servo_status_ = StatusCode::JOINT_BOUND;
-      target_state = haltJoints(joint_variables_to_halt, current_state, target_state);
+      target_state = haltJoints(joint_indices_to_halt, current_state, target_state);
     }
   }
 
