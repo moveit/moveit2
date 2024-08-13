@@ -326,7 +326,7 @@ servo:
 
   joint_limit_margins: {
     type: double_array,
-    default_value: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
+    default_value: [0.1],
     description: "Added as a buffer to joint limits [radians]. If moving quickly, make this larger. Can be of size 1, which applies the margin to all joints, or the same size as the number of degrees of freedom of the active joint group.",
     validation: {
       lower_element_bounds<>: 0.0
