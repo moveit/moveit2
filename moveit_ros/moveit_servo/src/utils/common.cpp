@@ -446,8 +446,6 @@ std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const
         }
       }
     }
-
-    ++joint_idx;
   }
   return variable_indices_to_halt;
 }
