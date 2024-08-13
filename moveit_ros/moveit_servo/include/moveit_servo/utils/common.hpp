@@ -166,16 +166,16 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override);
 
 /**
- * \brief Finds the joint indices that are exceeding allowable position limits in at least one variable.
+ * \brief Finds the joint variable indices correspond to joints exceeding allowable position limits.
  * @param positions The joint positions.
  * @param velocities The current commanded velocities.
  * @param joint_bounds The allowable limits for the robot joints.
  * @param margins Additional buffer on the actual joint limits.
- * @return The joint indices that violate the specified position limits.
+ * @return The joint variable indices that violate the specified position limits.
  */
-std::vector<size_t> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                                 const moveit::core::JointBoundsVector& joint_bounds,
-                                 const std::vector<double>& margins);
+std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+                                         const moveit::core::JointBoundsVector& joint_bounds,
+                                         const std::vector<double>& margins);
 
 /**
  * \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped.

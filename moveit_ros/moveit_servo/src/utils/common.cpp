@@ -408,19 +408,21 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
   return min_scaling_factor;
 }
 
-std::vector<size_t> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                                 const moveit::core::JointBoundsVector& joint_bounds,
-                                 const std::vector<double>& margins)
+std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+                                         const moveit::core::JointBoundsVector& joint_bounds,
+                                         const std::vector<double>& margins)
 {
-  std::vector<size_t> joint_indices_to_halt;
+  std::vector<size_t> variable_indices_to_halt;
 
   // Now get the scaling factor from joint velocity limits.
   size_t joint_idx = 0;
   size_t variable_idx = 0;
   for (const auto& joint_bound : joint_bounds)
   {
+    bool halt_joint = false;
     for (const auto& variable_bound : *joint_bound)
     {
+      // First, loop through all the variables to see if
       if (variable_bound.position_bounded_)
       {
         const bool approaching_negative_bound =
@@ -431,15 +433,24 @@ std::vector<size_t> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::
             positions[variable_idx] > (variable_bound.max_position_ - margins[variable_idx]);
         if (approaching_negative_bound || approaching_positive_bound)
         {
-          joint_indices_to_halt.push_back(joint_idx);
-          break;  // No need to add the same joint index more than once.
+          halt_joint |= true;
         }
       }
       ++variable_idx;
+
+      // If the joint needs to be halted, add all variable indices corresponding to that joint.
+      if (halt_joint)
+      {
+        for (size_t k = variable_idx - joint_bound->size(); k < variable_idx; ++k)
+        {
+          variable_indices_to_halt.push_back(k);
+        }
+      }
     }
+
     ++joint_idx;
   }
-  return joint_indices_to_halt;
+  return variable_indices_to_halt;
 }
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
