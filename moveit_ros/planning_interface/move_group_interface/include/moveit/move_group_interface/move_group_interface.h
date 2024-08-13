@@ -765,9 +765,16 @@ public:
       Return a value that is between 0.0 and 1.0 indicating the fraction of the path achieved as described by the
      waypoints.
       Return -1.0 in case of error. */
+  [[deprecated("Drop jump_threshold")]] double  //
+  computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
+                       double /*jump_threshold*/, moveit_msgs::msg::RobotTrajectory& trajectory,
+                       bool avoid_collisions = true, moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr)
+  {
+    return computeCartesianPath(waypoints, eef_step, trajectory, avoid_collisions, error_code);
+  }
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
-                              double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
-                              bool avoid_collisions = true, moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
+                              moveit_msgs::msg::RobotTrajectory& trajectory, bool avoid_collisions = true,
+                              moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
 
   /** \brief Compute a Cartesian path that follows specified waypoints with a step size of at most \e eef_step meters
       between end effector configurations of consecutive points in the result \e trajectory. The reference frame for the
@@ -781,8 +788,16 @@ public:
       Return a value that is between 0.0 and 1.0 indicating the fraction of the path achieved as described by the
      waypoints.
       Return -1.0 in case of error. */
+  [[deprecated("Drop jump_threshold")]] double  //
+  computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
+                       double /*jump_threshold*/, moveit_msgs::msg::RobotTrajectory& trajectory,
+                       const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions = true,
+                       moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr)
+  {
+    return computeCartesianPath(waypoints, eef_step, trajectory, path_constraints, avoid_collisions, error_code);
+  }
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
-                              double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
+                              moveit_msgs::msg::RobotTrajectory& trajectory,
                               const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions = true,
                               moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
 
