@@ -422,7 +422,7 @@ std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const
     bool halt_joint = false;
     for (const auto& variable_bound : *joint_bound)
     {
-      // First, loop through all the variables to see if
+      // First, loop through all the joint variables to see if the entire joint should be halted.
       if (variable_bound.position_bounded_)
       {
         const bool approaching_negative_bound =

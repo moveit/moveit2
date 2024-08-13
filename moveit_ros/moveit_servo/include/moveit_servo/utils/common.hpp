@@ -166,7 +166,7 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
                                        const moveit::core::JointBoundsVector& joint_bounds, double scaling_override);
 
 /**
- * \brief Finds the joint variable indices correspond to joints exceeding allowable position limits.
+ * \brief Finds the joint variable indices corresponding to joints exceeding allowable position limits.
  * @param positions The joint positions.
  * @param velocities The current commanded velocities.
  * @param joint_bounds The allowable limits for the robot joints.
