@@ -38,6 +38,8 @@
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
 #include <pybind11/operators.h>
 
+#include <fstream>
+
 namespace moveit_py
 {
 namespace bind_planning_scene
@@ -68,6 +70,28 @@ moveit_msgs::msg::PlanningScene getPlanningSceneMsg(std::shared_ptr<planning_sce
   moveit_msgs::msg::PlanningScene planning_scene_msg;
   planning_scene->getPlanningSceneMsg(planning_scene_msg);
   return planning_scene_msg;
+}
+
+bool saveGeometryToFile(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
+                        const std::string& file_path_and_name)
+{
+  std::ofstream save_file(file_path_and_name);
+  if (!save_file.is_open())
+  {
+    return false;
+  }
+  planning_scene->saveGeometryToStream(save_file);
+  save_file.close();
+  return true;
+}
+
+bool loadGeometryFromFile(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
+                          const std::string& file_path_and_name)
+{
+  std::ifstream load_file(file_path_and_name);
+  planning_scene->loadGeometryFromStream(load_file);
+  load_file.close();
+  return true;
 }
 
 void initPlanningScene(py::module& m)
@@ -431,6 +455,29 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in self collision otherwise false.
+           )")
+
+      .def("save_geometry_to_file", &moveit_py::bind_planning_scene::saveGeometryToFile, py::arg("file_path_and_name"),
+           R"(
+           Save the CollisionObjects in the PlanningScene to a file
+
+     Args:
+               file_path_and_name (str): The file to save the CollisionObjects to.
+
+     Returns:
+               bool: true if save to file was successful otherwise false.
+           )")
+
+      .def("load_geometry_from_file", &moveit_py::bind_planning_scene::loadGeometryFromFile,
+           py::arg("file_path_and_name"),
+           R"(
+           Load the CollisionObjects from a file to the PlanningScene
+
+     Args:
+               file_path_and_name (str): The file to load the CollisionObjects from.
+
+     Returns:
+               bool: true if load from file was successful otherwise false.
            )");
 }
 }  // namespace bind_planning_scene
