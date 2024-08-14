@@ -94,8 +94,16 @@ bool RuckigFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd
   }
 
   // Update Ruckig target state
-  // This assumes stationary at the target (zero vel, zero accel)
   ruckig_input_->target_position = std::vector<double>(positions.data(), positions.data() + positions.size());
+  // We don't know what the next command will be. Assume velocity continues forward based on current state,
+  // target_acceleration is zero.
+  const size_t num_joints = ruckig_input_->current_acceleration.size();
+  for (size_t i = 0; i < num_joints; ++i)
+  {
+    ruckig_input_->target_velocity.at(i) =
+        ruckig_input_->current_velocity.at(i) + ruckig_input_->current_acceleration.at(i) * params_.update_period;
+  }
+  // target_acceleration remains a vector of zeroes
 
   // Call the Ruckig algorithm
   ruckig::Result ruckig_result = ruckig_->update(*ruckig_input_, *ruckig_output_);
