@@ -152,7 +152,7 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   else
   {
     // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing and unpausing.
-    last_commanded_state_ = servo_->getCurrentRobotState(true /* wait for updated state */);
+    last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
     servo_->resetSmoothing(last_commanded_state_);
 
     // clear out the command rolling window and reset last commanded state to be the current state
@@ -300,7 +300,7 @@ void ServoNode::servoLoop()
     RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
     rclcpp::sleep_for(std::chrono::seconds(1));
   }
-  KinematicState current_state = servo_->getCurrentRobotState(true /* wait for updated state */);
+  KinematicState current_state = servo_->getCurrentRobotState(true /* block for current robot state */);
   last_commanded_state_ = current_state;
   // Ensure the filter is up to date
   servo_->resetSmoothing(current_state);
@@ -315,6 +315,7 @@ void ServoNode::servoLoop()
     // Skip processing if servoing is disabled.
     if (servo_paused_)
     {
+      servo_->resetSmoothing(current_state);
       servo_frequency.sleep();
       continue;
     }
@@ -330,7 +331,7 @@ void ServoNode::servoLoop()
     {
       // if all joint_cmd_rolling_window_ is empty or all commands in it are outdated, use current robot state
       joint_cmd_rolling_window_.clear();
-      current_state = servo_->getCurrentRobotState(false /* do not block for an updated state */);
+      current_state = servo_->getCurrentRobotState(false /* block for current robot state */);
       current_state.velocities *= 0.0;
     }
 
