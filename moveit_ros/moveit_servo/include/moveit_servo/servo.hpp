@@ -189,7 +189,7 @@ private:
    * @param servo_params The servo parameters
    * @return True if parameters are valid, else False
    */
-  bool validateParams(const servo::Params& servo_params) const;
+  bool validateParams(const servo::Params& servo_params);
 
   /**
    * \brief Updates the servo parameters and performs validations.
@@ -208,7 +208,7 @@ private:
    * @param target_state The target kinematic state.
    * @return The bounded kinematic state.
    */
-  KinematicState haltJoints(const std::vector<int>& joints_to_halt, const KinematicState& current_state,
+  KinematicState haltJoints(const std::vector<size_t>& joints_to_halt, const KinematicState& current_state,
                             const KinematicState& target_state) const;
 
   // Variables
@@ -232,6 +232,9 @@ private:
 
   // Map between joint subgroup names and corresponding joint name - move group indices map
   std::unordered_map<std::string, JointNameToMoveGroupIndexMap> joint_name_to_index_maps_;
+
+  // The current joint limit safety margins for each active joint position variable.
+  std::vector<double> joint_limit_margins_;
 };
 
 }  // namespace moveit_servo
