@@ -79,16 +79,6 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
-  // Load the smoothing plugin
-  if (servo_params_.use_smoothing)
-  {
-    setSmoothingPlugin();
-  }
-  else
-  {
-    RCLCPP_WARN(logger_, "No smoothing plugin loaded");
-  }
-
   // Create the collision checker and start collision checking.
   collision_monitor_ =
       std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, std::ref(collision_velocity_scale_));
@@ -125,6 +115,17 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
     joint_name_to_index_maps_.insert(
         std::make_pair<std::string, JointNameToMoveGroupIndexMap>(std::string(sub_group_name), std::move(new_map)));
   }
+
+  // Load the smoothing plugin
+  if (servo_params_.use_smoothing)
+  {
+    setSmoothingPlugin();
+  }
+  else
+  {
+    RCLCPP_WARN(logger_, "No smoothing plugin loaded");
+  }
+
   RCLCPP_INFO_STREAM(logger_, "Servo initialized successfully");
 }
 
