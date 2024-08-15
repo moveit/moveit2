@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Inc.
+ *  Copyright (c) 2024, Andrew Zelenak
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,61 +33,74 @@
  *********************************************************************/
 
 /* Author: Andy Zelenak
-   Description: Defines a pluginlib interface for smoothing algorithms.
+Description: Applies jerk/acceleration/velocity limits to online motion commands
  */
 
 #pragma once
 
-#include <rclcpp/rclcpp.hpp>
+#include <cstddef>
 
-#include <moveit/macros/class_forward.h>
-#include <moveit_smoothing_base_export.h>
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit_ruckig_filter_parameters.hpp>
 
-#include <Eigen/Dense>
-
-namespace moveit
-{
-namespace core
-{
-MOVEIT_CLASS_FORWARD(RobotModel);
-}  // namespace core
-}  // namespace moveit
+#include <ruckig/ruckig.hpp>
 
 namespace online_signal_smoothing
 {
-class SmoothingBaseClass
+
+class RuckigFilterPlugin : public SmoothingBaseClass
 {
 public:
-  SmoothingBaseClass();
-  virtual ~SmoothingBaseClass();
-
   /**
    * Initialize the smoothing algorithm
-   * @param node ROS node, typically used for parameter retrieval
-   * @param robot_model typically used to retrieve vel/accel/jerk limits
-   * @param num_joints number of actuated joints in the JointGroup Servo controls
+   * @param node ROS node, used for parameter retrieval
+   * @param robot_model used to retrieve vel/accel/jerk limits
+   * @param num_joints number of actuated joints in the JointGroup
    * @return True if initialization was successful
    */
-  virtual bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
-                          size_t num_joints) = 0;
+  bool initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
+                  size_t num_joints) override;
 
   /**
-   * Smooth an array of joint position deltas
-   * @param positiona array of joint position commands
+   * Smooth the command signals for all DOF
+   * @param positions array of joint position commands
    * @param velocities array of joint velocity commands
    * @param accelerations array of joint acceleration commands
    * @return True if initialization was successful
    */
-  virtual bool doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) = 0;
+  bool doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities, Eigen::VectorXd& accelerations) override;
 
   /**
    * Reset to a given joint state
    * @param positions reset the filters to these joint positions
-   * @param velocities reset the filters to these joint velocities (if applicable)
-   * @param accelerations reset the filters to these joint accelerations (if applicable)
+   * @param velocities (unused)
+   * @param accelerations (unused)
    * @return True if reset was successful
    */
-  virtual bool reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                     const Eigen::VectorXd& accelerations) = 0;
+  bool reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+             const Eigen::VectorXd& accelerations) override;
+
+private:
+  /**
+   * A utility to print Ruckig's internal state
+   */
+  void printRuckigState();
+
+  /**
+   * A utility to get velocity/acceleration/jerk bounds from the robot model
+   * @return true if all bounds are defined
+   */
+  bool getVelAccelJerkBounds(std::vector<double>& joint_velocity_bounds, std::vector<double>& joint_acceleration_bounds,
+                             std::vector<double>& joint_jerk_bounds);
+
+  /** \brief Parameters loaded from yaml file at runtime */
+  online_signal_smoothing::Params params_;
+  /** \brief The robot model contains the vel/accel/jerk limits that Ruckig requires */
+  moveit::core::RobotModelConstPtr robot_model_;
+  bool have_initial_ruckig_output_ = false;
+  std::optional<ruckig::Ruckig<ruckig::DynamicDOFs>> ruckig_;
+  std::optional<ruckig::InputParameter<ruckig::DynamicDOFs>> ruckig_input_;
+  std::optional<ruckig::OutputParameter<ruckig::DynamicDOFs>> ruckig_output_;
 };
 }  // namespace online_signal_smoothing

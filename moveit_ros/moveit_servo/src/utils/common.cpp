@@ -521,7 +521,16 @@ KinematicState extractRobotState(const moveit::core::RobotStatePtr& robot_state,
   current_state.joint_names = joint_names;
   robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
   robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+
   robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
+  // If any acceleration is nan, set all accelerations to zero
+  // TODO: fix the root cause so this isn't necessary (#2958)
+  if (std::any_of(current_state.accelerations.begin(), current_state.accelerations.end(),
+                  [](double v) { return isnan(v); }))
+  {
+    robot_state->zeroAccelerations();
+    robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
+  }
 
   return current_state;
 }
