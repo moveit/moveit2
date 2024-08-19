@@ -106,7 +106,7 @@ public:
    * \author Suat Gedikli (gedikli@willowgarage.com)
    * \param[out] buffer pointer to memory where the depth values need to be stored
    */
-  void getDepthBuffer(double* buffer) const;
+  void getDepthBuffer(float* buffer) const;
 
   /**
    * \brief loads, compiles, links and adds GLSL shaders from files to the current OpenGL context.
