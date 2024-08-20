@@ -53,8 +53,15 @@ jobs:
       - name: inject ccache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.1.2
         with:
-          cache-source: .ccache
-          cache-target: /root/.ccache/
+          cache-map: |
+            {
+              "var-cache-apt": {
+                "target": "/var/cache/apt",
+                "id": "1"
+              },
+              "var-lib-apt": "/var/lib/apt"
+            }
+          skip-extraction: ${{ steps.cache.outputs.cache-hit }}
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
