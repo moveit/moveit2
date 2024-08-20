@@ -205,18 +205,15 @@ TEST_F(MoveGroupFixture, QueryOnlyGTEFeature)
   }
 
   // Unrelated. No match.
+  {
+    Query::Ptr unrelated_fuzzy_query = coll.createQuery();
+    unrelated_gte_feature.appendFeaturesAsFuzzyFetchQuery(*unrelated_fuzzy_query, msg, *move_group_, 0.0);
+    EXPECT_TRUE(coll.queryList(unrelated_fuzzy_query).empty());
 
-  // NOTE: Disabled until https://github.com/moveit/warehouse_ros_sqlite/issues/43 is fixed.
-  // {
-  //   Query::Ptr unrelated_fuzzy_query = coll.createQuery();
-  //   query.append("unrelated", 6.0);
-  //   unrelated_gte_feature.appendFeaturesAsFuzzyFetchQuery(*unrelated_fuzzy_query, msg, *move_group_, 0.0);
-  //   EXPECT_TRUE(coll.queryList(unrelated_fuzzy_query).empty());
-
-  //   Query::Ptr exact_query = coll.createQuery();
-  //   unrelated_gte_feature.appendFeaturesAsExactFetchQuery(*exact_query, msg, *move_group_, 0.0);
-  //   EXPECT_TRUE(coll.queryList(exact_query).empty());
-  // }
+    Query::Ptr exact_query = coll.createQuery();
+    unrelated_gte_feature.appendFeaturesAsExactFetchQuery(*exact_query, msg, *move_group_, 0.0);
+    EXPECT_TRUE(coll.queryList(exact_query).empty());
+  }
 
   // Mismatched. No match.
   {
