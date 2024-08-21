@@ -42,16 +42,12 @@
 namespace move_group
 {
 /**
- * @brief Move group capability to save CollisionObjects in a PlanningScene to a file
+ * @brief Move group capability to save CollisionObjects in a PlanningScene to a .scene file
  *
  */
 class SaveGeometryToFileService : public MoveGroupCapability
 {
 public:
-  /**
-   * @brief Constructor
-   *
-   */
   SaveGeometryToFileService();
 
   /**

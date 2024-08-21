@@ -53,7 +53,7 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-LoadGeometryFromFileService::LoadGeometryFromFileService() : MoveGroupCapability("load_geometry_from_file")
+LoadGeometryFromFileService::LoadGeometryFromFileService() : MoveGroupCapability(LOAD_GEOMETRY_FROM_FILE_SERVICE_NAME)
 {
 }
 
@@ -63,10 +63,11 @@ void LoadGeometryFromFileService::initialize()
       LOAD_GEOMETRY_FROM_FILE_SERVICE_NAME,
       [this](const std::shared_ptr<moveit_msgs::srv::LoadGeometryFromFile::Request>& req,
              const std::shared_ptr<moveit_msgs::srv::LoadGeometryFromFile::Response>& res) {
-        res->success = false;
         std::ifstream file(req->file_path_and_name);
         if (!file.is_open())
         {
+          RCLCPP_ERROR(getLogger(), "Unable to open file %s for loading CollisionObjects",
+                       req->file_path_and_name.c_str());
           res->success = false;
           return;
         }

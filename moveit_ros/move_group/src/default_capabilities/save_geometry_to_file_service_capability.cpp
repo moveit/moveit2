@@ -53,7 +53,7 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-SaveGeometryToFileService::SaveGeometryToFileService() : MoveGroupCapability("save_geometry_to_file")
+SaveGeometryToFileService::SaveGeometryToFileService() : MoveGroupCapability(SAVE_GEOMETRY_TO_FILE_SERVICE_NAME)
 {
 }
 
@@ -63,10 +63,11 @@ void SaveGeometryToFileService::initialize()
       SAVE_GEOMETRY_TO_FILE_SERVICE_NAME,
       [this](const std::shared_ptr<moveit_msgs::srv::SaveGeometryToFile::Request>& req,
              const std::shared_ptr<moveit_msgs::srv::SaveGeometryToFile::Response>& res) {
-        res->success = false;
         std::ofstream file(req->file_path_and_name);
         if (!file.is_open())
         {
+          RCLCPP_ERROR(getLogger(), "Unable to open file %s for saving CollisionObjects",
+                       req->file_path_and_name.c_str());
           res->success = false;
           return;
         }
