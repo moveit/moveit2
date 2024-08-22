@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_ros_trajectory_cache)
 
+# Common cmake code applied to all moveit packages
+find_package(moveit_common REQUIRED)
+moveit_package()
+
 find_package(ament_cmake REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
@@ -25,7 +29,7 @@ set(TRAJECTORY_CACHE_DEPENDENCIES
     warehouse_ros)
 
 # Trajectory cache library
-add_library(moveit_ros_trajectory_cache_lib src/trajectory_cache.cpp)
+add_library(moveit_ros_trajectory_cache_lib SHARED src/trajectory_cache.cpp)
 generate_export_header(moveit_ros_trajectory_cache_lib)
 target_include_directories(
   moveit_ros_trajectory_cache_lib
