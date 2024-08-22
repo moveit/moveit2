@@ -35,7 +35,7 @@ set(TRAJECTORY_CACHE_LIBRARIES
     moveit_ros_trajectory_cache_lib)
 
 # Utils library
-add_library(moveit_ros_trajectory_cache_utils_lib src/utils/utils.cpp)
+add_library(moveit_ros_trajectory_cache_utils_lib SHARED src/utils/utils.cpp)
 generate_export_header(moveit_ros_trajectory_cache_utils_lib)
 target_include_directories(
   moveit_ros_trajectory_cache_utils_lib
@@ -46,7 +46,7 @@ ament_target_dependencies(moveit_ros_trajectory_cache_utils_lib
 
 # Features library
 add_library(
-  moveit_ros_trajectory_cache_features_lib
+  moveit_ros_trajectory_cache_features_lib SHARED
   src/features/motion_plan_request_features.cpp
   src/features/get_cartesian_path_request_features.cpp)
 generate_export_header(moveit_ros_trajectory_cache_features_lib)
@@ -61,7 +61,7 @@ ament_target_dependencies(moveit_ros_trajectory_cache_features_lib
 
 # Cache insert policies library
 add_library(
-  moveit_ros_trajectory_cache_cache_insert_policies_lib
+  moveit_ros_trajectory_cache_cache_insert_policies_lib SHARED
   src/cache_insert_policies/always_insert_never_prune_policy.cpp
   src/cache_insert_policies/best_seen_execution_time_policy.cpp)
 generate_export_header(moveit_ros_trajectory_cache_cache_insert_policies_lib)

@@ -6,13 +6,13 @@ if(BUILD_TESTING)
   find_package(warehouse_ros_sqlite REQUIRED)
 
   # Fixtures.
-  add_library(warehouse_fixture fixtures/warehouse_fixture.cpp)
+  add_library(warehouse_fixture SHARED fixtures/warehouse_fixture.cpp)
   target_include_directories(
     warehouse_fixture PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
   ament_target_dependencies(warehouse_fixture ${TRAJECTORY_CACHE_DEPENDENCIES}
                             ament_cmake_gtest warehouse_ros_sqlite)
 
-  add_library(move_group_fixture fixtures/move_group_fixture.cpp)
+  add_library(move_group_fixture SHARED fixtures/move_group_fixture.cpp)
   target_include_directories(
     move_group_fixture PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
   ament_target_dependencies(move_group_fixture ${TRAJECTORY_CACHE_DEPENDENCIES}
