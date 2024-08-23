@@ -389,9 +389,8 @@ bool IKFastKinematicsPlugin::computeRelativeTransform(const std::string& from, c
   robot_state = std::make_shared<RobotState>(robot_model_);
   robot_state->setToDefaultValues();
 
-  bool has_link;  // to suppress RCLCPP_ERRORs for non-existent frames
-  auto* from_link = robot_model_->getLinkModel(from, &has_link);
-  auto* to_link = robot_model_->getLinkModel(to, &has_link);
+  auto* from_link = robot_model_->getLinkModel(from);
+  auto* to_link = robot_model_->getLinkModel(to);
   if (!from_link || !to_link)
     return false;
 

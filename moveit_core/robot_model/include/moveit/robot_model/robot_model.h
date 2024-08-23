@@ -246,13 +246,17 @@ public:
   bool hasLinkModel(const std::string& name) const;
 
   /** \brief Get a link by its name. Output error and return nullptr when the link is missing. */
-  const LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr) const;
+  const LinkModel* getLinkModel(const std::string& link) const;
+  [[deprecated("Use getLinkModel(const std::string& name) instead.")]] const LinkModel*
+  getLinkModel(const std::string& link, bool* has_link) const;
 
   /** \brief Get a link by its index. Output error and return nullptr when the link is missing. */
   const LinkModel* getLinkModel(size_t index) const;
 
   /** \brief Get a link by its name. Output error and return nullptr when the link is missing. */
-  LinkModel* getLinkModel(const std::string& link, bool* has_link = nullptr);
+  LinkModel* getLinkModel(const std::string& link);
+  [[deprecated("Use getLinkModel(const std::string& name) instead.")]] LinkModel*
+  getLinkModel(const std::string& link, bool* has_link = nullptr);
 
   /** \brief Get the latest link upwards the kinematic tree, which is only connected via fixed joints
    *

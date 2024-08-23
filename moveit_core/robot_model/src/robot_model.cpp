@@ -1331,7 +1331,8 @@ JointModel* RobotModel::getJointModel(const std::string& name)
 
 const LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link) const
 {
-  return const_cast<RobotModel*>(this)->getLinkModel(name, has_link);
+  *has_link = false;
+  return const_cast<RobotModel*>(this)->getLinkModel(name);
 }
 
 const LinkModel* RobotModel::getLinkModel(size_t index) const
@@ -1347,18 +1348,20 @@ const LinkModel* RobotModel::getLinkModel(size_t index) const
 
 LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
 {
-  if (has_link)
-    *has_link = true;  // Start out optimistic
   LinkModelMap::const_iterator it = link_model_map_.find(name);
   if (it != link_model_map_.end())
-    return it->second;
-
-  if (has_link)
   {
-    *has_link = false;  // Report failure via argument
+    return it->second;
   }
   RCLCPP_ERROR(getLogger(), "Link '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
   return nullptr;
+}
+
+const LinkModel* getLinkModel(const std::string& link, bool* has_link) const
+{
+  RCLCPP_ERROR(getLogger(), "'has_link' argument is deprecated. Use getLinkModel(const std::string& name) instead.");
+  *has_link = false;
+  return getLinkModel(link);
 }
 
 const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link)
