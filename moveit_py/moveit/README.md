@@ -10,7 +10,7 @@ For this project we leverage (stubgen)[https://mypy.readthedocs.io/en/stable/stu
 Python package to autogenerate stub files. To do so we simply build the moveit_py Python library and run the following command from an environment containing the built package:
 
 ```
-stubgen -p moveit_py
+stubgen -p moveit
 ```
 
 This outputs the outgenerated stub files to an `out` directory. These are the stub files we use.
