@@ -39,7 +39,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/message_filter.h>
-#if RCLCPP_VERSION_GTE(28, 3, 3)  // Rolling
+#if RCLCPP_VERSION_GTE(28, 3, 0)  // Rolling
 #include <message_filters/subscriber.hpp>
 #else
 #include <message_filters/subscriber.h>
