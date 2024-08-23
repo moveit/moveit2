@@ -74,7 +74,7 @@ TEST_F(ServoRosFixture, testJointJog)
 
   // Call input type service
   auto request = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
-  request->command_type = 0;
+  request->command_type = moveit_msgs::srv::ServoCommandType::Request::JOINT_JOG;
   auto response = switch_input_client_->async_send_request(request);
   ASSERT_EQ(response.get()->success, true);
 
@@ -116,7 +116,7 @@ TEST_F(ServoRosFixture, testTwist)
       "/servo_node/delta_twist_cmds", rclcpp::SystemDefaultsQoS());
 
   auto request = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
-  request->command_type = 1;
+  request->command_type = moveit_msgs::srv::ServoCommandType::Request::TWIST;
   auto response = switch_input_client_->async_send_request(request);
   ASSERT_EQ(response.get()->success, true);
 
@@ -155,7 +155,7 @@ TEST_F(ServoRosFixture, testPose)
       "/servo_node/pose_target_cmds", rclcpp::SystemDefaultsQoS());
 
   auto request = std::make_shared<moveit_msgs::srv::ServoCommandType::Request>();
-  request->command_type = 2;
+  request->command_type = moveit_msgs::srv::ServoCommandType::Request::POSE;
   auto response = switch_input_client_->async_send_request(request);
   ASSERT_EQ(response.get()->success, true);
 

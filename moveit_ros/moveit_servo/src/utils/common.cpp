@@ -408,24 +408,46 @@ double jointLimitVelocityScalingFactor(const Eigen::VectorXd& velocities,
   return min_scaling_factor;
 }
 
-std::vector<int> jointsToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
-                              const moveit::core::JointBoundsVector& joint_bounds, const std::vector<double>& margins)
+std::vector<size_t> jointVariablesToHalt(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
+                                         const moveit::core::JointBoundsVector& joint_bounds,
+                                         const std::vector<double>& margins)
 {
-  std::vector<int> joint_idxs_to_halt;
-  for (size_t i = 0; i < joint_bounds.size(); i++)
+  std::vector<size_t> variable_indices_to_halt;
+
+  // Now get the scaling factor from joint velocity limits.
+  size_t variable_idx = 0;
+  for (const auto& joint_bound : joint_bounds)
   {
-    const auto joint_bound = (joint_bounds[i])->front();
-    if (joint_bound.position_bounded_)
+    bool halt_joint = false;
+    for (const auto& variable_bound : *joint_bound)
     {
-      const bool negative_bound = velocities[i] < 0 && positions[i] < (joint_bound.min_position_ + margins[i]);
-      const bool positive_bound = velocities[i] > 0 && positions[i] > (joint_bound.max_position_ - margins[i]);
-      if (negative_bound || positive_bound)
+      // First, loop through all the joint variables to see if the entire joint should be halted.
+      if (variable_bound.position_bounded_)
       {
-        joint_idxs_to_halt.push_back(i);
+        const bool approaching_negative_bound =
+            velocities[variable_idx] < 0 &&
+            positions[variable_idx] < (variable_bound.min_position_ + margins[variable_idx]);
+        const bool approaching_positive_bound =
+            velocities[variable_idx] > 0 &&
+            positions[variable_idx] > (variable_bound.max_position_ - margins[variable_idx]);
+        if (approaching_negative_bound || approaching_positive_bound)
+        {
+          halt_joint |= true;
+        }
+      }
+      ++variable_idx;
+
+      // If the joint needs to be halted, add all variable indices corresponding to that joint.
+      if (halt_joint)
+      {
+        for (size_t k = variable_idx - joint_bound->size(); k < variable_idx; ++k)
+        {
+          variable_indices_to_halt.push_back(k);
+        }
       }
     }
   }
-  return joint_idxs_to_halt;
+  return variable_indices_to_halt;
 }
 
 /** \brief Helper function for converting Eigen::Isometry3d to geometry_msgs/TransformStamped **/
@@ -499,7 +521,16 @@ KinematicState extractRobotState(const moveit::core::RobotStatePtr& robot_state,
   current_state.joint_names = joint_names;
   robot_state->copyJointGroupPositions(joint_model_group, current_state.positions);
   robot_state->copyJointGroupVelocities(joint_model_group, current_state.velocities);
+
   robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
+  // If any acceleration is nan, set all accelerations to zero
+  // TODO: fix the root cause so this isn't necessary (#2958)
+  if (std::any_of(current_state.accelerations.begin(), current_state.accelerations.end(),
+                  [](double v) { return isnan(v); }))
+  {
+    robot_state->zeroAccelerations();
+    robot_state->copyJointGroupAccelerations(joint_model_group, current_state.accelerations);
+  }
 
   return current_state;
 }
