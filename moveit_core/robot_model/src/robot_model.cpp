@@ -1357,7 +1357,10 @@ LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
   {
     *has_link = false;  // Report failure via argument
   }
-  RCLCPP_ERROR(getLogger(), "Link '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
+  else
+  {  // Otherwise print error
+    RCLCPP_ERROR(getLogger(), "Link '%s' not found in model '%s'", name.c_str(), model_name_.c_str());
+  }
   return nullptr;
 }
 

@@ -519,7 +519,7 @@ const double* RobotState::getJointPositions(const JointModel* joint) const
 {
   if (joint->getVariableCount() == 0)
   {
-    RCLCPP_ERROR(getLogger(), "Cannot get joint positions for joint '%s' because it has no variables",
+    RCLCPP_DEBUG(getLogger(), "Cannot get joint positions for joint '%s' because it has no variables",
                  joint->getName().c_str());
     return nullptr;
   }
@@ -530,7 +530,7 @@ const double* RobotState::getJointVelocities(const JointModel* joint) const
 {
   if (joint->getVariableCount() == 0)
   {
-    RCLCPP_ERROR(getLogger(), "Cannot get joint velocities for joint '%s' because it has no variables",
+    RCLCPP_DEBUG(getLogger(), "Cannot get joint velocities for joint '%s' because it has no variables",
                  joint->getName().c_str());
     return nullptr;
   }
@@ -541,7 +541,7 @@ const double* RobotState::getJointAccelerations(const JointModel* joint) const
 {
   if (joint->getVariableCount() == 0)
   {
-    RCLCPP_ERROR(getLogger(), "Cannot get joint accelerations for joint '%s' because it has no variables",
+    RCLCPP_DEBUG(getLogger(), "Cannot get joint accelerations for joint '%s' because it has no variables",
                  joint->getName().c_str());
     return nullptr;
   }
@@ -552,7 +552,7 @@ const double* RobotState::getJointEffort(const JointModel* joint) const
 {
   if (joint->getVariableCount() == 0)
   {
-    RCLCPP_ERROR(getLogger(), "Cannot get joint effort for joint '%s' because it has no variables",
+    RCLCPP_DEBUG(getLogger(), "Cannot get joint effort for joint '%s' because it has no variables",
                  joint->getName().c_str());
     return nullptr;
   }
@@ -926,7 +926,7 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
     std::string object{ frame.substr(0, idx) };
     if (!hasAttachedBody(object))
     {
-      RCLCPP_ERROR(getLogger(),
+      RCLCPP_DEBUG(getLogger(),
                    "Cannot find rigidly connected parent link for frame '%s' because there is no attached body.",
                    frame.c_str());
       return nullptr;
@@ -934,7 +934,7 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
     auto body{ getAttachedBody(object) };
     if (!body->hasSubframeTransform(frame))
     {
-      RCLCPP_ERROR(getLogger(),
+      RCLCPP_DEBUG(getLogger(),
                    "Cannot find rigidly connected parent link for frame '%s' because the transformation to the parent "
                    "link is unknown.",
                    frame.c_str());
