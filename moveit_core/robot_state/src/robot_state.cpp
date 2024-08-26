@@ -926,18 +926,15 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
     std::string object{ frame.substr(0, idx) };
     if (!hasAttachedBody(object))
     {
-      RCLCPP_DEBUG(getLogger(),
-                   "Cannot find rigidly connected parent link for frame '%s' because there is no attached body.",
-                   frame.c_str());
+      RCLCPP_DEBUG(getLogger().get_child("getRigidlyConnectedParentLink",
+                   "Attached object '%s' for frame '%s' does not exist.", object.c_str(), frame.c_str());
       return nullptr;
     }
     auto body{ getAttachedBody(object) };
     if (!body->hasSubframeTransform(frame))
     {
-      RCLCPP_DEBUG(getLogger(),
-                   "Cannot find rigidly connected parent link for frame '%s' because the transformation to the parent "
-                   "link is unknown.",
-                   frame.c_str());
+      RCLCPP_DEBUG(getLogger().get_child("getRigidlyConnectedParentLink",
+                   "Body '%s' does not have subframe '%s', object.c_str(), frame.c_str());
       return nullptr;
     }
     link = body->getAttachedLink();
