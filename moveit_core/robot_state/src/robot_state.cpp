@@ -1344,9 +1344,8 @@ const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, c
     frame_found = true;
     return IDENTITY_TRANSFORM;
   }
-  if ((robot_link = robot_model_->getLinkModel(frame_id)))
+  if ((robot_link = robot_model_->getLinkModel(frame_id, &frame_found)))
   {
-    frame_found = true;
     assert(checkLinkTransforms());
     return global_link_transforms_[robot_link->getLinkIndex()];
   }
