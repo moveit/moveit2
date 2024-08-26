@@ -934,7 +934,7 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
     if (!body->hasSubframeTransform(frame))
     {
       RCLCPP_DEBUG(getLogger().get_child("getRigidlyConnectedParentLink",
-                   "Body '%s' does not have subframe '%s', object.c_str(), frame.c_str());
+                   "Body '%s' does not have subframe '%s'", object.c_str(), frame.c_str());
       return nullptr;
     }
     link = body->getAttachedLink();

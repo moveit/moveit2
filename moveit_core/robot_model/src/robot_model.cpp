@@ -1368,7 +1368,7 @@ const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel*
 {
   if (!link)
   {
-    RCLCPP_DEBUG(getLogger().get_child("getRigidlyConnectedParentLink", "Link is NULL");
+    RCLCPP_DEBUG(getLogger().get_child("getRigidlyConnectedParentLink", "Link is NULL"));
     return link;
   }
   const moveit::core::LinkModel* parent_link = link->getParentLinkModel();
