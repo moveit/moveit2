@@ -909,26 +909,11 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
 
 const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
 {
+  bool found;
   const LinkModel* link{ nullptr };
-
-  size_t idx = 0;
-  if ((idx = frame.find('/')) != std::string::npos)
-  {  // resolve sub frame
-    std::string object{ frame.substr(0, idx) };
-    if (!hasAttachedBody(object))
-      return nullptr;
-    auto body{ getAttachedBody(object) };
-    if (!body->hasSubframeTransform(frame))
-      return nullptr;
-    link = body->getAttachedLink();
-  }
-  else if (hasAttachedBody(frame))
-  {
-    link = getAttachedBody(frame)->getAttachedLink();
-  }
-  else if (getRobotModel()->hasLinkModel(frame))
-    link = getLinkModel(frame);
-
+  getFrameInfo(frame, link, found);
+  if (!found)
+    RCLCPP_ERROR(LOGGER, "Unable to find link for frame '%s'", frame.c_str());
   return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
 }
 
