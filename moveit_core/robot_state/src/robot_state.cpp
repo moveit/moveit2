@@ -913,7 +913,7 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
   const LinkModel* link{ nullptr };
   getFrameInfo(frame, link, found);
   if (!found)
-    RCLCPP_ERROR(LOGGER, "Unable to find link for frame '%s'", frame.c_str());
+    RCLCPP_ERROR(getLogger(), "Unable to find link for frame '%s'", frame.c_str());
   return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
 }
 
