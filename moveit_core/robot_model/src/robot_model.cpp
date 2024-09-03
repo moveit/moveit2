@@ -1367,7 +1367,10 @@ LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
 const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link)
 {
   if (!link)
+  {
+    RCLCPP_DEBUG(getLogger().get_child("getRigidlyConnectedParentLink"), "Link is NULL");
     return link;
+  }
   const moveit::core::LinkModel* parent_link = link->getParentLinkModel();
   const moveit::core::JointModel* joint = link->getParentJointModel();
 

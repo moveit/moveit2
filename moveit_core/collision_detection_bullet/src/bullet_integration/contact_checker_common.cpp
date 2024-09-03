@@ -116,7 +116,7 @@ collision_detection::Contact* processResult(ContactTestData& cdata, collision_de
 
     return &(dr.back());
   }
-
+  RCLCPP_DEBUG(getLogger(), "Result cannot be processed. Returning nullptr, this should never happen!");
   return nullptr;
 }
 

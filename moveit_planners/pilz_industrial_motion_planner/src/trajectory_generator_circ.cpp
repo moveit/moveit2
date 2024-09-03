@@ -268,6 +268,7 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlan
     throw CenterPointDifferentRadius(os.str());
   }
 
+  RCLCPP_ERROR(getLogger(), "Result cannot set path CIRC. Returning nullptr, this should never happen!");
   return nullptr;
 }
 

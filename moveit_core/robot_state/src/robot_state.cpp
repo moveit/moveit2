@@ -519,6 +519,8 @@ const double* RobotState::getJointPositions(const JointModel* joint) const
 {
   if (joint->getVariableCount() == 0)
   {
+    RCLCPP_DEBUG(getLogger(), "Cannot get joint positions for joint '%s' because it has no variables",
+                 joint->getName().c_str());
     return nullptr;
   }
   return &position_.at(joint->getFirstVariableIndex());
@@ -528,6 +530,8 @@ const double* RobotState::getJointVelocities(const JointModel* joint) const
 {
   if (joint->getVariableCount() == 0)
   {
+    RCLCPP_DEBUG(getLogger(), "Cannot get joint velocities for joint '%s' because it has no variables",
+                 joint->getName().c_str());
     return nullptr;
   }
   return &velocity_.at(joint->getFirstVariableIndex());
@@ -537,6 +541,8 @@ const double* RobotState::getJointAccelerations(const JointModel* joint) const
 {
   if (joint->getVariableCount() == 0)
   {
+    RCLCPP_DEBUG(getLogger(), "Cannot get joint accelerations for joint '%s' because it has no variables",
+                 joint->getName().c_str());
     return nullptr;
   }
   return &effort_or_acceleration_.at(joint->getFirstVariableIndex());
@@ -546,6 +552,8 @@ const double* RobotState::getJointEffort(const JointModel* joint) const
 {
   if (joint->getVariableCount() == 0)
   {
+    RCLCPP_DEBUG(getLogger(), "Cannot get joint effort for joint '%s' because it has no variables",
+                 joint->getName().c_str());
     return nullptr;
   }
   return &effort_or_acceleration_.at(joint->getFirstVariableIndex());
@@ -911,24 +919,38 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
 {
   const LinkModel* link{ nullptr };
 
+  // Resolve the rigidly connected parent link for the given frame
   size_t idx = 0;
   if ((idx = frame.find('/')) != std::string::npos)
-  {  // resolve sub frame
+  {  // Check if the frame has a subframe
     std::string object{ frame.substr(0, idx) };
     if (!hasAttachedBody(object))
+    {
+      RCLCPP_DEBUG(getLogger().get_child("getRigidlyConnectedParentLink"),
+                   "Attached object '%s' for frame '%s' does not exist.", object.c_str(), frame.c_str());
       return nullptr;
+    }
     auto body{ getAttachedBody(object) };
     if (!body->hasSubframeTransform(frame))
+    {
+      RCLCPP_DEBUG(getLogger().get_child("getRigidlyConnectedParentLink"), "Body '%s' does not have subframe '%s'",
+                   object.c_str(), frame.c_str());
       return nullptr;
+    }
     link = body->getAttachedLink();
   }
   else if (hasAttachedBody(frame))
   {
+    // If the frame is an attached body, get the attached link
     link = getAttachedBody(frame)->getAttachedLink();
   }
   else if (getRobotModel()->hasLinkModel(frame))
+  {
+    // If the frame is a link in the robot model, get the link model
     link = getLinkModel(frame);
+  }
 
+  // Return the rigidly connected parent link model for the given frame
   return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
 }
 
