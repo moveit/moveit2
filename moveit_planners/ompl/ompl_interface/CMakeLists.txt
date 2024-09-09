@@ -30,7 +30,8 @@ if(APPLE)
 endif()
 
 ament_target_dependencies(
-  moveit_ompl_interface PUBLIC
+  moveit_ompl_interface
+  PUBLIC
   moveit_core
   moveit_msgs
   moveit_ros_planning
