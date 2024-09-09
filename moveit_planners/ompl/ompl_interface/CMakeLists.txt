@@ -30,7 +30,7 @@ if(APPLE)
 endif()
 
 ament_target_dependencies(
-  moveit_ompl_interface
+  moveit_ompl_interface PUBLIC
   moveit_core
   moveit_msgs
   moveit_ros_planning
@@ -44,7 +44,7 @@ set_target_properties(
                                    "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set_target_properties(moveit_ompl_interface PROPERTIES LINK_FLAGS
                                                        "${OpenMP_CXX_FLAGS}")
-target_link_libraries(moveit_ompl_interface ompl::ompl)
+target_link_libraries(moveit_ompl_interface PUBLIC ompl::ompl)
 add_executable(moveit_generate_state_database
                scripts/generate_state_database.cpp)
 target_link_libraries(moveit_generate_state_database moveit_ompl_interface
