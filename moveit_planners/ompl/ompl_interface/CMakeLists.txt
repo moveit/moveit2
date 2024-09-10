@@ -24,11 +24,6 @@ set_target_properties(moveit_ompl_interface
 
 find_package(OpenMP REQUIRED)
 
-# Used to link in ODE, an OMPL dependency, on macOS
-if(APPLE)
-  target_link_directories(moveit_ompl_interface PUBLIC ${OMPL_LIBRARY_DIRS})
-endif()
-
 ament_target_dependencies(
   moveit_ompl_interface
   PUBLIC
@@ -48,8 +43,7 @@ set_target_properties(moveit_ompl_interface PROPERTIES LINK_FLAGS
 target_link_libraries(moveit_ompl_interface PUBLIC ompl::ompl)
 add_executable(moveit_generate_state_database
                scripts/generate_state_database.cpp)
-target_link_libraries(moveit_generate_state_database moveit_ompl_interface
-                      ompl::ompl)
+target_link_libraries(moveit_generate_state_database moveit_ompl_interface)
 set_target_properties(moveit_generate_state_database
                       PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 set_target_properties(moveit_generate_state_database
@@ -96,8 +90,7 @@ if(BUILD_TESTING)
                   test/test_planning_context_manager.cpp)
   ament_target_dependencies(test_planning_context_manager moveit_core tf2_eigen
                             Boost Eigen3)
-  target_link_libraries(test_planning_context_manager moveit_ompl_interface
-                        ompl::ompl)
+  target_link_libraries(test_planning_context_manager moveit_ompl_interface)
 
   # Disabling flaky test TODO (vatanaksoytezer): Uncomment once this is fixed
   # ament_add_gtest(test_ompl_constraints test/test_ompl_constraints.cpp)
@@ -126,8 +119,7 @@ if(BUILD_TESTING)
                   test/test_threadsafe_state_storage.cpp)
   ament_target_dependencies(test_threadsafe_state_storage moveit_core Boost
                             Eigen3)
-  target_link_libraries(test_threadsafe_state_storage moveit_ompl_interface
-                        ompl::ompl)
+  target_link_libraries(test_threadsafe_state_storage moveit_ompl_interface)
   set_target_properties(test_threadsafe_state_storage
                         PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
