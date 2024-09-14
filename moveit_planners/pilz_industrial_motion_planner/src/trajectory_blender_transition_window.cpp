@@ -67,11 +67,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
   std::size_t second_intersection_index;
   if (!searchIntersectionPoints(req, first_intersection_index, second_intersection_index))
   {
-<<<<<<< HEAD
-    RCLCPP_ERROR(LOGGER, "Blend radius to large.");
-=======
     RCLCPP_ERROR(getLogger(), "Blend radius too large.");
->>>>>>> 4fad0d0de (Fix Pilz blending times... the right way (#2961))
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
