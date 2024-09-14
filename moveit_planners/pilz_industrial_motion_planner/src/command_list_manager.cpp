@@ -105,10 +105,6 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
                               // therefore: "i-1".
                               (i > 0 ? radii.at(i - 1) : 0.));
   }
-<<<<<<< HEAD
-=======
-
->>>>>>> 4fad0d0de (Fix Pilz blending times... the right way (#2961))
   return plan_comp_builder_.build();
 }
 
