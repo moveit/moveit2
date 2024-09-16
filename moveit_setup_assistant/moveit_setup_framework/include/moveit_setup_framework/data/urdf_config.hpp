@@ -35,7 +35,7 @@
 #pragma once
 
 #include <moveit_setup_framework/config.hpp>
-#include <urdf/model.h>  // for testing a valid urdf is loaded
+#include <urdf/model.hpp>  // for testing a valid urdf is loaded
 
 namespace moveit_setup
 {
