@@ -46,6 +46,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${MOVEIT_LIB_NAME}_export.h DESTINATIO
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_gmock REQUIRED)
+  find_package(ros_testing REQUIRED)
 
   ament_add_gmock(current_state_monitor_tests
     test/current_state_monitor_tests.cpp
@@ -59,4 +60,10 @@ if(BUILD_TESTING)
   target_link_libraries(trajectory_monitor_tests
     ${MOVEIT_LIB_NAME}
   )
+
+  ament_add_gtest_executable(planning_scene_monitor_test test/planning_scene_monitor_test.cpp)
+  target_link_libraries(planning_scene_monitor_test ${MOVEIT_LIB_NAME})
+  ament_target_dependencies(planning_scene_monitor_test moveit_core rclcpp moveit_msgs)
+  add_ros_test(test/launch/planning_scene_monitor.test.py TIMEOUT 30 ARGS
+    "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()
