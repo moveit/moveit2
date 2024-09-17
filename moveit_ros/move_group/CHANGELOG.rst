@@ -2,6 +2,13 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.11.0 (2024-09-16)
+-------------------
+* Add `SaveGeometryToFile` and `LoadGeometryFromFile` services (`#2973 <https://github.com/moveit/moveit2/issues/2973>`_)
+* New implementation for computeCartesianPath() (`#2916 <https://github.com/moveit/moveit2/issues/2916>`_)
+* Consider attached collision objects in the ComputeFK service (`#2953 <https://github.com/moveit/moveit2/issues/2953>`_)
+* Contributors: Bilal Gill, Daniel García López, Robert Haschke
+
 2.10.0 (2024-06-13)
 -------------------
 * Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
