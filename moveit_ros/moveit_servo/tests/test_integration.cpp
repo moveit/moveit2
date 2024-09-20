@@ -145,7 +145,7 @@ TEST_F(ServoCppFixture, PoseTest)
   ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
 
   // Check against manually verified value
-constexpr double expected_delta = 0.003364;
+  constexpr double expected_delta = 0.003364;
   double delta = next_state.positions[6] - curr_state.positions[6];
   constexpr double tol = 0.00001;
   ASSERT_NEAR(delta, expected_delta, tol);
