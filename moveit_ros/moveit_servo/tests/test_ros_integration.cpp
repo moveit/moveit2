@@ -162,13 +162,13 @@ TEST_F(ServoRosFixture, testPose)
   geometry_msgs::msg::PoseStamped pose_cmd;
   pose_cmd.header.frame_id = "panda_link0";  // Planning frame
 
-  pose_cmd.pose.position.x = 0.3;
-  pose_cmd.pose.position.y = 0.0;
+  pose_cmd.pose.position.x = 0.2;
+  pose_cmd.pose.position.y = -0.2;
   pose_cmd.pose.position.z = 0.6;
-  pose_cmd.pose.orientation.x = 0.7;
-  pose_cmd.pose.orientation.y = -0.7;
-  pose_cmd.pose.orientation.z = -0.000014;
-  pose_cmd.pose.orientation.w = -0.0000015;
+  pose_cmd.pose.orientation.x = 0.7071;
+  pose_cmd.pose.orientation.y = -0.7071;
+  pose_cmd.pose.orientation.z = 0.0;
+  pose_cmd.pose.orientation.w = 0.0;
 
   ASSERT_NE(state_count_, 0);
 

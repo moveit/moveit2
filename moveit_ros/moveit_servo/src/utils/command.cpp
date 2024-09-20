@@ -172,12 +172,12 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     else if (servo_params.command_in_type == "speed_units")
     {
       const auto linear_speed_scale = command.velocities.head<3>().norm() / servo_params.scale.linear;
-      if (linear_speed_scale > servo_params.scale.linear)
+      if (linear_speed_scale > 1.0)
       {
         cartesian_position_delta.head<3>() /= linear_speed_scale;
       }
       const auto angular_speed_scale = command.velocities.tail<3>().norm() / servo_params.scale.rotational;
-      if (angular_speed_scale > servo_params.scale.rotational)
+      if (angular_speed_scale > 1.0)
       {
         cartesian_position_delta.tail<3>() /= angular_speed_scale;
       }
