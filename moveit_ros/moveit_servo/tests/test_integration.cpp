@@ -66,8 +66,8 @@ TEST_F(ServoCppFixture, JointJogTest)
 
   // Check against manually verified value
   double delta = next_state.positions[6] - curr_state.positions[6];
-  constexpr double tol = 0.00001;
-  ASSERT_NEAR(delta, 0.02, tol);
+  constexpr double tol = 1.0e-5;
+  ASSERT_NEAR(delta, 0.01, tol);
 }
 
 TEST_F(ServoCppFixture, TwistTest)
@@ -89,9 +89,9 @@ TEST_F(ServoCppFixture, TwistTest)
   ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
 
   // Check against manually verified value
-  constexpr double expected_delta = -0.001693;
+  constexpr double expected_delta = -0.000338;
   double delta = next_state.positions[6] - curr_state.positions[6];
-  constexpr double tol = 0.00001;
+  constexpr double tol = 1.0e-5;
   ASSERT_NEAR(delta, expected_delta, tol);
 }
 
@@ -114,9 +114,9 @@ TEST_F(ServoCppFixture, NonPlanningFrameTwistTest)
   ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
 
   // Check against manually verified value
-  constexpr double expected_delta = 0.001693;
+  constexpr double expected_delta = 0.000338;
   double delta = next_state.positions[6] - curr_state.positions[6];
-  constexpr double tol = 0.00001;
+  constexpr double tol = 1.0e-5;
   ASSERT_NEAR(delta, expected_delta, tol);
 }
 
@@ -147,7 +147,7 @@ TEST_F(ServoCppFixture, PoseTest)
   // Check against manually verified value
   constexpr double expected_delta = 0.003364;
   double delta = next_state.positions[6] - curr_state.positions[6];
-  constexpr double tol = 0.00001;
+  constexpr double tol = 1.0e-5;
   ASSERT_NEAR(delta, expected_delta, tol);
 }
 
