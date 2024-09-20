@@ -91,7 +91,7 @@ servo:
     rotational: {
       type: double,
       default_value: 0.8,
-      description: "Max linear velocity in rad/s if using speed units or tracking a pose, else a scaling factor on the unitless commanded velocity. Used for Cartesian and pose tracking commands."
+      description: "Max angular velocity in rad/s if using speed units or tracking a pose, else a scaling factor on the unitless commanded velocity. Used for Cartesian and pose tracking commands."
     }
     joint: {
       type: double,
