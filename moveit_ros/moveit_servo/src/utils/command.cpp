@@ -171,15 +171,21 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     }
     else if (servo_params.command_in_type == "speed_units")
     {
-      const auto linear_speed_scale = command.velocities.head<3>().norm() / servo_params.scale.linear;
-      if (linear_speed_scale > 1.0)
+      if (servo_params.scale.linear > 0.0)
       {
-        cartesian_position_delta.head<3>() /= linear_speed_scale;
+        const auto linear_speed_scale = command.velocities.head<3>().norm() / servo_params.scale.linear;
+        if (linear_speed_scale > 1.0)
+        {
+          cartesian_position_delta.head<3>() /= linear_speed_scale;
+        }
       }
-      const auto angular_speed_scale = command.velocities.tail<3>().norm() / servo_params.scale.rotational;
-      if (angular_speed_scale > 1.0)
+      if (servo_params.scale.rotational > 0.0)
       {
-        cartesian_position_delta.tail<3>() /= angular_speed_scale;
+        const auto angular_speed_scale = command.velocities.tail<3>().norm() / servo_params.scale.rotational;
+        if (angular_speed_scale > 1.0)
+        {
+          cartesian_position_delta.tail<3>() /= angular_speed_scale;
+        }
       }
     }
 
@@ -245,17 +251,23 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
     Eigen::Vector3d translation_error = command.pose.translation() - ee_pose.translation();
 
     // Limit the commands by the maximum linear and angular speeds provided.
-    const auto linear_speed_scale =
-        (translation_error.norm() / servo_params.publish_period) / servo_params.scale.linear;
-    if (linear_speed_scale > 1.0)
+    if (servo_params.scale.linear > 0.0)
     {
-      translation_error /= linear_speed_scale;
+      const auto linear_speed_scale =
+          (translation_error.norm() / servo_params.publish_period) / servo_params.scale.linear;
+      if (linear_speed_scale > 1.0)
+      {
+        translation_error /= linear_speed_scale;
+      }
     }
-    const auto angular_speed_scale =
-        (std::abs(q_target.angularDistance(q_current)) / servo_params.publish_period) / servo_params.scale.rotational;
-    if (angular_speed_scale > 1.0)
+    if (servo_params.scale.rotational > 0.0)
     {
-      q_target = q_current.slerp(1.0 / angular_speed_scale, q_target);
+      const auto angular_speed_scale =
+          (std::abs(q_target.angularDistance(q_current)) / servo_params.publish_period) / servo_params.scale.rotational;
+      if (angular_speed_scale > 1.0)
+      {
+        q_target = q_current.slerp(1.0 / angular_speed_scale, q_target);
+      }
     }
 
     // Compute the Cartesian deltas from the velocity-scaled values.
