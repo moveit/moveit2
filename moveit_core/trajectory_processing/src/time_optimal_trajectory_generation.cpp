@@ -6,10 +6,9 @@
  * Date: 05/2012
  *
  * Humanoid Robotics Lab      Georgia Institute of Technology
- * Director: Mike Stilman     http://www.golems.org
+ * Director: Mike Stilman     
  *
  * Algorithm details and publications:
- * http://www.golems.org/node/1570
  *
  * This file is provided under the following "BSD-style" License:
  *   Redistribution and use in source and binary forms, with or
