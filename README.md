@@ -2,7 +2,7 @@
 
 The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the ROS 1 repository see [MoveIt 1](https://github.com/moveit/moveit). For the commercially supported version see [MoveIt Pro](http://picknik.ai/pro).
 
-*Easy-to-use open source robotics manipulation platform for developing commercial applications, prototyping designs, and benchmarking algorithms.*
+*An easy-to-use open-source robotics manipulation platform for developing commercial applications, prototyping designs, and benchmarking algorithms.*
 
 ## Continuous Integration Status
 
@@ -12,7 +12,7 @@ The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the
 
 ## Getting Started
 
-See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/).
+See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/) to help you get started.
 
 ## Install
 
@@ -29,33 +29,32 @@ See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/).
 
 ## Supporters
 
-This open source project is maintained by supporters from around the world — see our [MoveIt Maintainers and Core Contributors](https://moveit.ros.org/about/).
+This open-source project is maintained by supporters from around the world — see our [MoveIt Maintainers and Core Contributors](https://moveit.ros.org/about/).
 
 <a href="https://picknik.ai/">
   <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
 </a>
 
-[PickNik Inc](https://picknik.ai/) is leading the development of MoveIt.
-If you would like to support this project, please contact hello@picknik.ai.
+[PickNik Inc](https://picknik.ai/) leads the development of MoveIt. If you would like to support this project, please contact hello@picknik.ai.
 
 <a href="http://rosin-project.eu">
   <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png"
        alt="rosin_logo" height="60" >
 </a>
 
-The port to ROS 2 was supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
-More information: <a href="http://rosin-project.eu">rosin-project.eu</a>.
+The port to ROS 2 was supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components. More information: <a href="http://rosin-project.eu">rosin-project.eu</a>.
 
 <img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
      alt="eu_flag" height="45" align="left" >
 
-This project has received funding from the European Union’s Horizon 2020
-research and innovation programme under grant agreement no. 732287.
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under grant agreement no. 732287.
 
 ## Generate API Doxygen Documentation
+
 See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/main/doc/how_to_guides/how_to_generate_api_doxygen_locally.html).
 
 # Buildfarm
+
 | Package | Humble Binary | Iron Binary | Rolling Binary | Jazzy Binary |
 |:---:|:---:|:---:|:---:|:---:|
 | geometric_shapes | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Hbin_uJ64__geometric_shapes__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Hbin_uJ64__geometric_shapes__ubuntu_jammy_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Ibin_uJ64__geometric_shapes__ubuntu_jammy_amd64__binary)](https://build.ros2.org/job/Ibin_uJ64__geometric_shapes__ubuntu_jammy_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Rbin_uN64__geometric_shapes__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Rbin_uN64__geometric_shapes__ubuntu_noble_amd64__binary) | [![Build Status](https://build.ros2.org/buildStatus/icon?job=Jbin_uN64__geometric_shapes__ubuntu_noble_amd64__binary)](https://build.ros2.org/job/Jbin_uN64__geometric_shapes__ubuntu_noble_amd64__binary) |
