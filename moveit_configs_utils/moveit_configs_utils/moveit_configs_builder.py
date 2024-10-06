@@ -108,7 +108,9 @@ class MoveItConfigs:
     # A dictionary that has the sensor 3d configuration parameters.
     sensors_3d: Dict = field(default_factory=dict)
     # A dictionary containing move_group's non-default capabilities.
-    move_group_capabilities: Dict = field(default_factory=dict)
+    move_group_capabilities: Dict = field(
+        default_factory=lambda: {"capabilities": "", "disable_capabilities": ""}
+    )
     # A dictionary containing the overridden position/velocity/acceleration limits.
     joint_limits: Dict = field(default_factory=dict)
     # A dictionary containing MoveItCpp related parameters.
