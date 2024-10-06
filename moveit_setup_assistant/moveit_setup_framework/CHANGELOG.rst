@@ -2,6 +2,12 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.11.0 (2024-09-16)
+-------------------
+* Cast of "max_velocity" and "max_acceleration" values to double (`#2803 <https://github.com/moveit/moveit2/issues/2803>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Jorge Pérez Ramos
+
 2.10.0 (2024-06-13)
 -------------------
 * Apply clang-tidy fixes

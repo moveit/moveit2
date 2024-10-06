@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_servo</name>
-  <version>2.10.0</version>
+  <version>2.11.0</version>
   <description>Provides real-time manipulator Cartesian and joint servoing.</description>
   <maintainer email="blakeanderson@utexas.edu">Blake Anderson</maintainer>
   <maintainer email="andyz@utexas.edu">Andy Zelenak</maintainer>
@@ -45,6 +45,7 @@
   <exec_depend>joy</exec_depend>
   <exec_depend>launch_param_builder</exec_depend>
   <exec_depend>moveit_configs_utils</exec_depend>
+  <exec_depend>moveit_ros_visualization</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
 
