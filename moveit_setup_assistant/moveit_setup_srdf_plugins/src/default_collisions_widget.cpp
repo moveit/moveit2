@@ -124,7 +124,7 @@ void DefaultCollisionsWidget::onInit()
   fraction_spinbox_ = new QSpinBox(this);
   fraction_spinbox_->setRange(1, 100);
   fraction_spinbox_->setValue(95);
-  fraction_spinbox_->setSuffix("%");
+  fraction_spinbox_->setSuffix('%');
   buttons_layout->addWidget(fraction_spinbox_);
 
   // Generate Button
