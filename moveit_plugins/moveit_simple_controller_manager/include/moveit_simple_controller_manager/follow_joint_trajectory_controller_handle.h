@@ -63,6 +63,11 @@ public:
 
   // TODO(JafarAbdi): Revise parameter lookup
   // void configure(XmlRpc::XmlRpcValue& config) override;
+  void setPathTolerance(double path_tolerance);
+
+  void setGoalTolerance(double goal_tolerance);
+
+  void setGoalTimeTolerance(double goal_time_tolerance);
 
 protected:
   static control_msgs::msg::JointTolerance& getTolerance(std::vector<control_msgs::msg::JointTolerance>& tolerances,

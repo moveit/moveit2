@@ -25,6 +25,7 @@
   <depend version_gte="1.11.2">pluginlib</depend>
   <depend>control_msgs</depend>
   <depend>rclcpp_action</depend>
+  <depend>generate_parameter_library</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

@@ -49,6 +49,8 @@
 #include <map>
 #include <moveit/utils/logger.hpp>
 
+#include <moveit_simple_controller_manager_parameters.hpp>
+
 namespace
 {
 /**
@@ -101,62 +103,33 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    if (!node_->has_parameter(makeParameterName(PARAM_BASE_NAME, "controller_names")))
+    try
     {
-      RCLCPP_ERROR_STREAM(getLogger(), "No controller_names specified.");
-      return;
-    }
-    rclcpp::Parameter controller_names_param;
-    node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "controller_names"), controller_names_param);
-    if (controller_names_param.get_type() != rclcpp::ParameterType::PARAMETER_STRING_ARRAY)
-    {
-      RCLCPP_ERROR(getLogger(), "Parameter controller_names should be specified as a string array");
-      return;
-    }
-    std::vector<std::string> controller_names = controller_names_param.as_string_array();
-    /* actually create each controller */
-    for (const std::string& controller_name : controller_names)
-    {
-      try
+      const auto controller_manager_param_prefix = "moveit_simple_controller_manager";
+      param_listener_ =
+          std::make_shared<moveit_simple_controller_manager::ParamListener>(node_, controller_manager_param_prefix);
+      params_ = param_listener_->get_params();
+
+      std::vector<std::string> controller_names = params_.controller_names;
+
+      /* actually create each controller */
+      for (const auto& controller : params_.controller_names_map)
       {
-        std::string action_ns;
-        const std::string& action_ns_param = makeParameterName(PARAM_BASE_NAME, controller_name, "action_ns");
-        if (!node_->get_parameter(action_ns_param, action_ns))
-        {
-          RCLCPP_ERROR_STREAM(getLogger(), "No action namespace specified for controller `"
-                                               << controller_name << "` through parameter `" << action_ns_param << '`');
-          continue;
-        }
-
-        std::string type;
-        if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "type"), type))
-        {
-          RCLCPP_ERROR_STREAM(getLogger(), "No type specified for controller " << controller_name);
-          continue;
-        }
-
-        std::vector<std::string> controller_joints;
-        if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "joints"), controller_joints) ||
-            controller_joints.empty())
-        {
-          RCLCPP_ERROR_STREAM(getLogger(), "No joints specified for controller " << controller_name);
-          continue;
-        }
+        const std::string controller_name = controller.first;
+        const std::string action_ns = controller.second.action_ns;
+        const std::string controller_type = controller.second.type;
+        const std::vector<std::string> controller_joints = controller.second.joints;
 
         ActionBasedControllerHandleBasePtr new_handle;
-        if (type == "GripperCommand")
+        if (controller_type == "GripperCommand")
         {
-          double max_effort;
-          const std::string& max_effort_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort");
-          if (!node->get_parameter(max_effort_param, max_effort))
-          {
-            RCLCPP_INFO_STREAM(getLogger(), "Max effort set to 0.0");
-            max_effort = 0.0;
-          }
+          const double max_effort = controller.second.max_effort;
+          RCLCPP_INFO_STREAM(LOGGER, "Max effort set to " << max_effort);
 
           new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns, max_effort);
-          bool parallel_gripper = false;
-          if (node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "parallel"), parallel_gripper) && parallel_gripper)
+
+          bool parallel_gripper = controller.second.parallel;
+          if (parallel_gripper)
           {
             if (controller_joints.size() != 2)
             {
@@ -169,23 +142,28 @@ public:
           }
           else
           {
-            std::string command_joint;
-            if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "command_joint"), command_joint))
+            std::string command_joint = controller.second.command_joint;
+            if (command_joint.empty())
+            {
               command_joint = controller_joints[0];
-
+            }
             static_cast<GripperControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
           }
 
-          bool allow_failure;
-          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, "allow_failure"), allow_failure, false);
+          const bool allow_failure = controller.second.allow_failure;
           static_cast<GripperControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
 
           RCLCPP_INFO_STREAM(getLogger(), "Added GripperCommand controller for " << controller_name);
           controllers_[controller_name] = new_handle;
         }
-        else if (type == "FollowJointTrajectory")
+        else if (controller_type == "FollowJointTrajectory")
         {
           new_handle = std::make_shared<FollowJointTrajectoryControllerHandle>(node_, controller_name, action_ns);
+
+          // static_cast<FollowJointTrajectoryControllerHandle*>(new_handle.get())->setPathTolerance(controller.second.path_tolerance);
+          // static_cast<FollowJointTrajectoryControllerHandle*>(new_handle.get())->setGoalTolerance(controller.second.goal_tolerance);
+          static_cast<FollowJointTrajectoryControllerHandle*>(new_handle.get())
+              ->setGoalTimeTolerance(controller.second.goal_time_tolerance);
           RCLCPP_INFO_STREAM(getLogger(), "Added FollowJointTrajectory controller for " << controller_name);
           controllers_[controller_name] = new_handle;
         }
@@ -201,8 +179,7 @@ public:
         }
 
         moveit_controller_manager::MoveItControllerManager::ControllerState state;
-        node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "default"), state.default_, false);
-        state.active_ = true;
+        state.active_ = controller.second.make_default;
 
         controller_states_[controller_name] = state;
 
@@ -216,6 +193,7 @@ public:
       }
     }
   }
+
   /*
    * Get a controller, by controller name (which was specified in the controllers.yaml
    */
@@ -298,6 +276,9 @@ protected:
   rclcpp::Node::SharedPtr node_;
   std::map<std::string, ActionBasedControllerHandleBasePtr> controllers_;
   std::map<std::string, moveit_controller_manager::MoveItControllerManager::ControllerState> controller_states_;
+
+  std::shared_ptr<moveit_simple_controller_manager::ParamListener> param_listener_;
+  moveit_simple_controller_manager::Params params_;
 };
 
 }  // end namespace moveit_simple_controller_manager
