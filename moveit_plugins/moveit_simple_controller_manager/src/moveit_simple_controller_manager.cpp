@@ -156,7 +156,7 @@ public:
 
           new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns, max_effort);
           bool parallel_gripper = false;
-          if (node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "parallel"), parallel_gripper) && parallel_gripper)
+          if (node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "parallel"), parallel_gripper) && parallel_gripper)
           {
             if (controller_joints.size() != 2)
             {
