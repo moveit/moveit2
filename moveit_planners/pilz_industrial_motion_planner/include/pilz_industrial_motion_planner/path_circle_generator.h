@@ -80,7 +80,7 @@ private:
   static double cosines(const double a, const double b, const double c);
 
   static constexpr double MAX_RADIUS_DIFF{ 1e-2 };
-  static constexpr double MAX_COLINEAR_NORM{ 1e-5 };
+  static constexpr double MAX_COLINEAR_NORM{ 1e-6 };
 };
 
 }  // namespace pilz_industrial_motion_planner
