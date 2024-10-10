@@ -12,3 +12,7 @@ repositories:
     type: git
     url: https://github.com/moveit/moveit_resources.git
     version: ros2
+  srdfdom:
+    type: git
+    https://github.com/moveit/srdfdom.git
+    version: ros2

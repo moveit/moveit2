@@ -38,7 +38,11 @@
 
 #include <moveit/macros/class_forward.h>
 #include <moveit/rdf_loader/synchronized_string_parameter.h>
+#if __has_include(<urdf/model.hpp>)
 #include <urdf/model.hpp>
+#else
+#include <urdf/model.h>
+#endif
 #include <srdfdom/model.h>
 #include <rclcpp/rclcpp.hpp>
 
