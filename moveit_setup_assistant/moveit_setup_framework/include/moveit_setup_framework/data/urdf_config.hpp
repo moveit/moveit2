@@ -35,7 +35,7 @@
 #pragma once
 
 #include <moveit_setup_framework/config.hpp>
-#if __has_include(<urdf/model.hpp>) // for testing a valid urdf is loaded
+#if __has_include(<urdf/model.hpp>)  // for testing a valid urdf is loaded
 #include <urdf/model.hpp>
 #else
 #include <urdf/model.h>
