@@ -585,11 +585,6 @@ public:
     pose_reference_frame_ = pose_reference_frame;
   }
 
-  void setSupportSurfaceName(const std::string& support_surface)
-  {
-    support_surface_ = support_surface;
-  }
-
   const std::string& getPoseReferenceFrame() const
   {
     return pose_reference_frame_;
@@ -1083,61 +1078,6 @@ public:
     constructMotionPlanRequest(goal.request);
   }
 
-  //  moveit_msgs::action::Pickup::Goal constructPickupGoal(const std::string& object,
-  //                                                      std::vector<moveit_msgs::msg::Grasp>&& grasps,
-  //                                                      bool plan_only = false) const
-  //  {
-  //    moveit_msgs::action::Pickup::Goal goal;
-  //    goal.target_name = object;
-  //    goal.group_name = opt_.group_name;
-  //    goal.end_effector = getEndEffector();
-  //    goal.support_surface_name = support_surface_;
-  //    goal.possible_grasps = std::move(grasps);
-  //    if (!support_surface_.empty())
-  //      goal.allow_gripper_support_collision = true;
-  //
-  //    if (path_constraints_)
-  //      goal.path_constraints = *path_constraints_;
-  //
-  //    goal.planner_id = planner_id_;
-  //    goal.allowed_planning_time = allowed_planning_time_;
-  //
-  //    goal.planning_options.plan_only = plan_only;
-  //    goal.planning_options.look_around = can_look_;
-  //    goal.planning_options.replan = can_replan_;
-  //    goal.planning_options.replan_delay = replan_delay_;
-  //    goal.planning_options.planning_scene_diff.is_diff = true;
-  //    goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
-  //    return goal;
-  //  }
-
-  //  moveit_msgs::action::Place::Goal constructPlaceGoal(const std::string& object,
-  //                                                    std::vector<moveit_msgs::msg::PlaceLocation>&& locations,
-  //                                                    bool plan_only = false) const
-  //  {
-  //    moveit_msgs::action::Place::Goal goal;
-  //    goal.group_name = opt_.group_name;
-  //    goal.attached_object_name = object;
-  //    goal.support_surface_name = support_surface_;
-  //    goal.place_locations = std::move(locations);
-  //    if (!support_surface_.empty())
-  //      goal.allow_gripper_support_collision = true;
-  //
-  //    if (path_constraints_)
-  //      goal.path_constraints = *path_constraints_;
-  //
-  //    goal.planner_id = planner_id_;
-  //    goal.allowed_planning_time = allowed_planning_time_;
-  //
-  //    goal.planning_options.plan_only = plan_only;
-  //    goal.planning_options.look_around = can_look_;
-  //    goal.planning_options.replan = can_replan_;
-  //    goal.planning_options.replan_delay = replan_delay_;
-  //    goal.planning_options.planning_scene_diff.is_diff = true;
-  //    goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
-  //    return goal;
-  //  }
-
   void setPathConstraints(const moveit_msgs::msg::Constraints& constraint)
   {
     path_constraints_ = std::make_unique<moveit_msgs::msg::Constraints>(constraint);
@@ -1308,7 +1248,6 @@ private:
   std::unique_ptr<moveit_msgs::msg::TrajectoryConstraints> trajectory_constraints_;
   std::string end_effector_link_;
   std::string pose_reference_frame_;
-  std::string support_surface_;
 
   // ROS communication
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr trajectory_event_publisher_;
@@ -1510,46 +1449,6 @@ moveit::core::MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
 {
   return impl_->plan(plan);
 }
-
-// moveit_msgs::action::Pickup::Goal MoveGroupInterface::constructPickupGoal(const std::string& object,
-//                                                                        std::vector<moveit_msgs::msg::Grasp> grasps,
-//                                                                        bool plan_only = false) const
-//{
-//  return impl_->constructPickupGoal(object, std::move(grasps), plan_only);
-//}
-//
-// moveit_msgs::action::Place::Goal MoveGroupInterface::constructPlaceGoal(
-//    const std::string& object, std::vector<moveit_msgs::msg::PlaceLocation> locations, bool plan_only = false) const
-//{
-//  return impl_->constructPlaceGoal(object, std::move(locations), plan_only);
-//}
-//
-// std::vector<moveit_msgs::msg::PlaceLocation>
-// MoveGroupInterface::posesToPlaceLocations(const std::vector<geometry_msgs::msg::PoseStamped>& poses) const
-//{
-//  return impl_->posesToPlaceLocations(poses);
-//}
-//
-// moveit::core::MoveItErrorCode MoveGroupInterface::pick(const moveit_msgs::action::Pickup::Goal& goal)
-//{
-//  return impl_->pick(goal);
-//}
-//
-// moveit::core::MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const std::string& object, bool plan_only)
-//{
-//  return impl_->planGraspsAndPick(object, plan_only);
-//}
-//
-// moveit::core::MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object,
-// bool plan_only)
-//{
-//  return impl_->planGraspsAndPick(object, plan_only);
-//}
-//
-// moveit::core::MoveItErrorCode MoveGroupInterface::place(const moveit_msgs::action::Place::Goal& goal)
-//{
-//  return impl_->place(goal);
-//}
 
 double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
                                                 moveit_msgs::msg::RobotTrajectory& trajectory, bool avoid_collisions,
@@ -2308,11 +2207,6 @@ void MoveGroupInterface::setPlanningTime(double seconds)
 double MoveGroupInterface::getPlanningTime() const
 {
   return impl_->getPlanningTime();
-}
-
-void MoveGroupInterface::setSupportSurfaceName(const std::string& name)
-{
-  impl_->setSupportSurfaceName(name);
 }
 
 const rclcpp::Node::SharedPtr& MoveGroupInterface::getNode() const
