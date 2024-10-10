@@ -50,7 +50,11 @@
 
 #include <kdl/chainfksolverpos_recursive.hpp>
 
+#if __has_include(<urdf/model.hpp>)
 #include <urdf/model.hpp>
+#else
+#include <urdf/model.h>
+#endif
 
 #include <moveit/kinematics_base/kinematics_base.h>
 
