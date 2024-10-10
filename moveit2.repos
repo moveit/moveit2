@@ -14,5 +14,5 @@ repositories:
     version: ros2
   srdfdom:
     type: git
-    https://github.com/moveit/srdfdom.git
+    url: https://github.com/moveit/srdfdom.git
     version: ros2
