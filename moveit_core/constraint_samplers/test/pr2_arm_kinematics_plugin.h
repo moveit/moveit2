@@ -50,7 +50,7 @@
 
 #include <kdl/chainfksolverpos_recursive.hpp>
 
-#include <urdf/model.h>
+#include <urdf/model.hpp>
 
 #include <moveit/kinematics_base/kinematics_base.h>
 

@@ -38,7 +38,7 @@
 #pragma once
 
 #include <srdfdom/srdf_writer.h>
-#include <urdf/model.h>
+#include <urdf/model.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <geometry_msgs/msg/pose.hpp>
 
