@@ -38,7 +38,11 @@
 #pragma once
 
 #include <srdfdom/srdf_writer.h>
+#if __has_include(<urdf/model.hpp>)
+#include <urdf/model.hpp>
+#else
 #include <urdf/model.h>
+#endif
 #include <moveit/robot_model/robot_model.h>
 #include <geometry_msgs/msg/pose.hpp>
 
