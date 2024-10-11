@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>moveit_ros_trajectory_cache</name>
+  <version>2.11.0</version>
+  <description>A trajectory cache for MoveIt 2 motion plans and cartesian plans.</description>
+  <maintainer email="methylDragon@intrinsic.ai">Brandon Ong</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>moveit_common</depend>
+  <depend>geometry_msgs</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+  <depend>tf2_ros</depend>
+  <depend>trajectory_msgs</depend>
+
+  <exec_depend>moveit_ros</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>ament_cmake_uncrustify</test_depend>
+  <test_depend>launch_pytest</test_depend>
+  <test_depend>launch_testing_ament_cmake</test_depend>
+
+  <test_depend>moveit_configs_utils</test_depend>
+  <test_depend>moveit_planners_ompl</test_depend>
+  <test_depend>moveit_resources</test_depend>
+  <test_depend>python3-pytest</test_depend>
+  <test_depend>rmf_utils</test_depend>
+  <test_depend>robot_state_publisher</test_depend>
+  <test_depend>ros2_control</test_depend>
+  <test_depend>warehouse_ros_sqlite</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

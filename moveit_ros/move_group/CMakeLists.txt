@@ -46,9 +46,11 @@ add_library(
   src/default_capabilities/get_group_urdf_capability.cpp
   src/default_capabilities/get_planning_scene_service_capability.cpp
   src/default_capabilities/kinematics_service_capability.cpp
+  src/default_capabilities/load_geometry_from_file_service_capability.cpp
   src/default_capabilities/move_action_capability.cpp
   src/default_capabilities/plan_service_capability.cpp
   src/default_capabilities/query_planners_service_capability.cpp
+  src/default_capabilities/save_geometry_to_file_service_capability.cpp
   src/default_capabilities/state_validation_service_capability.cpp
   src/default_capabilities/tf_publisher_capability.cpp)
 target_include_directories(

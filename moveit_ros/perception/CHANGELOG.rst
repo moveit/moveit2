@@ -2,6 +2,13 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.11.0 (2024-09-16)
+-------------------
+* Replace obsolete header (`#2978 <https://github.com/moveit/moveit2/issues/2978>`_)
+* Fixed segmentation fault in depth_image_octomap_updater (`#2963 <https://github.com/moveit/moveit2/issues/2963>`_)
+* Fix deprecation warning (`#2922 <https://github.com/moveit/moveit2/issues/2922>`_)
+* Contributors: CihatAltiparmak, Robert Haschke, Sebastian Jahr
+
 2.10.0 (2024-06-13)
 -------------------
 * Fix segmentation fault in mesh_filter/gl_renderer (`#2834 <https://github.com/moveit/moveit2/issues/2834>`_)
