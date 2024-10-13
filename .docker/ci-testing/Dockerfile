@@ -29,7 +29,7 @@ RUN \
         # Some basic requirements
         wget git sudo curl \
         # Preferred build tools
-        clang clang-format-14 clang-tidy clang-tools \
+        clang clang-format-17 clang-tidy clang-tools \
         ccache \
         ros-"$ROS_DISTRO"-ros-base && \
     #
