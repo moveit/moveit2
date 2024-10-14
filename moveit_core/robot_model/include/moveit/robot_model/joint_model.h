@@ -139,6 +139,16 @@ public:
    */
   JointModel(const std::string& name, size_t joint_index, size_t first_variable_index);
 
+  /**
+   * @brief      Constructs a joint named \e name with a specified distance factor
+   *
+   * @param[in]  name                   The joint name
+   * @param[in]  index                  The index of the joint in the RobotModel
+   * @param[in]  first_variable_index   The index of the first variable in the RobotModel
+   * @param[in]  distance_factor        The factor applied to the distance between two joint states
+   */
+  JointModel(const std::string& name, size_t joint_index, size_t first_variable_index, double distance_factor);
+
   virtual ~JointModel();
 
   /** \brief Get the name of the joint */
@@ -487,6 +497,9 @@ private:
 protected:
   void computeVariableBoundsMsg();
 
+  /** \brief The factor applied to the distance between two joint states */
+  double distance_factor_;
+
   /** \brief The type of joint */
   JointType type_;
 
@@ -535,9 +548,6 @@ protected:
 
   /** \brief Specify whether this joint is marked as passive in the SRDF */
   bool passive_;
-
-  /** \brief The factor applied to the distance between two joint states */
-  double distance_factor_;
 };
 
 /** \brief Operator overload for printing variable bounds to a stream */
