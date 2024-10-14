@@ -285,23 +285,22 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     double wp_percentage_solved =
         computeCartesianPath(start_state, group, waypoint_traj, link, waypoints[i], global_reference_frame, max_step,
                              precision, validCallback, options, cost_function, link_offset);
+
+    std::vector<RobotStatePtr>::iterator start = waypoint_traj.begin();
+    if (i > 0 && !waypoint_traj.empty())
+      std::advance(start, 1);
+    traj.insert(traj.end(), start, waypoint_traj.end());
+
     if (fabs(wp_percentage_solved - 1.0) < std::numeric_limits<double>::epsilon())
     {
       percentage_solved = static_cast<double>(i + 1) / static_cast<double>(waypoints.size());
-      std::vector<RobotStatePtr>::iterator start = waypoint_traj.begin();
-      if (i > 0 && !waypoint_traj.empty())
-        std::advance(start, 1);
-      traj.insert(traj.end(), start, waypoint_traj.end());
     }
     else
     {
       percentage_solved += wp_percentage_solved / static_cast<double>(waypoints.size());
-      std::vector<RobotStatePtr>::iterator start = waypoint_traj.begin();
-      if (i > 0 && !waypoint_traj.empty())
-        std::advance(start, 1);
-      traj.insert(traj.end(), start, waypoint_traj.end());
       break;
     }
+    start_state = traj.back().get();
   }
 
   return percentage_solved;
@@ -490,21 +489,19 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
         computeCartesianPath(start_state, group, waypoint_path, link, waypoints[i], global_reference_frame, max_step,
                              NO_JOINT_SPACE_JUMP_TEST, validCallback, options, cost_function, link_offset);
 #pragma GCC diagnostic pop
+
+    std::vector<RobotStatePtr>::iterator start = waypoint_path.begin();
+    if (i > 0 && !waypoint_path.empty())
+      std::advance(start, 1);
+    path.insert(path.end(), start, waypoint_path.end());
+
     if (fabs(wp_percentage_solved - 1.0) < std::numeric_limits<double>::epsilon())
     {
       percentage_solved = static_cast<double>((i + 1)) / static_cast<double>(waypoints.size());
-      std::vector<RobotStatePtr>::iterator start = waypoint_path.begin();
-      if (i > 0 && !waypoint_path.empty())
-        std::advance(start, 1);
-      path.insert(path.end(), start, waypoint_path.end());
     }
     else
     {
       percentage_solved += wp_percentage_solved / static_cast<double>(waypoints.size());
-      std::vector<RobotStatePtr>::iterator start = waypoint_path.begin();
-      if (i > 0 && !waypoint_path.empty())
-        std::advance(start, 1);
-      path.insert(path.end(), start, waypoint_path.end());
       break;
     }
   }
