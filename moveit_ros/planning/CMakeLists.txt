@@ -49,8 +49,6 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_collision_plugin_loader
     moveit_constraint_sampler_manager_loader
     moveit_cpp
-    moveit_default_planning_request_adapter_plugins
-    moveit_default_planning_response_adapter_plugins
     moveit_kinematics_plugin_loader
     moveit_plan_execution
     moveit_planning_pipeline
@@ -105,6 +103,16 @@ add_subdirectory(trajectory_execution_manager)
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
   EXPORT moveit_ros_planningTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES
+  DESTINATION include/moveit_ros_planning)
+
+# install plugins as separate export set
+install(
+  TARGETS moveit_default_planning_response_adapter_plugins
+          moveit_default_planning_request_adapter_plugins
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin

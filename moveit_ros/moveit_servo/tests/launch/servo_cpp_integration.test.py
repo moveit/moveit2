@@ -112,7 +112,7 @@ def generate_test_description():
             joint_state_broadcaster_spawner,
             panda_arm_controller_spawner,
             test_container,
-            launch.actions.TimerAction(period=2.0, actions=[servo_gtest]),
+            launch.actions.TimerAction(period=5.0, actions=[servo_gtest]),
             launch_testing.actions.ReadyToTest(),
         ]
     ), {

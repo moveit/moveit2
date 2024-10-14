@@ -37,7 +37,11 @@
 #pragma once
 
 #include <urdf_model/model.h>
+#if __has_include(<urdf/model.hpp>)
+#include <urdf/model.hpp>
+#else
 #include <urdf/model.h>
+#endif
 #include <Eigen/Geometry>
 #include <Eigen/LU>  // provides LU decomposition
 #include <kdl/chainiksolver.hpp>
