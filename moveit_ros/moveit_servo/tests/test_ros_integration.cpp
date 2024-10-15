@@ -90,7 +90,7 @@ TEST_F(ServoRosFixture, testJointJog)
 
   std::fill(jog_cmd.velocities.begin(), jog_cmd.velocities.end(), 0.0);
 
-  jog_cmd.velocities[6] = 1.0;
+  jog_cmd.velocities[6] = 0.5;
 
   size_t count = 0;
   while (rclcpp::ok() && count < NUM_COMMANDS)
@@ -98,7 +98,7 @@ TEST_F(ServoRosFixture, testJointJog)
     jog_cmd.header.stamp = servo_test_node_->now();
     joint_jog_publisher->publish(jog_cmd);
     count++;
-    rclcpp::sleep_for(std::chrono::milliseconds(200));
+    rclcpp::sleep_for(std::chrono::milliseconds(100));
   }
 
   ASSERT_GE(traj_count_, NUM_COMMANDS);
@@ -137,7 +137,7 @@ TEST_F(ServoRosFixture, testTwist)
     twist_cmd.header.stamp = servo_test_node_->now();
     twist_publisher->publish(twist_cmd);
     count++;
-    rclcpp::sleep_for(std::chrono::milliseconds(200));
+    rclcpp::sleep_for(std::chrono::milliseconds(100));
   }
 
   ASSERT_GE(traj_count_, NUM_COMMANDS);
@@ -162,13 +162,13 @@ TEST_F(ServoRosFixture, testPose)
   geometry_msgs::msg::PoseStamped pose_cmd;
   pose_cmd.header.frame_id = "panda_link0";  // Planning frame
 
-  pose_cmd.pose.position.x = 0.3;
-  pose_cmd.pose.position.y = 0.0;
+  pose_cmd.pose.position.x = 0.2;
+  pose_cmd.pose.position.y = -0.2;
   pose_cmd.pose.position.z = 0.6;
-  pose_cmd.pose.orientation.x = 0.7;
-  pose_cmd.pose.orientation.y = -0.7;
-  pose_cmd.pose.orientation.z = -0.000014;
-  pose_cmd.pose.orientation.w = -0.0000015;
+  pose_cmd.pose.orientation.x = 0.7071;
+  pose_cmd.pose.orientation.y = -0.7071;
+  pose_cmd.pose.orientation.z = 0.0;
+  pose_cmd.pose.orientation.w = 0.0;
 
   ASSERT_NE(state_count_, 0);
 
@@ -178,7 +178,7 @@ TEST_F(ServoRosFixture, testPose)
     pose_cmd.header.stamp = servo_test_node_->now();
     pose_publisher->publish(pose_cmd);
     count++;
-    rclcpp::sleep_for(std::chrono::milliseconds(200));
+    rclcpp::sleep_for(std::chrono::milliseconds(100));
   }
 
   ASSERT_GE(traj_count_, NUM_COMMANDS);
