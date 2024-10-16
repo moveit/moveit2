@@ -11,12 +11,18 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(generate_parameter_library REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS control_msgs rclcpp rclcpp_action moveit_core
-                                 pluginlib)
+                                 pluginlib generate_parameter_library)
+
+generate_parameter_library(
+  moveit_simple_controller_manager_parameters # cmake target name for the parameter library
+  src/moveit_simple_controller_manager_parameters.yaml # path to input yaml file
+)
 
 include_directories(include)
 
@@ -31,6 +37,16 @@ set_target_properties(
 
 ament_target_dependencies(moveit_simple_controller_manager
                           ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+
+target_link_libraries(moveit_simple_controller_manager moveit_simple_controller_manager_parameters)
+
+install(
+  TARGETS moveit_simple_controller_manager_parameters
+  EXPORT ${PROJECT_NAME}Targets
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 install(
   TARGETS moveit_simple_controller_manager
