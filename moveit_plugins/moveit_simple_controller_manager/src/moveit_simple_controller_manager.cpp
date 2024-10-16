@@ -156,7 +156,8 @@ public:
 
           new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns, max_effort);
           bool parallel_gripper = false;
-          if (node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "parallel"), parallel_gripper) && parallel_gripper)
+          if (node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "parallel"), parallel_gripper) &&
+              parallel_gripper)
           {
             if (controller_joints.size() != 2)
             {
@@ -170,14 +171,16 @@ public:
           else
           {
             std::string command_joint;
-            if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, "command_joint"), command_joint))
+            if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "command_joint"),
+                                      command_joint))
               command_joint = controller_joints[0];
 
             static_cast<GripperControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
           }
 
           bool allow_failure;
-          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, "allow_failure"), allow_failure, false);
+          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "allow_failure"), allow_failure,
+                                  false);
           static_cast<GripperControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
 
           RCLCPP_INFO_STREAM(getLogger(), "Added GripperCommand controller for " << controller_name);
