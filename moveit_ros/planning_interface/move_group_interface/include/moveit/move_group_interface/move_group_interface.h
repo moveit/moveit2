@@ -302,10 +302,6 @@ public:
   /** \brief Set the starting state for planning to be that reported by the robot's joint state publication */
   void setStartStateToCurrentState();
 
-  /** \brief For pick/place operations, the name of the support surface is used to specify the fact that attached
-   * objects are allowed to touch the support surface */
-  void setSupportSurfaceName(const std::string& name);
-
   /**
    * \name Setting a joint state target (goal)
    *
