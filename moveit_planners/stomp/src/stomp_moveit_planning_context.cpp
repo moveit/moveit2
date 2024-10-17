@@ -277,12 +277,85 @@ void StompPlanningContext::solve(planning_interface::MotionPlanResponse& res)
   res.planning_time = elapsed_seconds.count();
 }
 
-void StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& /*res*/)
+void StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse& res)
 {
-  // TODO(#2168): implement this function
-  RCLCPP_ERROR(getLogger(),
-               "StompPlanningContext::solve(planning_interface::MotionPlanDetailedResponse&) is not implemented!");
-  return;
+  // STOMP config, task, planner instance
+  const auto group = getPlanningScene()->getRobotModel()->getJointModelGroup(getGroupName());
+  auto config = getStompConfig(params_, group->getActiveJointModels().size() /* num_dimensions */);
+
+  // Reset num_iterations in config to go through and store each trajectory at each iteration
+  int num_iterations = config.num_iterations;
+  config.num_iterations = 0;
+  res.trajectory.resize(num_iterations);
+  res.description.resize(num_iterations);
+  res.processing_time.resize(num_iterations);
+
+  for (int i = 0; i < num_iterations; i++)
+  {
+    // Increase number of iterations for each successive trajectory
+    config.num_iterations++;
+
+    // Start time
+    auto time_start = std::chrono::steady_clock::now();
+
+    res.planner_id = std::string("stomp");
+    // Default to happy path
+    res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+
+    // Extract start and goal states
+    const auto& req = getMotionPlanRequest();
+    const moveit::core::RobotState start_state(*getPlanningScene()->getCurrentStateUpdated(req.start_state));
+    moveit::core::RobotState goal_state(start_state);
+    constraint_samplers::ConstraintSamplerManager sampler_manager;
+    auto goal_sampler = sampler_manager.selectSampler(getPlanningScene(), getGroupName(), req.goal_constraints.at(0));
+    if (!goal_sampler || !goal_sampler->sample(goal_state))
+    {
+      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+      return;  // Can't plan without valid goal state
+    }
+
+    robot_trajectory::RobotTrajectoryPtr input_trajectory;
+    if (extractSeedTrajectory(request_, getPlanningScene()->getRobotModel(), input_trajectory))
+    {
+      config.num_timesteps = input_trajectory->size();
+    }
+    const auto task = createStompTask(config, *this);
+    stomp_ = std::make_shared<stomp::Stomp>(config, task);
+
+    std::condition_variable cv;
+    std::mutex cv_mutex;
+    bool finished = false;
+    auto timeout_future = std::async(std::launch::async, [&, stomp = stomp_]() {
+      std::unique_lock<std::mutex> lock(cv_mutex);
+      cv.wait_for(lock, std::chrono::duration<double>(req.allowed_planning_time), [&finished] { return finished; });
+      if (!finished)
+      {
+        stomp->cancel();
+      }
+    });
+
+    // Solve
+    if (!solveWithStomp(stomp_, start_state, goal_state, group, input_trajectory, res.trajectory[i]))
+    {
+      // We timed out if the timeout task has completed so that the timeout future is valid and ready
+      bool timed_out =
+          timeout_future.valid() && timeout_future.wait_for(std::chrono::nanoseconds(1)) == std::future_status::ready;
+      res.error_code.val = timed_out ? moveit_msgs::msg::MoveItErrorCodes::TIMED_OUT :
+                                       moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+    }
+    stomp_.reset();
+    {
+      std::unique_lock<std::mutex> lock(cv_mutex);
+      finished = true;
+      cv.notify_all();
+    }
+    // Description
+    res.description[i] = "plan_" + std::to_string(i);
+
+    // Stop time
+    std::chrono::duration<double> elapsed_seconds = std::chrono::steady_clock::now() - time_start;
+    res.processing_time[i] = elapsed_seconds.count();
+  }
 }
 
 bool StompPlanningContext::terminate()
