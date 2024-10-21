@@ -72,6 +72,8 @@ protected:
 
   void stringCallback(const std_msgs::msg::String::ConstSharedPtr& msg);
 
+  static std::string sanitizeNodeName(const std::string& node_name);
+
   std::shared_ptr<rclcpp::Node> node_;
   std::string name_;
   StringCallback parent_callback_;
