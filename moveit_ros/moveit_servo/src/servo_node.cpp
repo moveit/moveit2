@@ -383,6 +383,7 @@ void ServoNode::servoLoop()
     {
       // if no new command was created, use current robot state
       updateSlidingWindow(current_state, joint_cmd_rolling_window_, servo_params_.max_expected_latency, cur_time);
+      servo_->resetSmoothing(current_state);
     }
 
     status_msg.code = static_cast<int8_t>(servo_->getStatus());
