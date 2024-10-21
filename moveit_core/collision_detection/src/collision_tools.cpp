@@ -106,7 +106,7 @@ void getCollisionMarkersFromContacts(visualization_msgs::msg::MarkerArray& arr, 
   {
     for (const auto& contact : collision.second)
     {
-      std::string ns_name = contact.body_name_1 + "=" + contact.body_name_2;
+      std::string ns_name = contact.body_name_1 + '=' + contact.body_name_2;
       if (ns_counts.find(ns_name) == ns_counts.end())
       {
         ns_counts[ns_name] = 0;
