@@ -254,8 +254,12 @@ TEST_F(MoveGroupFixture, CartesianAlwaysInsertNeverPrunePolicyChecks)
     waypoints.push_back(move_group_->getRandomPose().pose);
 
     valid_msg = constructGetCartesianPathRequest(*move_group_, waypoints, /*max_step=*/0.01, /*jump_threshold=*/0.0);
+// TODO: Swap this over to the new computeCartesianPath API.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     valid_plan.fraction = move_group_->computeCartesianPath(valid_msg.waypoints, valid_msg.max_step,
                                                             valid_msg.jump_threshold, valid_plan.solution);
+#pragma GCC diagnostic pop
   } while (valid_plan.fraction <= 0);  // Sometimes the plan fails with the random pose.
 
   // Valid case, as control.
@@ -335,7 +339,11 @@ TEST_F(MoveGroupFixture, CartesianAlwaysInsertNeverPrunePolicyWorks)
     waypoints.push_back(move_group_->getRandomPose().pose);
 
     msg = constructGetCartesianPathRequest(*move_group_, waypoints, /*max_step=*/0.01, /*jump_threshold=*/0.0);
+// TODO: Swap this over to the new computeCartesianPath API.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     plan.fraction = move_group_->computeCartesianPath(msg.waypoints, msg.max_step, msg.jump_threshold, plan.solution);
+#pragma GCC diagnostic pop
   } while (plan.fraction <= -1);  // Sometimes the plan fails with the random pose.
 
   do
@@ -345,8 +353,12 @@ TEST_F(MoveGroupFixture, CartesianAlwaysInsertNeverPrunePolicyWorks)
     waypoints.push_back(move_group_->getRandomPose().pose);
 
     another_msg = constructGetCartesianPathRequest(*move_group_, waypoints, /*max_step=*/0.01, /*jump_threshold=*/0.0);
+// TODO: Swap this over to the new computeCartesianPath API.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     another_plan.fraction = move_group_->computeCartesianPath(another_msg.waypoints, another_msg.max_step,
                                                               another_msg.jump_threshold, another_plan.solution);
+#pragma GCC diagnostic pop
   } while (another_plan.fraction <= -1);  // Sometimes the plan fails with the random pose.
 
   // Ensure that the entries are valid.
