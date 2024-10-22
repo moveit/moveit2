@@ -40,11 +40,10 @@ TEST_F(WarehouseFixture, QueryAppendCenterWithToleranceWorks)
 
   Metadata::Ptr metadata = coll.createMetadata();
   metadata->append("test_metadata", 5.0);
-  metadata->append("unrelated_metadata", 1.0);
   coll.insert(geometry_msgs::msg::Point(), metadata);
 
   Query::Ptr unrelated_query = coll.createQuery();
-  moveit_ros::trajectory_cache::queryAppendCenterWithTolerance(*unrelated_query, "unrnelated_metadata", 1.0, 10.0);
+  moveit_ros::trajectory_cache::queryAppendCenterWithTolerance(*unrelated_query, "unrelated_metadata", 1.0, 10.0);
   EXPECT_TRUE(coll.queryList(unrelated_query).empty());
 
   Query::Ptr related_query_too_low = coll.createQuery();
