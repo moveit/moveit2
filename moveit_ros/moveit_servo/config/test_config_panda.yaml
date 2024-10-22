@@ -12,10 +12,10 @@ incoming_command_timeout: 0.5 # seconds
 command_in_type: "unitless" # "unitless" in the range [-1:1], as if from joystick. "speed_units" cmds are in m/s and rad/s
 scale:
   # Scale parameters are only used if command_in_type=="unitless"
-  linear:  1.0  # Max linear velocity. Unit is [m/s]. Only used for Cartesian commands.
-  rotational:  1.0 # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
+  linear: 0.2  # Max linear velocity. Unit is [m/s]. Only used for Cartesian commands.
+  rotational: 0.2  # Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands.
   # Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic.
-  joint: 1.0
+  joint: 0.5
 
 # What type of topic does your robot driver expect?
 # Currently supported are std_msgs/Float64MultiArray or trajectory_msgs/JointTrajectory
@@ -56,7 +56,7 @@ status_topic: ~/status # Publish status to this topic
 command_out_topic: /panda_arm_controller/joint_trajectory # Publish outgoing commands here
 
 ## Collision checking for the entire robot body
-check_collisions: true # Check collisions?
+check_collisions: true  # Check collisions?
 collision_check_rate: 10.0 # [Hz] Collision-checking can easily bog down a CPU if done too often.
 self_collision_proximity_threshold: 0.01 # Start decelerating when a self-collision is this far [m]
 scene_collision_proximity_threshold: 0.02 # Start decelerating when a scene collision is this far [m]
