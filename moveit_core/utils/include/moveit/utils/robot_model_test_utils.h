@@ -52,6 +52,17 @@ namespace moveit
 {
 namespace core
 {
+
+/** \brief Loads a robot model given a URDF and SRDF file in a package.
+ * \param[in] package_name The name of the package containing the URDF and SRDF files.
+ * \param[in] urdf_relative_path The relative path to the URDF file in the package installed directory.
+ * \param[in] srdf_relative_path The relative path to the SRDF file in the package installed directory.
+ * \returns a RobotModel constructed from the URDF and SRDF files, or nullptr if the files could not be loaded.
+ */
+moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& package_name,
+                                                  const std::string& urdf_relative_path,
+                                                  const std::string& srdf_relative_path);
+
 /** \brief Loads a robot from moveit_resources.
  * \param[in] robot_name The name of the robot in moveit_resources to load.
  *            This should be the prefix to many of the robot packages.
