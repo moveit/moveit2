@@ -135,6 +135,7 @@ public:
       throw std::runtime_error(error);
     }
 
+    setStartStateToCurrentState();
     joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name);
 
     joint_state_target_ = std::make_shared<moveit::core::RobotState>(getRobotModel());
@@ -406,28 +407,30 @@ public:
     return *joint_state_target_;
   }
 
+  void setStartState(const moveit_msgs::msg::RobotState& start_state)
+  {
+    considered_start_state_ = start_state;
+  }
+
   void setStartState(const moveit::core::RobotState& start_state)
   {
-    considered_start_state_ = std::make_shared<moveit::core::RobotState>(start_state);
+    considered_start_state_ = moveit_msgs::msg::RobotState();
+    moveit::core::robotStateToRobotStateMsg(start_state, considered_start_state_, true);
   }
 
   void setStartStateToCurrentState()
   {
-    considered_start_state_.reset();
+    // set message to empty diff
+    considered_start_state_ = moveit_msgs::msg::RobotState();
+    considered_start_state_.is_diff = true;
   }
 
   moveit::core::RobotStatePtr getStartState()
   {
-    if (considered_start_state_)
-    {
-      return considered_start_state_;
-    }
-    else
-    {
-      moveit::core::RobotStatePtr s;
-      getCurrentState(s);
-      return s;
-    }
+    moveit::core::RobotStatePtr s;
+    getCurrentState(s);
+    moveit::core::robotStateMsgToRobotState(considered_start_state_, *s, true);
+    return s;
   }
 
   bool setJointValueTarget(const geometry_msgs::msg::Pose& eef_pose, const std::string& end_effector_link,
@@ -1006,18 +1009,6 @@ public:
     return allowed_planning_time_;
   }
 
-  void constructRobotState(moveit_msgs::msg::RobotState& state) const
-  {
-    if (considered_start_state_)
-    {
-      moveit::core::robotStateToRobotStateMsg(*considered_start_state_, state);
-    }
-    else
-    {
-      state.is_diff = true;
-    }
-  }
-
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request) const
   {
     request.group_name = opt_.group_name;
@@ -1028,8 +1019,7 @@ public:
     request.pipeline_id = planning_pipeline_id_;
     request.planner_id = planner_id_;
     request.workspace_parameters = workspace_parameters_;
-
-    constructRobotState(request.start_state);
+    request.start_state = considered_start_state_;
 
     if (active_target_ == JOINT)
     {
@@ -1217,7 +1207,7 @@ private:
   std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory>> execute_action_client_;
 
   // general planning params
-  moveit::core::RobotStatePtr considered_start_state_;
+  moveit_msgs::msg::RobotState considered_start_state_;
   moveit_msgs::msg::WorkspaceParameters workspace_parameters_;
   double allowed_planning_time_;
   std::string planning_pipeline_id_;
@@ -1484,18 +1474,7 @@ void MoveGroupInterface::stop()
 
 void MoveGroupInterface::setStartState(const moveit_msgs::msg::RobotState& start_state)
 {
-  moveit::core::RobotStatePtr rs;
-  if (start_state.is_diff)
-  {
-    impl_->getCurrentState(rs);
-  }
-  else
-  {
-    rs = std::make_shared<moveit::core::RobotState>(getRobotModel());
-    rs->setToDefaultValues();  // initialize robot state values for conversion
-  }
-  moveit::core::robotStateMsgToRobotState(start_state, *rs);
-  setStartState(*rs);
+  impl_->setStartState(start_state);
 }
 
 void MoveGroupInterface::setStartState(const moveit::core::RobotState& start_state)
