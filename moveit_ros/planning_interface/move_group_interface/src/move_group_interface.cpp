@@ -865,8 +865,7 @@ public:
     auto req = std::make_shared<moveit_msgs::srv::GetCartesianPath::Request>();
     moveit_msgs::srv::GetCartesianPath::Response::SharedPtr response;
 
-    constructRobotState(req->start_state);
-
+    req->start_state = considered_start_state_;
     req->group_name = opt_.group_name;
     req->header.frame_id = getPoseReferenceFrame();
     req->header.stamp = getClock()->now();
@@ -1007,6 +1006,11 @@ public:
   double getPlanningTime() const
   {
     return allowed_planning_time_;
+  }
+
+  void constructRobotState(moveit_msgs::msg::RobotState& state) const
+  {
+    state = considered_start_state_;
   }
 
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request) const
