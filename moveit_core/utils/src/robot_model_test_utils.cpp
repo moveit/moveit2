@@ -60,6 +60,30 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
+moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& package_name,
+                                                  const std::string& urdf_relative_path,
+                                                  const std::string& srdf_relative_path)
+{
+  const auto urdf_path =
+      std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name)) / urdf_relative_path;
+  const auto srdf_path =
+      std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name)) / srdf_relative_path;
+
+  urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDFFile(urdf_path.string());
+  if (urdf_model == nullptr)
+  {
+    return nullptr;
+  }
+
+  auto srdf_model = std::make_shared<srdf::Model>();
+  if (!srdf_model->initFile(*urdf_model, srdf_path.string()))
+  {
+    return nullptr;
+  }
+
+  return std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+}
+
 moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& robot_name)
 {
   urdf::ModelInterfaceSharedPtr urdf = loadModelInterface(robot_name);
