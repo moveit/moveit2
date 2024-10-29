@@ -2,6 +2,12 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.11.0 (2024-09-16)
+-------------------
+* Export the IKFast library correctly (`#2999 <https://github.com/moveit/moveit2/issues/2999>`_)
+* Use Python3 with IKFast generation script (`#2997 <https://github.com/moveit/moveit2/issues/2997>`_)
+* Contributors: AndyZe
+
 2.10.0 (2024-06-13)
 -------------------
 * At least on humble, error is: 'robot_description_kinematics.arm.min_joint_config_distance' has invalid type: expected [double] got [integer]. (`#2865 <https://github.com/moveit/moveit2/issues/2865>`_)

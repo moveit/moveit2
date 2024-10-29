@@ -92,6 +92,8 @@ install(
           moveit_robot_model
           moveit_robot_state
           moveit_robot_trajectory
+          moveit_ruckig_filter
+          moveit_ruckig_filter_parameters
           moveit_smoothing_base
           moveit_test_utils
           moveit_trajectory_processing
@@ -143,8 +145,9 @@ pluginlib_export_plugin_description_file(moveit_core
 pluginlib_export_plugin_description_file(
   moveit_core collision_detector_bullet_description.xml)
 pluginlib_export_plugin_description_file(moveit_core
-                                         filter_plugin_butterworth.xml)
-pluginlib_export_plugin_description_file(moveit_core
                                          filter_plugin_acceleration.xml)
+pluginlib_export_plugin_description_file(moveit_core
+                                         filter_plugin_butterworth.xml)
+pluginlib_export_plugin_description_file(moveit_core filter_plugin_ruckig.xml)
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

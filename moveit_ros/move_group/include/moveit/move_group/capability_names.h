@@ -64,4 +64,8 @@ static const std::string CLEAR_OCTOMAP_SERVICE_NAME =
     "clear_octomap";  // name of the service that can be used to clear the octomap
 static const std::string GET_URDF_SERVICE_NAME =
     "get_urdf";  // name of the service that can be used to request the urdf of a planning group
+static const std::string SAVE_GEOMETRY_TO_FILE_SERVICE_NAME =
+    "save_geometry_to_file";  // name of the service that can be used to save CollisionObjects in a PlanningScene to a file
+static const std::string LOAD_GEOMETRY_FROM_FILE_SERVICE_NAME =
+    "load_geometry_from_file";  // name of the service that can be used to load CollisionObjects to a PlanningScene from a file
 }  // namespace move_group

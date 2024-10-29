@@ -135,6 +135,7 @@ public:
       throw std::runtime_error(error);
     }
 
+    setStartStateToCurrentState();
     joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name);
 
     joint_state_target_ = std::make_shared<moveit::core::RobotState>(getRobotModel());
@@ -406,28 +407,30 @@ public:
     return *joint_state_target_;
   }
 
+  void setStartState(const moveit_msgs::msg::RobotState& start_state)
+  {
+    considered_start_state_ = start_state;
+  }
+
   void setStartState(const moveit::core::RobotState& start_state)
   {
-    considered_start_state_ = std::make_shared<moveit::core::RobotState>(start_state);
+    considered_start_state_ = moveit_msgs::msg::RobotState();
+    moveit::core::robotStateToRobotStateMsg(start_state, considered_start_state_, true);
   }
 
   void setStartStateToCurrentState()
   {
-    considered_start_state_.reset();
+    // set message to empty diff
+    considered_start_state_ = moveit_msgs::msg::RobotState();
+    considered_start_state_.is_diff = true;
   }
 
   moveit::core::RobotStatePtr getStartState()
   {
-    if (considered_start_state_)
-    {
-      return considered_start_state_;
-    }
-    else
-    {
-      moveit::core::RobotStatePtr s;
-      getCurrentState(s);
-      return s;
-    }
+    moveit::core::RobotStatePtr s;
+    getCurrentState(s);
+    moveit::core::robotStateMsgToRobotState(considered_start_state_, *s, true);
+    return s;
   }
 
   bool setJointValueTarget(const geometry_msgs::msg::Pose& eef_pose, const std::string& end_effector_link,
@@ -583,11 +586,6 @@ public:
   void setPoseReferenceFrame(const std::string& pose_reference_frame)
   {
     pose_reference_frame_ = pose_reference_frame;
-  }
-
-  void setSupportSurfaceName(const std::string& support_surface)
-  {
-    support_surface_ = support_surface;
   }
 
   const std::string& getPoseReferenceFrame() const
@@ -860,21 +858,19 @@ public:
   }
 
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double step,
-                              double jump_threshold, moveit_msgs::msg::RobotTrajectory& msg,
+                              moveit_msgs::msg::RobotTrajectory& msg,
                               const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions,
                               moveit_msgs::msg::MoveItErrorCodes& error_code)
   {
     auto req = std::make_shared<moveit_msgs::srv::GetCartesianPath::Request>();
     moveit_msgs::srv::GetCartesianPath::Response::SharedPtr response;
 
-    constructRobotState(req->start_state);
-
+    req->start_state = considered_start_state_;
     req->group_name = opt_.group_name;
     req->header.frame_id = getPoseReferenceFrame();
     req->header.stamp = getClock()->now();
     req->waypoints = waypoints;
     req->max_step = step;
-    req->jump_threshold = jump_threshold;
     req->path_constraints = path_constraints;
     req->avoid_collisions = avoid_collisions;
     req->link_name = getEndEffectorLink();
@@ -1014,14 +1010,7 @@ public:
 
   void constructRobotState(moveit_msgs::msg::RobotState& state) const
   {
-    if (considered_start_state_)
-    {
-      moveit::core::robotStateToRobotStateMsg(*considered_start_state_, state);
-    }
-    else
-    {
-      state.is_diff = true;
-    }
+    state = considered_start_state_;
   }
 
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request) const
@@ -1034,8 +1023,7 @@ public:
     request.pipeline_id = planning_pipeline_id_;
     request.planner_id = planner_id_;
     request.workspace_parameters = workspace_parameters_;
-
-    constructRobotState(request.start_state);
+    request.start_state = considered_start_state_;
 
     if (active_target_ == JOINT)
     {
@@ -1083,61 +1071,6 @@ public:
   {
     constructMotionPlanRequest(goal.request);
   }
-
-  //  moveit_msgs::action::Pickup::Goal constructPickupGoal(const std::string& object,
-  //                                                      std::vector<moveit_msgs::msg::Grasp>&& grasps,
-  //                                                      bool plan_only = false) const
-  //  {
-  //    moveit_msgs::action::Pickup::Goal goal;
-  //    goal.target_name = object;
-  //    goal.group_name = opt_.group_name;
-  //    goal.end_effector = getEndEffector();
-  //    goal.support_surface_name = support_surface_;
-  //    goal.possible_grasps = std::move(grasps);
-  //    if (!support_surface_.empty())
-  //      goal.allow_gripper_support_collision = true;
-  //
-  //    if (path_constraints_)
-  //      goal.path_constraints = *path_constraints_;
-  //
-  //    goal.planner_id = planner_id_;
-  //    goal.allowed_planning_time = allowed_planning_time_;
-  //
-  //    goal.planning_options.plan_only = plan_only;
-  //    goal.planning_options.look_around = can_look_;
-  //    goal.planning_options.replan = can_replan_;
-  //    goal.planning_options.replan_delay = replan_delay_;
-  //    goal.planning_options.planning_scene_diff.is_diff = true;
-  //    goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
-  //    return goal;
-  //  }
-
-  //  moveit_msgs::action::Place::Goal constructPlaceGoal(const std::string& object,
-  //                                                    std::vector<moveit_msgs::msg::PlaceLocation>&& locations,
-  //                                                    bool plan_only = false) const
-  //  {
-  //    moveit_msgs::action::Place::Goal goal;
-  //    goal.group_name = opt_.group_name;
-  //    goal.attached_object_name = object;
-  //    goal.support_surface_name = support_surface_;
-  //    goal.place_locations = std::move(locations);
-  //    if (!support_surface_.empty())
-  //      goal.allow_gripper_support_collision = true;
-  //
-  //    if (path_constraints_)
-  //      goal.path_constraints = *path_constraints_;
-  //
-  //    goal.planner_id = planner_id_;
-  //    goal.allowed_planning_time = allowed_planning_time_;
-  //
-  //    goal.planning_options.plan_only = plan_only;
-  //    goal.planning_options.look_around = can_look_;
-  //    goal.planning_options.replan = can_replan_;
-  //    goal.planning_options.replan_delay = replan_delay_;
-  //    goal.planning_options.planning_scene_diff.is_diff = true;
-  //    goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
-  //    return goal;
-  //  }
 
   void setPathConstraints(const moveit_msgs::msg::Constraints& constraint)
   {
@@ -1278,7 +1211,7 @@ private:
   std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory>> execute_action_client_;
 
   // general planning params
-  moveit::core::RobotStatePtr considered_start_state_;
+  moveit_msgs::msg::RobotState considered_start_state_;
   moveit_msgs::msg::WorkspaceParameters workspace_parameters_;
   double allowed_planning_time_;
   std::string planning_pipeline_id_;
@@ -1309,7 +1242,6 @@ private:
   std::unique_ptr<moveit_msgs::msg::TrajectoryConstraints> trajectory_constraints_;
   std::string end_effector_link_;
   std::string pose_reference_frame_;
-  std::string support_surface_;
 
   // ROS communication
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr trajectory_event_publisher_;
@@ -1512,72 +1444,30 @@ moveit::core::MoveItErrorCode MoveGroupInterface::plan(Plan& plan)
   return impl_->plan(plan);
 }
 
-// moveit_msgs::action::Pickup::Goal MoveGroupInterface::constructPickupGoal(const std::string& object,
-//                                                                        std::vector<moveit_msgs::msg::Grasp> grasps,
-//                                                                        bool plan_only = false) const
-//{
-//  return impl_->constructPickupGoal(object, std::move(grasps), plan_only);
-//}
-//
-// moveit_msgs::action::Place::Goal MoveGroupInterface::constructPlaceGoal(
-//    const std::string& object, std::vector<moveit_msgs::msg::PlaceLocation> locations, bool plan_only = false) const
-//{
-//  return impl_->constructPlaceGoal(object, std::move(locations), plan_only);
-//}
-//
-// std::vector<moveit_msgs::msg::PlaceLocation>
-// MoveGroupInterface::posesToPlaceLocations(const std::vector<geometry_msgs::msg::PoseStamped>& poses) const
-//{
-//  return impl_->posesToPlaceLocations(poses);
-//}
-//
-// moveit::core::MoveItErrorCode MoveGroupInterface::pick(const moveit_msgs::action::Pickup::Goal& goal)
-//{
-//  return impl_->pick(goal);
-//}
-//
-// moveit::core::MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const std::string& object, bool plan_only)
-//{
-//  return impl_->planGraspsAndPick(object, plan_only);
-//}
-//
-// moveit::core::MoveItErrorCode MoveGroupInterface::planGraspsAndPick(const moveit_msgs::msg::CollisionObject& object,
-// bool plan_only)
-//{
-//  return impl_->planGraspsAndPick(object, plan_only);
-//}
-//
-// moveit::core::MoveItErrorCode MoveGroupInterface::place(const moveit_msgs::action::Place::Goal& goal)
-//{
-//  return impl_->place(goal);
-//}
-
 double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
-                                                double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
-                                                bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code)
+                                                moveit_msgs::msg::RobotTrajectory& trajectory, bool avoid_collisions,
+                                                moveit_msgs::msg::MoveItErrorCodes* error_code)
 {
   moveit_msgs::msg::Constraints path_constraints_tmp;
-  return computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, moveit_msgs::msg::Constraints(),
-                              avoid_collisions, error_code);
+  return computeCartesianPath(waypoints, eef_step, trajectory, moveit_msgs::msg::Constraints(), avoid_collisions,
+                              error_code);
 }
 
 double MoveGroupInterface::computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
-                                                double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
+                                                moveit_msgs::msg::RobotTrajectory& trajectory,
                                                 const moveit_msgs::msg::Constraints& path_constraints,
                                                 bool avoid_collisions, moveit_msgs::msg::MoveItErrorCodes* error_code)
 {
   if (error_code)
   {
-    return impl_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints,
-                                       avoid_collisions, *error_code);
+    return impl_->computeCartesianPath(waypoints, eef_step, trajectory, path_constraints, avoid_collisions, *error_code);
   }
   else
   {
     moveit_msgs::msg::MoveItErrorCodes err_tmp;
     err_tmp.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     moveit_msgs::msg::MoveItErrorCodes& err = error_code ? *error_code : err_tmp;
-    return impl_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory, path_constraints,
-                                       avoid_collisions, err);
+    return impl_->computeCartesianPath(waypoints, eef_step, trajectory, path_constraints, avoid_collisions, err);
   }
 }
 
@@ -1588,18 +1478,7 @@ void MoveGroupInterface::stop()
 
 void MoveGroupInterface::setStartState(const moveit_msgs::msg::RobotState& start_state)
 {
-  moveit::core::RobotStatePtr rs;
-  if (start_state.is_diff)
-  {
-    impl_->getCurrentState(rs);
-  }
-  else
-  {
-    rs = std::make_shared<moveit::core::RobotState>(getRobotModel());
-    rs->setToDefaultValues();  // initialize robot state values for conversion
-  }
-  moveit::core::robotStateMsgToRobotState(start_state, *rs);
-  setStartState(*rs);
+  impl_->setStartState(start_state);
 }
 
 void MoveGroupInterface::setStartState(const moveit::core::RobotState& start_state)
@@ -2311,11 +2190,6 @@ void MoveGroupInterface::setPlanningTime(double seconds)
 double MoveGroupInterface::getPlanningTime() const
 {
   return impl_->getPlanningTime();
-}
-
-void MoveGroupInterface::setSupportSurfaceName(const std::string& name)
-{
-  impl_->setSupportSurfaceName(name);
 }
 
 const rclcpp::Node::SharedPtr& MoveGroupInterface::getNode() const

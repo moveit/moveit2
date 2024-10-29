@@ -52,6 +52,7 @@ pluginlib_export_plugin_description_file(
   moveit_core _ROBOT_NAME___GROUP_NAME__moveit_ikfast_plugin_description.xml)
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
+ament_export_libraries(${IKFAST_LIBRARY_NAME})
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(pluginlib)
 ament_export_dependencies(rclcpp)
