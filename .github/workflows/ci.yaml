@@ -31,8 +31,10 @@ jobs:
           - IMAGE: jazzy-ci
             ROS_DISTRO: jazzy
     env:
+      # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
+      # https://stackoverflow.com/a/41673702
       CXXFLAGS: >-
-        -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
+        -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unknown-warning-option -Wno-cpp
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
       DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: >
@@ -103,36 +105,36 @@ jobs:
         with:
           file: moveit2.repos
       - name: Cache upstream workspace
-        uses: actions/cache@v4
+        uses: rhaschke/cache@main
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
-          save-always: true
         env:
+          GHA_CACHE_SAVE: always
           CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ steps.repos_edit_timestamp.outputs.timestamp }}-${{ matrix.env.IMAGE }}-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
       # The target directory cache doesn't include the source directory because
       # that comes from the checkout.  See "prepare target_ws for cache" task below
       - name: Cache target workspace
         if: "!matrix.env.CCOV"
-        uses: actions/cache@v4
+        uses: rhaschke/cache@main
         with:
           path: ${{ env.BASEDIR }}/target_ws
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
-          save-always: true
         env:
+          GHA_CACHE_SAVE: always
           CACHE_PREFIX: target_ws${{ matrix.env.CCOV && '-ccov' || '' }}-${{ matrix.env.IMAGE }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
-        uses: actions/cache@v4
+        uses: rhaschke/cache@main
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ env.CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
             ${{ env.CACHE_PREFIX }}-${{ github.sha }}
             ${{ env.CACHE_PREFIX }}
-          save-always: true
         env:
+          GHA_CACHE_SAVE: always
           CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
       - name: Configure ccache
         run: |

@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling, humble, iron]
+        ROS_DISTRO: [rolling, humble, iron, jazzy]
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -51,7 +51,7 @@ jobs:
           path: .ccache
           key: docker-tutorial-ccache-${{ matrix.ROS_DISTRO }}-${{ hashFiles( '.docker/tutorial-source/Dockerfile' ) }}
       - name: inject ccache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.1.1
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.2
         with:
           cache-source: .ccache
           cache-target: /root/.ccache/

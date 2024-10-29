@@ -112,6 +112,7 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
                               // therefore: "i-1".
                               (i > 0 ? radii.at(i - 1) : 0.));
   }
+
   return plan_comp_builder_.build();
 }
 
@@ -181,7 +182,8 @@ void CommandListManager::setStartState(const MotionResponseCont& motion_plan_res
   RobotState_OptRef rob_state_op{ getPreviousEndState(motion_plan_responses, group_name) };
   if (rob_state_op)
   {
-    moveit::core::robotStateToRobotStateMsg(rob_state_op.value(), start_state);
+    moveit::core::robotStateToRobotStateMsg(rob_state_op.value(), start_state, false);
+    start_state.is_diff = true;
   }
 }
 
