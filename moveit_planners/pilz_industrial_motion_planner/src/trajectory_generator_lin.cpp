@@ -154,10 +154,12 @@ void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& s
   // create Cartesian path for lin
   std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));
 
-  // create velocity profile
+  // create velocity profile using trap profile
+  //std::unique_ptr<KDL::VelocityProfile> vp(
+  //    cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
+  // create velocity profile using rect profile
   std::unique_ptr<KDL::VelocityProfile> vp(
-      cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
-
+        cartesianRectVelocityProfile(req.max_velocity_scaling_factor, path));
   // combine path and velocity profile into Cartesian trajectory
   // with the third parameter set to false, KDL::Trajectory_Segment does not
   // take
@@ -185,8 +187,9 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affin
   KDL::Frame kdl_start_pose, kdl_goal_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);
   tf2::transformEigenToKDL(goal_pose, kdl_goal_pose);
-  double eqradius = planner_limits_.getCartesianLimits().getMaxTranslationalVelocity() /
-                    planner_limits_.getCartesianLimits().getMaxRotationalVelocity();
+  //double eqradius = planner_limits_.getCartesianLimits().getMaxTranslationalVelocity() /
+  //                  planner_limits_.getCartesianLimits().getMaxRotationalVelocity();
+  double eqradius = 0.0;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
   return std::unique_ptr<KDL::Path>(
