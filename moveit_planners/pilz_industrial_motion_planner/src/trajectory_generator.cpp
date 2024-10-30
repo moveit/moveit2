@@ -41,6 +41,7 @@
 #include <boost/range/combine.hpp>
 
 #include <kdl/velocityprofile_trap.hpp>
+#include <kdl/velocityprofile_rect.hpp>
 #include <moveit/robot_state/conversions.h>
 
 #include <pilz_industrial_motion_planner/limits_container.h>
@@ -297,6 +298,37 @@ TrajectoryGenerator::cartesianTrapVelocityProfile(const double& max_velocity_sca
   {
     vp_trans->SetProfile(0, std::numeric_limits<double>::epsilon());
   }
+  return vp_trans;
+}
+
+std::unique_ptr<KDL::VelocityProfile>
+TrajectoryGenerator::cartesianRectVelocityProfile(const double& max_velocity_scaling_factor,
+                                                  const std::unique_ptr<KDL::Path>& path) const
+{
+  // Create a rectangular velocity profile with the calculated max velocity
+  //std::unique_ptr<KDL::VelocityProfile_Rectangular> vp_trans(new KDL::VelocityProfile_Rectangular());
+  std::unique_ptr<KDL::VelocityProfile> vp_trans = std::make_unique<KDL::VelocityProfile_Rectangular>(
+      max_velocity_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalVelocity());
+  //std::unique_ptr<KDL::VelocityProfile> vp_trans = std::make_unique<KDL::VelocityProfile_Trap>(
+  //    max_velocity_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalVelocity(),
+  //    max_acceleration_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalAcceleration());
+
+  if (path->PathLength() > std::numeric_limits<double>::epsilon())  // avoid division by zero
+  {
+    //vp_trans->SetProfile(0, path->PathLength());
+    // Use the PathLength function to get the total path distance
+    double actual_distance = path->PathLength();
+    // getting the actual velocity based on the max_velocity_scaling_factor
+    double actual_velocity = max_velocity_scaling_factor * planner_limits_.getCartesianLimits().getMaxTranslationalVelocity();
+    // Calculate the desired time based on max_velocity
+    double actual_duration = actual_distance / actual_velocity;
+    vp_trans->SetProfileDuration(0, actual_distance, actual_duration);
+  }
+  else
+  {
+    vp_trans->SetProfile(0, std::numeric_limits<double>::epsilon());
+  }
+  
   return vp_trans;
 }
 
