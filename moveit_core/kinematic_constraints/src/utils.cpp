@@ -217,6 +217,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 
   goal.orientation_constraints.resize(1);
   moveit_msgs::msg::OrientationConstraint& ocm = goal.orientation_constraints[0];
+  ocm.parameterization = moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR;
   ocm.link_name = link_name;
   ocm.header = pose.header;
   ocm.orientation = pose.pose.orientation;
@@ -655,9 +656,17 @@ bool resolveConstraintFrames(const moveit::core::RobotState& state, moveit_msgs:
     // the constraint needs to be expressed in the frame of a robot link.
     if (c.link_name != robot_link->getName())
     {
+      if (c.parameterization == moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES)
+      {
+        RCLCPP_ERROR(getLogger(),
+                     "Euler angles parameterization is not supported for non-link frames in orientation constraints. \n"
+                     "Switch to rotation vector parameterization.");
+        return false;
+      }
       c.link_name = robot_link->getName();
       Eigen::Quaterniond link_name_to_robot_link(transform.linear().transpose() *
                                                  state.getGlobalLinkTransform(robot_link).linear());
+      // adapt goal orientation
       Eigen::Quaterniond quat_target;
       tf2::fromMsg(c.orientation, quat_target);
       c.orientation = tf2::toMsg(quat_target * link_name_to_robot_link);
