@@ -597,7 +597,7 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   // clearing out any old data
   clear();
 
-  bool found;
+  bool found;  // just needed to silent the error message in getLinkModel()
   link_model_ = robot_model_->getLinkModel(oc.link_name, &found);
   if (!link_model_)
   {
