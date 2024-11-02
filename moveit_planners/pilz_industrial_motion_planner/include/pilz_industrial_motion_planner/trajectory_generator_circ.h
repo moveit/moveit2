@@ -56,8 +56,6 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(UnknownLinkNameOfAuxiliaryPoint,
                                    moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NumberOfConstraintsMismatch,
                                    moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircJointMissingInStartState,
-                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircInverseForGoalIncalculable, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 
 /**
