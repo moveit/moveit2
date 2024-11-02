@@ -240,7 +240,7 @@ void TrajectoryGenerator::checkGoalConstraints(
   }
   else
   {
-    checkCartesianGoalConstraint(goal_con, robot_state, robot_model_->getJointModelGroup(group_name));
+    checkCartesianGoalConstraint(goal_con, rstate, robot_model_->getJointModelGroup(group_name));
   }
 }
 
