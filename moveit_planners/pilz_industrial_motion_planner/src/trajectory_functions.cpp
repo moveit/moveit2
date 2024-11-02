@@ -74,10 +74,11 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   rstate.setVariablePositions(seed);
 
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
-  if (check_self_collision) {
+  if (check_self_collision)
+  {
     ik_constraint_function = [check_self_collision, scene](moveit::core::RobotState* robot_state,
-                                                          const moveit::core::JointModelGroup* joint_group,
-                                                          const double* joint_group_variable_values) {
+                                                           const moveit::core::JointModelGroup* joint_group,
+                                                           const double* joint_group_variable_values) {
       return pilz_industrial_motion_planner::isStateColliding(scene, robot_state, joint_group,
                                                               joint_group_variable_values);
     };

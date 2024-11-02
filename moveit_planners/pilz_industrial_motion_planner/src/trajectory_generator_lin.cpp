@@ -76,7 +76,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
   info.group_name = req.group_name;
   std::string frame_id{ robot_model_->getModelFrame() };
   robot_state::RobotState robot_state = scene->getCurrentState();
-  
+
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
   {

@@ -213,9 +213,8 @@ bool intersectionFound(const Eigen::Vector3d& p_center, const Eigen::Vector3d& p
  * @param ik_solution
  * @return
  */
-bool isStateColliding(const planning_scene::PlanningSceneConstPtr& scene,
-                      moveit::core::RobotState* state, const moveit::core::JointModelGroup* const group,
-                      const double* const ik_solution);
+bool isStateColliding(const planning_scene::PlanningSceneConstPtr& scene, moveit::core::RobotState* state,
+                      const moveit::core::JointModelGroup* const group, const double* const ik_solution);
 }  // namespace pilz_industrial_motion_planner
 
 void normalizeQuaternion(geometry_msgs::msg::Quaternion& quat);

@@ -218,8 +218,8 @@ void TrajectoryGenerator::checkCartesianGoalConstraint(const moveit_msgs::msg::C
 }
 
 void TrajectoryGenerator::checkGoalConstraints(
-    const moveit_msgs::msg::MotionPlanRequest::_goal_constraints_type& goal_constraints, const std::string& group_name
-    const moveit::core::RobotState& rstate) const
+    const moveit_msgs::msg::MotionPlanRequest::_goal_constraints_type& goal_constraints,
+    const std::string& const group_name moveit::core::RobotState& rstate) const
 {
   if (goal_constraints.size() != 1)
   {
@@ -367,7 +367,7 @@ TrajectoryGenerator::MotionPlanInfo::MotionPlanInfo(const planning_scene::Planni
   moveit::core::robotStateMsgToRobotState(scene->getTransforms(), req.start_state, start_state);
   start_state.update();
   start_scene = std::move(ps);
-  
+
   // initialize info.start_joint_position with active joint values from start_state
   const double* positions = start_state.getVariablePositions();
   for (const auto* jm : start_state.getRobotModel()->getJointModelGroup(req.group_name)->getActiveJointModels())
