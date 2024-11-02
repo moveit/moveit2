@@ -116,7 +116,7 @@ protected:
   class MotionPlanInfo
   {
   public:
-    MotionPlanInfo(const planning_scene::PlanningSceneConstptr& scene, const planning_interface::MotionPlanRequest& req);
+    MotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req);
 
     std::string group_name;
     std::string link_name;
@@ -125,7 +125,7 @@ protected:
     std::map<std::string, double> start_joint_position;
     std::map<std::string, double> goal_joint_position;
     std::pair<std::string, Eigen::Vector3d> circ_path_point;
-    planning_scene::PlanningSceneConstptr start_scene;  // scene with updated start state
+    planning_scene::PlanningSceneConstPtr start_scene;  // scene with updated start state
   };
 
   /**

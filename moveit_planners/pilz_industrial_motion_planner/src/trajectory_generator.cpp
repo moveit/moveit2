@@ -203,8 +203,8 @@ void TrajectoryGenerator::checkCartesianGoalConstraint(const moveit_msgs::msg::C
     throw PositionOrientationConstraintNameMismatch(os.str());
   }
 
-  const auto& lm = robot_state.getRigidlyConnectedParentLinkModel(pos_constraint.link_name, nullptr, jmg);
-  if (!lm || !jmg->canSetStateFromIk(lm->getName()))
+  const auto& lm = robot_state.getRigidlyConnectedParentLinkModel(pos_constraint.link_name);
+  if (!lm || !jmg->canSetStateFromIK(lm->getName()))
   {
     std::ostringstream os;
     os << "No IK solver available for link: \"" << pos_constraint.link_name << '\"';
@@ -218,8 +218,8 @@ void TrajectoryGenerator::checkCartesianGoalConstraint(const moveit_msgs::msg::C
 }
 
 void TrajectoryGenerator::checkGoalConstraints(
-    const moveit_msgs::msg::MotionPlanRequest::_goal_constraints_type& goal_constraints,
-    const std::string& const group_name moveit::core::RobotState& rstate) const
+    const moveit_msgs::msg::MotionPlanRequest::_goal_constraints_type& goal_constraints, const std::string& group_name,
+    const moveit::core::RobotState& rstate) const
 {
   if (goal_constraints.size() != 1)
   {
@@ -240,7 +240,7 @@ void TrajectoryGenerator::checkGoalConstraints(
   }
   else
   {
-    checkCartesianGoalConstraint(goal_con, rstate, robot_model_->getJointModelGroup(group_name));
+    checkCartesianGoalConstraint(goal_con, robot_state, robot_model_->getJointModelGroup(group_name));
   }
 }
 

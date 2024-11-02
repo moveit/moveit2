@@ -76,15 +76,16 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;
   if (check_self_collision)
   {
-    ik_constraint_function = [check_self_collision, scene](moveit::core::RobotState* robot_state,
-                                                           const moveit::core::JointModelGroup* joint_group,
-                                                           const double* joint_group_variable_values) {
+    ik_constraint_function = [scene](moveit::core::RobotState* robot_state,
+                                     const moveit::core::JointModelGroup* joint_group,
+                                     const double* joint_group_variable_values) {
       return pilz_industrial_motion_planner::isStateColliding(scene, robot_state, joint_group,
                                                               joint_group_variable_values);
     };
   }
 
   // call ik
+  const moveit::core::JointModelGroup* jmg = robot_model->getJointModelGroup(group_name);
   if (rstate.setFromIK(jmg, pose, link_name, timeout, ik_constraint_function))
   {
     // copy the solution
@@ -116,7 +117,7 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
                        timeout);
 }
 
-bool pilz_industrial_motion_planner::computeLinkFK(robot_state::RobotState& robot_state, const std::string& link_name,
+bool pilz_industrial_motion_planner::computeLinkFK(moveit::core::RobotState& robot_state, const std::string& link_name,
                                                    const std::map<std::string, double>& joint_state,
                                                    Eigen::Isometry3d& pose)
 {

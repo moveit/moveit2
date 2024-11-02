@@ -98,7 +98,7 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
 
   info.group_name = req.group_name;
   std::string frame_id{ robot_model_->getModelFrame() };
-  robot_state::RobotState = scene->getCurrentState();
+  moveit::core::RobotState = scene->getCurrentState();
 
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
