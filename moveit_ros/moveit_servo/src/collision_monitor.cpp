@@ -98,9 +98,6 @@ void CollisionMonitor::checkCollisions()
   double self_collision_scale, scene_collision_scale;
   const double log_val = -log(0.001);
 
-  // Get a read-only copy of the planning scene.
-  planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
-
   while (rclcpp::ok() && !stop_requested_)
   {
     const double self_velocity_scale_coefficient{ log_val / servo_params_.self_collision_proximity_threshold };
@@ -113,6 +110,9 @@ void CollisionMonitor::checkCollisions()
       robot_state_ = planning_scene_monitor_->getPlanningScene()->getCurrentState();
       // This must be called before doing collision checking.
       robot_state_.updateCollisionBodyTransforms();
+
+      // Get a read-only copy of the planning scene.
+      planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
 
       // Check collision with environment.
       scene_collision_result_.clear();
