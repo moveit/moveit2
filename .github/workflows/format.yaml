@@ -20,8 +20,8 @@ jobs:
     - uses: actions/setup-python@v5
       with:
         python-version: 3.x
-    - name: Install clang-format-14
-      run: sudo apt-get install clang-format-14
+    - name: Install clang-format-15
+      run: sudo apt-get install clang-format-15
     - uses: pre-commit/action@v3.0.1
       id: precommit
     - name: Upload pre-commit changes
