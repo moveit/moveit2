@@ -62,6 +62,24 @@ protected:
 
     planning_scene_monitor_ = moveit_servo::createPlanningSceneMonitor(servo_test_node_, servo_params_);
 
+    // Wait until the joint configuration is nonzero before starting MoveIt Servo.
+    int num_tries = 0;
+    const int max_tries = 20;
+    while (true)
+    {
+      const auto q = getCurrentJointPositions("panda_arm");
+      if (q.norm() > 0.0)
+      {
+        break;
+      }
+      if (num_tries > max_tries)
+      {
+        FAIL() << "Robot pose did not reach expected state after some time. Test is flaky.";
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      num_tries++;
+    }
+
     servo_test_instance_ =
         std::make_shared<moveit_servo::Servo>(servo_test_node_, servo_param_listener_, planning_scene_monitor_);
   }
@@ -69,7 +87,16 @@ protected:
   /// Helper function to get the current pose of a specified frame.
   Eigen::Isometry3d getCurrentPose(const std::string& target_frame) const
   {
-    return planning_scene_monitor_->getStateMonitor()->getCurrentState()->getGlobalLinkTransform(target_frame);
+    return planning_scene_monitor_->getPlanningScene()->getCurrentState().getGlobalLinkTransform(target_frame);
+  }
+
+  /// Helper function to get the joint configuration of a group.
+  Eigen::VectorXd getCurrentJointPositions(const std::string& group_name) const
+  {
+    std::vector<double> joint_positions;
+    const auto robot_state = planning_scene_monitor_->getPlanningScene()->getCurrentState();
+    robot_state.copyJointGroupPositions(group_name, joint_positions);
+    return Eigen::Map<Eigen::VectorXd>(joint_positions.data(), joint_positions.size());
   }
 
   std::shared_ptr<rclcpp::Node> servo_test_node_;
