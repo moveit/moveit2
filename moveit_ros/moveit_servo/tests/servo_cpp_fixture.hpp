@@ -74,7 +74,7 @@ protected:
       }
       if (num_tries > max_tries)
       {
-        FAIL() << "Robot pose did not reach expected state after some time. Test is flaky.";
+        FAIL() << "Robot joint configuration did not reach expected state after some time. Test is flaky.";
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
       num_tries++;
