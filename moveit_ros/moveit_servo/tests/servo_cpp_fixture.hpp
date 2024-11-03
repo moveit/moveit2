@@ -87,15 +87,16 @@ protected:
   /// Helper function to get the current pose of a specified frame.
   Eigen::Isometry3d getCurrentPose(const std::string& target_frame) const
   {
-    return planning_scene_monitor_->getPlanningScene()->getCurrentState().getGlobalLinkTransform(target_frame);
+    planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
+    return locked_scene->getCurrentState().getGlobalLinkTransform(target_frame);
   }
 
   /// Helper function to get the joint configuration of a group.
   Eigen::VectorXd getCurrentJointPositions(const std::string& group_name) const
   {
+    planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
     std::vector<double> joint_positions;
-    const auto robot_state = planning_scene_monitor_->getPlanningScene()->getCurrentState();
-    robot_state.copyJointGroupPositions(group_name, joint_positions);
+    locked_scene->getCurrentState().copyJointGroupPositions(group_name, joint_positions);
     return Eigen::Map<Eigen::VectorXd>(joint_positions.data(), joint_positions.size());
   }
 
