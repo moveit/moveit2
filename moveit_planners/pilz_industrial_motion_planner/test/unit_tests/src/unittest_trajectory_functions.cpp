@@ -139,7 +139,7 @@ protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
-  moveit::core::RobotStateConstPtr robot_state_;
+  moveit::core::RobotStatePtr robot_state_;
   std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
