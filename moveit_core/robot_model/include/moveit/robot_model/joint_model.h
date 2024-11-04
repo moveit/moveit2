@@ -514,10 +514,10 @@ protected:
   /** \brief The joint this one mimics (nullptr for joints that do not mimic) */
   const JointModel* mimic_;
 
-  /** \brief The offset to the mimic joint */
+  /** \brief The multiplier to the mimic joint */
   double mimic_factor_;
 
-  /** \brief The multiplier to the mimic joint */
+  /** \brief The offset to the mimic joint */
   double mimic_offset_;
 
   /** \brief The set of joints that should get a value copied to them when this joint changes */

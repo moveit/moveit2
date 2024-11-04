@@ -245,7 +245,8 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
     Eigen::Vector<double, 6> cartesian_position_delta;
 
     // Compute linear and angular change needed.
-    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(ee_frame) };
+    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(planning_frame).inverse() *
+                                     robot_state->getGlobalLinkTransform(ee_frame) };
     const Eigen::Quaterniond q_current(ee_pose.rotation());
     Eigen::Quaterniond q_target(command.pose.rotation());
     Eigen::Vector3d translation_error = command.pose.translation() - ee_pose.translation();
