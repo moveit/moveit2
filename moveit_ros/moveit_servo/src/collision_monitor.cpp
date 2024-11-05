@@ -105,14 +105,14 @@ void CollisionMonitor::checkCollisions()
 
     if (servo_params_.check_collisions)
     {
+      // Get a read-only copy of the planning scene.
+      planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
+
       // Fetch latest robot state using planning scene instead of state monitor due to
       // https://github.com/moveit/moveit2/issues/2748
-      robot_state_ = planning_scene_monitor_->getPlanningScene()->getCurrentState();
+      robot_state_ = locked_scene->getCurrentState();
       // This must be called before doing collision checking.
       robot_state_.updateCollisionBodyTransforms();
-
-      // Get a read-only copy of planning scene.
-      planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
 
       // Check collision with environment.
       scene_collision_result_.clear();
