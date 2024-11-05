@@ -95,6 +95,7 @@ protected:
     rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
     robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
+    robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
     // get parameters
@@ -138,6 +139,7 @@ protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  moveit::core::RobotStatePtr robot_state_;
   std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
@@ -189,27 +191,27 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, TipLinkFK)
 {
   Eigen::Isometry3d tip_pose;
   std::map<std::string, double> test_state = zero_state_;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(*robot_state_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0 + L1 + L2 + L3, EPSILON);
 
   test_state[joint_names_.at(1)] = M_PI_2;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(*robot_state_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), L1 + L2 + L3, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0, EPSILON);
 
   test_state[joint_names_.at(1)] = -M_PI_2;
   test_state[joint_names_.at(2)] = M_PI_2;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(*robot_state_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), -L1, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0 - L2 - L3, EPSILON);
 
   // wrong link name
   std::string link_name = "wrong_link_name";
-  EXPECT_FALSE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, link_name, test_state, tip_pose));
+  EXPECT_FALSE(pilz_industrial_motion_planner::computeLinkFK(*robot_state_, link_name, test_state, tip_pose));
 }
 
 /**
