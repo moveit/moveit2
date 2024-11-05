@@ -265,17 +265,13 @@ TEST_F(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
   }
 
   {
-    auto cjmiss_ex = std::make_shared<CircJointMissingInStartState>("");
-    EXPECT_EQ(cjmiss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
-  }
-
-  {
     auto cifgi_ex = std::make_shared<CircInverseForGoalIncalculable>("");
     EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
 }
 
 /**
+<<<<<<< HEAD
  * @brief test invalid motion plan request with incomplete start state and
  * cartesian goal
  */
@@ -294,6 +290,8 @@ TEST_F(TrajectoryGeneratorCIRCTest, incompleteStartState)
 }
 
 /**
+=======
+>>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
  * @brief test invalid motion plan request with non zero start velocity
  */
 TEST_F(TrajectoryGeneratorCIRCTest, nonZeroStartVelocity)
