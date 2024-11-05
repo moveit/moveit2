@@ -61,12 +61,13 @@ protected:
     servo_params_ = servo_param_listener_->get_params();
 
     planning_scene_monitor_ = moveit_servo::createPlanningSceneMonitor(servo_test_node_, servo_params_);
-    // Wait for next state update before starting MoveIt Servo.
-    if (!planning_scene_monitor_->waitForCurrentRobotState(servo_test_node_->now()))
-      ;
+    // Wait for complete state update before starting MoveIt Servo.
+    if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState("panda_arm", 1.0))
     {
       FAIL() << "Could not retrieve complete robot state";
     }
+    // Forward state update to planning scene
+    planning_scene_monitor_->updateSceneWithCurrentState();
 
     servo_test_instance_ =
         std::make_shared<moveit_servo::Servo>(servo_test_node_, servo_param_listener_, planning_scene_monitor_);
