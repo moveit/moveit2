@@ -289,6 +289,7 @@ int main(int argc, char** argv)
   // Initialize MoveItCpp
   const auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(nh, moveit_cpp_options);
   const auto planning_scene_monitor = moveit_cpp->getPlanningSceneMonitorNonConst();
+  
   if (auto ps = planning_scene_monitor->getPlanningScene())
   {
     if (nh->has_parameter("default_planning_scene"))
