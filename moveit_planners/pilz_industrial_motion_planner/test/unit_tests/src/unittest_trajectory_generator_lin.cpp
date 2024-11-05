@@ -197,12 +197,16 @@ TEST_F(TrajectoryGeneratorLINTest, TestExceptionErrorCodeMapping)
   }
 
   {
+<<<<<<< HEAD
     std::shared_ptr<LinJointMissingInStartState> ljmiss_ex{ new LinJointMissingInStartState("") };
     EXPECT_EQ(ljmiss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
   }
 
   {
     std::shared_ptr<LinInverseForGoalIncalculable> lifgi_ex{ new LinInverseForGoalIncalculable("") };
+=======
+    auto lifgi_ex = std::make_shared<LinInverseForGoalIncalculable>("");
+>>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
     EXPECT_EQ(lifgi_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
 }
@@ -429,6 +433,7 @@ TEST_F(TrajectoryGeneratorLINTest, IncorrectJointNumber)
 }
 
 /**
+<<<<<<< HEAD
  * @brief test invalid motion plan request with incomplete start state and
  * cartesian goal
  */
@@ -447,6 +452,8 @@ TEST_F(TrajectoryGeneratorLINTest, cartGoalIncompleteStartState)
 }
 
 /**
+=======
+>>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
  * @brief Set a frame id in goal constraint with cartesian goal on both position
  * and orientation constraints
  */

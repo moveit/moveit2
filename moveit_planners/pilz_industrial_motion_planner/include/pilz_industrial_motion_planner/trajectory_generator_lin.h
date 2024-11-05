@@ -48,7 +48,6 @@ namespace pilz_industrial_motion_planner
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinTrajectoryConversionFailure, moveit_msgs::msg::MoveItErrorCodes::FAILURE);
 
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(JointNumberMismatch, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinJointMissingInStartState, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinInverseForGoalIncalculable, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 
 /**

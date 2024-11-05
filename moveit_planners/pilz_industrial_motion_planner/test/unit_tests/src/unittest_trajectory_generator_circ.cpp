@@ -264,17 +264,22 @@ TEST_F(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
   }
 
   {
+<<<<<<< HEAD
     std::shared_ptr<CircJointMissingInStartState> cjmiss_ex{ new CircJointMissingInStartState("") };
     EXPECT_EQ(cjmiss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
   }
 
   {
     std::shared_ptr<CircInverseForGoalIncalculable> cifgi_ex{ new CircInverseForGoalIncalculable("") };
+=======
+    auto cifgi_ex = std::make_shared<CircInverseForGoalIncalculable>("");
+>>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
     EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
 }
 
 /**
+<<<<<<< HEAD
  * @brief Construct a TrajectoryGeneratorCirc with no limits given
  */
 TEST_F(TrajectoryGeneratorCIRCTest, noLimits)
@@ -303,6 +308,8 @@ TEST_F(TrajectoryGeneratorCIRCTest, incompleteStartState)
 }
 
 /**
+=======
+>>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
  * @brief test invalid motion plan request with non zero start velocity
  */
 TEST_F(TrajectoryGeneratorCIRCTest, nonZeroStartVelocity)
