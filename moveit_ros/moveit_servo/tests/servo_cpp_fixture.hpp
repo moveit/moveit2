@@ -61,8 +61,9 @@ protected:
     servo_params_ = servo_param_listener_->get_params();
 
     planning_scene_monitor_ = moveit_servo::createPlanningSceneMonitor(servo_test_node_, servo_params_);
-    // Wait until the joint configuration is nonzero before starting MoveIt Servo.
-    if (!planning_scene_monitor_->getStateMonitor()->waitForCompleteState("panda_arm", 2.0))
+    // Wait for next state update before starting MoveIt Servo.
+    if (!planning_scene_monitor_->waitForCurrentRobotState(servo_test_node_->now()))
+      ;
     {
       FAIL() << "Could not retrieve complete robot state";
     }
