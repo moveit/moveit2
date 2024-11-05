@@ -89,7 +89,7 @@ trajectory_msgs::msg::JointTrajectory createTrajectoryMessage(const std::vector<
   const double time_step = 1.0 / static_cast<double>(sampling_rate);
   const int n_samples = static_cast<int>(trajectory.getDuration() / time_step) + 1;
   trajectory_msg.points.reserve(n_samples);
-  for (int sample = 0; sample < n_samples; ++sample)
+  for (int sample = 0; sample <= n_samples; ++sample)
   {
     const double t = sample * time_step;
     trajectory_msgs::msg::JointTrajectoryPoint point;
