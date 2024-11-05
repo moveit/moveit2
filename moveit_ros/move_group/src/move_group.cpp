@@ -34,18 +34,17 @@
 
 /* Author: Ioan Sucan */
 
-#include <memory>
-#include <set>
-
-#include <boost/tokenizer.hpp>
-#include <moveit/macros/console_colors.h>
-#include <moveit/move_group/move_group_capability.h>
-#include <moveit/move_group/move_group_context.h>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
-#include <moveit/utils/logger.hpp>
 #include <tf2_ros/transform_listener.h>
+#include <moveit/move_group/move_group_capability.h>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
+#include <boost/tokenizer.hpp>
+#include <moveit/macros/console_colors.h>
+#include <moveit/move_group/move_group_context.h>
+#include <memory>
+#include <set>
+#include <moveit/utils/logger.hpp>
 
 static const std::string ROBOT_DESCRIPTION =
     "robot_description";  // name of the robot description (a param name, so it can be changed externally)
