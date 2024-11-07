@@ -409,27 +409,6 @@ TEST_F(TrajectoryGeneratorLINTest, IncorrectJointNumber)
 }
 
 /**
-<<<<<<< HEAD
- * @brief test invalid motion plan request with incomplete start state and
- * cartesian goal
- */
-TEST_F(TrajectoryGeneratorLINTest, cartGoalIncompleteStartState)
-{
-  // construct motion plan request
-  moveit_msgs::msg::MotionPlanRequest lin_cart_req{ tdp_->getLinCart("lin2").toRequest() };
-  EXPECT_GT(lin_cart_req.start_state.joint_state.name.size(), 1u);
-  lin_cart_req.start_state.joint_state.name.resize(1);
-  lin_cart_req.start_state.joint_state.position.resize(1);  // prevent failing check for equal sizes
-
-  // generate lin trajectory
-  planning_interface::MotionPlanResponse res;
-  EXPECT_FALSE(lin_->generate(planning_scene_, lin_cart_req, res));
-  EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
-}
-
-/**
-=======
->>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
  * @brief Set a frame id in goal constraint with cartesian goal on both position
  * and orientation constraints
  */
