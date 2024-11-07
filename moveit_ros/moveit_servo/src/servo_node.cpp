@@ -151,6 +151,7 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   }
   else
   {
+    std::lock_guard<std::mutex> lock_guard(lock_);
     // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing and unpausing.
     last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
     servo_->resetSmoothing(last_commanded_state_);
@@ -320,6 +321,7 @@ void ServoNode::servoLoop()
       continue;
     }
 
+    std::lock_guard<std::mutex> lock_guard(lock_);
     const bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
     const auto cur_time = node_->now();
 
