@@ -121,7 +121,7 @@ bool pilz_industrial_motion_planner::PlanningContextBase<GeneratorT>::solve(plan
 {
   if (!terminated_)
   {
-      return generator_.generate(getPlanningScene(), request_, res);
+    return generator_.generate(getPlanningScene(), request_, res);
   }
 
   RCLCPP_ERROR(rclcpp::get_logger("moveit.pilz_industrial_motion_planner.planning_context_base"),
