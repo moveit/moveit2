@@ -347,13 +347,8 @@ bool TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
     return false;
   }
 
-<<<<<<< HEAD
-  moveit::core::RobotState start_state(scene->getCurrentState());
-  moveit::core::robotStateMsgToRobotState(req.start_state, start_state, true);
-  setSuccessResponse(start_state, req.group_name, joint_trajectory, planning_begin, res);
-  return true;
-=======
   setSuccessResponse(plan_info.start_scene->getCurrentState(), req.group_name, joint_trajectory, planning_begin, res);
+  return true;
 }
 
 TrajectoryGenerator::MotionPlanInfo::MotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
@@ -376,7 +371,6 @@ TrajectoryGenerator::MotionPlanInfo::MotionPlanInfo(const planning_scene::Planni
       start_joint_position[names[i]] = positions[j];
     }
   }
->>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
 }
 
 }  // namespace pilz_industrial_motion_planner

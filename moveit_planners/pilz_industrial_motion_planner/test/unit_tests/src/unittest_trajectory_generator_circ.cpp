@@ -264,22 +264,12 @@ TEST_F(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
   }
 
   {
-<<<<<<< HEAD
-    std::shared_ptr<CircJointMissingInStartState> cjmiss_ex{ new CircJointMissingInStartState("") };
-    EXPECT_EQ(cjmiss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
-  }
-
-  {
     std::shared_ptr<CircInverseForGoalIncalculable> cifgi_ex{ new CircInverseForGoalIncalculable("") };
-=======
-    auto cifgi_ex = std::make_shared<CircInverseForGoalIncalculable>("");
->>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
     EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
 }
 
 /**
-<<<<<<< HEAD
  * @brief Construct a TrajectoryGeneratorCirc with no limits given
  */
 TEST_F(TrajectoryGeneratorCIRCTest, noLimits)
@@ -290,26 +280,6 @@ TEST_F(TrajectoryGeneratorCIRCTest, noLimits)
 }
 
 /**
- * @brief test invalid motion plan request with incomplete start state and
- * cartesian goal
- */
-TEST_F(TrajectoryGeneratorCIRCTest, incompleteStartState)
-{
-  auto circ{ tdp_->getCircCartCenterCart("circ1_center_2") };
-
-  planning_interface::MotionPlanRequest req{ circ.toRequest() };
-  EXPECT_GT(req.start_state.joint_state.name.size(), 1u);
-  req.start_state.joint_state.name.resize(1);
-  req.start_state.joint_state.position.resize(1);  // prevent failing check for equal sizes
-
-  planning_interface::MotionPlanResponse res;
-  EXPECT_FALSE(circ_->generate(planning_scene_, req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
-}
-
-/**
-=======
->>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
  * @brief test invalid motion plan request with non zero start velocity
  */
 TEST_F(TrajectoryGeneratorCIRCTest, nonZeroStartVelocity)
