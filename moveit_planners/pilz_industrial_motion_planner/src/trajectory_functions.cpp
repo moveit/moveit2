@@ -59,15 +59,6 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
     return false;
   }
 
-<<<<<<< HEAD
-  if (!robot_model->getJointModelGroup(group_name)->canSetStateFromIK(link_name))
-  {
-    RCLCPP_ERROR_STREAM(LOGGER, "No valid IK solver exists for " << link_name << " in planning group " << group_name);
-    return false;
-  }
-
-=======
->>>>>>> 70e1aae8b (Ports moveit/moveit/pull/3519 to ros2 (#3055))
   if (frame_id != robot_model->getModelFrame())
   {
     RCLCPP_ERROR_STREAM(LOGGER, "Given frame (" << frame_id << ") is unequal to model frame("
