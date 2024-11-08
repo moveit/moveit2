@@ -171,31 +171,31 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
   {
     RCLCPP_WARN(getLogger(), "Frame id is not set in position constraints of "
                              "path. Use model frame as default");
-  center_point_frame_id = robot_model_->getModelFrame();
-}
-else
-{
-  center_point_frame_id = req.path_constraints.position_constraints.front().header.frame_id;
-}
+    center_point_frame_id = robot_model_->getModelFrame();
+  }
+  else
+  {
+    center_point_frame_id = req.path_constraints.position_constraints.front().header.frame_id;
+  }
 
-Eigen::Isometry3d center_point_pose;
-tf2::fromMsg(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front(),
-             center_point_pose);
+  Eigen::Isometry3d center_point_pose;
+  tf2::fromMsg(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front(),
+               center_point_pose);
 
-center_point_pose = scene->getFrameTransform(center_point_frame_id) * center_point_pose;
+  center_point_pose = scene->getFrameTransform(center_point_frame_id) * center_point_pose;
 
-if (!req.goal_constraints.front().position_constraints.empty())
-{
-  const moveit_msgs::msg::Constraints& goal = req.goal_constraints.front();
-  geometry_msgs::Point center_point = tf2::toMsg(Eigen::Vector3d(center_point_pose.translation()));
-  info.circ_path_point.second = getConstraintPose(center_point, goal.orientation_constraints.front().orientation,
-                                                  goal.position_constraints.front().target_point_offset)
-                                    .translation();
-}
-else
-{
-  info.circ_path_point.second = center_point_pose.translation();
-}
+  if (!req.goal_constraints.front().position_constraints.empty())
+  {
+    const moveit_msgs::msg::Constraints& goal = req.goal_constraints.front();
+    geometry_msgs::Point center_point = tf2::toMsg(Eigen::Vector3d(center_point_pose.translation()));
+    info.circ_path_point.second = getConstraintPose(center_point, goal.orientation_constraints.front().orientation,
+                                                    goal.position_constraints.front().target_point_offset)
+                                      .translation();
+  }
+  else
+  {
+    info.circ_path_point.second = center_point_pose.translation();
+  }
 }
 
 void TrajectoryGeneratorCIRC::plan(const planning_scene::PlanningSceneConstPtr& scene,
