@@ -79,7 +79,10 @@ template <typename Derived>
 void ChompCost::getDerivative(const Eigen::MatrixXd::ColXpr& joint_trajectory,
                               Eigen::MatrixBase<Derived>& derivative) const
 {
-  derivative = (quad_cost_full_ * (2.0 * joint_trajectory));
+  if (quad_cost_full_.size() == 0) {
+    throw std::runtime_error("Error: Quadratic cost matrix is not initialized.");
+  }
+  derivative = 2.0 * (quad_cost_full_.lazyProduct(joint_trajectory));
 }
 
 inline const Eigen::MatrixXd& ChompCost::getQuadraticCostInverse() const
@@ -94,7 +97,10 @@ inline const Eigen::MatrixXd& ChompCost::getQuadraticCost() const
 
 inline double ChompCost::getCost(const Eigen::MatrixXd::ColXpr& joint_trajectory) const
 {
-  return joint_trajectory.dot(quad_cost_full_ * joint_trajectory);
+  if (quad_cost_full_.size() == 0) {
+    throw std::runtime_error("Error: Quadratic cost matrix is not initialized.");
+  }
+  return joint_trajectory.dot(quad_cost_full_.lazyProduct(joint_trajectory));
 }
 
 }  // namespace chomp

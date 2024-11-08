@@ -289,6 +289,9 @@ void ChompOptimizer::registerParents(const moveit::core::JointModel* model)
 
 bool ChompOptimizer::optimize()
 {
+  if (trajectory_.getNumPoints() == 0 || cost_.isEmpty()) {
+    throw std::runtime_error("Optimizer received uninitialized trajectory or cost data.");
+  }
   bool optimization_result = 0;
 
   const auto start_time = std::chrono::system_clock::now();
@@ -545,6 +548,7 @@ void ChompOptimizer::calculateSmoothnessIncrements()
   }
 }
 
+
 void ChompOptimizer::calculateCollisionIncrements()
 {
   double potential;
@@ -562,14 +566,10 @@ void ChompOptimizer::calculateCollisionIncrements()
   int end_point = free_vars_end_;
 
   // In stochastic descent, simply use a random point in the trajectory, rather than all the trajectory points.
-  // This is faster and guaranteed to converge, but it may take more iterations in the worst case.
   if (parameters_->use_stochastic_descent_)
   {
     start_point = static_cast<int>(rsl::uniform_real(0., 1.) * (free_vars_end_ - free_vars_start_) + free_vars_start_);
-    if (start_point < free_vars_start_)
-      start_point = free_vars_start_;
-    if (start_point > free_vars_end_)
-      start_point = free_vars_end_;
+    start_point = std::clamp(start_point, free_vars_start_, free_vars_end_);
     end_point = start_point;
   }
   else
@@ -577,12 +577,13 @@ void ChompOptimizer::calculateCollisionIncrements()
     start_point = free_vars_start_;
   }
 
+  // Parallelize the outer loop over 'i' using OpenMP
+  #pragma omp parallel for private(potential, vel_mag_sq, vel_mag, potential_gradient, normalized_velocity, orthogonal_projector, curvature_vector, cartesian_gradient)
   for (int i = start_point; i <= end_point; ++i)
   {
     for (int j = 0; j < num_collision_points_; ++j)
     {
       potential = collision_point_potential_[i][j];
-
       if (potential < 0.0001)
         continue;
 
@@ -591,35 +592,28 @@ void ChompOptimizer::calculateCollisionIncrements()
       vel_mag = collision_point_vel_mag_[i][j];
       vel_mag_sq = vel_mag * vel_mag;
 
-      // all math from the CHOMP paper:
-
+      // CHOMP paper equations
       normalized_velocity = collision_point_vel_eigen_[i][j] / vel_mag;
       orthogonal_projector = Eigen::Matrix3d::Identity() - (normalized_velocity * normalized_velocity.transpose());
       curvature_vector = (orthogonal_projector * collision_point_acc_eigen_[i][j]) / vel_mag_sq;
       cartesian_gradient = vel_mag * (orthogonal_projector * potential_gradient - potential * curvature_vector);
 
-      // pass it through the jacobian transpose to get the increments
+      // Jacobian transformation
       getJacobian(i, collision_point_pos_eigen_[i][j], collision_point_joint_names_[i][j], jacobian_);
 
       if (parameters_->use_pseudo_inverse_)
       {
         calculatePseudoInverse();
+        #pragma omp critical
         collision_increments_.row(i - free_vars_start_).transpose() -= jacobian_pseudo_inverse_ * cartesian_gradient;
       }
       else
       {
+        #pragma omp critical
         collision_increments_.row(i - free_vars_start_).transpose() -= jacobian_.transpose() * cartesian_gradient;
       }
-
-      /*
-        if(point_is_in_collision_[i][j])
-        {
-        break;
-        }
-      */
     }
   }
-  // cout << collision_increments_ << endl;
 }
 
 void ChompOptimizer::calculatePseudoInverse()
