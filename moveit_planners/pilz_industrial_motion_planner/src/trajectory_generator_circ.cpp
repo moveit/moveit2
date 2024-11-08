@@ -177,6 +177,9 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
 
   computeLinkFK(scene, info.link_name, info.start_joint_position, info.start_pose);
 
+  // center point with wrt. the planning frame
+  std::string center_point_frame_id;
+
   info.circ_path_point.first = req.path_constraints.name;
   if (req.path_constraints.position_constraints.front().header.frame_id.empty())
       ROS_WARN("Frame id is not set in position constraints of "
