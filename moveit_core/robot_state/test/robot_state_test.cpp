@@ -95,12 +95,12 @@ void checkJacobian(moveit::core::RobotState& state, const moveit::core::JointMod
       index += (*jt)->getVariableCount();
     }
 
-    EXPECT_TRUE(jacobian.block(0, index, jacobian.rows(), jacobian.cols()).isZero())
+    EXPECT_TRUE(jacobian.block(0, index, jacobian.rows(), jacobian.cols() - index).isZero())
         << "Jacobian contains non-zero values for joints that are not used based on the reference link "
         << reference_link->getName() << ". This is the faulty Jacobian: " << '\n'
         << jacobian << '\n'
         << "The columns " << index << " to " << jacobian.cols() << " should be zero. Instead the values are: " << '\n'
-        << jacobian.block(0, index, jacobian.rows(), jacobian.cols());
+        << jacobian.block(0, index, jacobian.rows(), jacobian.cols() - index);
   }
 
   // Compute the Cartesian velocity vector using the Jacobian.
