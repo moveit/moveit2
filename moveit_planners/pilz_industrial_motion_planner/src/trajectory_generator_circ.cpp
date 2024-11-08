@@ -207,7 +207,7 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
   }
   else
   {
-    info.circ_path_point.second = circ_path_point;
+    info.circ_path_point.second = center_point_pose.translation();
   }
 }
 
