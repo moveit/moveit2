@@ -85,10 +85,15 @@ void checkJacobian(moveit::core::RobotState& state, const moveit::core::JointMod
   // Verify that only elements of the Jacobian contain values that correspond to joints that are being used based on the reference link.
   const std::vector<const moveit::core::JointModel*>& joint_models = joint_model_group.getJointModels();
   auto it = std::find_if(joint_models.begin(), joint_models.end(),
-                         [&](const moveit::core::JointModel* jm) { return jm->getChildLinkModel() == reference_link; });
+                         [&](const moveit::core::JointModel* jm) { return jm->getParentLinkModel() == reference_link; });
   if (it != joint_models.end())
   {
-    std::size_t index = std::distance(joint_models.begin(), it);
+    std::size_t index = 0;
+    for (auto jt = joint_models.begin(); jt != it; ++jt)
+    {
+      index += (*jt)->getVariableCount();
+    }
+
     EXPECT_TRUE(jacobian.block(0, index, jacobian.rows(), jacobian.cols()).isZero())
         << "Jacobian contains non-zero values for joints that are not used based on the reference link "
         << reference_link->getName() << ". This is the faulty Jacobian: " << '\n'
@@ -105,7 +110,7 @@ void checkJacobian(moveit::core::RobotState& state, const moveit::core::JointMod
   state.setJointGroupPositions(&joint_model_group, joint_values + delta_joint_angles);
   state.updateLinkTransforms();
   const Eigen::Isometry3d tip_pose_after_delta =
-      root_pose_world * state.getGlobalLinkTransform(joint_model_group.getLinkModels().back());
+      root_pose_world * state.getGlobalLinkTransform(reference_link);
   const Eigen::Vector3d displacement = tip_pose_after_delta.translation() - tip_pose_initial.translation();
 
   // The Cartesian velocity vector obtained via the Jacobian should be aligned with the instantaneous robot motion, i.e.
