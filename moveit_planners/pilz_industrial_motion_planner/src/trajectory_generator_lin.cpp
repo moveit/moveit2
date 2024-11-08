@@ -74,6 +74,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
   RCLCPP_DEBUG(getLogger(), "Extract necessary information from motion plan request.");
 
   info.group_name = req.group_name;
+  moveit::core::RobotState robot_state = scene->getCurrentState();
 
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
@@ -96,9 +97,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
       info.goal_joint_position[joint_item.joint_name] = joint_item.position;
     }
 
-    // Ignored return value because at this point the function should always
-    // return 'true'.
-    computeLinkFK(scene, info.link_name, info.goal_joint_position, info.goal_pose);
+    computeLinkFK(robot_state, info.link_name, info.goal_joint_position, info.goal_pose);
   }
   // goal given in Cartesian space
   else
