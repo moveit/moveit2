@@ -224,12 +224,6 @@ inline double ChompTrajectory::operator()(size_t traj_point, size_t joint) const
 
 inline Eigen::MatrixXd::RowXpr ChompTrajectory::getTrajectoryPoint(int traj_point)
 {
-  // Checks to ensure indices are within bounds before accessing or modifying the trajectory matrix.
-  if (point < 0 || point >= num_points_) {
-    std::cerr << "Error: Point index out of range." << std::endl;
-    // Return a default value on error
-    return Eigen::VectorXd::Zero(num_joints_); 
-  }
   return trajectory_.row(point);
 }
 
