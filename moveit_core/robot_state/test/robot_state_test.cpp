@@ -84,8 +84,9 @@ void checkJacobian(moveit::core::RobotState& state, const moveit::core::JointMod
 
   // Verify that only elements of the Jacobian contain values that correspond to joints that are being used based on the reference link.
   const std::vector<const moveit::core::JointModel*>& joint_models = joint_model_group.getJointModels();
-  auto it = std::find_if(joint_models.begin(), joint_models.end(),
-                         [&](const moveit::core::JointModel* jm) { return jm->getParentLinkModel() == reference_link; });
+  auto it = std::find_if(joint_models.begin(), joint_models.end(), [&](const moveit::core::JointModel* jm) {
+    return jm->getParentLinkModel() == reference_link;
+  });
   if (it != joint_models.end())
   {
     std::size_t index = 0;
@@ -109,8 +110,7 @@ void checkJacobian(moveit::core::RobotState& state, const moveit::core::JointMod
   const Eigen::VectorXd delta_joint_angles = time_step * joint_velocities;
   state.setJointGroupPositions(&joint_model_group, joint_values + delta_joint_angles);
   state.updateLinkTransforms();
-  const Eigen::Isometry3d tip_pose_after_delta =
-      root_pose_world * state.getGlobalLinkTransform(reference_link);
+  const Eigen::Isometry3d tip_pose_after_delta = root_pose_world * state.getGlobalLinkTransform(reference_link);
   const Eigen::Vector3d displacement = tip_pose_after_delta.translation() - tip_pose_initial.translation();
 
   // The Cartesian velocity vector obtained via the Jacobian should be aligned with the instantaneous robot motion, i.e.
