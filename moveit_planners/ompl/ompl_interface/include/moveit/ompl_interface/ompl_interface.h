@@ -42,9 +42,10 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
-#include <rclcpp/node.hpp>
 #include <string>
 #include <map>
+#include <rclcpp/rclcpp.hpp>
+#include <std_srvs/srv/trigger.hpp>
 
 /** \brief The MoveIt interface to OMPL */
 namespace ompl_interface
@@ -68,6 +69,13 @@ public:
                 const std::string& parameter_namespace);
 
   virtual ~OMPLInterface();
+
+  /** @brief Store the OMPL planner data in a file.
+   *  @param request the service request
+   *  @param response the service response
+   */
+  void storePlannerData(const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
+                        const std::shared_ptr<std_srvs::srv::Trigger::Response>& response);
 
   /** @brief Specify configurations for the planners.
       @param pconfig Configurations for the different planners */
@@ -151,5 +159,7 @@ protected:
 
 private:
   constraint_sampler_manager_loader::ConstraintSamplerManagerLoaderPtr constraint_sampler_manager_loader_;
+
+  rclcpp::Service<std_srvs::srv::Trigger>::SharedPtr store_planner_data_service_;
 };
 }  // namespace ompl_interface

@@ -63,6 +63,13 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
   RCLCPP_DEBUG(getLogger(), "Initializing OMPL interface using ROS parameters");
   loadPlannerConfigurations();
   loadConstraintSamplers();
+
+  store_planner_data_service_ = node_->create_service<std_srvs::srv::Trigger>(
+      "store_planner_data",
+      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
+             const std::shared_ptr<std_srvs::srv::Trigger::Response>& response) -> void {
+        storePlannerData(request, response);
+      });
 }
 
 OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model,
@@ -78,9 +85,26 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
   RCLCPP_DEBUG(getLogger(), "Initializing OMPL interface using specified configuration");
   setPlannerConfigurations(pconfig);
   loadConstraintSamplers();
+
+  store_planner_data_service_ = node_->create_service<std_srvs::srv::Trigger>(
+      "store_planner_data",
+      [this](const std::shared_ptr<std_srvs::srv::Trigger::Request>& request,
+             const std::shared_ptr<std_srvs::srv::Trigger::Response>& response) -> void {
+        storePlannerData(request, response);
+      });
 }
 
 OMPLInterface::~OMPLInterface() = default;
+
+void OMPLInterface::storePlannerData(const std::shared_ptr<std_srvs::srv::Trigger::Request>& /* unused */,
+                                     const std::shared_ptr<std_srvs::srv::Trigger::Response>& response)
+{
+  response->success = context_manager_.storePlannerData();
+  if (!response->success)
+  {
+    RCLCPP_ERROR(getLogger(), "Motion planning graph is empty");
+  }
+}
 
 void OMPLInterface::setPlannerConfigurations(const planning_interface::PlannerConfigurationMap& pconfig)
 {
