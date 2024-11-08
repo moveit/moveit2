@@ -240,7 +240,7 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::Plannin
         req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
     {
       RCLCPP_WARN("Frame id is not set in position/orientation constraints of "
-               "goal. Use model frame as default");
+                  "goal. Use model frame as default");
       frame_id = robot_model_->getModelFrame();
     }
     else
