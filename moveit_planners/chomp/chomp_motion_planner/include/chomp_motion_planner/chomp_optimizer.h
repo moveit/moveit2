@@ -48,6 +48,8 @@
 #include <Eigen/StdVector>
 #include <vector>
 
+#include <omp.h>
+
 namespace chomp
 {
 class ChompOptimizer

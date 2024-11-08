@@ -560,6 +560,11 @@ void ChompOptimizer::calculateCollisionIncrements()
   Eigen::Vector3d curvature_vector;
   Eigen::Vector3d cartesian_gradient;
 
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+  
   collision_increments_.setZero(num_vars_free_, num_joints_);
 
   int start_point = 0;
@@ -568,7 +573,14 @@ void ChompOptimizer::calculateCollisionIncrements()
   // In stochastic descent, simply use a random point in the trajectory, rather than all the trajectory points.
   if (parameters_->use_stochastic_descent_)
   {
+<<<<<<< HEAD
     start_point = static_cast<int>(rsl::uniform_real(0., 1.) * (free_vars_end_ - free_vars_start_) + free_vars_start_);
+=======
+    
+    start_point = static_cast<int>(dis(gen) * (free_vars_end_ - free_vars_start_) + free_vars_start_);
+
+    
+>>>>>>> 39881a592 (Added OpenMP to improve the collision checking.)
     start_point = std::clamp(start_point, free_vars_start_, free_vars_end_);
     end_point = start_point;
   }
@@ -615,6 +627,7 @@ void ChompOptimizer::calculateCollisionIncrements()
     }
   }
 }
+
 
 void ChompOptimizer::calculatePseudoInverse()
 {

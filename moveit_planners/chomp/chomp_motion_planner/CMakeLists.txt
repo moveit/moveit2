@@ -14,6 +14,11 @@ find_package(trajectory_msgs REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS moveit_core rclcpp rsl trajectory_msgs
                                  visualization_msgs)
+# Check if OpenMP is available, and add it to dependencies if so
+find_package(OpenMP)
+if(OpenMP_FOUND)
+  list(APPEND THIS_PACKAGE_INCLUDE_DEPENDS OpenMP)
+endif()
 
 include_directories(include)
 
@@ -25,10 +30,7 @@ set_target_properties(chomp_motion_planner
                       PROPERTIES VERSION "${chomp_motion_planner_VERSION}")
 ament_target_dependencies(chomp_motion_planner ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-find_package(OpenMP REQUIRED)
-if(OPENMP_FOUND)
-    target_link_libraries(chomp_motion_planner PUBLIC OpenMP::OpenMP_CXX)
-endif()
+target_compile_options(chomp_motion_planner PRIVATE -fopenmp)
 
 
 install(
