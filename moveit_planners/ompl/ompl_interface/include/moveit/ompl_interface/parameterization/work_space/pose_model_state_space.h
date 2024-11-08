@@ -145,5 +145,6 @@ private:
   };
 
   std::vector<PoseComponent> poses_;
+  double jump_factor_;
 };
 }  // namespace ompl_interface

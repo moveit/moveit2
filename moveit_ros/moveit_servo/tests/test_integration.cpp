@@ -46,10 +46,12 @@ namespace
 
 TEST_F(ServoCppFixture, JointJogTest)
 {
+  planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
+  auto robot_state = std::make_shared<moveit::core::RobotState>(locked_scene->getCurrentState());
+
   moveit_servo::StatusCode status_curr, status_next, status_initial;
   moveit_servo::JointJogCommand joint_jog_z{ { "panda_joint7" }, { 1.0 } };
   moveit_servo::JointJogCommand zero_joint_jog;
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
   // Compute next state.
   servo_test_instance_->setCommandType(moveit_servo::CommandType::JOINT_JOG);
@@ -72,10 +74,12 @@ TEST_F(ServoCppFixture, JointJogTest)
 
 TEST_F(ServoCppFixture, TwistTest)
 {
+  planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
+  auto robot_state = std::make_shared<moveit::core::RobotState>(locked_scene->getCurrentState());
+
   moveit_servo::StatusCode status_curr, status_next, status_initial;
   moveit_servo::TwistCommand twist_non_zero{ "panda_link0", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
   moveit_servo::TwistCommand twist_zero{ "panda_link0", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
   servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
@@ -97,10 +101,12 @@ TEST_F(ServoCppFixture, TwistTest)
 
 TEST_F(ServoCppFixture, NonPlanningFrameTwistTest)
 {
+  planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
+  auto robot_state = std::make_shared<moveit::core::RobotState>(locked_scene->getCurrentState());
+
   moveit_servo::StatusCode status_curr, status_next, status_initial;
   moveit_servo::TwistCommand twist_non_zero{ "panda_link8", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.1 } };
   moveit_servo::TwistCommand twist_zero{ "panda_link8", { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 } };
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
   servo_test_instance_->setCommandType(moveit_servo::CommandType::TWIST);
   status_initial = servo_test_instance_->getStatus();
@@ -122,6 +128,9 @@ TEST_F(ServoCppFixture, NonPlanningFrameTwistTest)
 
 TEST_F(ServoCppFixture, PoseTest)
 {
+  planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
+  auto robot_state = std::make_shared<moveit::core::RobotState>(locked_scene->getCurrentState());
+
   moveit_servo::StatusCode status_curr, status_next, status_initial;
   moveit_servo::PoseCommand zero_pose, non_zero_pose;
   zero_pose.frame_id = "panda_link0";
@@ -135,7 +144,6 @@ TEST_F(ServoCppFixture, PoseTest)
   status_initial = servo_test_instance_->getStatus();
   ASSERT_EQ(status_initial, moveit_servo::StatusCode::NO_WARNING);
 
-  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
   moveit_servo::KinematicState curr_state = servo_test_instance_->getNextJointState(robot_state, zero_pose);
   status_curr = servo_test_instance_->getStatus();
   ASSERT_EQ(status_curr, moveit_servo::StatusCode::NO_WARNING);
