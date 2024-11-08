@@ -91,7 +91,11 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
   RCLCPP_DEBUG(LOGGER, "Extract necessary information from motion plan request.");
 
   info.group_name = req.group_name;
+<<<<<<< HEAD
   std::string frame_id{ robot_model_->getModelFrame() };
+=======
+  moveit::core::RobotState robot_state = scene->getCurrentState();
+>>>>>>> 4c28a7434 (Enhancement/ports moveit 3522 (#3070))
 
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
@@ -123,6 +127,7 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
   // goal given in Cartesian space
   else
   {
+    std::string frame_id;
     info.link_name = req.goal_constraints.front().position_constraints.front().link_name;
     if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
         req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
@@ -135,7 +140,23 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
     {
       frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
     }
-    info.goal_pose = getConstraintPose(req.goal_constraints.front());
+
+    // goal pose with optional offset wrt. the planning frame
+    info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
+    frame_id = robot_model_->getModelFrame();
+
+    // check goal pose ik before Cartesian motion plan starts
+    std::map<std::string, double> ik_solution;
+    if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
+                       ik_solution))
+    {
+      // LCOV_EXCL_START
+      std::ostringstream os;
+      os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
+      throw CircInverseForGoalIncalculable(os.str());
+      // LCOV_EXCL_STOP // not able to trigger here since lots of checks before
+      // are in place
+    }
   }
 
   assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
@@ -155,34 +176,38 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
 
   computeLinkFK(scene, info.link_name, info.start_joint_position, info.start_pose);
 
-  // check goal pose ik before Cartesian motion plan starts
-  std::map<std::string, double> ik_solution;
-  if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
-                     ik_solution))
-  {
-    // LCOV_EXCL_START
-    std::ostringstream os;
-    os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
-    throw CircInverseForGoalIncalculable(os.str());
-    // LCOV_EXCL_STOP // not able to trigger here since lots of checks before
-    // are in place
-  }
+  // center point with wrt. the planning frame
+  std::string center_point_frame_id;
+
   info.circ_path_point.first = req.path_constraints.name;
-  if (!req.goal_constraints.front().position_constraints.empty())
+  if (req.path_constraints.position_constraints.front().header.frame_id.empty())
   {
-    const moveit_msgs::msg::Constraints& goal = req.goal_constraints.front();
-    info.circ_path_point.second =
-        getConstraintPose(
-            req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front().position,
-            goal.orientation_constraints.front().orientation, goal.position_constraints.front().target_point_offset)
-            .translation();
+    RCLCPP_WARN(getLogger(), "Frame id is not set in position constraints of "
+                             "path. Use model frame as default");
+    center_point_frame_id = robot_model_->getModelFrame();
   }
   else
   {
-    Eigen::Vector3d circ_path_point;
-    tf2::fromMsg(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front().position,
-                 circ_path_point);
-    info.circ_path_point.second = circ_path_point;
+    center_point_frame_id = req.path_constraints.position_constraints.front().header.frame_id;
+  }
+
+  Eigen::Isometry3d center_point_pose;
+  tf2::fromMsg(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front(),
+               center_point_pose);
+
+  center_point_pose = scene->getFrameTransform(center_point_frame_id) * center_point_pose;
+
+  if (!req.goal_constraints.front().position_constraints.empty())
+  {
+    const moveit_msgs::msg::Constraints& goal = req.goal_constraints.front();
+    geometry_msgs::msg::Point center_point = tf2::toMsg(Eigen::Vector3d(center_point_pose.translation()));
+    info.circ_path_point.second = getConstraintPose(center_point, goal.orientation_constraints.front().orientation,
+                                                    goal.position_constraints.front().target_point_offset)
+                                      .translation();
+  }
+  else
+  {
+    info.circ_path_point.second = center_point_pose.translation();
   }
 }
 
