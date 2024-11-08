@@ -187,7 +187,7 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
   if (!req.goal_constraints.front().position_constraints.empty())
   {
     const moveit_msgs::msg::Constraints& goal = req.goal_constraints.front();
-    geometry_msgs::Point center_point = tf2::toMsg(Eigen::Vector3d(center_point_pose.translation()));
+    geometry_msgs::msg::Point center_point = tf2::toMsg(Eigen::Vector3d(center_point_pose.translation()));
     info.circ_path_point.second = getConstraintPose(center_point, goal.orientation_constraints.front().orientation,
                                                     goal.position_constraints.front().target_point_offset)
                                       .translation();
