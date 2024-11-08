@@ -132,10 +132,6 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
       throw LinInverseForGoalIncalculable(os.str());
     }
 
-    // Ignored return value because at this point the function should always
-    // return 'true'.
-    computeLinkFK(scene, info.link_name, info.start_joint_position, info.start_pose);
-
   }
 
   assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
@@ -153,6 +149,9 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
     info.start_joint_position[joint_name] = req.start_state.joint_state.position[index];
   }
 
+  // Ignored return value because at this point the function should always
+  // return 'true'.
+  computeLinkFK(scene, info.link_name, info.start_joint_position, info.start_pose);
 }
 
 void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& scene,
