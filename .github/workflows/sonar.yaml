@@ -9,14 +9,14 @@ on:
 jobs:
   default:
     env:
-      ROS_DISTRO: rolling
+      ROS_DISTRO: humble
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
-      DOCKER_IMAGE: moveit/moveit2:rolling-ci
+      DOCKER_IMAGE: moveit/moveit2:humble-ci
       UPSTREAM_WORKSPACE: >
         moveit2.repos
-        $(f="moveit2_$(sed 's/-.*$//' <<< "rolling-ci").repos"; test -r $f && echo $f)
+        $(f="moveit2_$(sed 's/-.*$//' <<< "humble-ci").repos"; test -r $f && echo $f)
       # Pull any updates to the upstream workspace (after restoring it from cache)
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
@@ -38,7 +38,7 @@ jobs:
       BASEDIR: ${{ github.workspace }}/.work
       ADDITIONAL_DEBS: lld
 
-    name: rolling-ci-ccov-sonar
+    name: humble-ci-ccov-sonar
     runs-on: ubuntu-latest
     steps:
       - name: "Free up disk space"
@@ -79,15 +79,15 @@ jobs:
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
           GHA_CACHE_SAVE: always
-          CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ steps.repos_edit_timestamp.outputs.timestamp }}-rolling-ci-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
+          CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ steps.repos_edit_timestamp.outputs.timestamp }}-humble-ci-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
         uses: rhaschke/cache@main
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-rolling-ci-ccov-${{ github.sha }}-${{ github.run_id }}
+          key: ccache-humble-ci-ccov-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
-            ccache-rolling-ci-ccov-${{ github.sha }}
-            ccache-rolling-ci-ccov
+            ccache-humble-ci-ccov-${{ github.sha }}
+            ccache-humble-ci-ccov
         env:
           GHA_CACHE_SAVE: always
       - name: Configure ccache

@@ -26,6 +26,7 @@ jobs:
             CLANG_TIDY: pedantic
           - IMAGE: humble-ci
             ROS_DISTRO: humble
+            CCOV: true
           - IMAGE: humble-ci-testing
             ROS_DISTRO: humble
           - IMAGE: jazzy-ci
