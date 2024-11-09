@@ -167,8 +167,8 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
   info.circ_path_point.first = req.path_constraints.name;
   if (req.path_constraints.position_constraints.front().header.frame_id.empty())
   {
-    RCLCPP_WARN(getLogger(), "Frame id is not set in position constraints of "
-                             "path. Use model frame as default");
+    RCLCPP_WARN(LOGGER, "Frame id is not set in position constraints of "
+                        "path. Use model frame as default");
     center_point_frame_id = robot_model_->getModelFrame();
   }
   else
