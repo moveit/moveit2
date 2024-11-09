@@ -91,11 +91,11 @@ int main(int argc, char* argv[])
 
   std::chrono::seconds timeout_duration(3);
   std::chrono::seconds time_elapsed(0);
-  auto start_time = std::chrono::steady_clock::now();
+  const auto start_time = std::chrono::steady_clock::now();
 
   // create command queue to build trajectory message and add current robot state
   std::deque<KinematicState> joint_cmd_rolling_window;
-  KinematicState current_state = servo.getCurrentRobotState();
+  KinematicState current_state = servo.getCurrentRobotState(true /* wait for updated state */);
   updateSlidingWindow(current_state, joint_cmd_rolling_window, servo_params.max_expected_latency, demo_node->now());
 
   RCLCPP_INFO_STREAM(demo_node->get_logger(), servo.getStatusMessage());
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     KinematicState joint_state = servo.getNextJointState(robot_state, joint_jog);
     const StatusCode status = servo.getStatus();
 
-    auto current_time = std::chrono::steady_clock::now();
+    const auto current_time = std::chrono::steady_clock::now();
     time_elapsed = std::chrono::duration_cast<std::chrono::seconds>(current_time - start_time);
     if (time_elapsed > timeout_duration)
     {

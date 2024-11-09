@@ -89,6 +89,5 @@ public:
    */
   virtual bool reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& velocities,
                      const Eigen::VectorXd& accelerations) = 0;
-  ;
 };
 }  // namespace online_signal_smoothing

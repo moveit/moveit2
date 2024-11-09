@@ -159,7 +159,7 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
   const bool is_zero = command.velocities.isZero();
   if (!is_zero && is_planning_frame && valid_command)
   {
-    // Compute the Cartesian position delta based on incoming command, assumed to be in m/s
+    // Compute the Cartesian position delta based on incoming twist command.
     cartesian_position_delta = command.velocities * servo_params.publish_period;
     // This scaling is supposed to be applied to the command.
     // But since it is only used here, we avoid creating a copy of the command,
@@ -168,6 +168,25 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     {
       cartesian_position_delta.head<3>() *= servo_params.scale.linear;
       cartesian_position_delta.tail<3>() *= servo_params.scale.rotational;
+    }
+    else if (servo_params.command_in_type == "speed_units")
+    {
+      if (servo_params.scale.linear > 0.0)
+      {
+        const auto linear_speed_scale = command.velocities.head<3>().norm() / servo_params.scale.linear;
+        if (linear_speed_scale > 1.0)
+        {
+          cartesian_position_delta.head<3>() /= linear_speed_scale;
+        }
+      }
+      if (servo_params.scale.rotational > 0.0)
+      {
+        const auto angular_speed_scale = command.velocities.tail<3>().norm() / servo_params.scale.rotational;
+        if (angular_speed_scale > 1.0)
+        {
+          cartesian_position_delta.tail<3>() /= angular_speed_scale;
+        }
+      }
     }
 
     // Compute the required change in joint angles.
@@ -178,7 +197,7 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
     {
       joint_position_delta = delta_result.second;
       // Get velocity scaling information for singularity.
-      const std::pair<double, StatusCode> singularity_scaling_info =
+      const auto singularity_scaling_info =
           velocityScalingFactorForSingularity(robot_state, cartesian_position_delta, servo_params);
       // Apply velocity scaling for singularity, if there was any scaling.
       if (singularity_scaling_info.second != StatusCode::NO_WARNING)
@@ -226,12 +245,35 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
     Eigen::Vector<double, 6> cartesian_position_delta;
 
     // Compute linear and angular change needed.
-    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(ee_frame) };
-    const Eigen::Quaterniond q_current(ee_pose.rotation()), q_target(command.pose.rotation());
-    const Eigen::Quaterniond q_error = q_target * q_current.inverse();
-    const Eigen::AngleAxisd angle_axis_error(q_error);
+    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(planning_frame).inverse() *
+                                     robot_state->getGlobalLinkTransform(ee_frame) };
+    const Eigen::Quaterniond q_current(ee_pose.rotation());
+    Eigen::Quaterniond q_target(command.pose.rotation());
+    Eigen::Vector3d translation_error = command.pose.translation() - ee_pose.translation();
 
-    cartesian_position_delta.head<3>() = command.pose.translation() - ee_pose.translation();
+    // Limit the commands by the maximum linear and angular speeds provided.
+    if (servo_params.scale.linear > 0.0)
+    {
+      const auto linear_speed_scale =
+          (translation_error.norm() / servo_params.publish_period) / servo_params.scale.linear;
+      if (linear_speed_scale > 1.0)
+      {
+        translation_error /= linear_speed_scale;
+      }
+    }
+    if (servo_params.scale.rotational > 0.0)
+    {
+      const auto angular_speed_scale =
+          (std::abs(q_target.angularDistance(q_current)) / servo_params.publish_period) / servo_params.scale.rotational;
+      if (angular_speed_scale > 1.0)
+      {
+        q_target = q_current.slerp(1.0 / angular_speed_scale, q_target);
+      }
+    }
+
+    // Compute the Cartesian deltas from the velocity-scaled values.
+    const auto angle_axis_error = Eigen::AngleAxisd(q_target * q_current.inverse());
+    cartesian_position_delta.head<3>() = translation_error;
     cartesian_position_delta.tail<3>() = angle_axis_error.axis() * angle_axis_error.angle();
 
     // Compute the required change in joint angles.
@@ -241,6 +283,16 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
     if (status != StatusCode::INVALID)
     {
       joint_position_delta = delta_result.second;
+      // Get velocity scaling information for singularity.
+      const auto singularity_scaling_info =
+          velocityScalingFactorForSingularity(robot_state, cartesian_position_delta, servo_params);
+      // Apply velocity scaling for singularity, if there was any scaling.
+      if (singularity_scaling_info.second != StatusCode::NO_WARNING)
+      {
+        status = singularity_scaling_info.second;
+        RCLCPP_WARN_STREAM(getLogger(), SERVO_STATUS_CODE_MAP.at(status));
+        joint_position_delta *= singularity_scaling_info.first;
+      }
     }
   }
   else

@@ -37,9 +37,14 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/message_filter.h>
+#if RCLCPP_VERSION_GTE(28, 3, 3)  // Rolling
+#include <message_filters/subscriber.hpp>
+#else
 #include <message_filters/subscriber.h>
+#endif
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
 #include <moveit/point_containment_filter/shape_mask.h>

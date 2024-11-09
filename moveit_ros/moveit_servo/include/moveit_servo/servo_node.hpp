@@ -133,6 +133,9 @@ private:
   // Threads used by ServoNode
   std::thread servo_loop_thread_;
 
+  // Locks for threads safety
+  std::mutex lock_;
+
   // rolling window of joint commands
   std::deque<KinematicState> joint_cmd_rolling_window_;
 };

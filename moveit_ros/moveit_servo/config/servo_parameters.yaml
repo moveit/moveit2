@@ -86,24 +86,23 @@ servo:
     linear: {
       type: double,
       default_value: 0.4,
-      description: "Max linear velocity. Unit is [m/s]. Only used for Cartesian commands."
+      description: "Max linear velocity in m/s if using speed units or tracking a pose, else a scaling factor on the unitless commanded velocity. Used for Cartesian and pose tracking commands."
     }
     rotational: {
       type: double,
       default_value: 0.8,
-      description: "Max angular velocity. Unit is [rad/s]. Only used for Cartesian commands."
+      description: "Max angular velocity in rad/s if using speed units or tracking a pose, else a scaling factor on the unitless commanded velocity. Used for Cartesian and pose tracking commands."
     }
     joint: {
       type: double,
       default_value: 0.5,
-      description: "Max joint angular/linear velocity. Only used for joint commands on joint_command_in_topic."
+      description: "Joint angular/linear velocity scale. Only used for unitless joint commands."
     }
-
 
   incoming_command_timeout: {
     type: double,
     default_value: 0.1,
-    description: "Commands will be discarded if it is older than the timeout.\
+    description: "Commands will be discarded if they are older than the timeout, in seconds.\
                    Important because ROS may drop some messages."
   }
 
@@ -123,7 +122,7 @@ servo:
     linear_tolerance: {
         type: double,
         default_value: 0.001,
-        description: "The allowable linear error when tracking a pose.",
+        description: "The allowable linear error, in meters, when tracking a pose.",
         validation: {
           gt<>: 0.0
         }
@@ -132,7 +131,7 @@ servo:
     angular_tolerance: {
         type: double,
         default_value: 0.01,
-        description: "The allowable angular error when tracking a pose.",
+        description: "The allowable angular error, in radians, when tracking a pose.",
         validation: {
           gt<>: 0.0
         }
@@ -326,8 +325,8 @@ servo:
 
   joint_limit_margins: {
     type: double_array,
-    default_value: [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1],
-    description: "Added as a buffer to joint limits [radians]. If moving quickly, make this larger.",
+    default_value: [0.1],
+    description: "Added as a buffer to joint variable position bounds [in that joint variable's respective units]. Can be of size 1, which applies the margin to all joints, or the same size as the number of degrees of freedom of the active joint group. If moving quickly, make these values larger.",
     validation: {
       lower_element_bounds<>: 0.0
     }
@@ -336,7 +335,7 @@ servo:
   override_velocity_scaling_factor: {
     type: double,
     default_value: 0.0,
-    description: "Scaling factor when servo overrides the velocity (eg: near singularities)",
+    description: "Scaling factor when servo overrides the velocity (e.g, near singularities)",
     validation: {
       bounds<>: [0.0, 1.0]
     }
