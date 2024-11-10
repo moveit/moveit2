@@ -142,7 +142,7 @@ protected:
    * @param epsilon
    * return
    */
-  bool jointsNear(const std::vector<double> joints1, const std::vector<double> joints2, double epsilon);
+  bool jointsNear(const std::vector<double>& joints1, const std::vector<double>& joints2, double epsilon);
 
   /**
    * @brief get the current joint values of the robot state
@@ -196,7 +196,7 @@ bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const E
   return true;
 }
 
-bool TrajectoryFunctionsTestBase::jointsNear(const std::vector<double> joints1, const std::vector<double> joints2,
+bool TrajectoryFunctionsTestBase::jointsNear(const std::vector<double>& joints1, const std::vector<double>& joints2,
                                              double epsilon)
 {
   if (joints1.size() != joints2.size())
