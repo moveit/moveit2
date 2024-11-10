@@ -136,7 +136,7 @@ protected:
   bool tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double epsilon);
 
   /**
-   * @brief check if two sets of joint poisitions are close
+   * @brief check if two sets of joint positions are close
    * @param joints1
    * @param joints2
    * @param epsilon
