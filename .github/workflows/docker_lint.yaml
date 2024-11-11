@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        DOCKERFILE_PATH: [ci, ci-testing, release, source]
+        DOCKERFILE_PATH: [ci, release, source]
 
     name: Lint Dockerfiles
     runs-on: ubuntu-latest
