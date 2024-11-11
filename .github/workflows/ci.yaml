@@ -26,9 +26,9 @@ jobs:
             CLANG_TIDY: pedantic
           - IMAGE: humble-ci
             ROS_DISTRO: humble
-          - IMAGE: humble-ci-testing
-            ROS_DISTRO: humble
           - IMAGE: jazzy-ci
+            ROS_DISTRO: jazzy
+          - IMAGE: jazzy-ci-testing
             ROS_DISTRO: jazzy
     env:
       # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
