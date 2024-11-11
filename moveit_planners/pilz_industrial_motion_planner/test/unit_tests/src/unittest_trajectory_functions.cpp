@@ -154,11 +154,11 @@ protected:
 
   /**
    * @brief attach a collision object and subframes to a link
-   * @param state
-   * @param link
-   * @param object_name
-   * @param object_pose
-   * @param subframes
+   * @param state the state we are updating
+   * @param link the link we are attaching the collision object to
+   * @param object_name a unique name for the collision object
+   * @param object_pose the pose of the object relative to the parent link
+   * @param subframes subframe names and poses relative to the object they attach to
    */
   void attachToLink(moveit::core::RobotState& state, const moveit::core::LinkModel* link,
                     const std::string& object_name, const Eigen::Isometry3d& object_pose,
