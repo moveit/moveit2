@@ -35,7 +35,6 @@ if(BUILD_TESTING)
         ${CMAKE_CURRENT_BINARY_DIR}/../planning_scene;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;
         ${CMAKE_CURRENT_BINARY_DIR}/../kinematics_constraint"
   )
-  endif()
 
   ament_add_gmock(test_constraint_samplers test/test_constraint_samplers.cpp
                   test/pr2_arm_kinematics_plugin.cpp test/pr2_arm_ik.cpp)
