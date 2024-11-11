@@ -30,13 +30,11 @@ if(BUILD_TESTING)
   include_directories(SYSTEM ${orocos_kdl_INCLUDE_DIRS} ${angles_INCLUDE_DIRS}
                       ${tf2_kdl_INCLUDE_DIRS})
 
-  if(WIN32)
-    # set(APPEND_LIBRARY_DIRS
-    # "$<TARGET_FILE_DIR:${PROJECT_NAME}>;$<TARGET_FILE_DIR:${PROJECT_NAME}_TestPlugins1>")
-  else()
-    set(APPEND_LIBRARY_DIRS
-        "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;${CMAKE_CURRENT_BINARY_DIR}/../planning_scene;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;${CMAKE_CURRENT_BINARY_DIR}/../kinematics_constraint"
-    )
+  set(APPEND_LIBRARY_DIRS
+        "${CMAKE_CURRENT_BINARY_DIR};${CMAKE_CURRENT_BINARY_DIR}/../utils;${CMAKE_CURRENT_BINARY_DIR}/../robot_state;
+        ${CMAKE_CURRENT_BINARY_DIR}/../planning_scene;${CMAKE_CURRENT_BINARY_DIR}/../robot_model;
+        ${CMAKE_CURRENT_BINARY_DIR}/../kinematics_constraint"
+  )
   endif()
 
   ament_add_gmock(test_constraint_samplers test/test_constraint_samplers.cpp
