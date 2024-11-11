@@ -137,18 +137,18 @@ protected:
 
   /**
    * @brief check if two sets of joint positions are close
-   * @param joints1
-   * @param joints2
-   * @param epsilon
-   * return
+   * @param joints1 the first set of joint positions to compare
+   * @param joints2 the second set of joint positions to compare
+   * @param epsilon the tolerance a all joint position diffs must satisfy
+   * @return false if any joint diff exceeds tolerance. true otherwise
    */
   bool jointsNear(const std::vector<double>& joints1, const std::vector<double>& joints2, double epsilon);
 
   /**
    * @brief get the current joint values of the robot state
-   * @param jmg
-   * @param state
-   * @param
+   * @param jmg the joint model group whose joints we are interested in
+   * @param state the robot state to fetch the current joint positions for
+   * @return the joint positions for joints from jmg, set to the positions determined from state
    */
   std::vector<double> getJoints(const moveit::core::JointModelGroup* jmg, const moveit::core::RobotState& state);
 
@@ -203,7 +203,7 @@ bool TrajectoryFunctionsTestBase::jointsNear(const std::vector<double>& joints1,
   {
     return false;
   }
-  for (std::size_t i = 0; i < joints1.size(); i++)
+  for (std::size_t i = 0; i < joints1.size(); ++i)
   {
     if (fabs(joints1.at(i) - joints2.at(i)) > fabs(epsilon))
     {
