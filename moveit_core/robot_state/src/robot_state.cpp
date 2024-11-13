@@ -1671,32 +1671,15 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
         auto* pose_parent = getRigidlyConnectedParentLinkModel(pose_frame);
         if (!pose_parent)
         {
-          RCLCPP_ERROR_STREAM(getLogger(), "The following Pose Frame does not exist: " << pose_frame);
+          RCLCPP_ERROR_STREAM(LOGGER, "The following Pose Frame does not exist: " << pose_frame);
           return false;
         }
         Eigen::Isometry3d pose_parent_to_frame = getFrameTransform(pose_frame);
         auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame);
         if (!tip_parent)
         {
-<<<<<<< HEAD
-          const moveit::core::LinkModel* link_model = getLinkModel(pose_frame);
-          if (!link_model)
-          {
-            RCLCPP_ERROR(LOGGER, "The following Pose Frame does not exist: %s", pose_frame.c_str());
-            return false;
-          }
-          const moveit::core::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
-          for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
-            if (Transforms::sameFrame(fixed_link.first->getName(), solver_tip_frame))
-            {
-              pose_frame = solver_tip_frame;
-              pose = pose * fixed_link.second;
-              break;
-            }
-=======
-          RCLCPP_ERROR_STREAM(getLogger(), "The following Solver Tip Frame does not exist: " << solver_tip_frame);
+          RCLCPP_ERROR_STREAM(LOGGER, "The following Solver Tip Frame does not exist: " << solver_tip_frame);
           return false;
->>>>>>> ab34495d2 (Allow RobotState::setFromIK to work with subframes (#3077))
         }
         Eigen::Isometry3d tip_parent_to_tip = getFrameTransform(solver_tip_frame);
         if (pose_parent == tip_parent)
