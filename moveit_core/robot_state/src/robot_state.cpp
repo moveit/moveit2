@@ -1668,14 +1668,17 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
 
       if (pose_frame != solver_tip_frame)
       {
-        if (hasAttachedBody(pose_frame))
+        auto* pose_parent = getRigidlyConnectedParentLinkModel(pose_frame);
+        if (!pose_parent)
         {
-          const AttachedBody* body = getAttachedBody(pose_frame);
-          pose_frame = body->getAttachedLinkName();
-          pose = pose * body->getPose().inverse();
+          RCLCPP_ERROR_STREAM(getLogger(), "The following Pose Frame does not exist: " << pose_frame);
+          return false;
         }
-        if (pose_frame != solver_tip_frame)
+        Eigen::Isometry3d pose_parent_to_frame = getFrameTransform(pose_frame);
+        auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame);
+        if (!tip_parent)
         {
+<<<<<<< HEAD
           const moveit::core::LinkModel* link_model = getLinkModel(pose_frame);
           if (!link_model)
           {
@@ -1690,18 +1693,26 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
               pose = pose * fixed_link.second;
               break;
             }
+=======
+          RCLCPP_ERROR_STREAM(getLogger(), "The following Solver Tip Frame does not exist: " << solver_tip_frame);
+          return false;
+>>>>>>> ab34495d2 (Allow RobotState::setFromIK to work with subframes (#3077))
         }
-
-      }  // end if pose_frame
-
-      // Check if this pose frame works
-      if (pose_frame == solver_tip_frame)
+        Eigen::Isometry3d tip_parent_to_tip = getFrameTransform(solver_tip_frame);
+        if (pose_parent == tip_parent)
+        {
+          // transform goal pose as target for solver_tip_frame (instead of pose_frame)
+          pose = pose * pose_parent_to_frame.inverse() * tip_parent_to_tip;
+          found_valid_frame = true;
+          break;
+        }
+      }
+      else
       {
         found_valid_frame = true;
         break;
-      }
-
-    }  // end for solver_tip_frames
+      }  // end if pose_frame
+    }    // end for solver_tip_frames
 
     // Make sure one of the tip frames worked
     if (!found_valid_frame)
