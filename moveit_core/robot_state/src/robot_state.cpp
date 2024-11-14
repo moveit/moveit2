@@ -1496,19 +1496,25 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
   const int rows = use_quaternion_representation ? 7 : 6;
   const int columns = group->getVariableCount();
   jacobian.resize(rows, columns);
+  jacobian.setZero();
 
   // Get the tip pose with respect to the group root link. Append the user-requested offset 'reference_point_position'.
   const Eigen::Isometry3d root_pose_tip = root_pose_world * getGlobalLinkTransform(link);
   const Eigen::Vector3d tip_point = root_pose_tip * reference_point_position;
 
-  // Here we iterate over all the group active joints, and compute how much each of them contribute to the Cartesian
-  // displacement at the tip. So we build the Jacobian incrementally joint by joint.
-  std::size_t active_joints = group->getActiveJointModels().size();
+  // Initialize the column index of the Jacobian matrix.
   int i = 0;
-  for (std::size_t joint = 0; joint < active_joints; ++joint)
+
+  // Here we iterate over all the group active joints, and compute how much each of them contribute to the Cartesian
+  // displacement at the tip. So we build the Jacobian incrementally joint by joint up to the parent joint of the reference link.
+  for (const JointModel* joint_model : joint_models)
   {
+    // Stop looping if we reached the child joint of the reference link.
+    if (joint_model->getParentLinkModel() == link)
+    {
+      break;
+    }
     // Get the child link for the current joint, and its pose with respect to the group root link.
-    const JointModel* joint_model = joint_models[joint];
     const LinkModel* child_link_model = joint_model->getChildLinkModel();
     const Eigen::Isometry3d& root_pose_link = root_pose_world * getGlobalLinkTransform(child_link_model);
 
@@ -1540,6 +1546,7 @@ bool RobotState::getJacobian(const JointModelGroup* group, const LinkModel* link
       RCLCPP_ERROR(getLogger(), "Unknown type of joint in Jacobian computation");
       return false;
     }
+
     i += joint_model->getVariableCount();
   }
 
@@ -1870,42 +1877,34 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
 
       if (pose_frame != solver_tip_frame)
       {
-        if (hasAttachedBody(pose_frame))
+        auto* pose_parent = getRigidlyConnectedParentLinkModel(pose_frame);
+        if (!pose_parent)
         {
-          const AttachedBody* body = getAttachedBody(pose_frame);
-          pose_frame = body->getAttachedLinkName();
-          pose = pose * body->getPose().inverse();
+          RCLCPP_ERROR_STREAM(getLogger(), "The following Pose Frame does not exist: " << pose_frame);
+          return false;
         }
-        if (pose_frame != solver_tip_frame)
+        Eigen::Isometry3d pose_parent_to_frame = getFrameTransform(pose_frame);
+        auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame);
+        if (!tip_parent)
         {
-          const LinkModel* link_model = getLinkModel(pose_frame);
-          if (!link_model)
-          {
-            RCLCPP_ERROR(getLogger(), "The following Pose Frame does not exist: %s", pose_frame.c_str());
-            return false;
-          }
-          const LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
-          for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
-          {
-            if (Transforms::sameFrame(fixed_link.first->getName(), solver_tip_frame))
-            {
-              pose_frame = solver_tip_frame;
-              pose = pose * fixed_link.second;
-              break;
-            }
-          }
+          RCLCPP_ERROR_STREAM(getLogger(), "The following Solver Tip Frame does not exist: " << solver_tip_frame);
+          return false;
         }
-
-      }  // end if pose_frame
-
-      // Check if this pose frame works
-      if (pose_frame == solver_tip_frame)
+        Eigen::Isometry3d tip_parent_to_tip = getFrameTransform(solver_tip_frame);
+        if (pose_parent == tip_parent)
+        {
+          // transform goal pose as target for solver_tip_frame (instead of pose_frame)
+          pose = pose * pose_parent_to_frame.inverse() * tip_parent_to_tip;
+          found_valid_frame = true;
+          break;
+        }
+      }
+      else
       {
         found_valid_frame = true;
         break;
-      }
-
-    }  // end for solver_tip_frames
+      }  // end if pose_frame
+    }    // end for solver_tip_frames
 
     // Make sure one of the tip frames worked
     if (!found_valid_frame)
