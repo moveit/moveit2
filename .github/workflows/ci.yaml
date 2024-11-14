@@ -19,7 +19,7 @@ jobs:
           - IMAGE: humble-ci
             CCOV: true
             ROS_DISTRO: humble
-          - IMAGE: humble-ci-testing
+          - IMAGE: humble-ci
             ROS_DISTRO: humble
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
