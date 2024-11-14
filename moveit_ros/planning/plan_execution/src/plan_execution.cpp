@@ -282,16 +282,17 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
     std::size_t wpc = t.getWayPointCount();
     collision_detection::CollisionRequest req;
     req.group_name = t.getGroupName();
+    req.use_padded_collision_environment = false;
     for (std::size_t i = std::max(path_segment.second - 1, 0); i < wpc; ++i)
     {
       collision_detection::CollisionResult res;
       if (acm)
       {
-        plan.planning_scene->checkCollisionUnpadded(req, res, t.getWayPoint(i), *acm);
+        plan.planning_scene->checkCollision(req, res, t.getWayPoint(i), *acm);
       }
       else
       {
-        plan.planning_scene->checkCollisionUnpadded(req, res, t.getWayPoint(i));
+        plan.planning_scene->checkCollision(req, res, t.getWayPoint(i));
       }
 
       if (res.collision || !plan.planning_scene->isStateFeasible(t.getWayPoint(i), false))
@@ -306,11 +307,11 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
         res.clear();
         if (acm)
         {
-          plan.planning_scene->checkCollisionUnpadded(req, res, t.getWayPoint(i), *acm);
+          plan.planning_scene->checkCollision(req, res, t.getWayPoint(i), *acm);
         }
         else
         {
-          plan.planning_scene->checkCollisionUnpadded(req, res, t.getWayPoint(i));
+          plan.planning_scene->checkCollision(req, res, t.getWayPoint(i));
         }
         return false;
       }

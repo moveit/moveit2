@@ -347,19 +347,12 @@ public:
   void checkCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res);
 
   /** \brief Check whether the current state is in collision. The current state is expected to be updated. */
-  void checkCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res) const
-  {
-    checkCollision(req, res, getCurrentState());
-  }
+  void checkCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in collision. This variant of the function takes
       a non-const \e robot_state and calls updateCollisionBodyTransforms() on it. */
   void checkCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
-                      moveit::core::RobotState& robot_state) const
-  {
-    robot_state.updateCollisionBodyTransforms();
-    checkCollision(req, res, static_cast<const moveit::core::RobotState&>(robot_state));
-  }
+                      moveit::core::RobotState& robot_state) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in collision. The collision transforms of \e
    * robot_state are
@@ -372,114 +365,80 @@ public:
       a non-const \e robot_state and updates its link transforms if needed. */
   void checkCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                       moveit::core::RobotState& robot_state,
-                      const collision_detection::AllowedCollisionMatrix& acm) const
-  {
-    robot_state.updateCollisionBodyTransforms();
-    checkCollision(req, res, static_cast<const moveit::core::RobotState&>(robot_state), acm);
-  }
+                      const collision_detection::AllowedCollisionMatrix& acm) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in collision, with respect to a given
       allowed collision matrix (\e acm). */
   void checkCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                       const moveit::core::RobotState& robot_state,
-                      const collision_detection::AllowedCollisionMatrix& acm) const;
+                      const collision_detection::AllowedCollisionMatrix& acm, bool validate_transforms = true) const;
 
   /** \brief Check whether the current state is in collision,
       but use a collision_detection::CollisionRobot instance that has no padding.
       Since the function is non-const, the current state transforms are also updated if needed. */
-  void checkCollisionUnpadded(const collision_detection::CollisionRequest& req,
-                              collision_detection::CollisionResult& res);
+  [[deprecated("Use new CollisionRequest flags to enable/ disable padding instead.")]] void
+  checkCollisionUnpadded(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res);
 
   /** \brief Check whether the current state is in collision,
       but use a collision_detection::CollisionRobot instance that has no padding.  */
-  void checkCollisionUnpadded(const collision_detection::CollisionRequest& req,
-                              collision_detection::CollisionResult& res) const
-  {
-    checkCollisionUnpadded(req, res, getCurrentState(), getAllowedCollisionMatrix());
-  }
+  [[deprecated("Use new CollisionRequest flags to enable/ disable padding instead.")]] void
+  checkCollisionUnpadded(const collision_detection::CollisionRequest& req,
+                         collision_detection::CollisionResult& res) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in collision,
       but use a collision_detection::CollisionRobot instance that has no padding.  */
-  void checkCollisionUnpadded(const collision_detection::CollisionRequest& req,
-                              collision_detection::CollisionResult& res,
-                              const moveit::core::RobotState& robot_state) const
-  {
-    checkCollisionUnpadded(req, res, robot_state, getAllowedCollisionMatrix());
-  }
+  [[deprecated("Use new CollisionRequest flags to enable/ disable padding instead.")]] void
+  checkCollisionUnpadded(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
+                         const moveit::core::RobotState& robot_state) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in collision,
       but use a collision_detection::CollisionRobot instance that has no padding.
       Update the link transforms of \e robot_state if needed. */
-  void checkCollisionUnpadded(const collision_detection::CollisionRequest& req,
-                              collision_detection::CollisionResult& res, moveit::core::RobotState& robot_state) const
-  {
-    robot_state.updateCollisionBodyTransforms();
-    checkCollisionUnpadded(req, res, static_cast<const moveit::core::RobotState&>(robot_state),
-                           getAllowedCollisionMatrix());
-  }
+  [[deprecated("Use new CollisionRequest flags to enable/ disable padding instead.")]] void
+  checkCollisionUnpadded(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
+                         moveit::core::RobotState& robot_state) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in collision, with respect to a given
       allowed collision matrix (\e acm), but use a collision_detection::CollisionRobot instance that has no padding.
       This variant of the function takes a non-const \e robot_state and calls updates the link transforms if needed. */
-  void checkCollisionUnpadded(const collision_detection::CollisionRequest& req,
-                              collision_detection::CollisionResult& res, moveit::core::RobotState& robot_state,
-                              const collision_detection::AllowedCollisionMatrix& acm) const
-  {
-    robot_state.updateCollisionBodyTransforms();
-    checkCollisionUnpadded(req, res, static_cast<const moveit::core::RobotState&>(robot_state), acm);
-  }
+  [[deprecated("Use new CollisionRequest flags to enable/ disable padding instead.")]] void
+  checkCollisionUnpadded(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
+                         moveit::core::RobotState& robot_state,
+                         const collision_detection::AllowedCollisionMatrix& acm) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in collision, with respect to a given
       allowed collision matrix (\e acm), but use a collision_detection::CollisionRobot instance that has no padding.  */
-  void checkCollisionUnpadded(const collision_detection::CollisionRequest& req,
-                              collision_detection::CollisionResult& res, const moveit::core::RobotState& robot_state,
-                              const collision_detection::AllowedCollisionMatrix& acm) const;
+  [[deprecated("Use new CollisionRequest flags to enable/ disable padding instead.")]] void
+  checkCollisionUnpadded(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
+                         const moveit::core::RobotState& robot_state,
+                         const collision_detection::AllowedCollisionMatrix& acm) const;
 
   /** \brief Check whether the current state is in self collision */
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res);
 
   /** \brief Check whether the current state is in self collision */
   void checkSelfCollision(const collision_detection::CollisionRequest& req,
-                          collision_detection::CollisionResult& res) const
-  {
-    checkSelfCollision(req, res, getCurrentState());
-  }
+                          collision_detection::CollisionResult& res) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in self collision */
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
-                          moveit::core::RobotState& robot_state) const
-  {
-    robot_state.updateCollisionBodyTransforms();
-    checkSelfCollision(req, res, static_cast<const moveit::core::RobotState&>(robot_state), getAllowedCollisionMatrix());
-  }
+                          moveit::core::RobotState& robot_state) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in self collision */
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
-                          const moveit::core::RobotState& robot_state) const
-  {
-    // do self-collision checking with the unpadded version of the robot
-    getCollisionEnvUnpadded()->checkSelfCollision(req, res, robot_state, getAllowedCollisionMatrix());
-  }
+                          const moveit::core::RobotState& robot_state) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in self collision, with respect to a given
       allowed collision matrix (\e acm). The link transforms of \e robot_state are updated if needed. */
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                           moveit::core::RobotState& robot_state,
-                          const collision_detection::AllowedCollisionMatrix& acm) const
-  {
-    robot_state.updateCollisionBodyTransforms();
-    checkSelfCollision(req, res, static_cast<const moveit::core::RobotState&>(robot_state), acm);
-  }
+                          const collision_detection::AllowedCollisionMatrix& acm) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in self collision, with respect to a given
       allowed collision matrix (\e acm) */
   void checkSelfCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                           const moveit::core::RobotState& robot_state,
-                          const collision_detection::AllowedCollisionMatrix& acm) const
-  {
-    // do self-collision checking with the unpadded version of the robot
-    getCollisionEnvUnpadded()->checkSelfCollision(req, res, robot_state, acm);
-  }
+                          const collision_detection::AllowedCollisionMatrix& acm) const;
 
   /** \brief Get the names of the links that are involved in collisions for the current state */
   void getCollidingLinks(std::vector<std::string>& links);
