@@ -425,7 +425,7 @@ void PlanningScene::checkCollision(const collision_detection::CollisionRequest& 
   {
     robot_state.updateCollisionBodyTransforms();
   }
-  checkCollision(req, res, robot_state, acm);
+  checkCollision(req, res, static_cast<const moveit::core::RobotState&>(robot_state), acm);
 }
 
 void PlanningScene::checkCollision(const collision_detection::CollisionRequest& req,
