@@ -360,7 +360,8 @@ void initPlanningScene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&>(
                &planning_scene::PlanningScene::checkCollisionUnpadded),
@@ -410,7 +411,7 @@ void initPlanningScene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
+#pragma GCC diagnostic pop
       .def("check_self_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&>(
                &planning_scene::PlanningScene::checkSelfCollision),
