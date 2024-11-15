@@ -431,14 +431,8 @@ void PlanningScene::checkCollision(const collision_detection::CollisionRequest& 
 void PlanningScene::checkCollision(const collision_detection::CollisionRequest& req,
                                    collision_detection::CollisionResult& res,
                                    const moveit::core::RobotState& robot_state,
-                                   const collision_detection::AllowedCollisionMatrix& acm,
-                                   bool validate_transforms) const
+                                   const collision_detection::AllowedCollisionMatrix& acm) const
 {
-  if (validate_transforms && robot_state.dirtyCollisionBodyTransforms())
-  {
-    RCLCPP_WARN(getLogger(), "Robot state has dirty collision body transforms. Please update the collision body "
-                             "transforms before checking collision.");
-  }
   // check collision with the world using the padded version
   req.pad_environment_collisions ? getCollisionEnv()->checkRobotCollision(req, res, robot_state, acm) :
                                    getCollisionEnvUnpadded()->checkRobotCollision(req, res, robot_state, acm);
