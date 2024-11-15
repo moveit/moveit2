@@ -359,7 +359,7 @@ void PlanningSceneDisplay::renderPlanningScene()
   Ogre::ColourValue env_color(color.redF(), color.greenF(), color.blueF(), scene_alpha_property_->getFloat());
   if (attached_body_color_property_)
     color = attached_body_color_property_->getColor();
-  Ogre::ColourValue attached_color(color.redF(), color.greenF(), color.blueF(), color.alphaF());
+  Ogre::ColourValue attached_color(color.redF(), color.greenF(), color.blueF(), robot_alpha_property_->getFloat());
 
   try
   {
