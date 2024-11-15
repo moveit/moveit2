@@ -17,6 +17,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <rclcpp/version.h>
 
 #include <geometry_msgs/msg/point.hpp>
 #include <moveit/trajectory_cache/utils/utils.hpp>
