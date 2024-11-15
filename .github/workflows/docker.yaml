@@ -30,6 +30,16 @@ jobs:
       PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
+      - uses: rhaschke/docker-run-action@v5
+        name: Check for apt updates
+        continue-on-error: true
+        id: apt
+        with:
+          image: ${{ env.IMAGE }}
+          run: |
+            apt-get update
+            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
+            echo "no_cache=$have_updates" >> "$GITHUB_OUTPUT"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to Github Container Registry
@@ -46,12 +56,14 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: ${{ env.PUSH }}
-          no-cache: true
+          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
+          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
+          cache-to: type=inline
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -71,6 +83,16 @@ jobs:
       PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
 
     steps:
+      - uses: rhaschke/docker-run-action@v5
+        name: Check for apt updates
+        continue-on-error: true
+        id: apt
+        with:
+          image: ${{ env.IMAGE }}
+          run: |
+            apt-get update
+            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
+            echo "no_cache=$have_updates" >> "$GITHUB_OUTPUT"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to Github Container Registry
@@ -87,15 +109,19 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and Push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: ${{ env.PUSH }}
-          no-cache: true
+          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
+          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
+          cache-to: type=inline
           tags: |
             ${{ env.GH_IMAGE }}
+            ${{ env.GH_IMAGE }}-testing
             ${{ env.DH_IMAGE }}
+            ${{ env.DH_IMAGE }}-testing
 
   source:
     needs: ci
