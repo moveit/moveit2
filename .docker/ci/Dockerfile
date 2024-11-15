@@ -20,7 +20,7 @@ COPY . src/moveit2
 RUN \
     # Update apt package list as previous containers clear the cache
     apt-get -q update && \
-    apt-get -q -y upgrade --with-new-pkgs && \
+    apt-get -q -y upgrade && \
     #
     # Install some base dependencies
     apt-get -q install --no-install-recommends -y \
