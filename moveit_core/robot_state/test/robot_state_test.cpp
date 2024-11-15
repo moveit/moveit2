@@ -792,9 +792,6 @@ TEST_F(OneRobot, rigidlyConnectedParent)
       EigenSTL::vector_Isometry3d{}, std::set<std::string>{}, trajectory_msgs::msg::JointTrajectory{},
       moveit::core::FixedTransformsMap{ { "subframe", Eigen::Isometry3d::Identity() } }));
 
-  // This may be redundant
-  state.updateLinkTransforms();
-
   // RobotState's version should resolve these too
   EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object"));
   EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object/subframe"));
