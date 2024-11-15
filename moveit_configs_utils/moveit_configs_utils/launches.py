@@ -59,6 +59,7 @@ def generate_moveit_rviz_launch(moveit_config):
     rviz_parameters = [
         moveit_config.planning_pipelines,
         moveit_config.robot_description_kinematics,
+        moveit_config.joint_limits,
     ]
 
     add_debuggable_node(
