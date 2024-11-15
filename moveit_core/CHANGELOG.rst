@@ -1,6 +1,10 @@
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.12.0 (202X-XX-XX)
+-------------------
+* Add flags to control padding to CollisionRequest and deprecate PlanningScene::checkCollisionUnpadded(..) functions
+
 
 2.11.0 (2024-09-16)
 -------------------
