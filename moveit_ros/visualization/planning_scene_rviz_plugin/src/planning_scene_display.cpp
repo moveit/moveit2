@@ -356,10 +356,10 @@ void PlanningSceneDisplay::changedSceneName()
 void PlanningSceneDisplay::renderPlanningScene()
 {
   QColor color = scene_color_property_->getColor();
-  Ogre::ColourValue env_color(color.redF(), color.greenF(), color.blueF());
+  Ogre::ColourValue env_color(color.redF(), color.greenF(), color.blueF(), scene_alpha_property_->getFloat());
   if (attached_body_color_property_)
     color = attached_body_color_property_->getColor();
-  Ogre::ColourValue attached_color(color.redF(), color.greenF(), color.blueF());
+  Ogre::ColourValue attached_color(color.redF(), color.greenF(), color.blueF(), color.alphaF());
 
   try
   {
