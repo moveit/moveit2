@@ -58,7 +58,7 @@ repos:
     hooks:
       - id: cmake-format
       - id: cmake-lint
-        args: [--line-width  220, 
+        args: [--line-width  220,
                --disabled-codes=C0307,
                --suppress-decorations
               ]
