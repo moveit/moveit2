@@ -1010,7 +1010,7 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
 
       // compute correctness and clearance
       collision_detection::CollisionRequest req;
-      req.use_padded_collision_environment = false;
+      req.pad_environment_collisions = false;
       for (std::size_t k = 0; k < p.getWayPointCount(); ++k)
       {
         collision_detection::CollisionResult res;

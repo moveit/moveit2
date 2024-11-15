@@ -368,7 +368,7 @@ public:
                       const collision_detection::AllowedCollisionMatrix& acm) const;
 
   /** \brief Check whether a specified state (\e robot_state) is in collision, with respect to a given
-      allowed collision matrix (\e acm). */
+      allowed collision matrix (\e acm). If validate_transforms is set true, the given robot state is checked for dirty transforms. */
   void checkCollision(const collision_detection::CollisionRequest& req, collision_detection::CollisionResult& res,
                       const moveit::core::RobotState& robot_state,
                       const collision_detection::AllowedCollisionMatrix& acm, bool validate_transforms = true) const;
