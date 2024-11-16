@@ -158,13 +158,14 @@ jobs:
       - name: "Remove .dockerignore"
         run: rm .dockerignore  # enforce full source context
       - name: Build and Push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: ${{ env.PUSH }}
-          no-cache: true
+          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
+          cache-to: type=inline
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -177,7 +178,7 @@ jobs:
     steps:
       - name: Delete Untagged Images
         if: (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2')
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
           script: |
