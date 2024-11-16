@@ -176,7 +176,7 @@ jobs:
       - source
     steps:
       - name: Delete Untagged Images
-        if: (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2')
+        if: (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2')
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
@@ -192,6 +192,6 @@ jobs:
                 }
             }
         env:
-          OWNER: ros-planning
+          OWNER: moveit
           PACKAGE_NAME: moveit2
           PER_PAGE: 100
