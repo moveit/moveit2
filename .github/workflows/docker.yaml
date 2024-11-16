@@ -78,9 +78,9 @@ jobs:
       packages: write
       contents: read
     env:
-      GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      GH_IMAGE: ghcr.io/moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
 
     steps:
       - uses: rhaschke/docker-run-action@v5
@@ -134,9 +134,9 @@ jobs:
       packages: write
       contents: read
     env:
-      GH_IMAGE: ghcr.io/ros-planning/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      GH_IMAGE: ghcr.io/moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
       DH_IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2') }}
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -158,13 +158,14 @@ jobs:
       - name: "Remove .dockerignore"
         run: rm .dockerignore  # enforce full source context
       - name: Build and Push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: .docker/${{ github.job }}/Dockerfile
           build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
           push: ${{ env.PUSH }}
-          no-cache: true
+          cache-from: type=registry,ref=${{ env.GH_IMAGE }}
+          cache-to: type=inline
           tags: |
             ${{ env.GH_IMAGE }}
             ${{ env.DH_IMAGE }}
@@ -176,8 +177,8 @@ jobs:
       - source
     steps:
       - name: Delete Untagged Images
-        if: (github.event_name != 'pull_request') && (github.repository == 'ros-planning/moveit2')
-        uses: actions/github-script@v6
+        if: (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2')
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
           script: |
@@ -192,6 +193,6 @@ jobs:
                 }
             }
         env:
-          OWNER: ros-planning
+          OWNER: moveit
           PACKAGE_NAME: moveit2
           PER_PAGE: 100
