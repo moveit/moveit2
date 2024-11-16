@@ -137,7 +137,7 @@ void RobotStateVisualization::updateHelper(const moveit::core::RobotStateConstPt
       RCLCPP_ERROR_STREAM(LOGGER, "Link " << attached_body->getAttachedLinkName() << " not found in rviz::Robot");
       continue;
     }
-    Ogre::ColourValue rcolor(color.r, color.g, color.b);
+    Ogre::ColourValue rcolor(color.r, color.g, color.b, color.a);
     const EigenSTL::vector_Isometry3d& ab_t = attached_body->getShapePosesInLinkFrame();
     const std::vector<shapes::ShapeConstPtr>& ab_shapes = attached_body->getShapes();
     for (std::size_t j = 0; j < ab_shapes.size(); ++j)
