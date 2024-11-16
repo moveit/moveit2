@@ -691,6 +691,10 @@ TEST_F(OneRobot, rigidlyConnectedParent)
   EXPECT_EQ(robot_model_->getRigidlyConnectedParentLinkModel(link_b), link_a);
 
   moveit::core::RobotState state(robot_model_);
+<<<<<<< HEAD
+=======
+  state.setToDefaultValues();
+>>>>>>> f20265a5a (Fixes flaky RobotState test (#3105))
   state.updateLinkTransforms();
 
   EXPECT_EQ(state.getRigidlyConnectedParentLinkModel("link_b"), link_a);
