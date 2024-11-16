@@ -415,9 +415,10 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotStateWithIdentityColl
   const moveit::core::LinkModel* tip_link = robot_model_->getLinkModel(tcp_link_);
   Eigen::Isometry3d tip_pose_in_base = state.getFrameTransform(tcp_link_);
 
-  // Attach an object with no subframes, and no transform
+  // Attach an object with ignored subframes, and no transform
   Eigen::Isometry3d object_pose_in_tip = Eigen::Isometry3d::Identity();
-  attachToLink(state, tip_link, "object", object_pose_in_tip, { {} });
+  moveit::core::FixedTransformsMap subframes({ { "ignored", Eigen::Isometry3d::Identity() } });
+  attachToLink(state, tip_link, "object", object_pose_in_tip, subframes);
 
   // The RobotState should be able to use an object pose to set the joints
   Eigen::Isometry3d object_pose_in_base = tip_pose_in_base * object_pose_in_tip;
@@ -440,12 +441,12 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotStateWithTransformedC
   const moveit::core::LinkModel* tip_link = robot_model_->getLinkModel(tcp_link_);
   Eigen::Isometry3d tip_pose_in_base = state.getFrameTransform(tcp_link_);
 
-  // Attach an object with no subframes, and a non-trivial transform
+  // Attach an object with ignored subframes, and a non-trivial transform
   Eigen::Isometry3d object_pose_in_tip;
   object_pose_in_tip = Eigen::Translation3d(1, 2, 3);
   object_pose_in_tip *= Eigen::AngleAxis(M_PI_2, Eigen::Vector3d::UnitX());
-
-  attachToLink(state, tip_link, "object", object_pose_in_tip, { {} });
+  moveit::core::FixedTransformsMap subframes({ { "ignored", Eigen::Isometry3d::Identity() } });
+  attachToLink(state, tip_link, "object", object_pose_in_tip, subframes);
 
   // The RobotState should be able to use an object pose to set the joints
   Eigen::Isometry3d object_pose_in_base = tip_pose_in_base * object_pose_in_tip;
