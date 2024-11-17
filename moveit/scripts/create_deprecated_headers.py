@@ -37,12 +37,14 @@ MOVEIT_HPPS = "**/moveit*/**/*.hpp"
 USAGE = "Usage: ./generate_deprecated_headers <install_directory>"
 DEPRECATION = "{0}.h imports are deprecated. Consider using {0}.hpp"
 
+
 def create_c_header(hpp_path: str) -> None:
     header_directory = hpp_path.parent
     file = hpp_path.name.replace(".hpp", "")
-    with open(header_directory/f"{file}.h", "w") as h_file:
+    with open(header_directory / f"{file}.h", "w") as h_file:
         h_file.write(f"#warning {DEPRECATION.format(file)}\n")
         h_file.write(f"#include <{file}.hpp>\n")
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
