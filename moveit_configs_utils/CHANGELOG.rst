@@ -2,8 +2,8 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2024-11-17)
+------------------
 * fix move_group_capabilities usage (`#3018 <https://github.com/ros-planning/moveit2/issues/3018>`_) (`#3033 <https://github.com/ros-planning/moveit2/issues/3033>`_)
 * Backport of `#2172 <https://github.com/ros-planning/moveit2/issues/2172>`_ and `#2684 <https://github.com/ros-planning/moveit2/issues/2684>`_ into Humble (`#2779 <https://github.com/ros-planning/moveit2/issues/2779>`_)
 * Use different packages for launch and config packages in generate_demo_launch (backport `#2647 <https://github.com/ros-planning/moveit2/issues/2647>`_) (`#2650 <https://github.com/ros-planning/moveit2/issues/2650>`_)

@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2024-11-17)
+------------------
 * PSM: keep references to scene\_ valid upon receiving full scenes (`#2850 <https://github.com/ros-planning/moveit2/issues/2850>`_)
 * Protect against zero frequency in TrajectoryMonitorMiddlewareHandler (`#2423 <https://github.com/ros-planning/moveit2/issues/2423>`_) (`#2424 <https://github.com/ros-planning/moveit2/issues/2424>`_)
 * Re-enable waiting for current state in MoveItCpp (`#2419 <https://github.com/ros-planning/moveit2/issues/2419>`_) (`#2426 <https://github.com/ros-planning/moveit2/issues/2426>`_)

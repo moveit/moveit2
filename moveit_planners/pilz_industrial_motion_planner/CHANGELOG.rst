@@ -2,8 +2,8 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2024-11-17)
+------------------
 * Allow RobotState::setFromIK to work with subframes (backport `#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_) (`#3085 <https://github.com/ros-planning/moveit2/issues/3085>`_)
 * Enhancement/ports moveit 3522 (backport `#3070 <https://github.com/ros-planning/moveit2/issues/3070>`_) (`#3074 <https://github.com/ros-planning/moveit2/issues/3074>`_)
 * Ports moveit/moveit/pull/3519 to ros2 (backport `#3055 <https://github.com/ros-planning/moveit2/issues/3055>`_) (`#3061 <https://github.com/ros-planning/moveit2/issues/3061>`_)

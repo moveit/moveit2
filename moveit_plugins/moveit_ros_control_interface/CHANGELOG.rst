@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2024-11-17)
+------------------
 * Use the non-deprecated service fields for switching controllers (`#2927 <https://github.com/ros-planning/moveit2/issues/2927>`_)
 * Contributors: Sai Kishor Kothakota
 

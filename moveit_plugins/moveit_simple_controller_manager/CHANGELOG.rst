@@ -2,8 +2,8 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2024-11-17)
+------------------
 * Become standard-compatible (`#2895 <https://github.com/ros-planning/moveit2/issues/2895>`_)
 * Contributors: Tobias Fischer
 

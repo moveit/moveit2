@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2024-11-17)
+------------------
 * Attached Collision Object Transparency (`#3093 <https://github.com/ros-planning/moveit2/issues/3093>`_) (`#3099 <https://github.com/ros-planning/moveit2/issues/3099>`_)
 * fix for not having transparency in collision scenes on rviz, backporting the fix to humble (`#2929 <https://github.com/ros-planning/moveit2/issues/2929>`_)
 * Check valid interactive marker pointer before trying to update pose (`#1581 <https://github.com/ros-planning/moveit2/issues/1581>`_) (`#2366 <https://github.com/ros-planning/moveit2/issues/2366>`_)

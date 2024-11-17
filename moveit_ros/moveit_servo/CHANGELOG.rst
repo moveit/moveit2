@@ -2,8 +2,8 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2024-11-17)
+------------------
 * Make `moveit_servo` listen to Octomap updates (backport `#2601 <https://github.com/ros-planning/moveit2/issues/2601>`_) (`#2606 <https://github.com/ros-planning/moveit2/issues/2606>`_)
 * Use ACM in all MoveIt Servo collision checks (`#2643 <https://github.com/ros-planning/moveit2/issues/2643>`_)
 * Contributors: Amal Nanavati, Sebastian Castro, mergify[bot]

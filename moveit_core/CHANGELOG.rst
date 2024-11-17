@@ -2,8 +2,8 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.6 (2024-11-17)
+------------------
 * Allow RobotState::setFromIK to work with subframes (backport `#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_) (`#3085 <https://github.com/ros-planning/moveit2/issues/3085>`_)
 * Fixes flaky RobotState test (backport `#3105 <https://github.com/ros-planning/moveit2/issues/3105>`_) (`#3107 <https://github.com/ros-planning/moveit2/issues/3107>`_)
 * Fix flipped comments in `joint_model.h` (`#3047 <https://github.com/ros-planning/moveit2/issues/3047>`_) (`#3049 <https://github.com/ros-planning/moveit2/issues/3049>`_)
