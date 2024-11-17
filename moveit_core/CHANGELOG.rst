@@ -2,6 +2,21 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Allow RobotState::setFromIK to work with subframes (backport `#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_) (`#3085 <https://github.com/ros-planning/moveit2/issues/3085>`_)
+* Fixes flaky RobotState test (backport `#3105 <https://github.com/ros-planning/moveit2/issues/3105>`_) (`#3107 <https://github.com/ros-planning/moveit2/issues/3107>`_)
+* Fix flipped comments in `joint_model.h` (`#3047 <https://github.com/ros-planning/moveit2/issues/3047>`_) (`#3049 <https://github.com/ros-planning/moveit2/issues/3049>`_)
+* Fix RobotState::getRigidlyConnectedParentLinkModel() (`#2985 <https://github.com/ros-planning/moveit2/issues/2985>`_, `#2993 <https://github.com/ros-planning/moveit2/issues/2993>`_)
+* Backport to Humble: Pass more distance information out from FCL collision check `#2572 <https://github.com/ros-planning/moveit2/issues/2572>`_ (`#2979 <https://github.com/ros-planning/moveit2/issues/2979>`_)
+* Fix doc reference to non-existent function (`#2765 <https://github.com/ros-planning/moveit2/issues/2765>`_) (`#2766 <https://github.com/ros-planning/moveit2/issues/2766>`_)
+* Update moveit::core::error_msg_to_string (`#2689 <https://github.com/ros-planning/moveit2/issues/2689>`_)
+* [TOTG] Exit loop when position can't change (backport `#2307 <https://github.com/ros-planning/moveit2/issues/2307>`_) (`#2646 <https://github.com/ros-planning/moveit2/issues/2646>`_)
+* Fix angular distance calculation in floating joint model (backport `#2538 <https://github.com/ros-planning/moveit2/issues/2538>`_) (`#2543 <https://github.com/ros-planning/moveit2/issues/2543>`_)
+* Change `collision_detection_bullet` install path back to `include/moveit` (`#2403 <https://github.com/ros-planning/moveit2/issues/2403>`_)
+* Use find_package for fcl (backport `#2399 <https://github.com/ros-planning/moveit2/issues/2399>`_) (`#2400 <https://github.com/ros-planning/moveit2/issues/2400>`_)
+* Contributors: Chris Schindlbeck, Gabriel Pacheco, Nacho Mellado, Tom Noble, Sebastian Castro, reidchristopher, Robert Haschke, Henning Kayser, Tyler Weaver, mergify[bot]
+
 2.5.5 (2023-09-10)
 ------------------
 * Don't use ament_export_targets from package sub folder (backport `#1889 <https://github.com/ros-planning/moveit2/issues/1889>`_) (`#1893 <https://github.com/ros-planning/moveit2/issues/1893>`_)

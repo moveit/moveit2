@@ -2,6 +2,11 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Become standard-compatible (`#2895 <https://github.com/ros-planning/moveit2/issues/2895>`_)
+* Contributors: Tobias Fischer
+
 2.5.5 (2023-09-10)
 ------------------
 * Use emulated time in action-based controller (`#899 <https://github.com/ros-planning/moveit2/issues/899>`_) (`#1743 <https://github.com/ros-planning/moveit2/issues/1743>`_)

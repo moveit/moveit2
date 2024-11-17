@@ -2,6 +2,12 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Cast of "max_velocity" and "max_acceleration" values to double (`#2803 <https://github.com/ros-planning/moveit2/issues/2803>`_) (`#3038 <https://github.com/ros-planning/moveit2/issues/3038>`_)
+* Fix `#1971 <https://github.com/ros-planning/moveit2/issues/1971>`_ (`#2428 <https://github.com/ros-planning/moveit2/issues/2428>`_) (`#2430 <https://github.com/ros-planning/moveit2/issues/2430>`_)
+* Contributors: Michael Ferguson, Jorge Pérez Ramos, David V. Lu!!, mergify[bot]
+
 2.5.5 (2023-09-10)
 ------------------
 * Fix clang compiler warnings (backport of `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_) (`#1896 <https://github.com/ros-planning/moveit2/issues/1896>`_)

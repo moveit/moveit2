@@ -2,6 +2,9 @@
 Changelog for package moveit_setup_assistant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.5 (2023-09-10)
 ------------------
 * Use <> for non-local headers (`#1765 <https://github.com/ros-planning/moveit2/issues/1765>`_)

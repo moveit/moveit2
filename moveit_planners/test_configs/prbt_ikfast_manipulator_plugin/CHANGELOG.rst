@@ -2,6 +2,11 @@
 Changelog for package moveit_resources_prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* PRBT IkFast patch from robostack (`#2395 <https://github.com/ros-planning/moveit2/issues/2395>`_) (`#2397 <https://github.com/ros-planning/moveit2/issues/2397>`_)
+* Contributors: Tyler Weaver, mergify[bot]
+
 2.5.5 (2023-09-10)
 ------------------
 * Used C++ style casting for int type (backport `#1627 <https://github.com/ros-planning/moveit2/issues/1627>`_) (`#1819 <https://github.com/ros-planning/moveit2/issues/1819>`_)

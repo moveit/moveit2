@@ -2,6 +2,15 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Allow RobotState::setFromIK to work with subframes (backport `#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_) (`#3085 <https://github.com/ros-planning/moveit2/issues/3085>`_)
+* Enhancement/ports moveit 3522 (backport `#3070 <https://github.com/ros-planning/moveit2/issues/3070>`_) (`#3074 <https://github.com/ros-planning/moveit2/issues/3074>`_)
+* Ports moveit/moveit/pull/3519 to ros2 (backport `#3055 <https://github.com/ros-planning/moveit2/issues/3055>`_) (`#3061 <https://github.com/ros-planning/moveit2/issues/3061>`_)
+* Fix Pilz blending times (backport `#2961 <https://github.com/ros-planning/moveit2/issues/2961>`_) (`#3000 <https://github.com/ros-planning/moveit2/issues/3000>`_)
+* PILZ: Throw if IK solver doesn't exist (`#2082 <https://github.com/ros-planning/moveit2/issues/2082>`_) (`#2921 <https://github.com/ros-planning/moveit2/issues/2921>`_)
+* Contributors: Tom Noble, Sebastian Castro, Sebastian Jahr, Robert Haschke, mergify[bot]
+
 2.5.5 (2023-09-10)
 ------------------
 * Pilz multi-group incompatibility (`#1856 <https://github.com/ros-planning/moveit2/issues/1856>`_) (`#2306 <https://github.com/ros-planning/moveit2/issues/2306>`_)
