@@ -53,7 +53,7 @@
 #include <QInputDialog>
 #include <QFileDialog>
 
-#include "ui_motion_planning_rviz_plugin_frame.hpp"
+#include "ui_motion_planning_rviz_plugin_frame.h"
 
 namespace
 {

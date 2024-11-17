@@ -67,7 +67,7 @@
 
 #include <QShortcut>
 
-#include "ui_motion_planning_rviz_plugin_frame.hpp"
+#include "ui_motion_planning_rviz_plugin_frame.h"
 #include <moveit/utils/rclcpp_utils.hpp>
 #include <moveit/utils/logger.hpp>
 

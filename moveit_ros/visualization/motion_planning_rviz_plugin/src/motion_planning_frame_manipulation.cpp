@@ -43,7 +43,7 @@
 
 #include <tf2_eigen/tf2_eigen.hpp>
 
-#include "ui_motion_planning_rviz_plugin_frame.hpp"
+#include "ui_motion_planning_rviz_plugin_frame.h"
 
 namespace moveit_rviz_plugin
 {

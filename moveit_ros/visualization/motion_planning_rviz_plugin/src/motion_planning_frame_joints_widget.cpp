@@ -37,7 +37,7 @@
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.hpp>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.hpp>
 
-#include "ui_motion_planning_rviz_plugin_frame_joints.hpp"
+#include "ui_motion_planning_rviz_plugin_frame_joints.h"
 #include <QPainter>
 #include <QSlider>
 #include <QEvent>
