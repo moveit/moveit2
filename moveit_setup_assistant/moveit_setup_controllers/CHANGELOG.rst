@@ -2,6 +2,19 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* Don't assume gripper controller for single joint control in MoveIt Setup Assistant (backport `#2555 <https://github.com/ros-planning/moveit2/issues/2555>`_) (`#2559 <https://github.com/ros-planning/moveit2/issues/2559>`_)
+  * For single joint controllers which are not gripper controllers, still output joints list
+  * Use OR
+  * Only check for GripperActionController
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  (cherry picked from commit 81094a63898ace7829687d2d6aa3ccb3cdd81b58)
+  Co-authored-by: Forrest Rogers-Marcovitz <39061824+forrest-rm@users.noreply.github.com>
+* Contributors: Forrest Rogers-Marcovitz, mergify[bot]
+
 2.5.5 (2023-09-10)
 ------------------
 * add missing dependencies on config utils (backport `#1962 <https://github.com/ros-planning/moveit2/issues/1962>`_) (`#2206 <https://github.com/ros-planning/moveit2/issues/2206>`_)

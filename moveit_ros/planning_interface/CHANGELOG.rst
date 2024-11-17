@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+
 2.5.5 (2023-09-10)
 ------------------
 * 400% speed up to move group interface (`#1865 <https://github.com/ros-planning/moveit2/issues/1865>`_) (`#1867 <https://github.com/ros-planning/moveit2/issues/1867>`_)

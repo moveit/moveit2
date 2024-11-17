@@ -2,6 +2,11 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* CI: Fix building of ikfast plugins (`#2791 <https://github.com/ros-planning/moveit2/issues/2791>`_)
+* Contributors: Robert Haschke, mergify[bot]
+
 2.5.5 (2023-09-10)
 ------------------
 * Fix ikfast package template (`#2195 <https://github.com/ros-planning/moveit2/issues/2195>`_) (`#2199 <https://github.com/ros-planning/moveit2/issues/2199>`_)
