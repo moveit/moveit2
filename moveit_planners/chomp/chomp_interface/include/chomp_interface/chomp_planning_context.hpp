@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <chomp_interface/chomp_interface.h>
+#include <chomp_interface/chomp_interface.hpp>
 #include <moveit/planning_interface/planning_interface.hpp>
 
 #include <rclcpp/rclcpp.hpp>
