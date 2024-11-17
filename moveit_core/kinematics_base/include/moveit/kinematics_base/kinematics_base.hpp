@@ -45,7 +45,7 @@
 #include <functional>
 #include <moveit/utils/logger.hpp>
 
-#include <moveit_kinematics_base_export.hpp>
+#include <moveit_kinematics_base_export.h>
 
 namespace moveit
 {

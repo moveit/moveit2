@@ -52,7 +52,7 @@
 #include <mutex>
 #include <thread>
 
-#include <moveit_planning_scene_monitor_export.hpp>
+#include <moveit_planning_scene_monitor_export.h>
 
 namespace planning_scene_monitor
 {

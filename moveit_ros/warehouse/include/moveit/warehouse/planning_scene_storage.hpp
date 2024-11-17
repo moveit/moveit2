@@ -43,7 +43,7 @@
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <rclcpp/logger.hpp>
 
-#include <moveit_warehouse_export.hpp>
+#include <moveit_warehouse_export.h>
 
 namespace moveit_warehouse
 {

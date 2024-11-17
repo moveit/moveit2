@@ -43,7 +43,7 @@
 #include <moveit/robot_state/conversions.hpp>
 #include <moveit/utils/robot_model_test_utils.hpp>
 
-#include <geometric_shapes/shape_operations.hpp>
+#include <geometric_shapes/shape_operations.h>
 #include <visualization_msgs/msg/marker_array.hpp>
 
 #include <gmock/gmock.h>

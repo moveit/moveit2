@@ -41,8 +41,8 @@
 #include <moveit/collision_detection/collision_env.hpp>
 #include <moveit/collision_detection/collision_detector_allocator.hpp>
 
-#include <urdf_parser/urdf_parser.hpp>
-#include <geometric_shapes/shape_operations.hpp>
+#include <urdf_parser/urdf_parser.h>
+#include <geometric_shapes/shape_operations.h>
 
 #include <gtest/gtest.h>
 #include <sstream>

@@ -48,7 +48,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/pipeline_state.hpp>
 #include <memory>
-#include <moveit_planning_pipeline_export.hpp>
+#include <moveit_planning_pipeline_export.h>
 #include <planning_pipeline_parameters.hpp>
 
 namespace planning_pipeline

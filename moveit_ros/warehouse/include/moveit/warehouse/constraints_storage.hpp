@@ -40,7 +40,7 @@
 #include <moveit/macros/class_forward.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
-#include <moveit_warehouse_export.hpp>
+#include <moveit_warehouse_export.h>
 
 #include <rclcpp/logger.hpp>
 

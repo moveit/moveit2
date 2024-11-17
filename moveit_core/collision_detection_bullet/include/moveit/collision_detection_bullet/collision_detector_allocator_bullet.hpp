@@ -39,7 +39,7 @@
 #include <moveit/collision_detection/collision_detector_allocator.hpp>
 #include <moveit/collision_detection_bullet/collision_env_bullet.hpp>
 
-#include <moveit_collision_detection_bullet_export.hpp>
+#include <moveit_collision_detection_bullet_export.h>
 
 namespace collision_detection
 {
