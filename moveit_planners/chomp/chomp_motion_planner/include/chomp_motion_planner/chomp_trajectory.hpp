@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <chomp_motion_planner/chomp_utils.h>
+#include <chomp_motion_planner/chomp_utils.hpp>
 #include <moveit/robot_model/robot_model.hpp>
 
 #include <eigen3/Eigen/Core>

@@ -34,9 +34,9 @@
 
 /* Author: E. Gil Jones */
 
-#include <chomp_motion_planner/chomp_optimizer.h>
-#include <chomp_motion_planner/chomp_planner.h>
-#include <chomp_motion_planner/chomp_trajectory.h>
+#include <chomp_motion_planner/chomp_optimizer.hpp>
+#include <chomp_motion_planner/chomp_planner.hpp>
+#include <chomp_motion_planner/chomp_trajectory.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_eigen/tf2_eigen.hpp>

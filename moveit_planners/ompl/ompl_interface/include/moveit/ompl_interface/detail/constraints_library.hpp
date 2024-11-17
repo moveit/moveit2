@@ -40,7 +40,7 @@
 #include <moveit/macros/class_forward.hpp>
 #include <moveit/ompl_interface/model_based_planning_context.hpp>
 #include <moveit/kinematic_constraints/kinematic_constraint.hpp>
-#include <ompl/base/StateStorage.hpp>
+#include <ompl/base/StateStorage.h>
 #include <boost/serialization/map.hpp>
 
 namespace ompl_interface

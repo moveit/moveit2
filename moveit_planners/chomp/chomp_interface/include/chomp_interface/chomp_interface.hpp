@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <chomp_motion_planner/chomp_parameters.h>
-#include <chomp_motion_planner/chomp_planner.h>
+#include <chomp_motion_planner/chomp_parameters.hpp>
+#include <chomp_motion_planner/chomp_planner.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 

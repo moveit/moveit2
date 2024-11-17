@@ -34,8 +34,8 @@
 
 /* Author: Mrinal Kalakrishnan */
 
-#include <chomp_motion_planner/chomp_optimizer.h>
-#include <chomp_motion_planner/chomp_utils.h>
+#include <chomp_motion_planner/chomp_optimizer.hpp>
+#include <chomp_motion_planner/chomp_utils.hpp>
 #include <moveit/planning_scene/planning_scene.hpp>
 #include <moveit/robot_model/robot_model.hpp>
 #include <moveit/robot_state/conversions.hpp>

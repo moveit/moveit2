@@ -38,7 +38,7 @@
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/utils/message_checks.hpp>
 #include <moveit/move_group/capability_names.hpp>
-#include <tf2_ros/transform_broadcaster.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/robot_state/attached_body.hpp>

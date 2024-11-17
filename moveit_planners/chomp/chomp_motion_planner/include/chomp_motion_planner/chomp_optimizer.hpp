@@ -36,10 +36,10 @@
 
 #pragma once
 
-#include <chomp_motion_planner/chomp_cost.h>
-#include <chomp_motion_planner/chomp_parameters.h>
-#include <chomp_motion_planner/chomp_trajectory.h>
-#include <chomp_motion_planner/multivariate_gaussian.h>
+#include <chomp_motion_planner/chomp_cost.hpp>
+#include <chomp_motion_planner/chomp_parameters.hpp>
+#include <chomp_motion_planner/chomp_trajectory.hpp>
+#include <chomp_motion_planner/multivariate_gaussian.hpp>
 #include <moveit/collision_distance_field/collision_env_hybrid.hpp>
 #include <moveit/planning_scene/planning_scene.hpp>
 #include <moveit/robot_model/robot_model.hpp>
