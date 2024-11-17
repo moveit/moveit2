@@ -22,11 +22,11 @@
 /// To compile without any main function as a shared object (might need -llapack):
 ///     gcc -fPIC -lstdc++ -DIKFAST_NO_MAIN -DIKFAST_CLIBRARY -shared -Wl,-soname,libik.so -o libik.so ik.cpp
 #define IKFAST_HAS_LIBRARY
-#include "ikfast.h" // found inside share/openrave-X.Y/python/ikfast.h
+#include "ikfast.hpp" // found inside share/openrave-X.Y/python/ikfast.hpp
 using namespace ikfast;
 
 // check if the included ikfast version matches what this file was compiled with
-static_assert(IKFAST_VERSION==61); // version found in ikfast.h
+static_assert(IKFAST_VERSION==61); // version found in ikfast.hpp
 
 #include <cmath>
 #include <vector>
