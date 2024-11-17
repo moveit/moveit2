@@ -251,7 +251,7 @@ def create_ikfast_package(args):
 
 def find_template_dir():
     for candidate in [os.path.dirname(__file__) + "/../templates"]:
-        if os.path.exists(candidate) and os.path.exists(candidate + "/ikfast.hpp"):
+        if os.path.exists(candidate) and os.path.exists(candidate + "/ikfast.h"):
             return os.path.realpath(candidate)
     try:
         return os.path.join(
@@ -303,8 +303,8 @@ def update_ikfast_package(args):
 
     # Copy ikfast header file
     copy_file(
-        template_dir + "/ikfast.hpp",
-        args.ikfast_plugin_pkg_path + "/include/ikfast.hpp",
+        template_dir + "/ikfast.h",
+        args.ikfast_plugin_pkg_path + "/include/ikfast.h",
         "ikfast header file",
     )
     # Create ikfast plugin template
