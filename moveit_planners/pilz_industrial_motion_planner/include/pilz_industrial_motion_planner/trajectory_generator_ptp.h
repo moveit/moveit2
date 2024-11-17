@@ -34,12 +34,12 @@
 
 #pragma once
 
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene/planning_scene.hpp>
 
 #include <eigen3/Eigen/Eigen>
-#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
-#include <pilz_industrial_motion_planner/trajectory_generator.h>
-#include <pilz_industrial_motion_planner/velocity_profile_atrap.h>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.pph>
+#include <pilz_industrial_motion_planner/trajectory_generator.hpp>
+#include <pilz_industrial_motion_planner/velocity_profile_atrap.hpp>
 
 namespace pilz_industrial_motion_planner
 {

@@ -34,7 +34,7 @@
 
 /* Author: Jafar Uruç */
 
-#include "world.h"
+#include "world.hpp"
 
 namespace moveit_py
 {

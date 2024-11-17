@@ -41,8 +41,8 @@
 
 #include <Eigen/Geometry>
 
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/kinematic_constraints/kinematic_constraint.hpp>
 
 #include <stomp_moveit/stomp_moveit_task.hpp>
 #include <stomp_moveit/conversion_functions.hpp>

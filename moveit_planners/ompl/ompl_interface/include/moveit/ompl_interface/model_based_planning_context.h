@@ -36,9 +36,9 @@
 
 #pragma once
 
-#include <moveit/ompl_interface/parameterization/model_based_state_space.h>
-#include <moveit/constraint_samplers/constraint_sampler_manager.h>
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/ompl_interface/parameterization/model_based_state_space.hpp>
+#include <moveit/constraint_samplers/constraint_sampler_manager.hpp>
+#include <moveit/planning_interface/planning_interface.hpp>
 
 #include <ompl/geometric/SimpleSetup.h>
 #include <ompl/tools/benchmark/Benchmark.h>

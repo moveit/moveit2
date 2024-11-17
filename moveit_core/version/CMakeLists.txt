@@ -23,12 +23,12 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_custom_target(
-  version_h
+  version_hpp
   DEPENDS always_rebuild
   COMMENT "Generating version.hpp")
 
 add_executable(moveit_version version.cpp)
-add_dependencies(moveit_version version_h)
+add_dependencies(moveit_version version_hpp)
 
 target_include_directories(moveit_version
                            PRIVATE ${CMAKE_BINARY_DIR}/include/moveit_core)

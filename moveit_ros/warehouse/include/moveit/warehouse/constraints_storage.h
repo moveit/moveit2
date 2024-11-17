@@ -36,11 +36,11 @@
 
 #pragma once
 
-#include <moveit/warehouse/moveit_message_storage.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/warehouse/moveit_message_storage.hpp>
+#include <moveit/macros/class_forward.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
-#include <moveit_warehouse_export.h>
+#include <moveit_warehouse_export.hpp>
 
 #include <rclcpp/logger.hpp>
 

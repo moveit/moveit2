@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/collision_detection/occupancy_map.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
+#include <moveit/collision_detection/occupancy_map.hpp>
+#include <moveit/occupancy_map_monitor/occupancy_map_updater.hpp>
 #include <moveit_msgs/srv/load_map.hpp>
 #include <moveit_msgs/srv/save_map.hpp>
 

@@ -38,9 +38,9 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/utils/moveit_error_code.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 

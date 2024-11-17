@@ -36,9 +36,9 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/kinematics_base/kinematics_base.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/kinematics_base/kinematics_base.hpp>
 #include <kinematics_parameters.hpp>
 #include <moveit/utils/logger.hpp>
 

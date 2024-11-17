@@ -38,11 +38,11 @@
 #include <geometric_shapes/mesh_operations.h>
 #include <rclcpp/logging.hpp>
 
-#include <moveit/collision_detection_bullet/bullet_integration/basic_types.h>
-#include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h>
-#include <moveit/collision_detection/collision_common.h>
-#include <moveit/macros/declare_ptr.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/collision_detection_bullet/bullet_integration/basic_types.hpp>
+#include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.hpp>
+#include <moveit/collision_detection/collision_common.hpp>
+#include <moveit/macros/declare_ptr.hpp>
+#include <moveit/macros/class_forward.hpp>
 
 namespace collision_detection_bullet
 {

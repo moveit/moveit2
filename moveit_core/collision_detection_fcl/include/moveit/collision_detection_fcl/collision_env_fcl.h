@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/collision_detection/collision_env.h>
-#include <moveit/collision_detection_fcl/collision_common.h>
+#include <moveit/collision_detection/collision_env.hpp>
+#include <moveit/collision_detection_fcl/collision_common.hpp>
 
 #if (MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0))
 #include <fcl/broadphase/broadphase_collision_manager.h>

@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 #include <functional>
 

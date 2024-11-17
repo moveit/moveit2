@@ -36,10 +36,10 @@
 
 #pragma once
 
-#include <moveit/ompl_interface/planning_context_manager.h>
-#include <moveit/constraint_samplers/constraint_sampler_manager.h>
-#include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.h>
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/ompl_interface/planning_context_manager.hpp>
+#include <moveit/constraint_samplers/constraint_sampler_manager.hpp>
+#include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.hpp>
+#include <moveit/planning_interface/planning_interface.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <rclcpp/node.hpp>

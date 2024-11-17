@@ -53,10 +53,10 @@
 
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/local_planner/local_constraint_solver_interface.h>
-#include <moveit/local_planner/trajectory_operator_interface.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/local_planner/local_constraint_solver_interface.hpp>
+#include <moveit/local_planner/trajectory_operator_interface.hpp>
 
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>

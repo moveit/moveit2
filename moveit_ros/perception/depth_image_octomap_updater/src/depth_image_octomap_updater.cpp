@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan, Suat Gedikli */
 
-#include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
+#include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.hpp>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 #include <cmath>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2/LinearMath/Vector3.h>

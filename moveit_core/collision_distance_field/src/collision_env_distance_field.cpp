@@ -34,17 +34,17 @@
 
 /* Author: E. Gil Jones */
 
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#include <moveit/collision_distance_field/collision_env_distance_field.h>
-#include <moveit/collision_distance_field/collision_common_distance_field.h>
-#include <moveit/distance_field/propagation_distance_field.h>
-#include <moveit/collision_distance_field/collision_detector_allocator_distance_field.h>
+#include <moveit/collision_distance_field/collision_env_distance_field.hpp>
+#include <moveit/collision_distance_field/collision_common_distance_field.hpp>
+#include <moveit/distance_field/propagation_distance_field.hpp>
+#include <moveit/collision_distance_field/collision_detector_allocator_distance_field.hpp>
 #include <functional>
 #include <memory>
 #include <utility>

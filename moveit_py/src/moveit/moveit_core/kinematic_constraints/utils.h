@@ -38,7 +38,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
 namespace py = pybind11;

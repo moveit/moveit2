@@ -35,7 +35,7 @@
 /* Author: David V. Lu!! */
 
 #include <moveit_setup_framework/config.hpp>
-#include <moveit/macros/class_forward.h>
+#include <moveit/macros/class_forward.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <unordered_map>
 #include <memory>

@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/collision_detection/collision_detector_allocator.h>
-#include <moveit/collision_distance_field/collision_env_distance_field.h>
+#include <moveit/collision_detection/collision_detector_allocator.hpp>
+#include <moveit/collision_distance_field/collision_env_distance_field.hpp>
 
 namespace collision_detection
 {

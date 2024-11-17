@@ -40,14 +40,14 @@
 #include <Eigen/Geometry>
 #include <kdl/frames.hpp>
 #include <kdl/trajectory.hpp>
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
 
-#include <pilz_industrial_motion_planner/joint_limits_extension.h>
-#include <pilz_industrial_motion_planner/limits_container.h>
-#include <pilz_industrial_motion_planner/trajectory_functions.h>
-#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
+#include <pilz_industrial_motion_planner/joint_limits_extension.hpp>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
+#include <pilz_industrial_motion_planner/trajectory_functions.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.hpp>
 
 namespace pilz_industrial_motion_planner
 {

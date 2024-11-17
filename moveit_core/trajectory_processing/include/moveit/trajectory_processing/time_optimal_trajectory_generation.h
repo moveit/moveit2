@@ -40,8 +40,8 @@
 
 #include <Eigen/Core>
 #include <list>
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit/trajectory_processing/time_parameterization.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
+#include <moveit/trajectory_processing/time_parameterization.hpp>
 
 namespace trajectory_processing
 {

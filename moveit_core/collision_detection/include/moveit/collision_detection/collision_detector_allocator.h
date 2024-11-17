@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/collision_detection/collision_env.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/collision_detection/collision_env.hpp>
+#include <moveit/macros/class_forward.hpp>
 
 namespace collision_detection
 {

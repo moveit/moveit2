@@ -45,7 +45,7 @@
 #include <moveit_msgs/action/global_planner.hpp>
 #include <moveit_msgs/action/hybrid_planner.hpp>
 
-#include <moveit/hybrid_planning_manager/planner_logic_interface.h>
+#include <moveit/hybrid_planning_manager/planner_logic_interface.hpp>
 
 #include <pluginlib/class_loader.hpp>
 

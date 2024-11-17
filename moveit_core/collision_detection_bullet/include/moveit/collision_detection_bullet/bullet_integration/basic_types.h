@@ -29,7 +29,7 @@
 #include <memory>
 #include <functional>
 #include <map>
-#include <moveit/collision_detection/collision_common.h>
+#include <moveit/collision_detection/collision_common.hpp>
 
 namespace collision_detection_bullet
 {

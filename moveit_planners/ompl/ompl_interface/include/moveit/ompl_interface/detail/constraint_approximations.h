@@ -36,9 +36,9 @@
 
 #pragma once
 
-#include <moveit/macros/declare_ptr.h>
-#include <planning_scene/planning_scene.h>
-#include <kinematic_constraints/kinematic_constraint.h>
+#include <moveit/macros/declare_ptr.hpp>
+#include <planning_scene/planning_scene.hpp>
+#include <kinematic_constraints/kinematic_constraint.hpp>
 #include <ompl/base/StateStorage.h>
 #include <visualization_msgs/msg/marker_array.hpp>
 

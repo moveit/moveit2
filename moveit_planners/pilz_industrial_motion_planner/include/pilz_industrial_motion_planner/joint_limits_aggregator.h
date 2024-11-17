@@ -34,14 +34,14 @@
 
 #pragma once
 
-#include <pilz_industrial_motion_planner/joint_limits_container.h>
-#include <pilz_industrial_motion_planner/joint_limits_extension.h>
+#include <pilz_industrial_motion_planner/joint_limits_container.hpp>
+#include <pilz_industrial_motion_planner/joint_limits_extension.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/planning_interface/planning_response.h>
-#include <moveit/robot_model/joint_model.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/planning_interface/planning_response.hpp>
+#include <moveit/robot_model/joint_model.hpp>
 
 #include <map>
 

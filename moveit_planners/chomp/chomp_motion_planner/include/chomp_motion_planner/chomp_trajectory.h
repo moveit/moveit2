@@ -37,7 +37,7 @@
 #pragma once
 
 #include <chomp_motion_planner/chomp_utils.h>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 
 #include <eigen3/Eigen/Core>
 #include <moveit_msgs/msg/motion_plan_detailed_response.hpp>

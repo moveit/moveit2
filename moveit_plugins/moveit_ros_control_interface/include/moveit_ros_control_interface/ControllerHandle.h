@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/controller_manager/controller_manager.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/controller_manager/controller_manager.hpp>
+#include <moveit/macros/class_forward.hpp>
 
 namespace moveit_ros_control_interface
 {

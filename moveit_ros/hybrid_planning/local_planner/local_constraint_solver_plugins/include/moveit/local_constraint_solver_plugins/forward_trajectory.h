@@ -41,7 +41,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/local_planner/local_constraint_solver_interface.h>
+#include <moveit/local_planner/local_constraint_solver_interface.hpp>
 
 namespace moveit::hybrid_planning
 {

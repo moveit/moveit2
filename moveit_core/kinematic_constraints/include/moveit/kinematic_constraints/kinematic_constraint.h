@@ -36,11 +36,11 @@
 
 #pragma once
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/transforms/transforms.h>
-#include <moveit/collision_detection/collision_env.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/transforms/transforms.hpp>
+#include <moveit/collision_detection/collision_env.hpp>
+#include <moveit/macros/class_forward.hpp>
 
 #include <geometric_shapes/bodies.h>
 #include <moveit_msgs/msg/constraints.hpp>

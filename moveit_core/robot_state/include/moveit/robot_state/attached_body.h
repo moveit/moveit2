@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/robot_model/link_model.h>
-#include <moveit/transforms/transforms.h>
+#include <moveit/robot_model/link_model.hpp>
+#include <moveit/transforms/transforms.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <eigen_stl_containers/eigen_stl_containers.h>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>

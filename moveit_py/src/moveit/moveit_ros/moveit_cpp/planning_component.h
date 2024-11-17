@@ -41,16 +41,16 @@
 #include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <pybind11/functional.h>
-#include <moveit_py/moveit_py_utils/copy_ros_msg.h>
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/moveit_cpp/planning_component.h>
+#include <moveit_py/moveit_py_utils/copy_ros_msg.hpp>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/moveit_cpp/planning_component.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
-#include "moveit_cpp.h"
-#include "../planning_scene_monitor/planning_scene_monitor.h"
-#include "../../moveit_core/planning_interface/planning_response.h"
+#include "moveit_cpp.hpp"
+#include "../planning_scene_monitor/planning_scene_monitor.hpp"
+#include "../../moveit_core/planning_interface/planning_response.hpp"
 
 namespace py = pybind11;
 

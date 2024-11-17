@@ -38,14 +38,14 @@
 
 #include <geometry_msgs/msg/pose.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
-#include <moveit/macros/class_forward.h>
+#include <moveit/macros/class_forward.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <string>
 #include <functional>
 #include <moveit/utils/logger.hpp>
 
-#include <moveit_kinematics_base_export.h>
+#include <moveit_kinematics_base_export.hpp>
 
 namespace moveit
 {

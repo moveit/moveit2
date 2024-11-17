@@ -36,7 +36,7 @@
 
 #include <string>
 
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 
 namespace pilz_industrial_motion_planner
 {

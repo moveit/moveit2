@@ -36,16 +36,16 @@
 
 #pragma once
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/transforms/transforms.h>
-#include <moveit/collision_detection/collision_detector_allocator.h>
-#include <moveit/collision_detection/world_diff.h>
-#include <moveit/collision_detection/collision_env.h>
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/transforms/transforms.hpp>
+#include <moveit/collision_detection/collision_detector_allocator.hpp>
+#include <moveit/collision_detection/world_diff.hpp>
+#include <moveit/collision_detection/collision_env.hpp>
+#include <moveit/kinematic_constraints/kinematic_constraint.hpp>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
+#include <moveit/macros/class_forward.hpp>
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
@@ -59,7 +59,7 @@
 #include <optional>
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit_planning_scene_export.h>
+#include <moveit_planning_scene_export.hpp>
 
 /** \brief This namespace includes the central class for representing planning contexts */
 namespace planning_scene

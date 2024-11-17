@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/macros/declare_ptr.h>
+#include <moveit/macros/declare_ptr.hpp>
 
 /**
  * \def MOVEIT_CLASS_FORWARD

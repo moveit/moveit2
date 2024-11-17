@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/move_group/move_group_capability.h>
+#include <moveit/move_group/move_group_capability.hpp>
 #include <std_srvs/srv/empty.hpp>
 
 namespace move_group

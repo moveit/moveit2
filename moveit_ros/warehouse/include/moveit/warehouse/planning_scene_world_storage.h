@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/warehouse/moveit_message_storage.h>
+#include <moveit/warehouse/moveit_message_storage.hpp>
 #include <moveit_msgs/msg/planning_scene_world.hpp>
 #include <rclcpp/logger.hpp>
 

@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/ompl_interface/parameterization/model_based_state_space.h>
+#include <moveit/ompl_interface/parameterization/model_based_state_space.hpp>
 #include <ompl/base/spaces/SE3StateSpace.h>
 
 namespace ompl_interface

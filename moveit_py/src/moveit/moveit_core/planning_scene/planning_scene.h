@@ -39,9 +39,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
-#include <moveit_py/moveit_py_utils/copy_ros_msg.h>
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit_py/moveit_py_utils/copy_ros_msg.hpp>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
 
 namespace py = pybind11;
 

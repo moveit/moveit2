@@ -36,7 +36,7 @@
 
 #include <stdexcept>
 
-#include "basecmd.h"
+#include "basecmd.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

@@ -37,7 +37,7 @@
 #pragma once
 
 #include <ompl/base/StateSampler.h>
-#include <moveit/constraint_samplers/constraint_sampler.h>
+#include <moveit/constraint_samplers/constraint_sampler.hpp>
 
 namespace ompl_interface
 {

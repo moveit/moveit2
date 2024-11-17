@@ -35,7 +35,7 @@
 #pragma once
 
 #include <gtest/gtest.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_state/robot_state.hpp>
 
 namespace pilz_industrial_motion_planner_testutils
 {

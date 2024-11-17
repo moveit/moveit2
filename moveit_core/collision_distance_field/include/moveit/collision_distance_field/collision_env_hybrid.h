@@ -36,10 +36,10 @@
 
 #pragma once
 
-#include <moveit/collision_detection_fcl/collision_env_fcl.h>
-#include <moveit/collision_distance_field/collision_distance_field_types.h>
-#include <moveit/collision_distance_field/collision_common_distance_field.h>
-#include <moveit/collision_distance_field/collision_env_distance_field.h>
+#include <moveit/collision_detection_fcl/collision_env_fcl.hpp>
+#include <moveit/collision_distance_field/collision_distance_field_types.hpp>
+#include <moveit/collision_distance_field/collision_common_distance_field.hpp>
+#include <moveit/collision_distance_field/collision_env_distance_field.hpp>
 
 namespace collision_detection
 {

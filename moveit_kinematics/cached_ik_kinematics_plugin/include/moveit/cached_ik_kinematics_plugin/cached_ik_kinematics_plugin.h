@@ -36,10 +36,10 @@
 
 #pragma once
 
-#include <moveit/cached_ik_kinematics_plugin/detail/NearestNeighborsGNAT.h>
-#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/cached_ik_kinematics_plugin/detail/NearestNeighborsGNAT.hpp>
+#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.hpp>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/robot_model/robot_model.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Vector3.h>
 #include <mutex>

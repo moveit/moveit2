@@ -37,7 +37,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/controller_manager/controller_manager.h>
+#include <moveit/controller_manager/controller_manager.hpp>
 #include <iostream>
 #include <map>
 

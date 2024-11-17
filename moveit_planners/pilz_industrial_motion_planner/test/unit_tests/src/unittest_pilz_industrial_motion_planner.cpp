@@ -36,10 +36,10 @@
 
 #include <iostream>
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 
-#include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.h>
+#include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.hpp>
 #include "test_utils.hpp"
 
 #include <rclcpp/rclcpp.hpp>

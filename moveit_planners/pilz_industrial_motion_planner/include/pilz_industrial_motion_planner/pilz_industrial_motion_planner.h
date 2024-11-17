@@ -36,11 +36,11 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <pilz_industrial_motion_planner/joint_limits_extension.h>
-#include <pilz_industrial_motion_planner/planning_context_loader.h>
+#include <pilz_industrial_motion_planner/joint_limits_extension.hpp>
+#include <pilz_industrial_motion_planner/planning_context_loader.hpp>
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/planning_interface/planning_interface.hpp>
 
 #include <pluginlib/class_loader.hpp>
 #include <memory>

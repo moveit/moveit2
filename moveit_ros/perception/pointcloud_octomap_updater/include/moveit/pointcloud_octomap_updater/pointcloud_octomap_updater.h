@@ -46,8 +46,8 @@
 #include <message_filters/subscriber.h>
 #endif
 #include <sensor_msgs/msg/point_cloud2.hpp>
-#include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
-#include <moveit/point_containment_filter/shape_mask.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_updater.hpp>
+#include <moveit/point_containment_filter/shape_mask.hpp>
 
 #include <memory>
 

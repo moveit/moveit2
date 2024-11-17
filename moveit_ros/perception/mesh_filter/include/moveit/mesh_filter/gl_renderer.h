@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
+#include <moveit/macros/class_forward.hpp>
 #include <GL/glew.h>
 #ifdef __APPLE__
 #include <OpenGL/gl.h>

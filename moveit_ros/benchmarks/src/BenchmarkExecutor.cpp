@@ -34,12 +34,12 @@
 
 /* Author: Ryan Luna */
 
-#include <moveit/benchmarks/BenchmarkExecutor.h>
-#include <moveit/moveit_cpp/planning_component.h>
-#include <moveit/utils/lexical_casts.h>
-#include <moveit/utils/moveit_error_code.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/version.h>
+#include <moveit/benchmarks/BenchmarkExecutor.hpp>
+#include <moveit/moveit_cpp/planning_component.hpp>
+#include <moveit/utils/lexical_casts.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/version.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/logger.hpp>
 

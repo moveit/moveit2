@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/collision_detection/collision_common.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/collision_detection/collision_common.hpp>
+#include <moveit/macros/class_forward.hpp>
 #include <moveit_msgs/msg/allowed_collision_matrix.hpp>
 #include <iostream>
 #include <vector>

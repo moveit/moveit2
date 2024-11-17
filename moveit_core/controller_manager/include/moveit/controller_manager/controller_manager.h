@@ -39,7 +39,7 @@
 #include <vector>
 #include <string>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
-#include <moveit/macros/class_forward.h>
+#include <moveit/macros/class_forward.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 /// Namespace for the base class of a MoveIt controller manager

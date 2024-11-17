@@ -43,7 +43,7 @@
 #else
 #include <urdf/model.h>
 #endif
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 
 #include <rclcpp/node.hpp>

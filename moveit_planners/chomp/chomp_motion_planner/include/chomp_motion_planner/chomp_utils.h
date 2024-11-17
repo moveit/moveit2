@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene/planning_scene.hpp>
 
 #include <Eigen/Core>
 #include <iostream>

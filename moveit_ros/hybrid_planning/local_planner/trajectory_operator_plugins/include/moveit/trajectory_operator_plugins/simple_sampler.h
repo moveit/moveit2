@@ -38,8 +38,8 @@
    is updated to the next global trajectory waypoint. Global trajectory updates simply replace the reference trajectory.
  */
 
-#include <moveit/local_planner/trajectory_operator_interface.h>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/local_planner/trajectory_operator_interface.hpp>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 
 namespace moveit::hybrid_planning
 {

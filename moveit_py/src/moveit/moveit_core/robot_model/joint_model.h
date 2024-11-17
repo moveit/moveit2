@@ -39,7 +39,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
-#include <moveit/robot_model/joint_model.h>
+#include <moveit/robot_model/joint_model.hpp>
 
 namespace py = pybind11;
 

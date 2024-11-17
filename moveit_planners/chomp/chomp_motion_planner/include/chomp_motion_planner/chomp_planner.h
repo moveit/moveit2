@@ -37,10 +37,10 @@
 #pragma once
 
 #include <chomp_motion_planner/chomp_parameters.h>
-#include <moveit/planning_interface/planning_request.h>
-#include <moveit/planning_interface/planning_response.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/planning_interface/planning_request.hpp>
+#include <moveit/planning_interface/planning_response.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 
 namespace chomp
 {

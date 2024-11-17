@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/controller_manager/controller_manager.h>
+#include <moveit/controller_manager/controller_manager.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>

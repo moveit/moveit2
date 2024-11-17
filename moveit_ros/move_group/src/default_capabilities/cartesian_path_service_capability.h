@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/move_group/move_group_capability.h>
+#include <moveit/move_group/move_group_capability.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 

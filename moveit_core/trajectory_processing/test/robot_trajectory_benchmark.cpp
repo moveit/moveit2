@@ -37,11 +37,11 @@
 // To run this benchmark, 'cd' to the build/moveit_core/trajectory_processing directory and directly run the binary.
 
 #include <benchmark/benchmark.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit/utils/robot_model_test_utils.h>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 
 // Robot and planning group to use in the benchmarks.
 constexpr char TEST_ROBOT[] = "panda";

@@ -40,8 +40,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
-#include <moveit/utils/moveit_error_code.h>
-#include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
+#include <moveit/utils/moveit_error_code.hpp>
+#include <moveit/hybrid_planning_manager/hybrid_planning_events.hpp>
 
 namespace moveit::hybrid_planning
 {

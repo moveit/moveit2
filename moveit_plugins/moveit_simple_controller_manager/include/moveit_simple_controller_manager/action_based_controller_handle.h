@@ -39,8 +39,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-#include <moveit/controller_manager/controller_manager.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/controller_manager/controller_manager.hpp>
+#include <moveit/macros/class_forward.hpp>
 #include <memory>
 
 namespace moveit_simple_controller_manager

@@ -38,11 +38,11 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/global_planner/global_planner_interface.h>
+#include <moveit/global_planner/global_planner_interface.hpp>
 
 // MoveitCpp
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/moveit_cpp/planning_component.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/moveit_cpp/planning_component.hpp>
 
 namespace moveit::hybrid_planning
 {

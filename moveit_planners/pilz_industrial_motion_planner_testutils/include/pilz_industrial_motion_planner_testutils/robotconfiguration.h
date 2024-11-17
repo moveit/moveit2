@@ -37,10 +37,10 @@
 #include <string>
 #include <utility>
 
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 
-#include "goalconstraintsmsgconvertible.h"
-#include "robotstatemsgconvertible.h"
+#include "goalconstraintsmsgconvertible.hpp"
+#include "robotstatemsgconvertible.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

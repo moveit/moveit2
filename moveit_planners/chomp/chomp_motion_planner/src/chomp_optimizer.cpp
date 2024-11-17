@@ -36,9 +36,9 @@
 
 #include <chomp_motion_planner/chomp_optimizer.h>
 #include <chomp_motion_planner/chomp_utils.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <rclcpp/logger.hpp>

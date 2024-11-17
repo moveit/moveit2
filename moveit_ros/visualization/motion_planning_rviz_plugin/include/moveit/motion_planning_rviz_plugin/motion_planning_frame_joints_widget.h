@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <Eigen/SVD>
 #include <QAbstractItemModel>
 #include <QWidget>

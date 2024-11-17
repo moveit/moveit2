@@ -41,8 +41,8 @@
 
 #include <moveit_msgs/msg/motion_sequence_request.hpp>
 
-#include "command_types_typedef.h"
-#include "motioncmd.h"
+#include "command_types_typedef.hpp"
+#include "motioncmd.hpp"
 #include <variant>
 
 namespace pilz_industrial_motion_planner_testutils

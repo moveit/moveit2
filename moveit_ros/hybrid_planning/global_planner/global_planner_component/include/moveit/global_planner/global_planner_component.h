@@ -43,7 +43,7 @@
 
 #include <pluginlib/class_loader.hpp>
 
-#include <moveit/global_planner/global_planner_interface.h>
+#include <moveit/global_planner/global_planner_interface.hpp>
 
 #include <moveit_msgs/action/global_planner.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>

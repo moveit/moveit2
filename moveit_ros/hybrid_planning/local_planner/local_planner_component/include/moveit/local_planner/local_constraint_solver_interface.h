@@ -41,8 +41,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/constraints.hpp>

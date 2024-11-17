@@ -37,7 +37,7 @@
 #include <string>
 #include <memory>
 
-#include "motionplanrequestconvertible.h"
+#include "motionplanrequestconvertible.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

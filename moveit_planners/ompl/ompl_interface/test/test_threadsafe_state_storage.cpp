@@ -39,7 +39,7 @@ The skeleton of this test was taken from test_state_validity_checker.cpp by Jero
 */
 
 #include "load_test_robot.hpp"
-#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+#include <moveit/ompl_interface/detail/threadsafe_state_storage.hpp>
 #include <gtest/gtest.h>
 
 /** \brief Generic implementation of the tests that can be executed on different robots. **/

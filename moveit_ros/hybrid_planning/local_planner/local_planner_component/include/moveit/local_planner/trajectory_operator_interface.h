@@ -46,8 +46,8 @@
 
 #include <moveit_msgs/action/local_planner.hpp>
 
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 
 namespace moveit::hybrid_planning
 {

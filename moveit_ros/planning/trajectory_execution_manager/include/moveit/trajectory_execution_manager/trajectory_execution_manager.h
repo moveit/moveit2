@@ -36,21 +36,21 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/planning_scene_monitor/current_state_monitor.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/controller_manager/controller_manager.h>
+#include <moveit/controller_manager/controller_manager.hpp>
 #include <pluginlib/class_loader.hpp>
 
 #include <memory>
 #include <deque>
 #include <thread>
 
-#include <moveit_trajectory_execution_manager_export.h>
+#include <moveit_trajectory_execution_manager_export.hpp>
 
 namespace trajectory_execution_manager
 {

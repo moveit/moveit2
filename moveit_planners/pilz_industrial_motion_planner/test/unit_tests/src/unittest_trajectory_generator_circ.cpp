@@ -36,17 +36,17 @@
 
 #include <gtest/gtest.h>
 
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
-#include <pilz_industrial_motion_planner/trajectory_generator_circ.h>
-#include <pilz_industrial_motion_planner_testutils/command_types_typedef.h>
-#include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_circ.hpp>
+#include <pilz_industrial_motion_planner_testutils/command_types_typedef.hpp>
+#include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.hpp>
 #include "test_utils.hpp"
 
 #include <rclcpp/rclcpp.hpp>

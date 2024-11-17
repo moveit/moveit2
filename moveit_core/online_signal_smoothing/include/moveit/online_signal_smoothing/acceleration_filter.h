@@ -74,9 +74,9 @@ c --------x--- v   |
 
 #include <cstddef>
 
-#include <moveit/online_signal_smoothing/smoothing_base_class.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/online_signal_smoothing/smoothing_base_class.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <moveit/utils/logger.hpp>
 #include <moveit_acceleration_filter_parameters.hpp>
 

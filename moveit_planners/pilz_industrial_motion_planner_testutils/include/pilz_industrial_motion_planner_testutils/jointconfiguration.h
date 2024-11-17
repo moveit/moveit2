@@ -41,10 +41,10 @@
 #include <stdexcept>
 
 #include <sensor_msgs/msg/joint_state.hpp>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
-#include "robotconfiguration.h"
+#include "robotconfiguration.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

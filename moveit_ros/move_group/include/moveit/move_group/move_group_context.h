@@ -38,7 +38,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <string>
-#include <moveit/macros/class_forward.h>
+#include <moveit/macros/class_forward.hpp>
 
 namespace moveit_cpp
 {

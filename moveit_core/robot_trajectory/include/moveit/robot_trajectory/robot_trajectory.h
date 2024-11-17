@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <deque>

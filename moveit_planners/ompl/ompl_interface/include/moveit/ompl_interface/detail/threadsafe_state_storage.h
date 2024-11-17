@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_state/robot_state.hpp>
 #include <thread>
 #include <mutex>
 

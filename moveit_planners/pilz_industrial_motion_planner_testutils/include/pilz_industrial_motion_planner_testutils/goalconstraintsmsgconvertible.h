@@ -37,7 +37,7 @@
 #include <string>
 
 #include <moveit_msgs/msg/constraints.hpp>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 
 namespace pilz_industrial_motion_planner_testutils
 {

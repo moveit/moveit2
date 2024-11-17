@@ -32,13 +32,13 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.h>
+#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.hpp>
 
 #include <algorithm>
 #include <memory>
 #include <math.h>
 #include <tf2_eigen/tf2_eigen.hpp>
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_interface/planning_interface.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace

@@ -36,9 +36,9 @@
 
 #pragma once
 
-#include <moveit/collision_detection/collision_env.h>
-#include <moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.h>
-#include <moveit/collision_detection_bullet/bullet_integration/bullet_cast_bvh_manager.h>
+#include <moveit/collision_detection/collision_env.hpp>
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.hpp>
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_cast_bvh_manager.hpp>
 #include <mutex>
 
 namespace collision_detection

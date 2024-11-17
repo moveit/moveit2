@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan, Jeroen De Maeyer */
 
-#include <moveit/ompl_interface/detail/state_validity_checker.h>
-#include <moveit/ompl_interface/model_based_planning_context.h>
+#include <moveit/ompl_interface/detail/state_validity_checker.hpp>
+#include <moveit/ompl_interface/model_based_planning_context.hpp>
 #include <ompl/base/spaces/constraint/ConstrainedStateSpace.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

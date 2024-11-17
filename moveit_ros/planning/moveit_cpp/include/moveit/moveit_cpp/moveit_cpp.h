@@ -40,11 +40,11 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/controller_manager/controller_manager.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/controller_manager/controller_manager.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <tf2_ros/buffer.h>
 
 namespace moveit_cpp

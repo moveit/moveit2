@@ -37,7 +37,7 @@
 #include <memory>
 
 #include <rclcpp_action/rclcpp_action.hpp>
-#include <moveit/move_group/move_group_capability.h>
+#include <moveit/move_group/move_group_capability.hpp>
 
 #include <moveit_msgs/action/move_group_sequence.hpp>
 

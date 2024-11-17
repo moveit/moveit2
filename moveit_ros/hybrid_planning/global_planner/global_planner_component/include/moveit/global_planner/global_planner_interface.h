@@ -42,7 +42,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 
 #include <moveit_msgs/action/global_planner.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>

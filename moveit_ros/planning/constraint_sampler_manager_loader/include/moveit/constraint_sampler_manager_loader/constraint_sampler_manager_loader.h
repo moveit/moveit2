@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/constraint_samplers/constraint_sampler_manager.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/constraint_samplers/constraint_sampler_manager.hpp>
+#include <moveit/macros/class_forward.hpp>
 
 namespace constraint_sampler_manager_loader
 {

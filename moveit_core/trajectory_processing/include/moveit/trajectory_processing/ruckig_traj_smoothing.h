@@ -37,7 +37,7 @@
 
 #include <Eigen/Core>
 #include <list>
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <ruckig/ruckig.hpp>
 
 namespace trajectory_processing

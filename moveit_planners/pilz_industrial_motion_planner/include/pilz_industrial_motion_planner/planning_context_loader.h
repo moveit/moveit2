@@ -34,14 +34,14 @@
 
 #pragma once
 
-#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
 
 #include <memory>
 #include <vector>
 
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_interface/planning_interface.hpp>
 
-#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
 
 namespace pilz_industrial_motion_planner
 {

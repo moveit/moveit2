@@ -37,9 +37,9 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/utils/moveit_error_code.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <moveit_msgs/msg/planner_interface_description.hpp>
@@ -58,7 +58,7 @@
 #include <utility>
 #include <tf2_ros/buffer.h>
 
-#include <moveit_move_group_interface_export.h>
+#include <moveit_move_group_interface_export.hpp>
 
 namespace moveit
 {

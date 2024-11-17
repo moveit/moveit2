@@ -28,7 +28,7 @@
 #include <geometric_shapes/shape_operations.h>
 #include <rclcpp/logging.hpp>
 
-#include <moveit/collision_detection_bullet/bullet_integration/basic_types.h>
+#include <moveit/collision_detection_bullet/bullet_integration/basic_types.hpp>
 
 namespace collision_detection_bullet
 {

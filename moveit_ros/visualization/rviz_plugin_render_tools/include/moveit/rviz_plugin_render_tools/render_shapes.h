@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/rviz_plugin_render_tools/octomap_render.hpp>
+#include <moveit/macros/class_forward.hpp>
 #include <geometric_shapes/shapes.h>
 #include <rviz_common/properties/color_property.hpp>
 #include <rviz_common/display_context.hpp>

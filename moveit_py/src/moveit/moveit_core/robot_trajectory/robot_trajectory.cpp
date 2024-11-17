@@ -34,9 +34,9 @@
 
 /* Author: Peter David Fagan */
 
-#include "robot_trajectory.h"
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
+#include "robot_trajectory.hpp"
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
 
 namespace moveit_py
 {

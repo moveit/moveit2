@@ -37,9 +37,9 @@
 
 #pragma once
 
-#include <moveit/robot_model/joint_model.h>
-#include <moveit/robot_model/link_model.h>
-#include <moveit/kinematics_base/kinematics_base.h>
+#include <moveit/robot_model/joint_model.hpp>
+#include <moveit/robot_model/link_model.hpp>
+#include <moveit/kinematics_base/kinematics_base.hpp>
 #include <srdfdom/model.h>
 #include <functional>
 #include <set>

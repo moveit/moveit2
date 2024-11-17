@@ -46,9 +46,9 @@
 #include <geometric_shapes/bodies.h>
 #include <octomap/OcTree.h>
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/distance_field/distance_field.h>
-#include <moveit/distance_field/propagation_distance_field.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/distance_field/distance_field.hpp>
+#include <moveit/distance_field/propagation_distance_field.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logging.hpp>

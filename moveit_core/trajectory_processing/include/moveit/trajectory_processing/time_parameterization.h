@@ -1,6 +1,6 @@
 #pragma once
 
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 
 namespace trajectory_processing
 {

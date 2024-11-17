@@ -35,17 +35,17 @@
 #include <boost/core/demangle.hpp>
 #include <gtest/gtest.h>
 
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_interface/planning_interface.hpp>
 
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 
-#include <pilz_industrial_motion_planner/joint_limits_container.h>
-#include <pilz_industrial_motion_planner/planning_context_circ.h>
-#include <pilz_industrial_motion_planner/planning_context_lin.h>
-#include <pilz_industrial_motion_planner/planning_context_ptp.h>
+#include <pilz_industrial_motion_planner/joint_limits_container.hpp>
+#include <pilz_industrial_motion_planner/planning_context_circ.hpp>
+#include <pilz_industrial_motion_planner/planning_context_lin.hpp>
+#include <pilz_industrial_motion_planner/planning_context_ptp.hpp>
 
 #include "test_utils.hpp"
 

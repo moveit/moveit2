@@ -38,7 +38,7 @@
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <Eigen/Geometry>
-#include <moveit/macros/class_forward.h>
+#include <moveit/macros/class_forward.hpp>
 #include <map>
 
 namespace moveit

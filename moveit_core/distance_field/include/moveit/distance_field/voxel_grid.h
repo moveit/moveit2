@@ -39,7 +39,7 @@
 #include <algorithm>
 #include <cmath>
 #include <Eigen/Core>
-#include <moveit/macros/declare_ptr.h>
+#include <moveit/macros/declare_ptr.hpp>
 
 namespace distance_field
 {

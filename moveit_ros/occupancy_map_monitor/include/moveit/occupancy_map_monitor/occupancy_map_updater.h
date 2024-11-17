@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/collision_detection/occupancy_map.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/collision_detection/occupancy_map.hpp>
 
 #include <geometric_shapes/shapes.h>
 #include <rclcpp/rclcpp.hpp>

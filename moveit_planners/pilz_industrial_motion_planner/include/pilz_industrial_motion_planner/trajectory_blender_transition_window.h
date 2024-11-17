@@ -34,12 +34,12 @@
 
 #pragma once
 
-#include <moveit/planning_interface/planning_interface.h>
-#include <pilz_industrial_motion_planner/cartesian_trajectory.h>
-#include <pilz_industrial_motion_planner/cartesian_trajectory_point.h>
-#include <pilz_industrial_motion_planner/trajectory_blend_request.h>
-#include <pilz_industrial_motion_planner/trajectory_blender.h>
-#include <pilz_industrial_motion_planner/trajectory_functions.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <pilz_industrial_motion_planner/cartesian_trajectory.hpp>
+#include <pilz_industrial_motion_planner/cartesian_trajectory_point.hpp>
+#include <pilz_industrial_motion_planner/trajectory_blend_request.hpp>
+#include <pilz_industrial_motion_planner/trajectory_blender.hpp>
+#include <pilz_industrial_motion_planner/trajectory_functions.hpp>
 
 namespace pilz_industrial_motion_planner
 {

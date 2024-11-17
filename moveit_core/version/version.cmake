@@ -34,5 +34,5 @@ if(NOT "${MOVEIT_VERSION_EXTRA}" STREQUAL "")
   string(APPEND MOVEIT_VERSION "-${MOVEIT_VERSION_EXTRA}")
 endif()
 
-configure_file("version.h.in"
+configure_file("version.hpp.in"
                "${VERSION_FILE_PATH}/moveit_core/moveit/version.hpp")

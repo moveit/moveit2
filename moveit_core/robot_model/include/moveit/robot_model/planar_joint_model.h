@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/robot_model/joint_model.h>
+#include <moveit/robot_model/joint_model.hpp>
 
 namespace moveit
 {

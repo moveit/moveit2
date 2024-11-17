@@ -39,12 +39,12 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
-#include <moveit/macros/class_forward.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/collision_plugin_loader/collision_plugin_loader.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
+#include <moveit/planning_scene_monitor/current_state_monitor.hpp>
+#include <moveit/collision_plugin_loader/collision_plugin_loader.hpp>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 #include <memory>
 #include <thread>
@@ -52,7 +52,7 @@
 #include <mutex>
 #include <thread>
 
-#include <moveit_planning_scene_monitor_export.h>
+#include <moveit_planning_scene_monitor_export.hpp>
 
 namespace planning_scene_monitor
 {

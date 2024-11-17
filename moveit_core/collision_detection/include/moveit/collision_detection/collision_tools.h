@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit/collision_detection/collision_common.h>
+#include <moveit/collision_detection/collision_common.hpp>
 #include <moveit_msgs/msg/cost_source.hpp>
 #include <moveit_msgs/msg/contact_information.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>

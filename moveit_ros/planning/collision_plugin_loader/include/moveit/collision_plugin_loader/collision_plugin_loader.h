@@ -35,7 +35,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/collision_detection/collision_plugin_cache.h>
+#include <moveit/collision_detection/collision_plugin_cache.hpp>
 
 namespace collision_detection
 {

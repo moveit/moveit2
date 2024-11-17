@@ -38,7 +38,7 @@
 
 #include <ompl/config.h>
 #include <ompl/base/ProjectionEvaluator.h>
-#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+#include <moveit/ompl_interface/detail/threadsafe_state_storage.hpp>
 
 typedef Eigen::Ref<Eigen::VectorXd> OMPLProjection;
 

@@ -47,8 +47,8 @@
 
 #pragma once
 
-#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
-#include <moveit/collision_detection/collision_common.h>
+#include <moveit/ompl_interface/detail/threadsafe_state_storage.hpp>
+#include <moveit/collision_detection/collision_common.hpp>
 #include <ompl/base/StateValidityChecker.h>
 
 namespace ompl_interface
@@ -139,7 +139,7 @@ public:
    *
    * Code sample that can be used to check all the assumptions:
    *
-   *    #include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.h>
+   *    #include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.hpp>
    *    #include <ompl/base/ConstrainedSpaceInformation.h>
    *
    *    // the code below should be pasted at the top of the isValid method

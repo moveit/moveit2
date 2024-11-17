@@ -40,7 +40,7 @@
 #pragma once
 
 #include <Eigen/Geometry>
-#include <moveit/robot_model/joint_model_group.h>
+#include <moveit/robot_model/joint_model_group.hpp>
 #include <stomp_moveit/stomp_moveit_task.hpp>
 
 #include <stomp/utils.h>

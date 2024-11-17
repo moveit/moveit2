@@ -37,8 +37,8 @@
 #pragma once
 
 #include <moveit_msgs/msg/robot_trajectory.hpp>
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 
 namespace trajectory_processing
 {

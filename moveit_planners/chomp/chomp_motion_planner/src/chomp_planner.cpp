@@ -37,7 +37,7 @@
 #include <chomp_motion_planner/chomp_optimizer.h>
 #include <chomp_motion_planner/chomp_planner.h>
 #include <chomp_motion_planner/chomp_trajectory.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>

@@ -34,18 +34,18 @@
 
 #pragma once
 
-#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/planning_interface/planning_response.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/planning_interface/planning_response.hpp>
 
 #include <atomic>
 #include <thread>
 
-#include <pilz_industrial_motion_planner/planning_context_base.h>
-#include <pilz_industrial_motion_planner/trajectory_generator_circ.h>
+#include <pilz_industrial_motion_planner/planning_context_base.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_circ.hpp>
 
 namespace pilz_industrial_motion_planner
 {

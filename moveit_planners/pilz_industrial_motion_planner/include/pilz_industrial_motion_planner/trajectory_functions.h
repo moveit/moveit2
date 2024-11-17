@@ -36,16 +36,16 @@
 
 #include <Eigen/Geometry>
 #include <kdl/trajectory.hpp>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <tf2/transform_datatypes.h>
 #include <trajectory_msgs/msg/multi_dof_joint_trajectory.hpp>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene/planning_scene.hpp>
 
-#include <pilz_industrial_motion_planner/cartesian_trajectory.h>
-#include <pilz_industrial_motion_planner/limits_container.h>
-#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
+#include <pilz_industrial_motion_planner/cartesian_trajectory.hpp>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.hpp>
 
 namespace pilz_industrial_motion_planner
 {

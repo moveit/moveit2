@@ -40,9 +40,9 @@
 #include <atomic>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <moveit/planning_scene_monitor/trajectory_monitor.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/planning_scene_monitor/trajectory_monitor.hpp>
+#include <moveit/planning_scene_monitor/current_state_monitor.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_ros/buffer.h>
 

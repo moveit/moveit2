@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/collision_detection/collision_common.h>
-#include <moveit/collision_detection/collision_env.h>
+#include <moveit/collision_detection/collision_common.hpp>
+#include <moveit/collision_detection/collision_env.hpp>
 
 namespace collision_detection
 {

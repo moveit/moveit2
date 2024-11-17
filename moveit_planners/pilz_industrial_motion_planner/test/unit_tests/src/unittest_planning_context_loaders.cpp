@@ -36,10 +36,10 @@
 
 #include <pluginlib/class_loader.hpp>
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 
-#include <pilz_industrial_motion_planner/planning_context_loader.h>
+#include <pilz_industrial_motion_planner/planning_context_loader.hpp>
 
 #include "test_utils.hpp"
 

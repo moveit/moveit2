@@ -36,17 +36,17 @@
 
 #pragma once
 
-#include <moveit/benchmarks/BenchmarkOptions.h>
+#include <moveit/benchmarks/BenchmarkOptions.hpp>
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 
-#include <moveit/warehouse/planning_scene_storage.h>
-#include <moveit/warehouse/planning_scene_world_storage.h>
-#include <moveit/warehouse/state_storage.h>
-#include <moveit/warehouse/constraints_storage.h>
-#include <moveit/warehouse/trajectory_constraints_storage.h>
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <warehouse_ros/database_loader.h>
+#include <moveit/warehouse/planning_scene_storage.hpp>
+#include <moveit/warehouse/planning_scene_world_storage.hpp>
+#include <moveit/warehouse/state_storage.hpp>
+#include <moveit/warehouse/constraints_storage.hpp>
+#include <moveit/warehouse/trajectory_constraints_storage.hpp>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <warehouse_ros/database_loader.hpp>
 #include <pluginlib/class_loader.hpp>
 
 #include <map>

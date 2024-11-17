@@ -32,9 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/global_planner/global_planner_component.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/global_planner/global_planner_component.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 #include <chrono>

@@ -37,7 +37,7 @@
 
 #pragma once
 
-#include <moveit_simple_controller_manager/action_based_controller_handle.h>
+#include <moveit_simple_controller_manager/action_based_controller_handle.hpp>
 #include <control_msgs/action/follow_joint_trajectory.hpp>
 #include <control_msgs/msg/joint_tolerance.hpp>
 #include <functional>

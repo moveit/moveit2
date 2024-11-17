@@ -50,7 +50,7 @@
 
 #include <tf2_ros/buffer.h>
 
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_state/robot_state.hpp>
 
 namespace planning_scene_monitor
 {

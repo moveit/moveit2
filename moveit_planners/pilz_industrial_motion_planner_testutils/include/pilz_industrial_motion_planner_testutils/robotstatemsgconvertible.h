@@ -35,7 +35,7 @@
 #pragma once
 
 #include <moveit_msgs/msg/robot_state.hpp>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 
 namespace pilz_industrial_motion_planner_testutils
 {

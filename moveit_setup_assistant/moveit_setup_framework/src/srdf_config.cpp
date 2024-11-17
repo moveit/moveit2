@@ -34,7 +34,7 @@
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <moveit_setup_framework/data_warehouse.hpp>
 #include <moveit_setup_framework/utilities.hpp>
-#include <moveit/rdf_loader/rdf_loader.h>
+#include <moveit/rdf_loader/rdf_loader.hpp>
 
 namespace moveit_setup
 {

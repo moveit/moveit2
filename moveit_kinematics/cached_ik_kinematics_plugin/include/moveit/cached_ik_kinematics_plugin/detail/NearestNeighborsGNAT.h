@@ -38,7 +38,7 @@
 
 #pragma once
 
-#include <moveit/exceptions/exceptions.h>
+#include <moveit/exceptions/exceptions.hpp>
 #include <rsl/random.hpp>
 #include <algorithm>
 #include <queue>

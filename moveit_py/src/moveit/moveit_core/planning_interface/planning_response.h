@@ -39,10 +39,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
-#include <moveit_msgs/msg/robot_state.h>
-#include <moveit_msgs/msg/move_it_error_codes.h>
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
-#include <moveit/planning_interface/planning_response.h>
+#include <moveit_msgs/msg/robot_state.hpp>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
+#include <moveit/planning_interface/planning_response.hpp>
 
 namespace py = pybind11;
 

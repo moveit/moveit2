@@ -37,13 +37,13 @@
 #include <string>
 #include <utility>
 
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 
-#include "jointconfiguration.h"
-#include "cartesianconfiguration.h"
-#include "command_types_typedef.h"
-#include "sequence.h"
-#include "gripper.h"
+#include "jointconfiguration.hpp"
+#include "cartesianconfiguration.hpp"
+#include "command_types_typedef.hpp"
+#include "sequence.hpp"
+#include "gripper.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

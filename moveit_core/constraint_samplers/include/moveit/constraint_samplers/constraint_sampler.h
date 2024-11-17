@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/kinematic_constraints/kinematic_constraint.hpp>
 #include <vector>
 #include <rclcpp/rclcpp.hpp>
 /**

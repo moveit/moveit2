@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <moveit_ros_control_interface/ControllerHandle.h>
+#include <moveit_ros_control_interface/ControllerHandle.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 namespace moveit_simple_controller_manager

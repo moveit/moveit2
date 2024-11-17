@@ -33,8 +33,8 @@
  *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 

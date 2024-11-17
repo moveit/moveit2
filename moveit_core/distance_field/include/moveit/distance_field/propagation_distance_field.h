@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/distance_field/voxel_grid.h>
-#include <moveit/distance_field/distance_field.h>
+#include <moveit/distance_field/voxel_grid.hpp>
+#include <moveit/distance_field/distance_field.hpp>
 #include <vector>
 #include <Eigen/Core>
 #include <set>

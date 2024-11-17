@@ -45,13 +45,13 @@
 #include <moveit_servo/collision_monitor.hpp>
 #include <moveit_servo/utils/command.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/online_signal_smoothing/smoothing_base_class.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/online_signal_smoothing/smoothing_base_class.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_listener.hpp>
 #include <variant>
 #include <rclcpp/logger.hpp>
 #include <queue>

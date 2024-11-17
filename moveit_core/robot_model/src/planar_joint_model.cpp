@@ -39,7 +39,7 @@
 #include <cmath>
 #include <geometric_shapes/check_isometry.h>
 #include <limits>
-#include <moveit/robot_model/planar_joint_model.h>
+#include <moveit/robot_model/planar_joint_model.hpp>
 
 namespace moveit
 {

@@ -41,14 +41,14 @@
 
 #include <atomic>
 
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/planning_interface/planning_request_adapter.h>
-#include <moveit/planning_interface/planning_response_adapter.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/planning_interface/planning_request_adapter.hpp>
+#include <moveit/planning_interface/planning_response_adapter.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <moveit_msgs/msg/pipeline_state.hpp>
 #include <memory>
-#include <moveit_planning_pipeline_export.h>
+#include <moveit_planning_pipeline_export.hpp>
 #include <planning_pipeline_parameters.hpp>
 
 namespace planning_pipeline

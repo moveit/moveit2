@@ -40,9 +40,9 @@
 #include <chomp_motion_planner/chomp_parameters.h>
 #include <chomp_motion_planner/chomp_trajectory.h>
 #include <chomp_motion_planner/multivariate_gaussian.h>
-#include <moveit/collision_distance_field/collision_env_hybrid.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/collision_distance_field/collision_env_hybrid.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_model/robot_model.hpp>
 
 #include <Eigen/Core>
 #include <Eigen/StdVector>

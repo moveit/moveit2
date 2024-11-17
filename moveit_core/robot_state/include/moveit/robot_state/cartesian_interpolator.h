@@ -38,7 +38,7 @@
 
 #pragma once
 
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_state/robot_state.hpp>
 
 namespace moveit
 {

@@ -36,10 +36,10 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/planning_interface/planning_request.h>
-#include <moveit/planning_interface/planning_response.h>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/planning_interface/planning_request.hpp>
+#include <moveit/planning_interface/planning_response.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
 #include <rclcpp/node.hpp>
 #include <string>
 #include <map>

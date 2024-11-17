@@ -34,10 +34,10 @@
 
 /* Author: E. Gil Jones */
 
-#include <moveit/collision_distance_field/collision_distance_field_types.h>
+#include <moveit/collision_distance_field/collision_distance_field_types.hpp>
 #include <geometric_shapes/body_operations.h>
-#include <moveit/distance_field/distance_field.h>
-#include <moveit/distance_field/find_internal_points.h>
+#include <moveit/distance_field/distance_field.hpp>
+#include <moveit/distance_field/find_internal_points.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/time.hpp>

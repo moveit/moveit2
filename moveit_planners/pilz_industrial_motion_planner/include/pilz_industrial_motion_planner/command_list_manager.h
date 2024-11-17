@@ -39,14 +39,14 @@
 #include <memory>
 #include <functional>
 
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <moveit_msgs/msg/motion_plan_response.hpp>
 #include <moveit_msgs/msg/motion_sequence_request.hpp>
 
-#include <pilz_industrial_motion_planner/plan_components_builder.h>
-#include <pilz_industrial_motion_planner/trajectory_blender.h>
-#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
+#include <pilz_industrial_motion_planner/plan_components_builder.hpp>
+#include <pilz_industrial_motion_planner/trajectory_blender.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.hpp>
 
 #include <cartesian_limits_parameters.hpp>
 

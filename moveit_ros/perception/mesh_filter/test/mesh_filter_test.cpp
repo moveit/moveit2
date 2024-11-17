@@ -33,8 +33,8 @@
  *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <moveit/mesh_filter/mesh_filter.h>
-#include <moveit/mesh_filter/stereo_camera_model.h>
+#include <moveit/mesh_filter/mesh_filter.hpp>
+#include <moveit/mesh_filter/stereo_camera_model.hpp>
 #include <geometric_shapes/shapes.h>
 #include <geometric_shapes/shape_operations.h>
 #include <eigen3/Eigen/Eigen>

@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/warehouse/moveit_message_storage.h>
-#include <moveit/macros/class_forward.h>
+#include <moveit/warehouse/moveit_message_storage.hpp>
+#include <moveit/macros/class_forward.hpp>
 #include <moveit_msgs/msg/trajectory_constraints.hpp>
 #include <rclcpp/logger.hpp>
 

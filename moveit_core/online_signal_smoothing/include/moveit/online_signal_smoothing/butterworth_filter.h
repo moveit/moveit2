@@ -42,8 +42,8 @@
 #include <cstddef>
 
 #include <moveit_butterworth_filter_parameters.hpp>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/online_signal_smoothing/smoothing_base_class.hpp>
 
 namespace online_signal_smoothing
 {

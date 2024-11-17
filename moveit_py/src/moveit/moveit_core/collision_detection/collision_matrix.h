@@ -37,7 +37,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/eigen.h>
-#include <moveit/collision_detection/collision_matrix.h>
+#include <moveit/collision_detection/collision_matrix.hpp>
 
 namespace py = pybind11;
 

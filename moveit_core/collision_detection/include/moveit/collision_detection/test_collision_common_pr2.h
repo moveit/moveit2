@@ -34,13 +34,13 @@
 
 /* Author: E. Gil Jones */
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/utils/robot_model_test_utils.h>
-#include <moveit/collision_detection/collision_common.h>
-#include <moveit/collision_detection/collision_env.h>
-#include <moveit/collision_detection/collision_detector_allocator.h>
-#include <urdf_parser/urdf_parser.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
+#include <moveit/collision_detection/collision_common.hpp>
+#include <moveit/collision_detection/collision_env.hpp>
+#include <moveit/collision_detection/collision_detector_allocator.hpp>
+#include <urdf_parser/urdf_parser.hpp>
 #include <geometric_shapes/shape_operations.h>
 
 #include <gtest/gtest.h>

@@ -37,7 +37,7 @@
 /* Author: Ioan Sucan, Sachin Chitta, Acorn Pooley, Mario Prats, Dave Coleman, Robert Haschke */
 
 #include <memory>
-#include <moveit/robot_state/cartesian_interpolator.h>
+#include <moveit/robot_state/cartesian_interpolator.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

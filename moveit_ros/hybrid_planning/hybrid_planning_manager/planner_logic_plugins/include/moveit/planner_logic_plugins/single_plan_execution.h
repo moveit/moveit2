@@ -37,8 +37,8 @@
     with the local planner.
  */
 
-#include <moveit/hybrid_planning_manager/planner_logic_interface.h>
-#include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
+#include <moveit/hybrid_planning_manager/planner_logic_interface.hpp>
+#include <moveit/hybrid_planning_manager/hybrid_planning_manager.hpp>
 
 namespace moveit::hybrid_planning
 {

@@ -37,9 +37,9 @@
 
 #pragma once
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/attached_body.h>
-#include <moveit/transforms/transforms.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/attached_body.hpp>
+#include <moveit/transforms/transforms.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <std_msgs/msg/color_rgba.hpp>

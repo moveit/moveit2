@@ -37,17 +37,17 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/exceptions/exceptions.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/exceptions/exceptions.hpp>
 #include <srdfdom/model.h>
 
 // joint types
-#include <moveit/robot_model/joint_model_group.h>
-#include <moveit/robot_model/fixed_joint_model.h>
-#include <moveit/robot_model/floating_joint_model.h>
-#include <moveit/robot_model/planar_joint_model.h>
-#include <moveit/robot_model/revolute_joint_model.h>
-#include <moveit/robot_model/prismatic_joint_model.h>
+#include <moveit/robot_model/joint_model_group.hpp>
+#include <moveit/robot_model/fixed_joint_model.hpp>
+#include <moveit/robot_model/floating_joint_model.hpp>
+#include <moveit/robot_model/planar_joint_model.hpp>
+#include <moveit/robot_model/revolute_joint_model.hpp>
+#include <moveit/robot_model/prismatic_joint_model.hpp>
 #include <rclcpp/logging.hpp>
 #include <Eigen/Geometry>
 #include <iostream>
