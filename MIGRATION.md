@@ -3,6 +3,7 @@
 API changes in MoveIt releases
 
 ## ROS Rolling
+- [11/2024] All MoveIt 2 headers have been updated to use the `.hpp` extension. Please update all imports from `.h` to `.hpp`.
 - [12/2023] `trajectory_processing::Path` and `trajectory_processing::Trajectory` APIs have been updated to prevent misuse.
 The constructors have been replaced by builder methods so that errors can be communicated. Paths and trajectories now need to be created with `Path::Create()` and `Trajectory::Create()`. These methods now return an `std::optional` that needs to be checked for a valid value. `Trajectory` no longer has the `isValid()` method. If it's invalid, `Trajectory::Create()` will return `std::nullopt`. Finally, `Path` now takes the list of input waypoints as `std::vector`, instead of `std::list`.
 - [12/2023] LMA kinematics plugin is removed to remove the maintenance work because better alternatives exist like KDL or TracIK
