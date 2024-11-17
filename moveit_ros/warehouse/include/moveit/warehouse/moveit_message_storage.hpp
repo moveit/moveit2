@@ -36,7 +36,7 @@
 
 #pragma once
 
-#include <warehouse_ros/database_connection.hpp>
+#include <warehouse_ros/database_connection.h>
 #include <vector>
 #include <string>
 

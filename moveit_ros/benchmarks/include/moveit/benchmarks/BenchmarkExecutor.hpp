@@ -46,7 +46,7 @@
 #include <moveit/warehouse/constraints_storage.hpp>
 #include <moveit/warehouse/trajectory_constraints_storage.hpp>
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
-#include <warehouse_ros/database_loader.hpp>
+#include <warehouse_ros/database_loader.h>
 #include <pluginlib/class_loader.hpp>
 
 #include <map>
