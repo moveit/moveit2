@@ -57,7 +57,7 @@
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/base/spaces/constraint/ProjectedStateSpace.h>
 
-#include "load_test_robot.h"
+#include "load_test_robot.hpp"
 
 rclcpp::Logger getLogger()
 {

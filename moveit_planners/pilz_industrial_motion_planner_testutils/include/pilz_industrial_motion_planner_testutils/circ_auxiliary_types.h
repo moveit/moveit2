@@ -34,10 +34,10 @@
 
 #pragma once
 
-#include "center.h"
-#include "interim.h"
-#include "cartesianconfiguration.h"
-#include "cartesianpathconstraintsbuilder.h"
+#include "center.hpp"
+#include "interim.hpp"
+#include "cartesianconfiguration.hpp"
+#include "cartesianpathconstraintsbuilder.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

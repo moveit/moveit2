@@ -41,13 +41,13 @@
 #include <rviz_common/properties/string_property.hpp>
 #include <rviz_common/properties/ros_topic_property.hpp>
 #ifndef Q_MOC_RUN
-#include <moveit/rviz_plugin_render_tools/planning_scene_render.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/rviz_plugin_render_tools/planning_scene_render.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/planning_scene_rviz_plugin/background_processing.hpp>
 #include <rclcpp/rclcpp.hpp>
 #endif
 
-#include <moveit_planning_scene_rviz_plugin_core_export.h>
+#include <moveit_planning_scene_rviz_plugin_core_export.hpp>
 
 namespace Ogre
 {

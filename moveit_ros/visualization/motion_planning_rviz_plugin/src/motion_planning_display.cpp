@@ -34,15 +34,15 @@
 
 /* Author: Ioan Sucan, Dave Coleman, Adam Leeper, Sachin Chitta */
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.h>
-#include <moveit/robot_interaction/kinematic_options_map.h>
-#include <moveit/rviz_plugin_render_tools/planning_link_updater.h>
-#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.hpp>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.hpp>
+#include <moveit/robot_interaction/kinematic_options_map.hpp>
+#include <moveit/rviz_plugin_render_tools/planning_link_updater.hpp>
+#include <moveit/rviz_plugin_render_tools/robot_state_visualization.hpp>
 
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
-#include <moveit/motion_planning_rviz_plugin/interactive_marker_display.h>
+#include <moveit/motion_planning_rviz_plugin/interactive_marker_display.hpp>
 
 #include <rviz_common/properties/property.hpp>
 #include <rviz_common/properties/string_property.hpp>
@@ -62,13 +62,13 @@
 #include <OgreSceneNode.h>
 #include <rviz_rendering/objects/shape.hpp>
 
-#include <moveit/robot_state/conversions.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
 
 #include <QShortcut>
 
-#include "ui_motion_planning_rviz_plugin_frame.h"
-#include <moveit/utils/rclcpp_utils.h>
+#include "ui_motion_planning_rviz_plugin_frame.hpp"
+#include <moveit/utils/rclcpp_utils.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace moveit_rviz_plugin

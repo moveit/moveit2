@@ -41,13 +41,13 @@
 #include <QListWidgetItem>
 
 #ifndef Q_MOC_RUN
-#include <moveit/macros/class_forward.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_interaction/robot_interaction.h>
-#include <moveit/robot_interaction/interaction_handler.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_interaction/robot_interaction.hpp>
+#include <moveit/robot_interaction/interaction_handler.hpp>
 // TODO (ddengster): Enable when moveit_ros_perception is ported
-// #include <moveit/semantic_world/semantic_world.h>
+// #include <moveit/semantic_world/semantic_world.hpp>
 
 #include <interactive_markers/interactive_marker_server.hpp>
 #include <rviz_default_plugins/displays/interactive_markers/interactive_marker.hpp>

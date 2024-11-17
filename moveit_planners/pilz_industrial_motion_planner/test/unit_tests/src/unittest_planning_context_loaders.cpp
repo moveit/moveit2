@@ -41,7 +41,7 @@
 
 #include <pilz_industrial_motion_planner/planning_context_loader.h>
 
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 #include <rclcpp/rclcpp.hpp>
 

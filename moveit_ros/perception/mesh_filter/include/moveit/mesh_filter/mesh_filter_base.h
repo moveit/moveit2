@@ -37,9 +37,9 @@
 #pragma once
 
 #include <map>
-#include <moveit/macros/class_forward.h>
-#include <moveit/mesh_filter/gl_renderer.h>
-#include <moveit/mesh_filter/sensor_model.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/mesh_filter/gl_renderer.hpp>
+#include <moveit/mesh_filter/sensor_model.hpp>
 #include <Eigen/Geometry>  // for Isometry3d
 #include <queue>
 #include <thread>

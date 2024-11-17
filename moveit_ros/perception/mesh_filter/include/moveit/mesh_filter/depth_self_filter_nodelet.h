@@ -38,9 +38,9 @@
 
 #include <nodelet/nodelet.h>
 #include <image_transport/image_transport.h>
-#include <moveit/mesh_filter/transform_provider.h>
-#include <moveit/mesh_filter/mesh_filter.h>
-#include <moveit/mesh_filter/stereo_camera_model.h>
+#include <moveit/mesh_filter/transform_provider.hpp>
+#include <moveit/mesh_filter/mesh_filter.hpp>
+#include <moveit/mesh_filter/stereo_camera_model.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <memory>
 

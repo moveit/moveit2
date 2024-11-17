@@ -38,7 +38,7 @@
 
 #include <moveit_msgs/msg/constraints.hpp>
 
-#include "cartesianconfiguration.h"
+#include "cartesianconfiguration.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

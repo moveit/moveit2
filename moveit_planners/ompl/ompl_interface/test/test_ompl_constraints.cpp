@@ -41,7 +41,7 @@
  *  NOTE q = joint positions
  **/
 
-#include "load_test_robot.h"
+#include "load_test_robot.hpp"
 
 #include <memory>
 #include <string>

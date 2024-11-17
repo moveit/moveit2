@@ -52,7 +52,7 @@
 #include <fstream>
 #include <functional>
 
-#include "pr2_arm_kinematics_plugin.h"
+#include "pr2_arm_kinematics_plugin.hpp"
 
 class LoadPlanningModelsPr2 : public testing::Test
 {

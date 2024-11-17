@@ -39,7 +39,7 @@
 
 #include <rviz_default_plugins/displays/interactive_markers/interactive_marker_namespace_property.hpp>
 
-#include <moveit/motion_planning_rviz_plugin/interactive_marker_display.h>
+#include <moveit/motion_planning_rviz_plugin/interactive_marker_display.hpp>
 
 namespace rviz_default_plugins
 {

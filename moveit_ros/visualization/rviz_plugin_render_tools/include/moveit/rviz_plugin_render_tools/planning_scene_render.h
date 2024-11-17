@@ -36,9 +36,9 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/rviz_plugin_render_tools/render_shapes.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/rviz_plugin_render_tools/render_shapes.hpp>
 #include <rviz_common/properties/color_property.hpp>
 #include <OgreMaterial.h>
 

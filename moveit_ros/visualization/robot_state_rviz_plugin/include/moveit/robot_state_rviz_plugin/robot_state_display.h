@@ -39,8 +39,8 @@
 #include <rviz_common/display.hpp>
 
 #ifndef Q_MOC_RUN
-#include <moveit/rdf_loader/rdf_loader.h>
-#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
+#include <moveit/rdf_loader/rdf_loader.hpp>
+#include <moveit/rviz_plugin_render_tools/robot_state_visualization.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <rclcpp/rclcpp.hpp>
 #endif

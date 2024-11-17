@@ -34,13 +34,13 @@
 
 #pragma once
 
-#include "ptp.h"
-#include "lin.h"
-#include "circ.h"
-#include "gripper.h"
-#include "jointconfiguration.h"
-#include "cartesianconfiguration.h"
-#include "circ_auxiliary_types.h"
+#include "ptp.hpp"
+#include "lin.hpp"
+#include "circ.hpp"
+#include "gripper.hpp"
+#include "jointconfiguration.hpp"
+#include "cartesianconfiguration.hpp"
+#include "circ_auxiliary_types.hpp"
 
 #include <variant>
 

@@ -36,8 +36,8 @@
 
 #include <memory>
 
-#include "basecmd.h"
-#include "circauxiliary.h"
+#include "basecmd.hpp"
+#include "circauxiliary.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

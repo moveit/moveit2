@@ -52,7 +52,7 @@
 #include <pilz_industrial_motion_planner/trajectory_blend_response.h>
 #include <pilz_industrial_motion_planner/trajectory_blender_transition_window.h>
 #include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 #include <rclcpp/rclcpp.hpp>
 

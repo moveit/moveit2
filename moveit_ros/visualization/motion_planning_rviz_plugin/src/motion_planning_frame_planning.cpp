@@ -34,19 +34,19 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.hpp>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
 #include <std_srvs/srv/empty.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 
-#include "ui_motion_planning_rviz_plugin_frame.h"
+#include "ui_motion_planning_rviz_plugin_frame.hpp"
 
 namespace moveit_rviz_plugin
 {

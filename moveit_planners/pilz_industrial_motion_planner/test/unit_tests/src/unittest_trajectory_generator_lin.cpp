@@ -40,7 +40,7 @@
 #include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
 #include <pilz_industrial_motion_planner_testutils/command_types_typedef.h>
 #include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/robot_model/robot_model.h>

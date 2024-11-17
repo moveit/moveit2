@@ -39,7 +39,7 @@
 #include <visualization_msgs/msg/interactive_marker_feedback.hpp>
 #include <visualization_msgs/msg/interactive_marker.hpp>
 #include <interactive_markers/menu_handler.hpp>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_state/robot_state.hpp>
 #include <functional>
 #include <thread>
 

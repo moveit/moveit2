@@ -36,10 +36,10 @@
 
 #pragma once
 
-#include <moveit/mesh_filter/sensor_model.h>
+#include <moveit/mesh_filter/sensor_model.hpp>
 #include <string>
 
-#include <moveit_mesh_filter_export.h>
+#include <moveit_mesh_filter_export.hpp>
 
 namespace mesh_filter
 {

@@ -47,7 +47,7 @@
 #include <pilz_industrial_motion_planner/planning_context_lin.h>
 #include <pilz_industrial_motion_planner/planning_context_ptp.h>
 
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 // parameters from parameter server
 const std::string PARAM_PLANNING_GROUP_NAME("planning_group");

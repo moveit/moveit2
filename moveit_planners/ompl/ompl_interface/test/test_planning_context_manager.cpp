@@ -50,7 +50,7 @@
  *
  **/
 
-#include "load_test_robot.h"
+#include "load_test_robot.hpp"
 
 #include <gtest/gtest.h>
 

@@ -35,4 +35,4 @@ if(NOT "${MOVEIT_VERSION_EXTRA}" STREQUAL "")
 endif()
 
 configure_file("version.h.in"
-               "${VERSION_FILE_PATH}/moveit_core/moveit/version.h")
+               "${VERSION_FILE_PATH}/moveit_core/moveit/version.hpp")

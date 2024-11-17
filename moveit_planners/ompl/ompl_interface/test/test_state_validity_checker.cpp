@@ -48,7 +48,7 @@
  *    The test do show what is minimally required to create a working StateValidityChecker.
  **/
 
-#include "load_test_robot.h"
+#include "load_test_robot.hpp"
 
 #include <limits>
 #include <ostream>

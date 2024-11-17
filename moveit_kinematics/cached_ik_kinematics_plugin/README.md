@@ -56,7 +56,7 @@ Below is a complete list of all arguments:
 
 The Cached IK Kinematics Plugin is implemented as a wrapper around classed derived from the `kinematics::KinematicsBase` [abstract base class](http://docs.ros.org/en/latest/api/moveit_core/html/cpp/classkinematics_1_1KinematicsBase.html). Wrappers for the `kdl_kinematics_plugin::KDLKinematicsPlugin` and `srv_kinematics_plugin::SrvKinematicsPlugin` classes are already included in the plugin. For any other solver, you can create a new kinematics plugin. The C++ code for doing so is extremely simple; here is the code to create a wrapper for the KDL solver:
 
-    #include "cached_ik_kinematics_plugin.h"
+    #include "cached_ik_kinematics_plugin.hpp"
     #include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
     #include <pluginlib/class_list_macros.hpp>
     PLUGINLIB_EXPORT_CLASS(cached_ik_kinematics_plugin::CachedIKKinematicsPlugin<kdl_kinematics_plugin::KDLKinematicsPlugin>, kinematics::KinematicsBase);

@@ -52,7 +52,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 const double EPSILON = 1.0e-6;
 const std::string PLAN_SERVICE_NAME = "/plan_kinematic_path";

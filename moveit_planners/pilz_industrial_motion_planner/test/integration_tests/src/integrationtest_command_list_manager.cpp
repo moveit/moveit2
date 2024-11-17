@@ -54,7 +54,7 @@
 #include <pilz_industrial_motion_planner_testutils/sequence.h>
 #include <pilz_industrial_motion_planner_testutils/xml_testdata_loader.h>
 
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 #include <pilz_industrial_motion_planner/command_list_manager.h>
 #include <pilz_industrial_motion_planner/tip_frame_getter.h>

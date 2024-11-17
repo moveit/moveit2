@@ -38,7 +38,7 @@ This test checks if a state can be set in TSSafeStateStorage and correctly retri
 The skeleton of this test was taken from test_state_validity_checker.cpp by Jeroen De Maeyer.
 */
 
-#include "load_test_robot.h"
+#include "load_test_robot.hpp"
 #include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
 #include <gtest/gtest.h>
 

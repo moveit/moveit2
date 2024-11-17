@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan, Acorn Pooley, Adam Leeper */
 
 #include <math.h>
-#include <moveit/robot_interaction/interactive_marker_helpers.h>
+#include <moveit/robot_interaction/interactive_marker_helpers.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 

@@ -45,8 +45,8 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/kinematic_constraints/utils.h>
 
-#include "robotconfiguration.h"
-#include "jointconfiguration.h"
+#include "robotconfiguration.hpp"
+#include "jointconfiguration.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

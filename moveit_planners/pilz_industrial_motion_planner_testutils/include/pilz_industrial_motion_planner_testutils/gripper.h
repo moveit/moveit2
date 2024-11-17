@@ -34,8 +34,8 @@
 
 #pragma once
 
-#include "ptp.h"
-#include "jointconfiguration.h"
+#include "ptp.hpp"
+#include "jointconfiguration.hpp"
 
 namespace pilz_industrial_motion_planner_testutils
 {

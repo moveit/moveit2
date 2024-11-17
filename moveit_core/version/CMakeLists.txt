@@ -25,7 +25,7 @@ add_custom_command(
 add_custom_target(
   version_h
   DEPENDS always_rebuild
-  COMMENT "Generating version.h")
+  COMMENT "Generating version.hpp")
 
 add_executable(moveit_version version.cpp)
 add_dependencies(moveit_version version_h)
@@ -33,6 +33,6 @@ add_dependencies(moveit_version version_h)
 target_include_directories(moveit_version
                            PRIVATE ${CMAKE_BINARY_DIR}/include/moveit_core)
 
-install(FILES "${CMAKE_BINARY_DIR}/include/moveit_core/moveit/version.h"
+install(FILES "${CMAKE_BINARY_DIR}/include/moveit_core/moveit/version.hpp"
         DESTINATION include/moveit_core/moveit)
 install(TARGETS moveit_version RUNTIME DESTINATION bin)

@@ -60,7 +60,7 @@
 
 #include <memory>
 
-#include "pr2_arm_ik.h"
+#include "pr2_arm_ik.hpp"
 
 namespace pr2_arm_kinematics
 {

@@ -57,7 +57,7 @@
 #include <pilz_industrial_motion_planner/cartesian_trajectory_point.h>
 #include <pilz_industrial_motion_planner/limits_container.h>
 #include <pilz_industrial_motion_planner/trajectory_functions.h>
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 #define _USE_MATH_DEFINES
 

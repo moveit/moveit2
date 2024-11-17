@@ -44,8 +44,8 @@
 #include <queue>
 #include <unordered_set>
 #include <utility>
-#include "GreedyKCenters.h"
-#include "NearestNeighbors.h"
+#include "GreedyKCenters.hpp"
+#include "NearestNeighbors.hpp"
 #include <iostream>
 
 namespace cached_ik_kinematics_plugin

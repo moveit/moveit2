@@ -37,9 +37,9 @@
 #pragma once
 
 #include <map>
-#include <moveit/macros/declare_ptr.h>
-#include <moveit/mesh_filter/gl_renderer.h>
-#include <moveit/mesh_filter/mesh_filter_base.h>
+#include <moveit/macros/declare_ptr.hpp>
+#include <moveit/mesh_filter/gl_renderer.hpp>
+#include <moveit/mesh_filter/mesh_filter_base.hpp>
 
 // forward declarations
 namespace shapes

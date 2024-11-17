@@ -37,7 +37,7 @@
 #include <string>
 #include <vector>
 
-#include "cartesian_trajectory_point.h"
+#include "cartesian_trajectory_point.hpp"
 
 namespace pilz_industrial_motion_planner
 {

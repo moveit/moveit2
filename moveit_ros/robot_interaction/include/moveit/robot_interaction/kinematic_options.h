@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 
 namespace robot_interaction
 {

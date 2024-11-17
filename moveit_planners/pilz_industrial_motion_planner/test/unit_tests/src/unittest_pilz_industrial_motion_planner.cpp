@@ -40,7 +40,7 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
 #include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.h>
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 #include <rclcpp/rclcpp.hpp>
 

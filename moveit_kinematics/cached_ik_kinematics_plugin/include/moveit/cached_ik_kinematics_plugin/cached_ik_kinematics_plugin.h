@@ -354,4 +354,4 @@ public:
 };
 }  // namespace cached_ik_kinematics_plugin
 
-#include "cached_ik_kinematics_plugin-inl.h"
+#include "cached_ik_kinematics_plugin-inl.hpp"

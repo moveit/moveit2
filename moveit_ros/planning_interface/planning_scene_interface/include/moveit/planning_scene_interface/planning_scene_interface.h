@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <moveit_msgs/msg/object_color.hpp>
 #include <moveit_msgs/msg/collision_object.hpp>
 #include <moveit_msgs/msg/attached_collision_object.hpp>
