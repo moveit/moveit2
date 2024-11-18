@@ -437,7 +437,8 @@ void PlanningScene::checkCollision(const collision_detection::CollisionRequest& 
   req.pad_environment_collisions ? getCollisionEnv()->checkRobotCollision(req, res, robot_state, acm) :
                                    getCollisionEnvUnpadded()->checkRobotCollision(req, res, robot_state, acm);
 
-  // Return early if a collision was found or the maximum number of allowed contacts is exceeded
+  // Return early if a collision was found and the number of contacts found already exceed `req.max_contacts`, if
+  // `req.contacts` is enabled.
   if (res.collision && (!req.contacts || res.contacts.size() >= req.max_contacts))
   {
     return;
