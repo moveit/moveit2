@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/robot_model/robot_model.hpp>
-#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_model/robot_model.hp>
+#include <moveit/robot_state/robot_state.hp>
 #include <moveit/transforms/transforms.hpp>
 #include <moveit/collision_detection/collision_detector_allocator.hpp>
 #include <moveit/collision_detection/world_diff.hpp>
