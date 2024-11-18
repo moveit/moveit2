@@ -150,12 +150,6 @@ struct CollisionRequest
    * are included. */
   std::string group_name = "";
 
-  /** \brief If true, use padded collision environment */
-  bool pad_environment_collisions = true;
-
-  /** \brief If true, do self collision check with padded robot links */
-  bool pad_self_collisions = false;
-
   /** \brief If true, compute proximity distance */
   bool distance = false;
 
