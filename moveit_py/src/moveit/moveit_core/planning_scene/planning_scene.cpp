@@ -101,6 +101,9 @@ void initPlanningScene(py::module& m)
 {
   py::module planning_scene = m.def_submodule("planning_scene");
 
+// Remove once checkCollisionUnpadded is removed
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   py::class_<planning_scene::PlanningScene, std::shared_ptr<planning_scene::PlanningScene>>(planning_scene,
                                                                                             "PlanningScene",
                                                                                             R"(
@@ -360,7 +363,7 @@ void initPlanningScene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
+      // DEPRECATED! Use check_collision instead
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&>(
                &planning_scene::PlanningScene::checkCollisionUnpadded),
@@ -375,7 +378,7 @@ void initPlanningScene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
+      // DEPRECATED! Use check_collision instead
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
                              moveit::core::RobotState&>(&planning_scene::PlanningScene::checkCollisionUnpadded,
@@ -392,7 +395,7 @@ void initPlanningScene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
+      // DEPRECATED! Use check_collision instead
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
                              moveit::core::RobotState&, const collision_detection::AllowedCollisionMatrix&>(
@@ -410,7 +413,6 @@ void initPlanningScene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
       .def("check_self_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&>(
                &planning_scene::PlanningScene::checkSelfCollision),
@@ -481,6 +483,7 @@ void initPlanningScene(py::module& m)
      Returns:
                bool: true if load from file was successful otherwise false.
            )");
+#pragma GCC diagnostic pop  // TODO remove once checkCollisionUnpadded is removed
 }
 }  // namespace bind_planning_scene
 }  // namespace moveit_py
