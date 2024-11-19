@@ -25,5 +25,13 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-include("${moveit_common_DIR}/moveit_package.cmake")
-include("${moveit_common_DIR}/deprecated_headers.cmake")
+find_package(PythonInterp REQUIRED)
+find_package(Python REQUIRED)
+
+set(SCRIPT ${CMAKE_CURRENT_LIST_DIR}/../scripts/create_deprecated_headers.py)
+
+macro(CREATE_DEPRECATED_HEADERS)
+    add_custom_target(${PROJECT_NAME}_deprecated_headers ALL
+        COMMAND ${PYTHON_EXECUTABLE} ${SCRIPT} ${CMAKE_INSTALL_PREFIX}
+    )
+endmacro()

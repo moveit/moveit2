@@ -6,3 +6,4 @@ find_package(ament_cmake REQUIRED)
 ament_package(CONFIG_EXTRAS "moveit_common-extras.cmake")
 
 install(DIRECTORY cmake DESTINATION share/moveit_common)
+install(DIRECTORY scripts DESTINATION share/moveit_common)

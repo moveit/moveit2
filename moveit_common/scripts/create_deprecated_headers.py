@@ -32,23 +32,22 @@
 import sys
 from pathlib import Path
 
-# TODO: This doesn't work for chomp and pilz
-MOVEIT_HPPS = "**/moveit*/**/*.hpp"
+ALL_HPPS = "**/*.hpp"
 USAGE = "Usage: ./generate_deprecated_headers <install_directory>"
 DEPRECATION = "{0}.h imports are deprecated. Consider using {0}.hpp"
 
-
-def create_c_header(hpp_path: str) -> None:
-    header_directory = hpp_path.parent
+def create_c_header(include_directory: Path, hpp_path: Path) -> None:
     file = hpp_path.name.replace(".hpp", "")
-    with open(header_directory / f"{file}.h", "w") as h_file:
+    hpp_import = f"<{hpp_path.relative_to(include_directory)}>"
+    with open(str(hpp_path).replace("pp", ""), "w") as h_file:
         h_file.write(f"#warning {DEPRECATION.format(file)}\n")
-        h_file.write(f"#include <{file}.hpp>\n")
+        h_file.write(f"#include {hpp_import}\n")
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         sys.exit(USAGE)
-    install_directory = sys.argv[1]
-    for hpp_path in Path(install_directory).rglob(MOVEIT_HPPS):
-        create_c_header(hpp_path)
+    include_directory = Path(sys.argv[1]) / "include"
+    print(str(include_directory))
+    for hpp_path in Path(include_directory).rglob(ALL_HPPS):
+        create_c_header(include_directory, hpp_path)
