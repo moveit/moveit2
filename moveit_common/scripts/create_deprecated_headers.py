@@ -40,7 +40,7 @@ DEPRECATION = "{0}.h imports are deprecated. Consider using {0}.hpp"
 def create_c_header(include_directory: Path, hpp_path: Path) -> None:
     file = hpp_path.name.replace(".hpp", "")
     hpp_import = f"<{hpp_path.relative_to(include_directory)}>"
-    with open(str(hpp_path).replace("pp", ""), "w") as h_file:
+    with open(str(hpp_path).replace(".hpp", ".h"), "w") as h_file:
         h_file.write(f"#warning {DEPRECATION.format(file)}\n")
         h_file.write(f"#include {hpp_import}\n")
 
