@@ -26,9 +26,9 @@ jobs:
             CLANG_TIDY: pedantic
           - IMAGE: humble-ci
             ROS_DISTRO: humble
-          - IMAGE: humble-ci-testing
-            ROS_DISTRO: humble
           - IMAGE: jazzy-ci
+            ROS_DISTRO: jazzy
+          - IMAGE: jazzy-ci-testing
             ROS_DISTRO: jazzy
     env:
       # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
@@ -167,7 +167,7 @@ jobs:
           workdir: ${{ env.BASEDIR }}/target_ws
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info
