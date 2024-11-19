@@ -18,7 +18,7 @@ jobs:
       matrix:
         env:
           - IMAGE: rolling-ci
-            CCOV: false # Disabled: https://github.com/moveit/moveit2/issues/2866
+            CCOV: true
             ROS_DISTRO: rolling
           - IMAGE: rolling-ci
             ROS_DISTRO: rolling
@@ -165,6 +165,7 @@ jobs:
         with:
           docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
+          lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
         uses: codecov/codecov-action@v5
