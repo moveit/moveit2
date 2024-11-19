@@ -36,6 +36,7 @@ ALL_HPPS = "**/*.hpp"
 USAGE = "Usage: ./generate_deprecated_headers <install_directory>"
 DEPRECATION = "{0}.h imports are deprecated. Consider using {0}.hpp"
 
+
 def create_c_header(include_directory: Path, hpp_path: Path) -> None:
     file = hpp_path.name.replace(".hpp", "")
     hpp_import = f"<{hpp_path.relative_to(include_directory)}>"
