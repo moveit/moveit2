@@ -164,6 +164,7 @@ install(
   DESTINATION include/pilz_industrial_motion_planner)
 
 install(DIRECTORY include/ DESTINATION include/pilz_industrial_motion_planner)
+create_deprecated_headers()
 
 ament_export_include_directories(include/pilz_industrial_motion_planner)
 ament_export_targets(pilz_industrial_motion_plannerTargets HAS_LIBRARY_TARGET)

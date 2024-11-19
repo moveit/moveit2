@@ -41,6 +41,7 @@ install(
   INCLUDES
   DESTINATION include/moveit_simple_controller_manager)
 install(DIRECTORY include/ DESTINATION include/moveit_simple_controller_manager)
+create_deprecated_headers()
 
 ament_export_targets(moveit_simple_controller_managerTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)

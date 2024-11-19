@@ -114,6 +114,7 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES
   DESTINATION include/moveit_ros_visualization)
+create_deprecated_headers()
 
 ament_export_targets(moveit_ros_visualizationTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

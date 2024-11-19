@@ -66,6 +66,7 @@ install(
   INCLUDES
   DESTINATION include/moveit_setup_assistant)
 install(DIRECTORY include/ DESTINATION include/moveit_setup_assistant)
+create_deprecated_headers()
 ament_export_include_directories(include)
 install(DIRECTORY launch DESTINATION share/moveit_setup_assistant)
 install(DIRECTORY resources DESTINATION share/moveit_setup_assistant)

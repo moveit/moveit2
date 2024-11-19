@@ -54,6 +54,7 @@ install(
 
 install(DIRECTORY include/
         DESTINATION include/pilz_industrial_motion_planner_testutils)
+create_deprecated_headers()
 
 ament_export_targets(pilz_industrial_motion_planner_testutilsTargets
                      HAS_LIBRARY_TARGET)

@@ -38,6 +38,7 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES
   DESTINATION include/moveit_planners_stomp)
+create_deprecated_headers()
 
 ament_export_targets(moveit_planners_stompTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core stomp generate_parameter_library)

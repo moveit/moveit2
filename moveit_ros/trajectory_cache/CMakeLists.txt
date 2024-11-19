@@ -51,6 +51,7 @@ install(DIRECTORY include/ DESTINATION include/moveit_ros_trajectory_cache)
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_ros_trajectory_cache_lib_export.h
   DESTINATION include/moveit_ros_trajectory_cache)
+create_deprecated_headers()
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)

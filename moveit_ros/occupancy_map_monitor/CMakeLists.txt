@@ -59,6 +59,7 @@ install(
 install(TARGETS moveit_ros_occupancy_map_server
         DESTINATION lib/moveit_ros_occupancy_map_monitor)
 install(DIRECTORY include/ DESTINATION include/moveit_ros_occupancy_map_monitor)
+create_deprecated_headers()
 
 ament_export_targets(moveit_ros_occupancy_map_monitorTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} eigen3_cmake_module)

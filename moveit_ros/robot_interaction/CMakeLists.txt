@@ -55,6 +55,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_robot_interaction_export.h
         DESTINATION include/moveit_ros_robot_interaction)
 
 install(DIRECTORY resources DESTINATION share/moveit_ros_robot_interaction)
+create_deprecated_headers()
 
 ament_export_targets(moveit_ros_robot_interactionTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

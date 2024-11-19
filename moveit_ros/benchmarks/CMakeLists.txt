@@ -60,4 +60,6 @@ install(DIRECTORY include/ DESTINATION include/moveit_ros_benchmarks)
 install(PROGRAMS scripts/moveit_benchmark_statistics.py
         DESTINATION lib/moveit_ros_benchmarks)
 
+create_deprecated_headers()
+
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

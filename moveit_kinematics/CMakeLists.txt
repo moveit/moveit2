@@ -73,6 +73,7 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES
   DESTINATION include/moveit_kinematics)
+create_deprecated_headers()
 
 ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
