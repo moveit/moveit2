@@ -1,5 +1,0 @@
-repositories:
-  generate_parameter_library:
-    type: git
-    url: https://github.com/PickNikRobotics/generate_parameter_library.git
-    version: 0.3.7

@@ -597,7 +597,8 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   // clearing out any old data
   clear();
 
-  link_model_ = robot_model_->getLinkModel(oc.link_name);
+  bool found;  // just needed to silent the error message in getLinkModel()
+  link_model_ = robot_model_->getLinkModel(oc.link_name, &found);
   if (!link_model_)
   {
     RCLCPP_WARN(getLogger(), "Could not find link model for link name %s", oc.link_name.c_str());
@@ -617,6 +618,7 @@ bool OrientationConstraint::configure(const moveit_msgs::msg::OrientationConstra
   if (oc.header.frame_id.empty())
     RCLCPP_WARN(getLogger(), "No frame specified for position constraint on link '%s'!", oc.link_name.c_str());
 
+  desired_R_in_frame_id_ = Eigen::Quaterniond(q);  // desired rotation wrt. frame_id
   if (tf.isFixedFrame(oc.header.frame_id))
   {
     tf.transformQuaternion(oc.header.frame_id, q, q);
@@ -749,10 +751,8 @@ ConstraintEvaluationResult OrientationConstraint::decide(const moveit::core::Rob
   else if (parameterization_type_ == moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR)
   {
     Eigen::AngleAxisd aa(diff.linear());
-    xyz_rotation = aa.axis() * aa.angle();
-    xyz_rotation(0) = fabs(xyz_rotation(0));
-    xyz_rotation(1) = fabs(xyz_rotation(1));
-    xyz_rotation(2) = fabs(xyz_rotation(2));
+    // transform rotation vector from target frame to frame_id and take absolute values
+    xyz_rotation = (desired_R_in_frame_id_ * (aa.axis() * aa.angle())).cwiseAbs();
   }
   else
   {

@@ -95,6 +95,7 @@ protected:
     rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
     robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
+    robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
     // get parameters
@@ -134,10 +135,40 @@ protected:
    */
   bool tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, double epsilon);
 
+  /**
+   * @brief check if two sets of joint positions are close
+   * @param joints1 the first set of joint positions to compare
+   * @param joints2 the second set of joint positions to compare
+   * @param epsilon the tolerance a all joint position diffs must satisfy
+   * @return false if any joint diff exceeds tolerance. true otherwise
+   */
+  bool jointsNear(const std::vector<double>& joints1, const std::vector<double>& joints2, double epsilon);
+
+  /**
+   * @brief get the current joint values of the robot state
+   * @param jmg the joint model group whose joints we are interested in
+   * @param state the robot state to fetch the current joint positions for
+   * @return the joint positions for joints from jmg, set to the positions determined from state
+   */
+  std::vector<double> getJoints(const moveit::core::JointModelGroup* jmg, const moveit::core::RobotState& state);
+
+  /**
+   * @brief attach a collision object and subframes to a link
+   * @param state the state we are updating
+   * @param link the link we are attaching the collision object to
+   * @param object_name a unique name for the collision object
+   * @param object_pose the pose of the object relative to the parent link
+   * @param subframes subframe names and poses relative to the object they attach to
+   */
+  void attachToLink(moveit::core::RobotState& state, const moveit::core::LinkModel* link,
+                    const std::string& object_name, const Eigen::Isometry3d& object_pose,
+                    const moveit::core::FixedTransformsMap& subframes);
+
 protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  moveit::core::RobotStatePtr robot_state_;
   std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
@@ -165,6 +196,43 @@ bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const E
   return true;
 }
 
+bool TrajectoryFunctionsTestBase::jointsNear(const std::vector<double>& joints1, const std::vector<double>& joints2,
+                                             double epsilon)
+{
+  if (joints1.size() != joints2.size())
+  {
+    return false;
+  }
+  for (std::size_t i = 0; i < joints1.size(); ++i)
+  {
+    if (fabs(joints1.at(i) - joints2.at(i)) > fabs(epsilon))
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::vector<double> TrajectoryFunctionsTestBase::getJoints(const moveit::core::JointModelGroup* jmg,
+                                                           const moveit::core::RobotState& state)
+{
+  std::vector<double> joints;
+  for (const auto& name : jmg->getActiveJointModelNames())
+  {
+    joints.push_back(state.getVariablePosition(name));
+  }
+  return joints;
+}
+
+void TrajectoryFunctionsTestBase::attachToLink(moveit::core::RobotState& state, const moveit::core::LinkModel* link,
+                                               const std::string& object_name, const Eigen::Isometry3d& object_pose,
+                                               const moveit::core::FixedTransformsMap& subframes)
+{
+  state.attachBody(std::make_unique<moveit::core::AttachedBody>(
+      link, object_name, object_pose, std::vector<shapes::ShapeConstPtr>{}, EigenSTL::vector_Isometry3d{},
+      std::set<std::string>{}, trajectory_msgs::msg::JointTrajectory{}, subframes));
+}
+
 /**
  * @brief Parametrized class for tests with and without gripper.
  */
@@ -189,27 +257,27 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, TipLinkFK)
 {
   Eigen::Isometry3d tip_pose;
   std::map<std::string, double> test_state = zero_state_;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(*robot_state_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0 + L1 + L2 + L3, EPSILON);
 
   test_state[joint_names_.at(1)] = M_PI_2;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(*robot_state_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), L1 + L2 + L3, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0, EPSILON);
 
   test_state[joint_names_.at(1)] = -M_PI_2;
   test_state[joint_names_.at(2)] = M_PI_2;
-  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, group_tip_link_, test_state, tip_pose));
+  EXPECT_TRUE(pilz_industrial_motion_planner::computeLinkFK(*robot_state_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0, 3), -L1, EPSILON);
   EXPECT_NEAR(tip_pose(1, 3), 0, EPSILON);
   EXPECT_NEAR(tip_pose(2, 3), L0 - L2 - L3, EPSILON);
 
   // wrong link name
   std::string link_name = "wrong_link_name";
-  EXPECT_FALSE(pilz_industrial_motion_planner::computeLinkFK(planning_scene_, link_name, test_state, tip_pose));
+  EXPECT_FALSE(pilz_industrial_motion_planner::computeLinkFK(*robot_state_, link_name, test_state, tip_pose));
 }
 
 /**
@@ -334,6 +402,120 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotState)
 
     --random_test_number_;
   }
+}
+
+TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotStateWithIdentityCollisionObject)
+{
+  // Set up a default robot
+  moveit::core::RobotState state(robot_model_);
+  state.setToDefaultValues();
+  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+
+  std::vector<double> default_joints = getJoints(jmg, state);
+  const moveit::core::LinkModel* tip_link = robot_model_->getLinkModel(tcp_link_);
+  Eigen::Isometry3d tip_pose_in_base = state.getFrameTransform(tcp_link_);
+
+  // Attach an object with ignored subframes, and no transform
+  Eigen::Isometry3d object_pose_in_tip = Eigen::Isometry3d::Identity();
+  moveit::core::FixedTransformsMap subframes({ { "ignored", Eigen::Isometry3d::Identity() } });
+  attachToLink(state, tip_link, "object", object_pose_in_tip, subframes);
+
+  // The RobotState should be able to use an object pose to set the joints
+  Eigen::Isometry3d object_pose_in_base = tip_pose_in_base * object_pose_in_tip;
+  bool success = state.setFromIK(jmg, object_pose_in_base, "object");
+  EXPECT_TRUE(success);
+
+  // Given the target pose is the default pose of the object, the joints should be unchanged
+  std::vector<double> ik_joints = getJoints(jmg, state);
+  EXPECT_TRUE(jointsNear(ik_joints, default_joints, 4 * IK_SEED_OFFSET));
+}
+
+TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotStateWithTransformedCollisionObject)
+{
+  // Set up a default robot
+  moveit::core::RobotState state(robot_model_);
+  state.setToDefaultValues();
+  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+
+  std::vector<double> default_joints = getJoints(jmg, state);
+  const moveit::core::LinkModel* tip_link = robot_model_->getLinkModel(tcp_link_);
+  Eigen::Isometry3d tip_pose_in_base = state.getFrameTransform(tcp_link_);
+
+  // Attach an object with ignored subframes, and a non-trivial transform
+  Eigen::Isometry3d object_pose_in_tip;
+  object_pose_in_tip = Eigen::Translation3d(1, 2, 3);
+  object_pose_in_tip *= Eigen::AngleAxis(M_PI_2, Eigen::Vector3d::UnitX());
+  moveit::core::FixedTransformsMap subframes({ { "ignored", Eigen::Isometry3d::Identity() } });
+  attachToLink(state, tip_link, "object", object_pose_in_tip, subframes);
+
+  // The RobotState should be able to use an object pose to set the joints
+  Eigen::Isometry3d object_pose_in_base = tip_pose_in_base * object_pose_in_tip;
+  bool success = state.setFromIK(jmg, object_pose_in_base, "object");
+  EXPECT_TRUE(success);
+
+  // Given the target pose is the default pose of the object, the joints should be unchanged
+  std::vector<double> ik_joints = getJoints(jmg, state);
+  EXPECT_TRUE(jointsNear(ik_joints, default_joints, 4 * IK_SEED_OFFSET));
+}
+
+TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotStateWithIdentitySubframe)
+{
+  // Set up a default robot
+  moveit::core::RobotState state(robot_model_);
+  state.setToDefaultValues();
+  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+
+  std::vector<double> default_joints = getJoints(jmg, state);
+  const moveit::core::LinkModel* tip_link = robot_model_->getLinkModel(tcp_link_);
+  Eigen::Isometry3d tip_pose_in_base = state.getFrameTransform(tcp_link_);
+
+  // Attach an object and subframe with no transforms
+  Eigen::Isometry3d object_pose_in_tip = Eigen::Isometry3d::Identity();
+  Eigen::Isometry3d subframe_pose_in_object = Eigen::Isometry3d::Identity();
+  moveit::core::FixedTransformsMap subframes({ { "subframe", subframe_pose_in_object } });
+  attachToLink(state, tip_link, "object", object_pose_in_tip, subframes);
+
+  // The RobotState should be able to use a subframe pose to set the joints
+  Eigen::Isometry3d subframe_pose_in_base = tip_pose_in_base * object_pose_in_tip * subframe_pose_in_object;
+  bool success = state.setFromIK(jmg, subframe_pose_in_base, "object/subframe");
+  EXPECT_TRUE(success);
+
+  // Given the target pose is the default pose of the subframe, the joints should be unchanged
+  std::vector<double> ik_joints = getJoints(jmg, state);
+  EXPECT_TRUE(jointsNear(ik_joints, default_joints, 4 * IK_SEED_OFFSET));
+}
+
+TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotStateWithTransformedSubframe)
+{
+  // Set up a default robot
+  moveit::core::RobotState state(robot_model_);
+  state.setToDefaultValues();
+  const moveit::core::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+
+  std::vector<double> default_joints = getJoints(jmg, state);
+  const moveit::core::LinkModel* tip_link = robot_model_->getLinkModel(tcp_link_);
+  Eigen::Isometry3d tip_pose_in_base = state.getFrameTransform(tcp_link_);
+
+  // Attach an object and subframe with non-trivial transforms
+  Eigen::Isometry3d object_pose_in_tip;
+  object_pose_in_tip = Eigen::Translation3d(1, 2, 3);
+  object_pose_in_tip *= Eigen::AngleAxis(M_PI_2, Eigen::Vector3d::UnitX());
+
+  Eigen::Isometry3d subframe_pose_in_object;
+  subframe_pose_in_object = Eigen::Translation3d(4, 5, 6);
+  subframe_pose_in_object *= Eigen::AngleAxis(M_PI_2, Eigen::Vector3d::UnitY());
+
+  moveit::core::FixedTransformsMap subframes({ { "subframe", subframe_pose_in_object } });
+  attachToLink(state, tip_link, "object", object_pose_in_tip, subframes);
+
+  // The RobotState should be able to use a subframe pose to set the joints
+  Eigen::Isometry3d subframe_pose_in_base = tip_pose_in_base * object_pose_in_tip * subframe_pose_in_object;
+  bool success = state.setFromIK(jmg, subframe_pose_in_base, "object/subframe");
+  EXPECT_TRUE(success);
+
+  // Given the target pose is the default pose of the subframe, the joints should be unchanged
+  std::vector<double> ik_joints = getJoints(jmg, state);
+  EXPECT_TRUE(jointsNear(ik_joints, default_joints, 4 * IK_SEED_OFFSET));
 }
 
 /**

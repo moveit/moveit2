@@ -18,7 +18,7 @@ jobs:
       matrix:
         env:
           - IMAGE: rolling-ci
-            CCOV: false # Disabled: https://github.com/moveit/moveit2/issues/2866
+            CCOV: true
             ROS_DISTRO: rolling
           - IMAGE: rolling-ci
             ROS_DISTRO: rolling
@@ -26,9 +26,9 @@ jobs:
             CLANG_TIDY: pedantic
           - IMAGE: humble-ci
             ROS_DISTRO: humble
-          - IMAGE: humble-ci-testing
-            ROS_DISTRO: humble
           - IMAGE: jazzy-ci
+            ROS_DISTRO: jazzy
+          - IMAGE: jazzy-ci-testing
             ROS_DISTRO: jazzy
     env:
       # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
@@ -165,9 +165,10 @@ jobs:
         with:
           docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
+          lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info

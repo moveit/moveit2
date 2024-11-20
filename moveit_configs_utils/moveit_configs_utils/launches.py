@@ -59,6 +59,7 @@ def generate_moveit_rviz_launch(moveit_config):
     rviz_parameters = [
         moveit_config.planning_pipelines,
         moveit_config.robot_description_kinematics,
+        moveit_config.joint_limits,
     ]
 
     add_debuggable_node(
@@ -249,7 +250,7 @@ def generate_move_group_launch(moveit_config):
         parameters=move_group_params,
         extra_debug_args=["--debug"],
         # Set the display variable, in case OpenGL code is used internally
-        additional_env={"DISPLAY": os.environ["DISPLAY"]},
+        additional_env={"DISPLAY": os.environ.get("DISPLAY", "")},
     )
     return ld
 
