@@ -38,6 +38,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit_setup_core_plugins/start_screen_widget.hpp>

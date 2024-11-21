@@ -38,6 +38,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit/collision_distance_field/collision_env_distance_field.hpp>

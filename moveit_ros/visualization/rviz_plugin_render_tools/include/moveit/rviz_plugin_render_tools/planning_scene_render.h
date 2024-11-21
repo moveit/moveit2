@@ -38,6 +38,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit/rviz_plugin_render_tools/planning_scene_render.hpp>

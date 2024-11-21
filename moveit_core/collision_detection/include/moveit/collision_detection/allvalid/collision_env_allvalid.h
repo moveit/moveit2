@@ -38,6 +38,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit/collision_detection/allvalid/collision_env_allvalid.hpp>

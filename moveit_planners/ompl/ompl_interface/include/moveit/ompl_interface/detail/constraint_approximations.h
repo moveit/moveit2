@@ -38,6 +38,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit/ompl_interface/detail/constraint_approximations.hpp>

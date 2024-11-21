@@ -39,6 +39,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit_simple_controller_manager/gripper_controller_handle.hpp>

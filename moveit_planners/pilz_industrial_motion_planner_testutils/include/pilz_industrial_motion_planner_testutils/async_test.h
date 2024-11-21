@@ -18,6 +18,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <pilz_industrial_motion_planner_testutils/async_test.hpp>

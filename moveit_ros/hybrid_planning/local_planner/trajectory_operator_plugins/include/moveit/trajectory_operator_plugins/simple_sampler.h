@@ -42,6 +42,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit/trajectory_operator_plugins/simple_sampler.hpp>

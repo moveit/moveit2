@@ -39,6 +39,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit/planning_pipeline_interfaces/stopping_criterion_functions.hpp>

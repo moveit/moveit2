@@ -40,6 +40,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+/* #pragma message(".h header is obsolete. Please use the .hpp")
 
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
