@@ -118,7 +118,7 @@ public:
     }
 
     setStartStateToCurrentState();
-    joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name);
+    joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name_);
 
     joint_state_target_ = std::make_shared<moveit::core::RobotState>(getRobotModel());
     joint_state_target_->setToDefaultValues();
@@ -961,7 +961,7 @@ public:
     moveit_msgs::srv::GetCartesianPath::Response::SharedPtr response;
 
     req->start_state = considered_start_state_;
-    req->group_name = opt_.group_name;
+    req->group_name = opt_.group_name_;
     req->header.frame_id = getPoseReferenceFrame();
     req->header.stamp = getClock()->now();
     req->waypoints = waypoints;
