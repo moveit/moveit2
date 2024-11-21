@@ -117,12 +117,8 @@ public:
       throw std::runtime_error(error);
     }
 
-<<<<<<< HEAD
-    joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name_);
-=======
     setStartStateToCurrentState();
     joint_model_group_ = getRobotModel()->getJointModelGroup(opt.group_name);
->>>>>>> 02ebcba72 (Enhancement/moveit ros1 ports (#3041))
 
     joint_state_target_ = std::make_shared<moveit::core::RobotState>(getRobotModel());
     joint_state_target_->setToDefaultValues();
@@ -409,21 +405,10 @@ public:
 
   moveit::core::RobotStatePtr getStartState()
   {
-<<<<<<< HEAD
-    if (considered_start_state_)
-      return considered_start_state_;
-    else
-    {
-      moveit::core::RobotStatePtr s;
-      getCurrentState(s);
-      return s;
-    }
-=======
     moveit::core::RobotStatePtr s;
     getCurrentState(s);
     moveit::core::robotStateMsgToRobotState(considered_start_state_, *s, true);
     return s;
->>>>>>> 02ebcba72 (Enhancement/moveit ros1 ports (#3041))
   }
 
   bool setJointValueTarget(const geometry_msgs::msg::Pose& eef_pose, const std::string& end_effector_link,
@@ -975,17 +960,8 @@ public:
     auto req = std::make_shared<moveit_msgs::srv::GetCartesianPath::Request>();
     moveit_msgs::srv::GetCartesianPath::Response::SharedPtr response;
 
-<<<<<<< HEAD
-    if (considered_start_state_)
-      moveit::core::robotStateToRobotStateMsg(*considered_start_state_, req->start_state);
-    else
-      req->start_state.is_diff = true;
-
-    req->group_name = opt_.group_name_;
-=======
     req->start_state = considered_start_state_;
     req->group_name = opt_.group_name;
->>>>>>> 02ebcba72 (Enhancement/moveit ros1 ports (#3041))
     req->header.frame_id = getPoseReferenceFrame();
     req->header.stamp = getClock()->now();
     req->waypoints = waypoints;
@@ -1118,14 +1094,11 @@ public:
     return allowed_planning_time_;
   }
 
-<<<<<<< HEAD
-=======
   void constructRobotState(moveit_msgs::msg::RobotState& state) const
   {
     state = considered_start_state_;
   }
 
->>>>>>> 02ebcba72 (Enhancement/moveit ros1 ports (#3041))
   void constructMotionPlanRequest(moveit_msgs::msg::MotionPlanRequest& request) const
   {
     request.group_name = opt_.group_name_;
@@ -1136,15 +1109,7 @@ public:
     request.pipeline_id = planning_pipeline_id_;
     request.planner_id = planner_id_;
     request.workspace_parameters = workspace_parameters_;
-<<<<<<< HEAD
-
-    if (considered_start_state_)
-      moveit::core::robotStateToRobotStateMsg(*considered_start_state_, request.start_state);
-    else
-      request.start_state.is_diff = true;
-=======
     request.start_state = considered_start_state_;
->>>>>>> 02ebcba72 (Enhancement/moveit ros1 ports (#3041))
 
     if (active_target_ == JOINT)
     {
@@ -1663,20 +1628,7 @@ void MoveGroupInterface::stop()
 
 void MoveGroupInterface::setStartState(const moveit_msgs::msg::RobotState& start_state)
 {
-<<<<<<< HEAD
-  moveit::core::RobotStatePtr rs;
-  if (start_state.is_diff)
-    impl_->getCurrentState(rs);
-  else
-  {
-    rs = std::make_shared<moveit::core::RobotState>(getRobotModel());
-    rs->setToDefaultValues();  // initialize robot state values for conversion
-  }
-  moveit::core::robotStateMsgToRobotState(start_state, *rs);
-  setStartState(*rs);
-=======
   impl_->setStartState(start_state);
->>>>>>> 02ebcba72 (Enhancement/moveit ros1 ports (#3041))
 }
 
 void MoveGroupInterface::setStartState(const moveit::core::RobotState& start_state)
