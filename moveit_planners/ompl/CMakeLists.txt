@@ -41,7 +41,6 @@ install(
   DESTINATION include/moveit_planners_ompl)
 ament_export_targets(moveit_planners_omplTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(moveit_core ompl)
-create_deprecated_headers()
 
 pluginlib_export_plugin_description_file(moveit_core
                                          ompl_interface_plugin_description.xml)

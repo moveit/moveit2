@@ -90,7 +90,6 @@ install(DIRECTORY include/ DESTINATION include/moveit_ros_move_group)
 
 install(PROGRAMS scripts/load_map scripts/save_map
         DESTINATION lib/moveit_ros_move_group)
-create_deprecated_headers()
 
 pluginlib_export_plugin_description_file(
   moveit_ros_move_group default_capabilities_plugin_description.xml)

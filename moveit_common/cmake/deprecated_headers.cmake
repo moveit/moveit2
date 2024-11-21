@@ -30,8 +30,9 @@ find_package(Python REQUIRED)
 
 set(SCRIPT ${CMAKE_CURRENT_LIST_DIR}/../scripts/create_deprecated_headers.py)
 
-# Run after all install() commands in a moveit_package() CMakeLists.txt to
-# generate .h files for every .hpp
+# Run to generate deprecated c headers for every .hpp in the local install space
+# Note: This is currently unused. See:
+# https://github.com/moveit/moveit2/pull/3113
 macro(CREATE_DEPRECATED_HEADERS)
   add_custom_target(
     ${PROJECT_NAME}_deprecated_headers ALL

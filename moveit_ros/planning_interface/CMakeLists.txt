@@ -82,7 +82,6 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES
   DESTINATION include/moveit_ros_planning_interface)
-create_deprecated_headers()
 
 ament_export_targets(moveit_ros_planning_interfaceTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

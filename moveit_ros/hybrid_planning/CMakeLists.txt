@@ -97,7 +97,6 @@ install(DIRECTORY ${THIS_PACKAGE_INCLUDE_DIRS}
 
 install(DIRECTORY test/launch DESTINATION share/moveit_hybrid_planning)
 install(DIRECTORY test/config DESTINATION share/moveit_hybrid_planning)
-create_deprecated_headers()
 
 pluginlib_export_plugin_description_file(moveit_hybrid_planning
                                          single_plan_execution_plugin.xml)

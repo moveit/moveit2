@@ -40,7 +40,6 @@ install(
 install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/moveit_setup_simulation)
 install(DIRECTORY include/ DESTINATION include/moveit_setup_simulation)
-create_deprecated_headers()
 
 ament_export_targets(moveit_setup_simulationTargets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework

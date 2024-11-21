@@ -34,7 +34,6 @@ install(
   INCLUDES
   DESTINATION include/chomp_motion_planner)
 install(DIRECTORY include/ DESTINATION include/chomp_motion_planner)
-create_deprecated_headers()
 
 ament_export_targets(chomp_motion_plannerTargets HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_EXPORT_DEPENDS})

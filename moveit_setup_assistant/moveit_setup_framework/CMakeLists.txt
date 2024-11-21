@@ -67,7 +67,6 @@ install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/moveit_setup_framework)
 
 install(DIRECTORY templates DESTINATION share/moveit_setup_framework)
-create_deprecated_headers()
 
 ament_export_targets(moveit_setup_frameworkTargets HAS_LIBRARY_TARGET)
 install(
