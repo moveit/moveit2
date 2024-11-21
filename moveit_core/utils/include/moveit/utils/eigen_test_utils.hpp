@@ -34,6 +34,8 @@
 
 /* Author: Robert Haschke */
 
+#pragma once
+
 #include <gtest/gtest.h>
 #include <sstream>
 #include <Eigen/Geometry>

@@ -34,6 +34,8 @@
 
 /* Author: Ioan Sucan */
 
+#pragma once
+
 #include <ompl/base/goals/GoalSampleableRegion.h>
 
 namespace ompl_interface

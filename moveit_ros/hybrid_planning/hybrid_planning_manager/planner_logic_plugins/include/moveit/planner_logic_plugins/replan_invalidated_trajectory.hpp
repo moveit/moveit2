@@ -38,6 +38,8 @@
    invalidated global trajectory.
  */
 
+#pragma once
+
 #include <moveit/planner_logic_plugins/single_plan_execution.hpp>
 
 namespace moveit::hybrid_planning

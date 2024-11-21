@@ -34,6 +34,8 @@
 
 /* Author: E. Gil Jones */
 
+#pragma once
+
 #include <moveit/robot_model/robot_model.hpp>
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/utils/robot_model_test_utils.hpp>

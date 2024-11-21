@@ -36,6 +36,9 @@
 /* Author: Sebastian Jahr
    Description: List of all parameter names used when move_group with OMPL, CHOMP, STOMP and PILZ is launched (01/2024).
 */
+
+#pragma once
+
 #include <string>
 
 namespace move_group_test

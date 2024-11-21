@@ -37,6 +37,8 @@
     with the local planner.
  */
 
+#pragma once
+
 #include <moveit/hybrid_planning_manager/planner_logic_interface.hpp>
 #include <moveit/hybrid_planning_manager/hybrid_planning_manager.hpp>
 

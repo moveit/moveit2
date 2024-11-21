@@ -34,6 +34,8 @@
 
 /* Author: Mark Moll */
 
+#pragma once
+
 #include <chrono>
 #include <cstdlib>
 

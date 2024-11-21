@@ -32,6 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#pragma once
+
 #include <pilz_industrial_motion_planner/limits_container.hpp>
 
 #include <rclcpp/rclcpp.hpp>
