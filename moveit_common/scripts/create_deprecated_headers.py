@@ -29,12 +29,16 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+# Author: Tom Noble
+
 import sys
 from pathlib import Path
 
+# TODO: Scan .hpp to include BSD-3 and Author?
+
 ALL_HPPS = "**/*.hpp"
 USAGE = "Usage: ./generate_deprecated_headers <install_directory>"
-DEPRECATION = "{0}.h imports are deprecated. Consider using {0}.hpp"
+DEPRECATION = "This header is obsolete. Please use the corresponding .hpp"
 
 
 def create_c_header(include_directory: Path, hpp_path: Path) -> None:
