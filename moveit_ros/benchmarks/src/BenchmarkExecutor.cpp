@@ -1010,10 +1010,11 @@ void BenchmarkExecutor::collectMetrics(PlannerRunData& metrics,
 
       // compute correctness and clearance
       collision_detection::CollisionRequest req;
+      req.pad_environment_collisions = false;
       for (std::size_t k = 0; k < p.getWayPointCount(); ++k)
       {
         collision_detection::CollisionResult res;
-        planning_scene_->checkCollisionUnpadded(req, res, p.getWayPoint(k));
+        planning_scene_->checkCollision(req, res, p.getWayPoint(k));
         if (res.collision)
           correct = false;
         if (!p.getWayPoint(k).satisfiesBounds())
