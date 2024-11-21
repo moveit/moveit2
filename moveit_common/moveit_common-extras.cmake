@@ -26,4 +26,3 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 include("${moveit_common_DIR}/moveit_package.cmake")
-include("${moveit_common_DIR}/deprecated_headers.cmake")
