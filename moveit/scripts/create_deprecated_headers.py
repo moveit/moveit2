@@ -123,7 +123,7 @@ if __name__ == "__main__":
         answer = input("Proceed to generate? (y/n): ")
         apply = answer.lower() == "y"
     if apply:
-        printf("Proceeding to generate {} .h files...")
+        print("Proceeding to generate {} .h files...")
         to_generate = [DeprecatedHeader(hpp) for hpp in processed]
-        _ = [open(h.path, "r").write(h.contents) for h in to_generate]
-        printf("Done.")
+        _ = [open(h.path, "w").write(h.contents) for h in to_generate]
+        print("Done.")
