@@ -46,7 +46,12 @@ def generate_test_description():
     panda_arm_controller_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+        arguments=[
+            "panda_arm_controller",
+            "--controller-manager",
+            "/controller_manager",
+        ],
+        output="screen",
     )
 
     psm_gtest = launch_ros.actions.Node(
@@ -80,7 +85,6 @@ def generate_test_description():
 
 
 class TestGTestWaitForCompletion(unittest.TestCase):
-    @unittest.skip("Flaky test on humble, see moveit2#2821")
     # Waits for test to complete, then waits a bit to make sure result files are generated
     def test_gtest_run_complete(self, psm_gtest):
         self.proc_info.assertWaitForShutdown(psm_gtest, timeout=4000.0)
@@ -88,7 +92,6 @@ class TestGTestWaitForCompletion(unittest.TestCase):
 
 @launch_testing.post_shutdown_test()
 class TestGTestProcessPostShutdown(unittest.TestCase):
-    @unittest.skip("Flaky test on humble, see moveit2#2821")
     # Checks if the test has been completed with acceptable exit codes (successful codes)
     def test_gtest_pass(self, proc_info, psm_gtest):
         launch_testing.asserts.assertExitCodes(proc_info, process=psm_gtest)
