@@ -72,8 +72,10 @@ void MoveGroupSequenceAction::initialize()
 {
   // start the move action server
   RCLCPP_INFO_STREAM(getLogger(), "initialize move group sequence action");
+  // Use MutuallyExclusiveCallbackGroup to prevent race conditions in callbacks.
+  // See: https://github.com/moveit/moveit2/issues/3117 for details.
   action_callback_group_ =
-      context_->moveit_cpp_->getNode()->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+      context_->moveit_cpp_->getNode()->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   move_action_server_ = rclcpp_action::create_server<moveit_msgs::action::MoveGroupSequence>(
       context_->moveit_cpp_->getNode(), "sequence_move_group",
       [](const rclcpp_action::GoalUUID& /* unused */,
