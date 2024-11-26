@@ -45,7 +45,7 @@ class NoIncludeGuard(Exception):
 
 
 class NoIncludeDirectory(Exception):
-    ERROR = "No includue directory found for {}.hpp. Unable to generate relative .hpp include"
+    ERROR = "No include directory found for {}.hpp. Unable to generate relative .hpp include"
 
     def __init__(self, file: Path):
         super().__init__(self.ERROR.format(file))
