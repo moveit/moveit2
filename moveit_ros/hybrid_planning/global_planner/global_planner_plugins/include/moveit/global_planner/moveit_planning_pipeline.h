@@ -39,6 +39,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+#pragma message(".h header is obsolete. Please use the .hpp header instead.")
 
 #include <moveit/global_planner/moveit_planning_pipeline.hpp>

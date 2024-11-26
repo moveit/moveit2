@@ -41,6 +41,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+#pragma message(".h header is obsolete. Please use the .hpp header instead.")
 
 #include <moveit/planner_logic_plugins/single_plan_execution.hpp>

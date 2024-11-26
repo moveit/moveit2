@@ -13,7 +13,7 @@
 #      notice, this list of conditions and the following disclaimer in the
 #      documentation and/or other materials provided with the distribution.
 #
-#    * Neither the name of the copyright holder. nor the names of its
+#    * Neither the name of the copyright holder nor the names of its
 #      contributors may be used to endorse or promote products derived from
 #      this software without specific prior written permission.
 #
@@ -32,6 +32,7 @@
 # Author: Tom Noble
 
 import sys
+import argparse
 import logging
 from typing import List, Tuple
 from pathlib import Path
@@ -91,7 +92,7 @@ class DeprecatedHeader:
 
     def contents(self) -> str:
         items = [self.prefix, self.hpp.pretext, self.warn, self.hpp.include]
-        return "\n\n".join(items)
+        return "\n\n".join(items) + "\n"
 
 
 def parse_args(args: List) -> bool:
@@ -102,28 +103,58 @@ def parse_args(args: List) -> bool:
     return apply
 
 
-if __name__ == "__main__":
-    apply = parse_args(sys.argv)
-    hpp_paths = list(Path.cwd().rglob("*.hpp"))
-    print(f"Generating deprecated .h files for {len(hpp_paths)} .hpp files...")
-    processed = []
-    bad = []
-    for hpp_path in hpp_paths:
+class HeaderSummary:
+    def __init__(self, n_processed_hpps: int, bad_hpps: List[str]):
+        self.n_processed_hpps = n_processed_hpps
+        self.bad_hpps = bad_hpps
+
+    def were_all_hpps_processed(self) -> bool:
+        return len(self.bad_hpps) == 0
+
+    def __repr__(self) -> str:
+        summary = f"Can generate {self.n_processed_hpps} .h files."
+        if self.bad_hpps:
+            summary += f" Cannot generate {len(self.bad_hpps)} .h files:\n\n"
+            summary += "\n".join([f"❌ {hpp}" for hpp in self.bad_hpps])
+            summary += "\n"
+        return summary
+
+
+class DeprecatedHeaderGenerator:
+    def __init__(self, hpp_paths: List[str]):
+        self.hpp_paths = hpp_paths
+        self.processed_hpps = []
+        self.bad_hpps = []
+
+    def __process_hpp(self, hpp: str) -> None:
         try:
-            processed.append(HppFile(hpp_path))
-        except NoIncludeDirectory as e:
-            bad.append(str(hpp_path))
-        except NoIncludeGuard as e:
-            bad.append(str(hpp_path))
-    print(f"Summary: Can generate {len(processed)} .h files")
-    if bad:
-        print(f"Cannot generate .h files for the following files:")
-        print("\n".join(bad))
-    if apply and bad:
-        answer = input("Proceed to generate? (y/n): ")
-        apply = answer.lower() == "y"
-    if apply:
-        print(f"Proceeding to generate {len(processed)} .h files...")
-        to_generate = [DeprecatedHeader(hpp) for hpp in processed]
-        _ = [open(h.path, "w").write(h.contents) for h in to_generate]
-        print("Done. (You may need to rerun formatting)")
+            self.processed_hpps.append(HppFile(hpp))
+        except (NoIncludeDirectory, NoIncludeGuard) as e:
+            self.bad_hpps.append(str(hpp))
+
+    def process_all_hpps(self) -> HeaderSummary:
+        print(f"\nProcessing {len(self.hpp_paths)} .hpp files...")
+        _ = [self.__process_hpp(hpp) for hpp in self.hpp_paths]
+        return HeaderSummary(len(self.processed_hpps), self.bad_hpps)
+
+    def create_h_files(self) -> None:
+        print(f"Proceeding to generate {len(self.processed_hpps)} .h files...")
+        h_files = [DeprecatedHeader(hpp) for hpp in self.processed_hpps]
+        _ = [open(h.path, "w").write(h.contents) for h in h_files]
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    # TODO: Add argument for skipping private headers
+    parser.add_argument("--apply", action="store_true", help="Generates the .h files")
+    args = parser.parse_args()
+    generator = DeprecatedHeaderGenerator(list(Path.cwd().rglob("*.hpp")))
+    summary = generator.process_all_hpps()
+    print(summary)
+    if args.apply and not summary.were_all_hpps_processed():
+        args.apply = input("Continue? (y/n): ").lower() == "y"
+    if args.apply:
+        generator.create_h_files()
+    else:
+        print("Skipping file generation...")
+    print("Done.\n")

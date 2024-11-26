@@ -44,6 +44,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+#pragma message(".h header is obsolete. Please use the .hpp header instead.")
 
 #include <moveit_setup_framework/data_warehouse.hpp>

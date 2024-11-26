@@ -40,6 +40,6 @@
 
 #pragma once
 
-#pragma message(".h header is obsolete. Please use the .hpp")
+#pragma message(".h header is obsolete. Please use the .hpp header instead.")
 
 #include <moveit/online_signal_smoothing/smoothing_base_class.hpp>
