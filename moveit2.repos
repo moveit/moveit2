@@ -3,7 +3,8 @@ repositories:
   geometric_shapes:
     type: git
     url: https://github.com/moveit/geometric_shapes.git
-    version: 4f65a38  # TODO: Fix the issues introduced in https://github.com/moveit/geometric_shapes/pull/239
+    #version: 4f65a38  # TODO: Fix the issues introduced in https://github.com/moveit/geometric_shapes/pull/239
+    version: revert-extend-with-transformed-box
   moveit_msgs:
     type: git
     url: https://github.com/moveit/moveit_msgs.git
