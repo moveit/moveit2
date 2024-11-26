@@ -95,14 +95,6 @@ class DeprecatedHeader:
         return "\n\n".join(items) + "\n"
 
 
-def parse_args(args: List) -> bool:
-    n_args = len(sys.argv)
-    if n_args > 2:
-        sys.exit("Usage: ./create_deprecated_headers [--apply]")
-    apply = "--apply" == sys.argv[1] if n_args == 2 else False
-    return apply
-
-
 class HeaderSummary:
     def __init__(self, n_processed_hpps: int, bad_hpps: List[str]):
         self.n_processed_hpps = n_processed_hpps
