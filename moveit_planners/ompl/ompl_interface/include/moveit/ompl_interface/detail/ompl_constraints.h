@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Jeroen De Maeyer, Boston Cleek */
+/* Author: Jeroen De Maeyer, Boston Cleek, Berend Pijnenburg */
 
 #pragma once
 
@@ -72,23 +72,19 @@ public:
   /** \brief Distance to region inside bounds
    *
    * Distance of a given value outside the bounds, zero inside the bounds.
+   * With the sign showing the direction of the penalty,
    * Creates a penalty function that looks like this:
    *
    * (penalty) ^
-   *           | \         /
-   *           |  \       /
-   *           |   \_____/
-   *           |----------------> (variable to be constrained)
+   *           |           /
+   *           |          /
+   *           |--- _____/-------------> (variable to be constrained)
+   *           |   /
+   *           |  /
+   *           | /
+   *           v
    * */
   Eigen::VectorXd penalty(const Eigen::Ref<const Eigen::VectorXd>& x) const;
-
-  /** \brief Derivative of the penalty function
-   * ^
-   * |
-   * | -1-1-1 0 0 0 +1+1+1
-   * |------------------------>
-   * **/
-  Eigen::VectorXd derivative(const Eigen::Ref<const Eigen::VectorXd>& x) const;
 
   std::size_t size() const;
 
@@ -121,30 +117,23 @@ std::ostream& operator<<(std::ostream& os, const ompl_interface::Bounds& bounds)
 class BaseConstraint : public ompl::base::Constraint
 {
 public:
-  /** \brief Construct a BaseConstraint using 3 `num_cons` by default because all constraints currently implemented have
-   * 3 constraint equations. **/
   BaseConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                 const unsigned int num_dofs, const unsigned int num_cons = 3);
-
-  /** \brief Initialize constraint based on message content.
-   *
-   * This is necessary because we cannot call the pure virtual
-   * parseConstraintsMsg method from the constructor of this class.
-   * */
-  void init(const moveit_msgs::msg::Constraints& constraints);
+                 const unsigned int num_dofs, const unsigned int num_cons);
 
   /** OMPL's main constraint evaluation function.
    *
    *  OMPL requires you to override at least "function" which represents the constraint F(q) = 0
    * */
-  void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
+  virtual void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
+                        Eigen::Ref<Eigen::VectorXd> out) const = 0;
 
   /** \brief Jacobian of the constraint function.
    *
    * Optionally you can also provide dF(q)/dq, the Jacobian of  the constraint.
    *
    * */
-  void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const override;
+  virtual void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values,
+                        Eigen::Ref<Eigen::MatrixXd> out) const = 0;
 
   /** \brief Wrapper for forward kinematics calculated by MoveIt's Robot State.
    *
@@ -161,37 +150,6 @@ public:
    * Jacobian method.
    * */
   Eigen::MatrixXd robotGeometricJacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values) const;
-
-  /** \brief Parse bounds on position and orientation parameters from MoveIt's constraint message.
-   *
-   * This can be non-trivial given the often complex structure of these messages.
-   * */
-  virtual void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) = 0;
-
-  /** \brief For inequality constraints: calculate the value of the parameter that is being constrained by the bounds.
-   *
-   * In this Position constraints case, it calculates the x, y and z position
-   * of the end-effector. This error is then converted in generic equality constraints in the implementation of
-   * `ompl_interface::BaseConstraint::function`.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::function directly and ignore
-   * the bounds calculation.
-   * */
-  virtual Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const;
-
-  /** \brief For inequality constraints: calculate the Jacobian for the current parameters that are being constrained.
-   *   *
-   * This error jacobian, as the name suggests, is only the jacobian of the position / orientation / ... error.
-   * It does not take into account the derivative of the penalty functions defined in the Bounds class.
-   * This correction is added in the implementation of of BaseConstraint::jacobian.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::jacobian directly and ignore
-   * the bounds calculation.
-   *
-   * TODO(jeroendm), Maybe also use an output argument as in `ompl::base::Constraint::jacobian(x, out)` for better
-   * performance?
-   * */
-  virtual Eigen::MatrixXd calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& /*x*/) const;
 
   // the methods below are specifically for debugging and testing
 
@@ -253,101 +211,53 @@ public:
  *
  * These bounds are applied around the nominal position and orientation
  * of the box.
+ *
+ * All constraints with a dimension lower than `EQUALITY_CONSTRAINT_THRESHOLD` will be modelled as equality constraints.
+ *
+ * WARNING: Below follows the explanation of an ugly hack. Ideally, the user could specify equality constraints by
+ * setting the constraint dimension to zero. However, this would result in a constraint region primitive with a zero
+ * dimension in MoveIt, which the planner can (almost) never satisfy. Therefore we use a threshold value, below which
+ * the constraint is interpreted as an equality constraint. This threshold value is not used in the planning algorithm itself!
+ *
+ * This threshold value should be larger than the tolerance of the constraints specified in OMPL
+ * (ompl::magic::CONSTRAINT_PROJECTION_TOLERANCE = 1e-4).
+ *
+ * This is necessary because the constraints are also checked by MoveIt in the StateValidity checker. If this check
+ * would use a stricter tolerance than was used to satisfy the constraints in OMPL, all states would be invalid.
+ * Therefore the dimension of an equality constraint specified in the constraint message should be at least equal the
+ * the tolerance used by OMPL to project onto the constraints. To avoid checking for exact equality on floats, the
+ * threshold is made a bit larger.
+ *
+ * EQUALITY_CONSTRAINT_THRESHOLD > tolerance in constraint message > OMPL projection tolerance
+ *
+ * That's why the value is 1e-3 > 1e-4.
+ * Now the user can specify any value between 1e-3 and 1e-4 to specify an equality constraint.
  * */
 class BoxConstraint : public BaseConstraint
 {
 public:
   BoxConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                const unsigned int num_dofs);
-
-  /** \brief Parse bounds on position parameters from MoveIt's constraint message.
-   *
-   * This can be non-trivial given the often complex structure of these messages.
-   * */
-  void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
-
-  /** \brief For inequality constraints: calculate the value of the parameter that is being constrained by the bounds.
-   *
-   * In this Position constraints case, it calculates the x, y and z position
-   * of the end-effector. This error is then converted in generic equality constraints in the implementation of
-   * `ompl_interface::BaseConstraint::function`.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::function directly and ignore
-   * the bounds calculation.
-   * */
-  Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
-
-  /** \brief For inequality constraints: calculate the Jacobian for the current parameters that are being constrained.
-   *   *
-   * This error jacobian, as the name suggests, is only the jacobian of the position / orientation / ... error.
-   * It does not take into account the derivative of the penalty functions defined in the Bounds class.
-   * This correction is added in the implementation of of BaseConstraint::jacobian.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::jacobian directly and ignore
-   * the bounds calculation.
-   *
-   * TODO(jeroendm), Maybe also use an output argument as in `ompl::base::Constraint::jacobian(x, out)` for better
-   * performance?
-   * */
-  Eigen::MatrixXd calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
-};
-
-/******************************************
- * Equality Position Constraints
- * ****************************************/
-/** \brief Equality constraints on a link's position.
- *
- *  When you set the name of a constraint to 'use_equality_constraints', all constraints with a dimension lower than
- * `EQUALITY_CONSTRAINT_THRESHOLD` will be modelled as equality constraints.
- *
- * The dimension value for the others are ignored. For example, a box with dimensions [1.0, 1e-5, 1.0]
- * will result in equality constraints on the y-position, and no constraints on the x or z-position.
- *
- * TODO(jeroendm) We could make this a base class `EqualityConstraints` with a specialization for position and orientation
- * constraints in the future. But the direct overriding of `function` and `jacobian` is probably more performant.
- * */
-class EqualityPositionConstraint : public BaseConstraint
-{
-public:
-  EqualityPositionConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                             const unsigned int num_dofs);
-
-  /** \brief Parse bounds on position parameters from MoveIt's constraint message.
-   *
-   * This can be non-trivial given the often complex structure of these messages.
-   * */
-  void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
+                const unsigned int num_dofs, const moveit_msgs::msg::PositionConstraint& pos_con);
 
   void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
 
   void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const override;
 
 private:
-  /** \brief Position bounds under this threshold are interpreted as equality constraints, the others as unbounded.
-   *
-   * WARNING: Below follows the explanation of an ugly hack. Ideally, the user could specify equality constraints by
-   * setting the constraint dimension to zero. However, this would result in a constraint region primitive with a zero
-   * dimension in MoveIt, which the planner can (almost) never satisfy. Therefore we use a threshold value, below which
-   * the constraint is interpreted as an equality constraint. This threshold value is not used in the planning algorithm itself!
-   *
-   * This threshold value should be larger than the tolerance of the constraints specified in OMPL
-   * (ompl::magic::CONSTRAINT_PROJECTION_TOLERANCE = 1e-4).
-   *
-   * This is necessary because the constraints are also checked by MoveIt in the StateValidity checker. If this check
-   * would use a stricter tolerance than was used to satisfy the constraints in OMPL, all states would be invalid.
-   * Therefore the dimension of an equality constraint specified in the constraint message should be at least equal the
-   * the tolerance used by OMPL to project onto the constraints. To avoid checking for exact equality on floats, the
-   * threshold is made a bit larger.
-   *
-   * EQUALITY_CONSTRAINT_THRESHOLD > tolerance in constraint message > OMPL projection tolerance
-   *
-   * That's why the value is 1e-3 > 1e-4.
-   * Now the user can specify any value between 1e-3 and 1e-4 to specify an equality constraint.
-   * **/
-  static constexpr double EQUALITY_CONSTRAINT_THRESHOLD{ 0.001 };
+  std::vector<std::size_t> getConstrainedDims(const moveit_msgs::msg::PositionConstraint& pos_con) const;
 
-  /** \brief Bool vector indicating which dimensions are constrained. **/
-  std::vector<bool> is_dim_constrained_;
+  /** \brief
+   *
+   * Assumes there is a single primitive of type `shape_msgs/SolidPrimitive.BOX`.
+   * The dimensions of the box are the bounds on the deviation of the link origin from
+   * the target pose, given in constraint_regions.primitive_poses[0].
+   * */
+  Bounds createBoundVector(const moveit_msgs::msg::PositionConstraint& pos_con,
+                           const std::vector<std::size_t>& constrained_dims) const;
+
+  std::vector<std::size_t> constrained_dims_;
+
+  static constexpr double EQUALITY_CONSTRAINT_THRESHOLD{ 0.001 };
 };
 
 /******************************************
@@ -378,63 +288,31 @@ class OrientationConstraint : public BaseConstraint
 {
 public:
   OrientationConstraint(const moveit::core::RobotModelConstPtr& robot_model, const std::string& group,
-                        const unsigned int num_dofs)
-    : BaseConstraint(robot_model, group, num_dofs)
-  {
-  }
+                        const unsigned int num_dofs, const moveit_msgs::msg::OrientationConstraint& ori_con);
 
-  /** \brief Parse bounds on orientation parameters from MoveIt's constraint message.
-   *
-   * This can be non-trivial given the often complex structure of these messages.
-   * */
-  void parseConstraintMsg(const moveit_msgs::msg::Constraints& constraints) override;
+  void function(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::VectorXd> out) const override;
 
-  /** \brief For inequality constraints: calculate the value of the parameter that is being constrained by the bounds.
-   *
-   * In this orientation constraints case, it calculates the orientation
-   * of the end-effector. This error is then converted in generic equality constraints in the implementation of
-   * `ompl_interface::BaseConstraint::function`.
-   *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::function directly and ignore
-   * the bounds calculation.
-   * */
-  Eigen::VectorXd calcError(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
+  void jacobian(const Eigen::Ref<const Eigen::VectorXd>& joint_values, Eigen::Ref<Eigen::MatrixXd> out) const override;
 
-  /** \brief For inequality constraints: calculate the Jacobian for the current parameters that are being constrained.
-   *   *
-   * This error jacobian, as the name suggests, is only the jacobian of the position / orientation / ... error.
-   * It does not take into account the derivative of the penalty functions defined in the Bounds class.
-   * This correction is added in the implementation of of BaseConstraint::jacobian.
+private:
+  std::vector<std::size_t> getConstrainedDims(const moveit_msgs::msg::OrientationConstraint& ori_con) const;
+
+  /** \brief
    *
-   * This method can be bypassed if you want to override `ompl_interface::BaseConstraint::jacobian directly and ignore
-   * the bounds calculation.
+   * These bounds are assumed to be centered around the target orientation / desired orientation
+   * given in the "orientation" field in the message.
+   * These bounds represent orientation error between the desired orientation and the current orientation of the
+   * end-effector.
    *
-   * TODO(jeroendm), Maybe also use an output argument as in `ompl::base::Constraint::jacobian(x, out)` for better
-   * performance?
+   * The "absolute_x_axis_tolerance", "absolute_y_axis_tolerance" and "absolute_z_axis_tolerance" are interpreted as
+   * the width of the tolerance regions around the target orientation, represented using exponential coordinates.
+   *
    * */
-  Eigen::MatrixXd calcErrorJacobian(const Eigen::Ref<const Eigen::VectorXd>& x) const override;
+  Bounds createBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con,
+                           const std::vector<std::size_t>& constrained_dims) const;
+
+  std::vector<std::size_t> constrained_dims_;
 };
-
-/** \brief Extract position constraints from the MoveIt message.
- *
- * Assumes there is a single primitive of type `shape_msgs/SolidPrimitive.BOX`.
- * The dimensions of the box are the bounds on the deviation of the link origin from
- * the target pose, given in constraint_regions.primitive_poses[0].
- * */
-Bounds positionConstraintMsgToBoundVector(const moveit_msgs::msg::PositionConstraint& pos_con);
-
-/** \brief Extract orientation constraints from the MoveIt message
- *
- * These bounds are assumed to be centered around the target orientation / desired orientation
- * given in the "orientation" field in the message.
- * These bounds represent orientation error between the desired orientation and the current orientation of the
- * end-effector.
- *
- * The "absolute_x_axis_tolerance", "absolute_y_axis_tolerance" and "absolute_z_axis_tolerance" are interpreted as
- * the width of the tolerance regions around the target orientation, represented using exponential coordinates.
- *
- * */
-Bounds orientationConstraintMsgToBoundVector(const moveit_msgs::msg::OrientationConstraint& ori_con);
 
 /** \brief Factory to create constraints based on what is in the MoveIt constraint message. **/
 ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelConstPtr& robot_model,
