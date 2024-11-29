@@ -279,7 +279,7 @@ private:
 protected:
   const moveit::core::RobotModelConstPtr robot_model_;
   const pilz_industrial_motion_planner::LimitsContainer planner_limits_;
-  static constexpr double MIN_SCALING_FACTOR{ 0.0001 };
+  static constexpr double MIN_SCALING_FACTOR{ 0.0000001 };
   static constexpr double MAX_SCALING_FACTOR{ 1. };
   static constexpr double VELOCITY_TOLERANCE{ 1e-8 };
   const std::unique_ptr<rclcpp::Clock> clock_;
