@@ -37,7 +37,7 @@ jobs:
         moveit2.repos
         $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
       # Pull any updates to the upstream workspace (after restoring it from cache)
-      AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
+      AFTER_SETUP_UPSTREAM_WORKSPACE: apt remove -y ros-$ROS_DISTRO-geometric-shapes; vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       # Clear the ccache stats before and log the stats after the build
       AFTER_SETUP_CCACHE: ccache --zero-stats --max-size=10.0G
