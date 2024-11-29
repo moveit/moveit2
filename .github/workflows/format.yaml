@@ -9,7 +9,7 @@ on:
   merge_group:
   push:
     branches:
-      - main
+      - jazzy
 
 jobs:
   pre-commit:
