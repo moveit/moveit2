@@ -38,9 +38,14 @@
  *
  */
 
-#include <moveit_servo/servo_node.hpp>
+#if __has_include(<urdf/realtime_tools/realtime_helpers.hpp.hpp>)
 #include <realtime_tools/realtime_helpers.hpp>
+#else
+#include <realtime_tools/thread_priority.hpp>
+#endif
+
 #include <moveit/utils/logger.hpp>
+#include <moveit_servo/servo_node.hpp>
 
 namespace moveit_servo
 {
