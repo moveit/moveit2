@@ -38,7 +38,7 @@
  *
  */
 
-#if __has_include(<realtime_tools/realtime_helpers.hpp.hpp>)
+#if __has_include(<realtime_tools/realtime_helpers.hpp>)
 #include <realtime_tools/realtime_helpers.hpp>
 #else
 #include <realtime_tools/thread_priority.hpp>
