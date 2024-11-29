@@ -33,13 +33,13 @@
  *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 #include <rclcpp/logger.hpp>
-#include "test_utils.h"
+#include "test_utils.hpp"
 
 // Logger
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("pilz_industrial_motion_planner.test_utils");

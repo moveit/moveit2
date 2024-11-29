@@ -32,7 +32,7 @@
 
 /* Authors: John Schulman, Levi Armstrong */
 
-#include <moveit/collision_detection_bullet/bullet_integration/bullet_utils.h>
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_utils.hpp>
 
 #include <BulletCollision/CollisionDispatch/btConvexConvexAlgorithm.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
@@ -42,7 +42,7 @@
 #include <octomap/octomap.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.h>
+#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.hpp>
 
 namespace collision_detection_bullet
 {

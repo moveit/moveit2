@@ -34,14 +34,14 @@
 
 /* Author: Jonas Tietz */
 
-#include "tf_publisher_capability.h"
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/move_group/capability_names.h>
+#include "tf_publisher_capability.hpp"
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/move_group/capability_names.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_eigen/tf2_eigen.hpp>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/attached_body.h>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_state/attached_body.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace move_group

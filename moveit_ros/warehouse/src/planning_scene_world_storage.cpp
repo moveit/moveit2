@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/warehouse/planning_scene_world_storage.h>
+#include <moveit/warehouse/planning_scene_world_storage.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <utility>

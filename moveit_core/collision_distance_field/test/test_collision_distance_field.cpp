@@ -34,12 +34,12 @@
 
 /** \author E. Gil Jones */
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/transforms/transforms.h>
-#include <moveit/collision_distance_field/collision_distance_field_types.h>
-#include <moveit/collision_distance_field/collision_env_distance_field.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/transforms/transforms.hpp>
+#include <moveit/collision_distance_field/collision_distance_field_types.hpp>
+#include <moveit/collision_distance_field/collision_env_distance_field.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 #include <geometric_shapes/shape_operations.h>
 #include <urdf_parser/urdf_parser.h>

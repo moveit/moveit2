@@ -2,6 +2,12 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Update urdf/model.h -> urdf/model.hpp (`#3003 <https://github.com/ros-planning/moveit2/issues/3003>`_)
+* Contributors: Robert Haschke, Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 * Cast of "max_velocity" and "max_acceleration" values to double (`#2803 <https://github.com/moveit/moveit2/issues/2803>`_)

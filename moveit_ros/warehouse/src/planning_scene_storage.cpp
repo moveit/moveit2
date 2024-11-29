@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/warehouse/planning_scene_storage.h>
+#include <moveit/warehouse/planning_scene_storage.hpp>
 #include <utility>
 #include <rclcpp/serialization.hpp>
 #include <regex>

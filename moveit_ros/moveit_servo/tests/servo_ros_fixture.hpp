@@ -39,6 +39,8 @@
    Created   : 07/23/2023
 */
 
+#pragma once
+
 #include <gtest/gtest.h>
 #include <moveit_msgs/msg/servo_status.hpp>
 #include <moveit_msgs/srv/servo_command_type.hpp>

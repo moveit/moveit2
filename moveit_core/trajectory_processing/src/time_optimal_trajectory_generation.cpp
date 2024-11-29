@@ -42,7 +42,7 @@
 #include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 #include <vector>
 #include <moveit/utils/logger.hpp>
 

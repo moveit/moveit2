@@ -35,10 +35,10 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model/joint_model_group.h>
-#include <moveit/robot_model/revolute_joint_model.h>
-#include <moveit/exceptions/exceptions.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model/joint_model_group.hpp>
+#include <moveit/robot_model/revolute_joint_model.hpp>
+#include <moveit/exceptions/exceptions.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <algorithm>

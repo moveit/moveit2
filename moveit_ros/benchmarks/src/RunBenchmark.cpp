@@ -36,8 +36,8 @@
 
 #include <string>
 
-#include <moveit/benchmarks/BenchmarkOptions.h>
-#include <moveit/benchmarks/BenchmarkExecutor.h>
+#include <moveit/benchmarks/BenchmarkOptions.hpp>
+#include <moveit/benchmarks/BenchmarkExecutor.hpp>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

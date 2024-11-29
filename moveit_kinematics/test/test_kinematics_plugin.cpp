@@ -43,17 +43,17 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 
 // MoveIt
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/rdf_loader/rdf_loader.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/rdf_loader/rdf_loader.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.hpp>
 
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <moveit/utils/logger.hpp>
 
 rclcpp::Logger getLogger()

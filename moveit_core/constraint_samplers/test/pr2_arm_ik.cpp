@@ -36,7 +36,7 @@
 
 #include <angles/angles.h>
 #include <moveit/utils/logger.hpp>
-#include "pr2_arm_ik.h"
+#include "pr2_arm_ik.hpp"
 
 /**** List of angles (for reference) *******
       th1 = shoulder/turret pan

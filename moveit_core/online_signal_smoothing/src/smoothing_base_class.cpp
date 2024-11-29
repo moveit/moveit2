@@ -36,7 +36,7 @@
    Description: Base class implementation for online smoothing plugins
  */
 
-#include <moveit/online_signal_smoothing/smoothing_base_class.h>
+#include <moveit/online_signal_smoothing/smoothing_base_class.hpp>
 
 namespace online_signal_smoothing
 {

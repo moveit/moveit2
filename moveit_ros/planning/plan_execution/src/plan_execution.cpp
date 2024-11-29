@@ -34,12 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/plan_execution/plan_execution.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/collision_detection/collision_tools.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/utils/moveit_error_code.h>
+#include <moveit/plan_execution/plan_execution.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
+#include <moveit/collision_detection/collision_tools.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -50,7 +50,7 @@
 #include <moveit/utils/logger.hpp>
 
 // #include <dynamic_reconfigure/server.h>
-// #include <moveit_ros_planning/PlanExecutionDynamicReconfigureConfig.h>
+// #include <moveit_ros_planning/PlanExecutionDynamicReconfigureConfig.hpp>
 
 namespace plan_execution
 {

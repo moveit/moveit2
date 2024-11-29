@@ -32,14 +32,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_lin.hpp>
 
-#include <pilz_industrial_motion_planner/tip_frame_getter.h>
+#include <pilz_industrial_motion_planner/tip_frame_getter.hpp>
 
 #include <cassert>
 #include <sstream>
 #include <time.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <kdl/path_line.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>

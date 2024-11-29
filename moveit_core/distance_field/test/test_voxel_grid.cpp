@@ -36,7 +36,7 @@
 
 #include <gtest/gtest.h>
 
-#include <moveit/distance_field/voxel_grid.h>
+#include <moveit/distance_field/voxel_grid.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 using namespace distance_field;

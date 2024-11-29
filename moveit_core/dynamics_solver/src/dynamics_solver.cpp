@@ -34,7 +34,7 @@
 
 /* Author: Sachin Chitta */
 
-#include <moveit/dynamics_solver/dynamics_solver.h>
+#include <moveit/dynamics_solver/dynamics_solver.hpp>
 // KDL
 #include <kdl/jntarray.hpp>
 #include <kdl_parser/kdl_parser.hpp>

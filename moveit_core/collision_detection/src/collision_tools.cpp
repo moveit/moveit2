@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/collision_detection/collision_tools.h>
+#include <moveit/collision_detection/collision_tools.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>

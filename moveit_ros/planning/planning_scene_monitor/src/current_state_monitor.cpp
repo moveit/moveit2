@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
+#include <moveit/planning_scene_monitor/current_state_monitor.hpp>
 #include <moveit/planning_scene_monitor/current_state_monitor_middleware_handle.hpp>
 #include <moveit/utils/logger.hpp>
 
