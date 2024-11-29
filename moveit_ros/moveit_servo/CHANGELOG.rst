@@ -2,8 +2,8 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.0 (2024-11-29)
+-------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
 * [moveit_servo] avoid race condition when calling ~/pause_servo (`#3059 <https://github.com/ros-planning/moveit2/issues/3059>`_)
 * Cleanup `#3056 <https://github.com/ros-planning/moveit2/issues/3056>`_ (`#3058 <https://github.com/ros-planning/moveit2/issues/3058>`_)

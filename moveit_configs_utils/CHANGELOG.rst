@@ -2,8 +2,8 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.0 (2024-11-29)
+-------------------
 * Added joint limits to rviz launch file. (`#3091 <https://github.com/ros-planning/moveit2/issues/3091>`_)
 * Switch to get for Dict lookup to prevent KeyError (`#3043 <https://github.com/ros-planning/moveit2/issues/3043>`_)
 * fix move_group_capabilities usage (`#3018 <https://github.com/ros-planning/moveit2/issues/3018>`_)

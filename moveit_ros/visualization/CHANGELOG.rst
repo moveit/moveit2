@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.0 (2024-11-29)
+-------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
 * Attached Collision Object Transparency (`#3093 <https://github.com/ros-planning/moveit2/issues/3093>`_)
 * Contributors: Aiden, Tom Noble
