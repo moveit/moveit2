@@ -24,10 +24,6 @@ jobs:
             ROS_DISTRO: jazzy
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
-            # Silent gmock/gtest warnings by picking more recent googletest version
-            AFTER_BUILD_UPSTREAM_WORKSPACE: |
-              git clone --depth 1 --quiet --branch 1.11.9000 https://github.com/ament/googletest "${BASEDIR}/upstream_ws/src/googletest"
-              builder_run_build "/opt/ros/${ROS_DISTRO}" "${BASEDIR}/upstream_ws" --packages-select gtest_vendor gmock_vendor
     env:
       # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
       # https://stackoverflow.com/a/41673702
