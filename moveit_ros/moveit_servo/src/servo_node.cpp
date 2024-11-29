@@ -39,7 +39,7 @@
  */
 
 #include <moveit_servo/servo_node.hpp>
-#include <realtime_tools/thread_priority.hpp>
+#include <realtime_tools/realtime_helpers.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace moveit_servo
