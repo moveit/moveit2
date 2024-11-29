@@ -29,6 +29,8 @@ jobs:
               git clone --depth 1 --quiet --branch 1.11.9000 https://github.com/ament/googletest "${BASEDIR}/upstream_ws/src/googletest"
               builder_run_build "/opt/ros/${ROS_DISTRO}" "${BASEDIR}/upstream_ws" --packages-select gtest_vendor gmock_vendor
     env:
+      # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
+      # https://stackoverflow.com/a/41673702
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unknown-warning-option -Wno-cpp
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
@@ -161,6 +163,7 @@ jobs:
         with:
           docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
+          lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
         uses: codecov/codecov-action@v5
