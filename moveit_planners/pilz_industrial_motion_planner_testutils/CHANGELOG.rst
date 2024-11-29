@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion_planner_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Contributors: Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 

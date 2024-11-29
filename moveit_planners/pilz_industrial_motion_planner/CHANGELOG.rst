@@ -2,6 +2,17 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Fix: Resolve race condition in MoveGroupSequenceAction (`#3125 <https://github.com/ros-planning/moveit2/issues/3125>`_)
+* Fixes pilz tests (`#3095 <https://github.com/ros-planning/moveit2/issues/3095>`_)
+* Allow RobotState::setFromIK to work with subframes (`#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_)
+* Enhancement/ports moveit 3522 (`#3070 <https://github.com/ros-planning/moveit2/issues/3070>`_)
+* Ports moveit/moveit/pull/3519 to ros2 (`#3055 <https://github.com/ros-planning/moveit2/issues/3055>`_)
+* Enhancement/moveit ros1 ports (`#3041 <https://github.com/ros-planning/moveit2/issues/3041>`_)
+* Contributors: Maxwell.L, Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 * Fix Pilz blending times... the right way (`#2961 <https://github.com/moveit/moveit2/issues/2961>`_)

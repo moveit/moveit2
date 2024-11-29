@@ -2,6 +2,12 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* fix parameter namespacing for gripper controller (`#3023 <https://github.com/ros-planning/moveit2/issues/3023>`_)
+* Contributors: Michael Ferguson, Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 
