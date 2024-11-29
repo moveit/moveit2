@@ -39,7 +39,7 @@
 
 #pragma once
 
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_interface/planning_interface.hpp>
 
 #include <stomp_moveit_parameters.hpp>
 

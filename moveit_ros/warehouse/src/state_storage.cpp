@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/warehouse/state_storage.h>
+#include <moveit/warehouse/state_storage.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <utility>

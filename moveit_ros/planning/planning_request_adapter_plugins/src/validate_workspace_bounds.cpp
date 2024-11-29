@@ -37,7 +37,7 @@
  * The default workspace is a cube whose edge length is defined with a ROS 2 parameter.
  */
 
-#include <moveit/planning_interface/planning_request_adapter.h>
+#include <moveit/planning_interface/planning_request_adapter.hpp>
 #include <class_loader/class_loader.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

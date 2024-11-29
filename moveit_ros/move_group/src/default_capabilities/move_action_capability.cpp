@@ -34,15 +34,15 @@
 
 /* Author: Ioan Sucan */
 
-#include "move_action_capability.h"
+#include "move_action_capability.hpp"
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/plan_execution/plan_execution.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/move_group/capability_names.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/plan_execution/plan_execution.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace move_group

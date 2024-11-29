@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "planning_response.h"
+#include "planning_response.hpp"
 
 namespace moveit_py
 {

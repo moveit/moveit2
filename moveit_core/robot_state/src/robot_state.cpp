@@ -37,9 +37,9 @@
 
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/shape_operations.h>
-#include <moveit/robot_state/cartesian_interpolator.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/transforms/transforms.h>
+#include <moveit/robot_state/cartesian_interpolator.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/transforms/transforms.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -47,8 +47,8 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <cassert>
 #include <functional>
-#include <moveit/macros/console_colors.h>
-#include <moveit/robot_model/aabb.h>
+#include <moveit/macros/console_colors.hpp>
+#include <moveit/robot_model/aabb.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace moveit

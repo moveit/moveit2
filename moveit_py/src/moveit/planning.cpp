@@ -34,10 +34,10 @@
 
 /* Author: Peter David Fagan */
 
-#include "moveit_ros/moveit_cpp/moveit_cpp.h"
-#include "moveit_ros/moveit_cpp/planning_component.h"
-#include "moveit_ros/planning_scene_monitor/planning_scene_monitor.h"
-#include "moveit_ros/trajectory_execution_manager/trajectory_execution_manager.h"
+#include "moveit_ros/moveit_cpp/moveit_cpp.hpp"
+#include "moveit_ros/moveit_cpp/planning_component.hpp"
+#include "moveit_ros/planning_scene_monitor/planning_scene_monitor.hpp"
+#include "moveit_ros/trajectory_execution_manager/trajectory_execution_manager.hpp"
 
 PYBIND11_MODULE(planning, m)
 {

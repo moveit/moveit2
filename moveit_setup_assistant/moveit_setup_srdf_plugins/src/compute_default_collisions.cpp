@@ -34,7 +34,7 @@
 
 /* Author: Dave Coleman */
 
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene/planning_scene.hpp>
 #include <moveit_setup_srdf_plugins/compute_default_collisions.hpp>
 #include <boost/math/special_functions/binomial.hpp>  // for statistics at end
 #include <boost/thread.hpp>

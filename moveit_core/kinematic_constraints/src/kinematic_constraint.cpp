@@ -34,11 +34,11 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/kinematic_constraints/kinematic_constraint.hpp>
 #include <geometric_shapes/body_operations.h>
 #include <geometric_shapes/shape_operations.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/collision_detection_fcl/collision_env_fcl.h>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/collision_detection_fcl/collision_env_fcl.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

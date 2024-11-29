@@ -34,10 +34,10 @@
 
 /* Author: Mathias Lüdtke */
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/utils/rclcpp_utils.h>
-#include <moveit_ros_control_interface/ControllerHandle.h>
-#include <moveit/controller_manager/controller_manager.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/utils/rclcpp_utils.hpp>
+#include <moveit_ros_control_interface/ControllerHandle.hpp>
+#include <moveit/controller_manager/controller_manager.hpp>
 #include <controller_manager_msgs/srv/list_controllers.hpp>
 #include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <pluginlib/class_list_macros.hpp>

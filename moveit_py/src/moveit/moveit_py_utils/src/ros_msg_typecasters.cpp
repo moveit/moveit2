@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan, Robert Haschke */
 
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
 
 namespace py = pybind11;
 namespace moveit_py

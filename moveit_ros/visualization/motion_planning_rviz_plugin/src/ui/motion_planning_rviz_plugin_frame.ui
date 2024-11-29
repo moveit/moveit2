@@ -2080,7 +2080,7 @@ This is usually achieved by random seeding, which can flip the robot configurati
   <customwidget>
    <class>moveit_rviz_plugin::MotionPlanningParamWidget</class>
    <extends>QTreeView</extends>
-   <header location="global">moveit/motion_planning_rviz_plugin/motion_planning_param_widget.h</header>
+   <header location="global">moveit/motion_planning_rviz_plugin/motion_planning_param_widget.hpp</header>
   </customwidget>
  </customwidgets>
  <tabstops>

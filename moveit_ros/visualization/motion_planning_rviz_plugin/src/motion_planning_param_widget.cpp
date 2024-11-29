@@ -34,8 +34,8 @@
 
 /* Author: Robert Haschke */
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_param_widget.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_param_widget.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/float_property.hpp>
 #include <rviz_common/properties/string_property.hpp>

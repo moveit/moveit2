@@ -33,8 +33,8 @@
  *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <moveit/online_signal_smoothing/acceleration_filter.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/online_signal_smoothing/acceleration_filter.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 constexpr std::string_view PLANNING_GROUP_NAME = "panda_arm";
 constexpr size_t PANDA_NUM_JOINTS = 7u;

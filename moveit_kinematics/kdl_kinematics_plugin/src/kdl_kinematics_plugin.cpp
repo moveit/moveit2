@@ -34,7 +34,7 @@
 
 /* Author: Sachin Chitta, David Lu!!, Ugo Cupcic */
 
-#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
+#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.hpp>
 #include <moveit/kdl_kinematics_plugin/chainiksolver_vel_mimic_svd.hpp>
 #include <moveit/utils/logger.hpp>
 

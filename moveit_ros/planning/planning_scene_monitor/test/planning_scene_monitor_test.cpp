@@ -43,8 +43,8 @@
 #include <gtest/gtest.h>
 
 // Main class
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
 class PlanningSceneMonitorTest : public ::testing::Test
 {
