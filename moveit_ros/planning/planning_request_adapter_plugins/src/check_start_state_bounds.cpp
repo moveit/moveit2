@@ -101,7 +101,7 @@ public:
       // it is within the model's declared bounds (usually -Pi, Pi), since the values wrap around.
       // It is possible that the encoder maintains values outside the range [-Pi, Pi], to inform
       // how many times the joint was wrapped. Because of this, we remember the offsets for continuous
-      // joints, and we un-do them when the plan comes from the planner
+      // joints, and we undo them when the plan comes from the planner.
       switch (jmodel->getType())
       {
         case moveit::core::JointModel::REVOLUTE:
@@ -115,8 +115,8 @@ public:
             {
               changed_req = true;
             }
+            break;
           }
-          break;
         }
         // Normalize yaw; no offset needs to be remembered
         case moveit::core::JointModel::PLANAR:
@@ -170,7 +170,7 @@ public:
       }
     }
 
-    // If we made any changes, consider using them them
+    // If we made any changes, consider using them.
     if (params.fix_start_state && changed_req)
     {
       RCLCPP_WARN(logger_, "Changing start state.");
