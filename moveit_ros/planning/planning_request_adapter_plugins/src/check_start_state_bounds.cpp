@@ -115,9 +115,8 @@ public:
             {
               changed_req = true;
             }
-            break;
           }
-          [[fallthrough]];  // If the revolute joint is non-continuous, we want to enter default case.
+          break;
         }
         // Normalize yaw; no offset needs to be remembered
         case moveit::core::JointModel::PLANAR:
@@ -145,29 +144,33 @@ public:
         }
         default:
         {
-          if (!start_state.satisfiesBounds(jmodel))
-          {
-            std::stringstream joint_values;
-            std::stringstream joint_bounds_low;
-            std::stringstream joint_bounds_hi;
-            const double* p = start_state.getJointPositions(jmodel);
-            for (std::size_t k = 0; k < jmodel->getVariableCount(); ++k)
-            {
-              joint_values << p[k] << ' ';
-            }
-            const moveit::core::JointModel::Bounds& b = jmodel->getVariableBounds();
-            for (const moveit::core::VariableBounds& variable_bounds : b)
-            {
-              joint_bounds_low << variable_bounds.min_position_ << ' ';
-              joint_bounds_hi << variable_bounds.max_position_ << ' ';
-            }
-            RCLCPP_ERROR(logger_,
-                         "Joint '%s' from the starting state is outside bounds by: [%s] should be in "
-                         "the range [%s], [%s].",
-                         jmodel->getName().c_str(), joint_values.str().c_str(), joint_bounds_low.str().c_str(),
-                         joint_bounds_hi.str().c_str());
-          }
+          break;  // do nothing
         }
+      }
+
+      // Check the joint against its bounds.
+      if (!start_state.satisfiesBounds(jmodel))
+      {
+        state_out_of_bounds |= true;
+        std::stringstream joint_values;
+        std::stringstream joint_bounds_low;
+        std::stringstream joint_bounds_hi;
+        const double* p = start_state.getJointPositions(jmodel);
+        for (std::size_t k = 0; k < jmodel->getVariableCount(); ++k)
+        {
+          joint_values << p[k] << ' ';
+        }
+        const moveit::core::JointModel::Bounds& b = jmodel->getVariableBounds();
+        for (const moveit::core::VariableBounds& variable_bounds : b)
+        {
+          joint_bounds_low << variable_bounds.min_position_ << ' ';
+          joint_bounds_hi << variable_bounds.max_position_ << ' ';
+        }
+        RCLCPP_ERROR(logger_,
+                     "Joint '%s' from the starting state is outside bounds by: [%s] should be in "
+                     "the range [%s], [%s].",
+                     jmodel->getName().c_str(), joint_values.str().c_str(), joint_bounds_low.str().c_str(),
+                     joint_bounds_hi.str().c_str());
       }
     }
 
