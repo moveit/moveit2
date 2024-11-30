@@ -151,7 +151,6 @@ public:
       // Check the joint against its bounds.
       if (!start_state.satisfiesBounds(jmodel))
       {
-        state_out_of_bounds |= true;
         std::stringstream joint_values;
         std::stringstream joint_bounds_low;
         std::stringstream joint_bounds_hi;
