@@ -117,6 +117,7 @@ public:
             }
             break;
           }
+          [[fallthrough]];  // If the revolute joint is non-continuous, we want to enter default case.
         }
         // Normalize yaw; no offset needs to be remembered
         case moveit::core::JointModel::PLANAR:
