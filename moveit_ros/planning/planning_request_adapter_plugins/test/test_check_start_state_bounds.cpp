@@ -93,7 +93,7 @@ TEST_F(TestCheckStartStateBounds, TestWithinBounds)
   ASSERT_EQ(result.message, "");
 }
 
-TEST_F(TestCheckStartStateBounds, TestOutOfBounds)
+TEST_F(TestCheckStartStateBounds, TestRevoluteJointOutOfBounds)
 {
   planning_interface::MotionPlanRequest request;
   request.group_name = "right_arm";
@@ -102,20 +102,16 @@ TEST_F(TestCheckStartStateBounds, TestOutOfBounds)
     "r_elbow_flex_joint",   "r_wrist_flex_joint",    "r_wrist_roll_joint",
   };
   request.start_state.joint_state.position = {
-    1.0,  // out of bounds
+    1.0,  // revolute joint out of bounds
     0.0, 0.0, 0.0, -0.5, -0.5, 0.0,
   };
-
-  // Do not modify the start state. The adapter should fail.
-  // TODO: It does not fail now, the logic needs to be fixed.
-  node_->set_parameter(rclcpp::Parameter("fix_start_state", false));
 
   const auto result = adapter_->adapt(planning_scene_, request);
   ASSERT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID);
   ASSERT_EQ(result.message, "Start state out of bounds.");
 }
 
-TEST_F(TestCheckStartStateBounds, TestOutOfBoundsFixStartState)
+TEST_F(TestCheckStartStateBounds, TestContinuousJointOutOfBounds)
 {
   planning_interface::MotionPlanRequest request;
   request.group_name = "right_arm";
@@ -124,17 +120,34 @@ TEST_F(TestCheckStartStateBounds, TestOutOfBoundsFixStartState)
     "r_elbow_flex_joint",   "r_wrist_flex_joint",    "r_wrist_roll_joint",
   };
   request.start_state.joint_state.position = {
-    1.0,  // out of bounds
-    0.0, 0.0, 0.0, -0.5, -0.5, 0.0,
+    0.0,  0.0,  0.0, 100.0,  // continuous joint out of bounds
+    -0.5, -0.5, 0.0,
+  };
+
+  const auto result = adapter_->adapt(planning_scene_, request);
+  ASSERT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID);
+  ASSERT_EQ(result.message, "Start state out of bounds.");
+}
+
+TEST_F(TestCheckStartStateBounds, TestContinuousJointFixedBounds)
+{
+  planning_interface::MotionPlanRequest request;
+  request.group_name = "right_arm";
+  request.start_state.joint_state.name = {
+    "r_shoulder_pan_joint", "r_shoulder_lift_joint", "r_upper_arm_roll_joint", "r_forearm_roll_joint",
+    "r_elbow_flex_joint",   "r_wrist_flex_joint",    "r_wrist_roll_joint",
+  };
+  request.start_state.joint_state.position = {
+    0.0,  0.0,  0.0, 100.0,  // continuous joint out of bounds
+    -0.5, -0.5, 0.0,
   };
 
   // Modify the start state. The adapter should succeed.
-  // TODO: This does not actually fix the start state? Needs to be fixed
   node_->set_parameter(rclcpp::Parameter("fix_start_state", true));
 
   const auto result = adapter_->adapt(planning_scene_, request);
   ASSERT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
-  ASSERT_EQ(result.message, "");
+  ASSERT_EQ(result.message, "Changing start state.");
 
   // TODO: Validate that the start state was actually changed.
 }

@@ -94,7 +94,8 @@ public:
     // Read parameters
     const auto params = param_listener_->get_params();
 
-    bool changed_req = false;
+    bool should_fix_state = false;
+    bool is_out_of_bounds = false;
     for (const moveit::core::JointModel* jmodel : jmodels)
     {
       // Check if we have a revolute, continuous joint. If we do, then we only need to make sure
@@ -113,7 +114,7 @@ public:
             double after = start_state.getJointPositions(jmodel)[0];
             if (fabs(initial - after) > std::numeric_limits<double>::epsilon())
             {
-              changed_req = true;
+              should_fix_state |= true;
             }
           }
           break;
@@ -126,7 +127,7 @@ public:
           if (static_cast<const moveit::core::PlanarJointModel*>(jmodel)->normalizeRotation(copy))
           {
             start_state.setJointPositions(jmodel, copy);
-            changed_req = true;
+            should_fix_state |= true;
           }
           break;
         }
@@ -138,7 +139,7 @@ public:
           if (static_cast<const moveit::core::FloatingJointModel*>(jmodel)->normalizeRotation(copy))
           {
             start_state.setJointPositions(jmodel, copy);
-            changed_req = true;
+            should_fix_state |= true;
           }
           break;
         }
@@ -151,6 +152,8 @@ public:
       // Check the joint against its bounds.
       if (!start_state.satisfiesBounds(jmodel))
       {
+        is_out_of_bounds |= true;
+
         std::stringstream joint_values;
         std::stringstream joint_bounds_low;
         std::stringstream joint_bounds_hi;
@@ -173,26 +176,22 @@ public:
       }
     }
 
-    // If we made any changes, consider using them.
-    if (params.fix_start_state && changed_req)
-    {
-      RCLCPP_WARN(logger_, "Changing start state.");
-      moveit::core::robotStateToRobotStateMsg(start_state, req.start_state);
-      return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::SUCCESS, std::string(""),
-                                           getDescription());
-    }
-
+    // Package up the adapter result, changing the state if applicable.
     auto status = moveit::core::MoveItErrorCode();
-    if (!changed_req)
-    {
-      status.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-    }
-    else
+    status.source = getDescription();
+    status.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+
+    if (is_out_of_bounds || (!params.fix_start_state && should_fix_state))
     {
       status.val = moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID;
       status.message = std::string("Start state out of bounds.");
     }
-    status.source = getDescription();
+    else if (params.fix_start_state && should_fix_state)
+    {
+      status.message = std::string("Changing start state.");
+      RCLCPP_WARN(logger_, status.message.c_str());
+      moveit::core::robotStateToRobotStateMsg(start_state, req.start_state);
+    }
     return status;
   }
 
