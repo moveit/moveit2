@@ -188,8 +188,9 @@ public:
     }
     else if (params.fix_start_state && should_fix_state)
     {
-      status.message = std::string("Changing start state.");
-      RCLCPP_WARN(logger_, status.message.c_str());
+      constexpr auto msg_string = "Changing start state.";
+      status.message = msg_string;
+      RCLCPP_WARN(logger_, msg_string);
       moveit::core::robotStateToRobotStateMsg(start_state, req.start_state);
     }
     return status;

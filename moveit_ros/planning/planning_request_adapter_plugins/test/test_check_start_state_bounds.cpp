@@ -89,8 +89,8 @@ TEST_F(TestCheckStartStateBounds, TestWithinBounds)
   };
 
   const auto result = adapter_->adapt(planning_scene_, request);
-  ASSERT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
-  ASSERT_EQ(result.message, "");
+  EXPECT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  EXPECT_EQ(result.message, "");
 }
 
 TEST_F(TestCheckStartStateBounds, TestRevoluteJointOutOfBounds)
@@ -107,8 +107,8 @@ TEST_F(TestCheckStartStateBounds, TestRevoluteJointOutOfBounds)
   };
 
   const auto result = adapter_->adapt(planning_scene_, request);
-  ASSERT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID);
-  ASSERT_EQ(result.message, "Start state out of bounds.");
+  EXPECT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID);
+  EXPECT_EQ(result.message, "Start state out of bounds.");
 }
 
 TEST_F(TestCheckStartStateBounds, TestContinuousJointOutOfBounds)
@@ -125,8 +125,8 @@ TEST_F(TestCheckStartStateBounds, TestContinuousJointOutOfBounds)
   };
 
   const auto result = adapter_->adapt(planning_scene_, request);
-  ASSERT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID);
-  ASSERT_EQ(result.message, "Start state out of bounds.");
+  EXPECT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID);
+  EXPECT_EQ(result.message, "Start state out of bounds.");
 }
 
 TEST_F(TestCheckStartStateBounds, TestContinuousJointFixedBounds)
@@ -146,10 +146,14 @@ TEST_F(TestCheckStartStateBounds, TestContinuousJointFixedBounds)
   node_->set_parameter(rclcpp::Parameter("fix_start_state", true));
 
   const auto result = adapter_->adapt(planning_scene_, request);
-  ASSERT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
-  ASSERT_EQ(result.message, "Changing start state.");
+  EXPECT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  EXPECT_EQ(result.message, "Changing start state.");
 
-  // TODO: Validate that the start state was actually changed.
+  // Validate that the start state in the request was actually changed.
+  const auto& joint_names = request.start_state.joint_state.name;
+  const size_t joint_idx =
+      std::find(joint_names.begin(), joint_names.end(), "r_forearm_roll_joint") - joint_names.begin();
+  EXPECT_NEAR(request.start_state.joint_state.position[joint_idx], -0.530965, 1.0e-4);
 }
 
 int main(int argc, char** argv)
