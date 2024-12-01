@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2024, Sebastian Castro.
+ *  Copyright (c) 2024, Sebastian Castro
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@
 class TestCheckStartStateBounds : public testing::Test
 {
 protected:
-  void SetUp()
+  void SetUp() override
   {
     rclcpp::init(0, nullptr);
     node_ = std::make_shared<rclcpp::Node>("test_check_start_state_bounds_adapter", "");
@@ -65,7 +65,7 @@ protected:
     adapter_->initialize(node_, "");
   }
 
-  void TearDown()
+  void TearDown() override
   {
     rclcpp::shutdown();
   }
