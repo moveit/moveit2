@@ -1817,7 +1817,7 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
   shape_poses.reserve(num_shapes);
 
   bool switch_object_pose_and_shape_pose = false;
-  if (num_shapes == 1 && (!object.subframe_poses.size()) && moveit::core::isEmpty(object.pose))
+  if (num_shapes == 1 && object.subframe_poses.empty() && moveit::core::isEmpty(object.pose))
   {
     // If the object pose is not set but the shape pose is, use the shape's pose as the object pose.
     switch_object_pose_and_shape_pose = true;
