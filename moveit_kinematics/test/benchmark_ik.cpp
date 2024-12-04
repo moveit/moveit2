@@ -37,9 +37,9 @@
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
 #include <boost/program_options.hpp>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace po = boost::program_options;

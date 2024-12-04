@@ -37,16 +37,16 @@
 #include <gtest/gtest.h>
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/collision_detection_bullet/bullet_integration/bullet_cast_bvh_manager.h>
-#include <moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.h>
-#include <moveit/collision_detection/collision_common.h>
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_cast_bvh_manager.hpp>
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.hpp>
+#include <moveit/collision_detection/collision_common.hpp>
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
-#include <moveit/collision_detection_bullet/collision_env_bullet.h>
-#include <moveit/collision_detection_bullet/bullet_integration/basic_types.h>
+#include <moveit/collision_detection_bullet/collision_env_bullet.hpp>
+#include <moveit/collision_detection_bullet/bullet_integration/basic_types.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <urdf_parser/urdf_parser.h>

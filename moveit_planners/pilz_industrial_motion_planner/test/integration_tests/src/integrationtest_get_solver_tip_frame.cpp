@@ -39,12 +39,12 @@
 
 #include <gtest/gtest.h>
 
-#include <moveit/robot_model/joint_model_group.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/robot_model/joint_model_group.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 #include <ros/ros.h>
 
-#include <pilz_industrial_motion_planner/tip_frame_getter.h>
+#include <pilz_industrial_motion_planner/tip_frame_getter.hpp>
 
 static const std::string ROBOT_DESCRIPTION_PARAM{ "robot_description" };
 

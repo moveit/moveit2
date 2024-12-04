@@ -34,12 +34,12 @@
 
 /* Author: Peter David Fagan */
 
-#include "robot_model.h"
+#include "robot_model.hpp"
 #include <fstream>
 #include <urdf_parser/urdf_parser.h>
 #include <srdfdom/model.h>
 #include <srdfdom/srdf_writer.h>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 
 namespace moveit_py
 {

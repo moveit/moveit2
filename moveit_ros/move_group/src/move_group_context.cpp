@@ -34,11 +34,11 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/move_group/move_group_context.h>
+#include <moveit/move_group/move_group_context.hpp>
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/plan_execution/plan_execution.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/plan_execution/plan_execution.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace move_group

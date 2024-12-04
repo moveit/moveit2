@@ -36,9 +36,9 @@
  * Desc: This adapter checks if the start state is in collision.
  */
 
-#include <moveit/planning_interface/planning_request_adapter.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
+#include <moveit/planning_interface/planning_request_adapter.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
 #include <class_loader/class_loader.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>

@@ -34,10 +34,10 @@
 
 /* Author: Bilal Gill */
 
-#include "load_geometry_from_file_service_capability.h"
+#include "load_geometry_from_file_service_capability.hpp"
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/move_group/capability_names.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <fstream>

@@ -35,7 +35,7 @@
 /* Author: David V. Lu!! */
 
 #include <moveit_setup_srdf_plugins/robot_poses.hpp>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 
 namespace moveit_setup
 {

@@ -42,7 +42,7 @@
 #include <rviz_common/visualization_manager.hpp>
 #include <rviz_common/view_manager.hpp>
 #include <rviz_common/view_controller.hpp>
-#include <moveit/robot_state_rviz_plugin/robot_state_display.h>
+#include <moveit/robot_state_rviz_plugin/robot_state_display.hpp>
 #include <QWidget>
 #include <QCheckBox>
 #include <QHBoxLayout>

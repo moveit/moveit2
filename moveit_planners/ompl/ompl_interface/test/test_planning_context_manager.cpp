@@ -50,20 +50,20 @@
  *
  **/
 
-#include "load_test_robot.h"
+#include "load_test_robot.hpp"
 
 #include <gtest/gtest.h>
 
 #include <tf2_eigen/tf2_eigen.hpp>
 
-#include <moveit/ompl_interface/planning_context_manager.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/planning_interface/planning_request.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/constraint_samplers/constraint_sampler_manager.h>
-#include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
-#include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.h>
+#include <moveit/ompl_interface/planning_context_manager.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/planning_interface/planning_request.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/constraint_samplers/constraint_sampler_manager.hpp>
+#include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.hpp>
+#include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.hpp>
 #include <moveit/utils/logger.hpp>
 
 /** \brief Generic implementation of the tests that can be executed on different robots. **/

@@ -20,9 +20,9 @@
 #include <memory>
 #include <vector>
 
-#include <moveit/robot_state/conversions.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/warehouse/moveit_message_storage.h>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/warehouse/moveit_message_storage.hpp>
 #include <warehouse_ros/message_collection.h>
 
 #include <rclcpp/rclcpp.hpp>

@@ -43,8 +43,8 @@
 #include <gtest/gtest.h>
 
 // Main class
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/moveit_cpp/planning_component.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/moveit_cpp/planning_component.hpp>
 // Msgs
 #include <geometry_msgs/PointStamped.h>
 

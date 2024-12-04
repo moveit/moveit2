@@ -40,7 +40,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <moveit/online_signal_smoothing/butterworth_filter.h>
+#include <moveit/online_signal_smoothing/butterworth_filter.hpp>
 
 TEST(SMOOTHING_PLUGINS, FilterConverge)
 {

@@ -37,8 +37,8 @@
 #include <algorithm>
 
 #include <geometric_shapes/solid_primitive_dims.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/utils/message_checks.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/utils/message_checks.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>

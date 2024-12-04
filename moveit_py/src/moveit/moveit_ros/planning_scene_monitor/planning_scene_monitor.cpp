@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "planning_scene_monitor.h"
+#include "planning_scene_monitor.hpp"
 
 namespace moveit_py
 {

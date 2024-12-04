@@ -35,15 +35,15 @@
 
 /* Authors: Ioan Sucan, Michael Goerner */
 
-#include <moveit/ompl_interface/ompl_interface.h>
-#include <moveit/ompl_interface/detail/constraints_library.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/ompl_interface/ompl_interface.hpp>
+#include <moveit/ompl_interface/detail/constraints_library.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/utils/message_checks.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/utils/message_checks.hpp>
 
 #include <boost/math/constants/constants.hpp>
 #include <sstream>

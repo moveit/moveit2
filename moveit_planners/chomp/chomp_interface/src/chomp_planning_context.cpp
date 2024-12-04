@@ -34,8 +34,8 @@
 
 /* Author: Chittaranjan Srinivas Swaminathan */
 
-#include <chomp_interface/chomp_planning_context.h>
-#include <moveit/robot_state/conversions.h>
+#include <chomp_interface/chomp_planning_context.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
 namespace chomp_interface
 {

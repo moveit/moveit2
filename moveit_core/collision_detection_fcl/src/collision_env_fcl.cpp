@@ -34,11 +34,11 @@
 
 /* Author: Ioan Sucan, Jens Petit */
 
-#include <moveit/collision_detection_fcl/collision_env_fcl.h>
-#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
-#include <moveit/collision_detection_fcl/collision_common.h>
+#include <moveit/collision_detection_fcl/collision_env_fcl.hpp>
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.hpp>
+#include <moveit/collision_detection_fcl/collision_common.hpp>
 
-#include <moveit/collision_detection_fcl/fcl_compat.h>
+#include <moveit/collision_detection_fcl/fcl_compat.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <moveit/utils/logger.hpp>
