@@ -188,7 +188,7 @@ public:
     }
     else if (params.fix_start_state && should_fix_state)
     {
-      constexpr auto msg_string = "Changing start state.";
+      constexpr auto msg_string = "Normalized start state.";
       status.message = msg_string;
       RCLCPP_WARN(logger_, msg_string);
       moveit::core::robotStateToRobotStateMsg(start_state, req.start_state);

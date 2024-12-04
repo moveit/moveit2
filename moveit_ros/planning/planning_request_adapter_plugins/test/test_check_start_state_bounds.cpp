@@ -147,9 +147,9 @@ TEST_F(TestCheckStartStateBounds, TestContinuousJointFixedBounds)
 
   const auto result = adapter_->adapt(planning_scene_, request);
   EXPECT_EQ(result.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
-  EXPECT_EQ(result.message, "Changing start state.");
+  EXPECT_EQ(result.message, "Normalized start state.");
 
-  // Validate that the start state in the request was actually changed.
+  // Validate that the large continuous joint position value in the request start state was normalized.
   const auto& joint_names = request.start_state.joint_state.name;
   const size_t joint_idx =
       std::find(joint_names.begin(), joint_names.end(), "r_forearm_roll_joint") - joint_names.begin();
