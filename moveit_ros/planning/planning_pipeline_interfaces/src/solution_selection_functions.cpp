@@ -44,14 +44,14 @@ namespace planning_pipeline_interfaces
 getShortestSolution(const std::vector<::planning_interface::MotionPlanResponse>& solutions)
 {
   // Find trajectory with minimal path
-  auto const shortest_trajectory = std::min_element(solutions.begin(), solutions.end(),
+  const auto shortest_trajectory = std::min_element(solutions.begin(), solutions.end(),
                                                     [](const ::planning_interface::MotionPlanResponse& solution_a,
                                                        const ::planning_interface::MotionPlanResponse& solution_b) {
                                                       // If both solutions were successful, check which path is shorter
                                                       if (solution_a && solution_b)
                                                       {
-                                                        return robot_trajectory::path_length(*solution_a.trajectory) <
-                                                               robot_trajectory::path_length(*solution_b.trajectory);
+                                                        return robot_trajectory::pathLength(*solution_a.trajectory) <
+                                                               robot_trajectory::pathLength(*solution_b.trajectory);
                                                       }
                                                       // If only solution a is successful, return a
                                                       else if (solution_a)

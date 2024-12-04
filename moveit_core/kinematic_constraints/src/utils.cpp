@@ -37,12 +37,13 @@
 #include <algorithm>
 
 #include <geometric_shapes/solid_primitive_dims.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/utils/message_checks.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/utils/message_checks.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/parameter_value.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <rclcpp/node.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -52,8 +53,13 @@ using namespace moveit::core;
 
 namespace kinematic_constraints
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_kinematic_constraints.utils");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.core.kinematic_constraints");
+}
+}  // namespace
 
 moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constraints& first,
                                                const moveit_msgs::msg::Constraints& second)
@@ -78,7 +84,8 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
         double high = std::min(a.position + a.tolerance_above, b.position + b.tolerance_above);
         if (low > high)
         {
-          RCLCPP_ERROR(LOGGER, "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
+          RCLCPP_ERROR(getLogger(),
+                       "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
                        a.joint_name.c_str());
         }
         else
@@ -210,6 +217,7 @@ moveit_msgs::msg::Constraints constructGoalConstraints(const std::string& link_n
 
   goal.orientation_constraints.resize(1);
   moveit_msgs::msg::OrientationConstraint& ocm = goal.orientation_constraints[0];
+  ocm.parameterization = moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR;
   ocm.link_name = link_name;
   ocm.header = pose.header;
   ocm.orientation = pose.pose.orientation;
@@ -290,7 +298,7 @@ bool updateOrientationConstraint(moveit_msgs::msg::Constraints& constraints, con
     {
       if (quat.header.frame_id.empty())
       {
-        RCLCPP_ERROR(LOGGER, "Cannot update orientation constraint, frame_id in the header is empty");
+        RCLCPP_ERROR(getLogger(), "Cannot update orientation constraint, frame_id in the header is empty");
         return false;
       }
       constraint.header = quat.header;
@@ -321,7 +329,7 @@ bool updatePositionConstraint(moveit_msgs::msg::Constraints& constraints, const 
     {
       if (goal_point.header.frame_id.empty())
       {
-        RCLCPP_ERROR(LOGGER, "Cannot update position constraint, frame_id in the header is empty");
+        RCLCPP_ERROR(getLogger(), "Cannot update position constraint, frame_id in the header is empty");
         return false;
       }
       constraint.header = goal_point.header;
@@ -557,7 +565,7 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
     const auto constraint_param = "constraints." + constraint_id;
     if (!node->has_parameter(constraint_param + ".type"))
     {
-      RCLCPP_ERROR(LOGGER, "constraint parameter \"%s\" does not specify its type", constraint_param.c_str());
+      RCLCPP_ERROR(getLogger(), "constraint parameter \"%s\" does not specify its type", constraint_param.c_str());
       return false;
     }
     std::string constraint_type;
@@ -588,7 +596,7 @@ static bool collectConstraints(const rclcpp::Node::SharedPtr& node, const std::v
     }
     else
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Unable to process unknown constraint type: " << constraint_type);
+      RCLCPP_ERROR_STREAM(getLogger(), "Unable to process unknown constraint type: " << constraint_type);
       return false;
     }
   }
@@ -648,9 +656,17 @@ bool resolveConstraintFrames(const moveit::core::RobotState& state, moveit_msgs:
     // the constraint needs to be expressed in the frame of a robot link.
     if (c.link_name != robot_link->getName())
     {
+      if (c.parameterization == moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES)
+      {
+        RCLCPP_ERROR(getLogger(),
+                     "Euler angles parameterization is not supported for non-link frames in orientation constraints. \n"
+                     "Switch to rotation vector parameterization.");
+        return false;
+      }
       c.link_name = robot_link->getName();
       Eigen::Quaterniond link_name_to_robot_link(transform.linear().transpose() *
                                                  state.getGlobalLinkTransform(robot_link).linear());
+      // adapt goal orientation
       Eigen::Quaterniond quat_target;
       tf2::fromMsg(c.orientation, quat_target);
       c.orientation = tf2::toMsg(quat_target * link_name_to_robot_link);

@@ -35,13 +35,14 @@
 /* Author: Ioan Sucan */
 
 #include <chrono>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/version.h>
+#include <moveit/utils/logger.hpp>
 #if RCLCPP_VERSION_GTE(20, 0, 0)
 #include <rclcpp/event_handler.hpp>
 #else
@@ -50,12 +51,12 @@
 #include <rclcpp/utilities.hpp>
 
 using namespace std::chrono_literals;
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("publish_scene_from_text");
 
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("publish_planning_scene");
+  moveit::setNodeLoggerName(node->get_name());
 
   // decide whether to publish the full scene
   bool full_scene = false;
@@ -100,7 +101,7 @@ int main(int argc, char** argv)
     std::ifstream f(argv[filename_index]);
     if (ps.loadGeometryFromStream(f))
     {
-      RCLCPP_INFO(LOGGER, "Publishing geometry from '%s' ...", argv[filename_index]);
+      RCLCPP_INFO(node->get_logger(), "Publishing geometry from '%s' ...", argv[filename_index]);
       moveit_msgs::msg::PlanningScene ps_msg;
       ps.getPlanningSceneMsg(ps_msg);
       ps_msg.is_diff = true;
@@ -123,7 +124,7 @@ int main(int argc, char** argv)
   }
   else
   {
-    RCLCPP_WARN(LOGGER,
+    RCLCPP_WARN(node->get_logger(),
                 "A filename was expected as argument. That file should be a text representation of the geometry in a "
                 "planning scene.");
   }

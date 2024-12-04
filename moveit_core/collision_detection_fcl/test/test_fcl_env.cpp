@@ -36,14 +36,15 @@
 
 #include <gtest/gtest.h>
 
-#include <moveit/collision_detection/collision_common.h>
+#include <moveit/collision_detection/collision_common.hpp>
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
+#include <moveit/utils/logger.hpp>
 
-#include <moveit/collision_detection_fcl/collision_common.h>
-#include <moveit/collision_detection_fcl/collision_env_fcl.h>
+#include <moveit/collision_detection_fcl/collision_common.hpp>
+#include <moveit/collision_detection_fcl/collision_env_fcl.hpp>
 
 #include <urdf_parser/urdf_parser.h>
 #include <geometric_shapes/shape_operations.h>
@@ -63,7 +64,10 @@ inline void setToHome(moveit::core::RobotState& panda_state)
   panda_state.update();
 }
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection_fcl.test.test_fcl_env");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.core.collision_detection_fcl.test_fcl_env");
+}
 
 class CollisionDetectionEnvTest : public testing::Test
 {
@@ -262,7 +266,7 @@ TEST_F(CollisionDetectionEnvTest, DISABLED_ContinuousCollisionSelf)
   res.clear();
 
   // c_env_->checkSelfCollision(req, res, state1, state2, *acm_);
-  RCLCPP_INFO(LOGGER, "Continuous to continuous collisions are not supported yet, therefore fail here.");
+  RCLCPP_INFO(getLogger(), "Continuous to continuous collisions are not supported yet, therefore fail here.");
   ASSERT_TRUE(res.collision);
   res.clear();
 }

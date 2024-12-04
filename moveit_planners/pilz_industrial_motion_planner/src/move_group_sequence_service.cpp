@@ -36,17 +36,24 @@
 
 // Modified by Pilz GmbH & Co. KG
 
-#include <pilz_industrial_motion_planner/move_group_sequence_service.h>
+#include <pilz_industrial_motion_planner/move_group_sequence_service.hpp>
 
-#include <pilz_industrial_motion_planner/capability_names.h>
-#include <pilz_industrial_motion_planner/command_list_manager.h>
-#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
+#include <pilz_industrial_motion_planner/capability_names.hpp>
+#include <pilz_industrial_motion_planner/command_list_manager.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.hpp>
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/utils/logger.hpp>
+
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.move_group_sequence_service");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.move_group_sequence_service");
+}
+}  // namespace
 MoveGroupSequenceService::MoveGroupSequenceService() : MoveGroupCapability("SequenceService")
 {
 }
@@ -72,7 +79,7 @@ bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::R
   // Handle empty requests
   if (req->request.items.empty())
   {
-    RCLCPP_WARN(LOGGER, "Received empty request. That's ok but maybe not what you intended.");
+    RCLCPP_WARN(getLogger(), "Received empty request. That's ok but maybe not what you intended.");
     res->response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
     return true;
   }
@@ -91,7 +98,7 @@ bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::R
         resolvePlanningPipeline(req->request.items[0].req.pipeline_id);
     if (!planning_pipeline)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Could not load planning pipeline " << req->request.items[0].req.pipeline_id);
+      RCLCPP_ERROR_STREAM(getLogger(), "Could not load planning pipeline " << req->request.items[0].req.pipeline_id);
       res->response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
       return false;
     }
@@ -100,14 +107,15 @@ bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::R
   }
   catch (const MoveItErrorCodeException& ex)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Planner threw an exception (error code: " << ex.getErrorCode() << "): " << ex.what());
+    RCLCPP_ERROR_STREAM(getLogger(),
+                        "Planner threw an exception (error code: " << ex.getErrorCode() << "): " << ex.what());
     res->response.error_code.val = ex.getErrorCode();
     return true;
   }
   // LCOV_EXCL_START // Keep moveit up even if lower parts throw
   catch (const std::exception& ex)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Planner threw an exception: " << ex.what());
+    RCLCPP_ERROR_STREAM(getLogger(), "Planner threw an exception: " << ex.what());
     // If 'FALSE' then no response will be sent to the caller.
     return false;
   }

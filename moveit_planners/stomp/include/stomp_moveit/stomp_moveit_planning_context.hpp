@@ -39,7 +39,7 @@
 
 #pragma once
 
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_interface/planning_interface.hpp>
 
 #include <stomp_moveit_parameters.hpp>
 
@@ -56,9 +56,9 @@ class StompPlanningContext : public planning_interface::PlanningContext
 public:
   StompPlanningContext(const std::string& name, const std::string& group_name, const stomp_moveit::Params& params);
 
-  bool solve(planning_interface::MotionPlanResponse& res) override;
+  void solve(planning_interface::MotionPlanResponse& res) override;
 
-  bool solve(planning_interface::MotionPlanDetailedResponse& res) override;
+  void solve(planning_interface::MotionPlanDetailedResponse& res) override;
 
   bool terminate() override;
 

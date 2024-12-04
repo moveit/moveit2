@@ -42,8 +42,8 @@
 #pragma once
 
 #include <moveit_servo_lib_parameters.hpp>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
 
 namespace moveit_servo
 {
@@ -67,8 +67,9 @@ private:
   // Variables
 
   const servo::Params& servo_params_;
-  moveit::core::RobotStatePtr robot_state_;
+
   const planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  moveit::core::RobotState robot_state_;
 
   // The collision monitor thread.
   std::thread monitor_thread_;

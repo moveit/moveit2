@@ -1,0 +1,61 @@
+local_planner_parameters:
+  group_name: {
+    type: string,
+    description: "Planning group to be used",
+    default_value: "UNKNOWN",
+  }
+  trajectory_operator_plugin_name: {
+    type: string,
+    description: "Trajectory operator plugin",
+    default_value: "UNKNOWN",
+  }
+  local_constraint_solver_plugin_name: {
+    type: string,
+    description: "Local constraint solver plugin",
+    default_value: "UNKNOWN",
+  }
+  local_planning_frequency: {
+    type: double,
+    description: "Spinning frequency of the local planner [Hz].",
+    default_value: 1.0,
+  }
+  global_solution_topic: {
+    type: string,
+    description: "Name of the topic where the global solution is published",
+    default_value: "UNKNOWN",
+  }
+  local_solution_topic: {
+    type: string,
+    description: "Name of the topic where the local solution is published",
+    default_value: "UNKNOWN",
+  }
+  local_solution_topic_type: {
+    type: string,
+    description: "Topic type of local solution",
+    default_value: "UNKNOWN",
+  }
+  publish_joint_positions: {
+    type: bool,
+    description: "Whether or not the local solver publishes position commands",
+    default_value: false,
+  }
+  publish_joint_velocities: {
+    type: bool,
+    description: "Whether or not the local solver publishes velocity commands",
+    default_value: false,
+  }
+  monitored_planning_scene_topic: {
+    type: string,
+    description: "Name of the topic where the reference planning scene is published",
+    default_value: "/planning_scene",
+  }
+  collision_object_topic: {
+    type: string,
+    description: "Name of the topic where the collision objects are published",
+    default_value: "/collision_object",
+  }
+  joint_states_topic: {
+    type: string,
+    description: "Name of the topic where the joint states are published",
+    default_value: "/joint_states",
+  }

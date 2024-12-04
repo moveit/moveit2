@@ -34,15 +34,22 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/ompl_interface/ompl_interface.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/utils/lexical_casts.h>
+#include <moveit/ompl_interface/ompl_interface.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/utils/lexical_casts.hpp>
 #include <fstream>
+#include <moveit/utils/logger.hpp>
 
 namespace ompl_interface
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.ompl_interface");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.ompl.interface");
+}
+}  // namespace
 
 OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model, const rclcpp::Node::SharedPtr& node,
                              const std::string& parameter_namespace)
@@ -53,7 +60,7 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
   , context_manager_(robot_model, constraint_sampler_manager_)
   , use_constraints_approximations_(true)
 {
-  RCLCPP_DEBUG(LOGGER, "Initializing OMPL interface using ROS parameters");
+  RCLCPP_DEBUG(getLogger(), "Initializing OMPL interface using ROS parameters");
   loadPlannerConfigurations();
   loadConstraintSamplers();
 }
@@ -68,7 +75,7 @@ OMPLInterface::OMPLInterface(const moveit::core::RobotModelConstPtr& robot_model
   , context_manager_(robot_model, constraint_sampler_manager_)
   , use_constraints_approximations_(true)
 {
-  RCLCPP_DEBUG(LOGGER, "Initializing OMPL interface using specified configuration");
+  RCLCPP_DEBUG(getLogger(), "Initializing OMPL interface using specified configuration");
   setPlannerConfigurations(pconfig);
   loadConstraintSamplers();
 }
@@ -127,7 +134,7 @@ bool OMPLInterface::loadPlannerConfiguration(const std::string& group_name, cons
 
   if (planner_params_result.names.empty())
   {
-    RCLCPP_ERROR(LOGGER, "Could not find the planner configuration '%s' on the param server", planner_id.c_str());
+    RCLCPP_ERROR(getLogger(), "Could not find the planner configuration '%s' on the param server", planner_id.c_str());
     return false;
   }
 
@@ -179,9 +186,9 @@ void OMPLInterface::loadPlannerConfigurations()
         const rclcpp::Parameter parameter = node_->get_parameter(param_name);
         if (parameter.get_type() != type)
         {
-          RCLCPP_ERROR_STREAM(LOGGER, "Invalid type for parameter '" << name << "' expected ["
-                                                                     << rclcpp::to_string(type) << "] got ["
-                                                                     << rclcpp::to_string(parameter.get_type()) << ']');
+          RCLCPP_ERROR_STREAM(getLogger(), "Invalid type for parameter '"
+                                               << name << "' expected [" << rclcpp::to_string(type) << "] got ["
+                                               << rclcpp::to_string(parameter.get_type()) << ']');
           continue;
         }
         if (parameter.get_type() == rclcpp::ParameterType::PARAMETER_STRING)
@@ -241,11 +248,11 @@ void OMPLInterface::loadPlannerConfigurations()
 
   for (const auto& [name, config_settings] : pconfig)
   {
-    RCLCPP_DEBUG(LOGGER, "Parameters for configuration '%s'", name.c_str());
+    RCLCPP_DEBUG(getLogger(), "Parameters for configuration '%s'", name.c_str());
 
     for (const auto& [param_name, param_value] : config_settings.config)
     {
-      RCLCPP_DEBUG_STREAM(LOGGER, " - " << param_name << " = " << param_value);
+      RCLCPP_DEBUG_STREAM(getLogger(), " - " << param_name << " = " << param_value);
     }
   }
 
@@ -254,6 +261,6 @@ void OMPLInterface::loadPlannerConfigurations()
 
 void OMPLInterface::printStatus()
 {
-  RCLCPP_INFO(LOGGER, "OMPL ROS interface is running.");
+  RCLCPP_INFO(getLogger(), "OMPL ROS interface is running.");
 }
 }  // namespace ompl_interface

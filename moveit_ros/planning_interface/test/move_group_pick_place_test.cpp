@@ -36,7 +36,7 @@
 /* Author: Tyler Weaver */
 
 /* These integration tests are based on the tutorials for using move_group to do a pick and place:
- * https://ros-planning.github.io/moveit_tutorials/doc/pick_place/pick_place_tutorial.html
+ * https://moveit.github.io/moveit_tutorials/doc/pick_place/pick_place_tutorial.html
  */
 
 // C++
@@ -49,8 +49,8 @@
 #include <gtest/gtest.h>
 
 // MoveIt
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 
 // TF2
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>

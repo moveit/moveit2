@@ -2,6 +2,103 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Port fixes for handling orientation constraints (`#3052 <https://github.com/ros-planning/moveit2/issues/3052>`_)
+* Contributors: Robert Haschke, Tom Noble
+
+2.11.0 (2024-09-16)
+-------------------
+* Fix constrained-based planning / PoseModelStateSpace (`#2910 <https://github.com/moveit/moveit2/issues/2910>`_)
+* Contributors: Robert Haschke
+
+2.10.0 (2024-06-13)
+-------------------
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* Do not overwrite the error code with OMPL interface (`#2725 <https://github.com/moveit/moveit2/issues/2725>`_)
+  In case of failure, set the error code to the one returned by the
+  planning pipeline's `solve` method rather than overwriting it with
+  `PLANNING_FAILED`.
+* Set `planner_id` in reponses with OMPL interface (`#2724 <https://github.com/moveit/moveit2/issues/2724>`_)
+  This avoids a warning `PlanningPipeline::generatePlan()`.
+  Co-authored-by: Gaël Écorchard <gael@km-robotics.cz>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Gaël Écorchard, Robert Haschke, Sebastian Jahr, Tyler Weaver
+
+2.9.0 (2024-01-09)
+------------------
+* Handle unsupported position constraints in OMPL (`#2417 <https://github.com/ros-planning/moveit2/issues/2417>`_)
+  * Handle unsupported position constraints in OMPL
+  OMPL constrained planning assumes that all position constraints have three
+  dimensions, meaning that they are represented by a BOX bounding volume.
+  If another shape is used (like a SPHERE from moveit_core/kinematic_constraints/utils.hpp),
+  the constraint adapter implementation will produce a segfault because of
+  the lack of dimensions. This fix prevents this by checking for the
+  required BOX type.
+  * Add warning if more than one position primitive is used
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Invoke OMPL debug print only when debug logging is enabled (`#2608 <https://github.com/ros-planning/moveit2/issues/2608>`_)
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* [Planning Pipeline Refactoring] `#1 <https://github.com/ros-planning/moveit2/issues/1>`_ Simplify Adapter - Planner chain (`#2429 <https://github.com/ros-planning/moveit2/issues/2429>`_)
+* Add new clang-tidy style rules (`#2177 <https://github.com/ros-planning/moveit2/issues/2177>`_)
+* Do not pass and return simple types by const ref (`#2453 <https://github.com/ros-planning/moveit2/issues/2453>`_)
+  Co-authored-by: Nils <nilsmailiseke@gmail.com>
+* Update pre-commit and add to .codespell_words (`#2465 <https://github.com/ros-planning/moveit2/issues/2465>`_)
+* Map ompl's APPROXIMATE_SOLUTION -> TIMED_OUT / PLANNING_FAILED (`#2455 <https://github.com/ros-planning/moveit2/issues/2455>`_)
+  ompl's APPROXIMATE_SOLUTION is not suitable for actual execution. It just states that we got closer to the goal...
+  The most prominent reason for an approximate solution is a timeout. Thus, return TIMED_OUT and print the used timeouts for convenience.
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Update clang-format-14 with QualifierAlignment (`#2362 <https://github.com/ros-planning/moveit2/issues/2362>`_)
+  * Set qualifier order in .clang-format
+  * Ran pre-commit to update according to new style guide
+* Converts float to double (`#2343 <https://github.com/ros-planning/moveit2/issues/2343>`_)
+  * Limiting the scope of variables `#874 <https://github.com/ros-planning/moveit2/issues/874>`_
+  Limited the scope of variables in moveit_core/collision_detection
+  * Update moveit_core/collision_detection/src/collision_octomap_filter.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_core/collision_detection/src/collision_octomap_filter.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_core/collision_detection/src/collision_octomap_filter.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * convert float to double
+  * change double to float
+  * Feedback fixes
+  * Introduced variables removed from previous merge commit
+  * Updated GL_Renderer function definitions with double instead of float
+  * Changed update() function arguments to float since it is a derived virtual function and needs to be overriden
+  * Fixed all override errors in visualization
+  * *Fixed override errors in perception
+  *Changed reinterpret_cast to double* from float*
+  * change variable types to fit function definition
+  * Fixed clang-tidy warnings
+  * Fixed scope of reusable variables
+  ---------
+  Co-authored-by: Salah Soliman <salahsoliman96@gmail.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Henning Kayser, Igor Medvedev, Marq Rasmussen, Robert Haschke, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+* Fix typo in model_based_planning_context.h (`#2243 <https://github.com/ros-planning/moveit2/issues/2243>`_)
+* Warn if optimization objective does not match expected values (`#2213 <https://github.com/ros-planning/moveit2/issues/2213>`_)
+  * Warn if optimization objective does not match expected values
+  * Update moveit_planners/ompl/ompl_interface/src/model_based_planning_context.cpp
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+  * Format
+  ---------
+* Contributors: Stephanie Eng
+
 2.7.4 (2023-05-18)
 ------------------
 * Fix Constraint Planning Segfault (`#2130 <https://github.com/ros-planning/moveit2/issues/2130>`_)

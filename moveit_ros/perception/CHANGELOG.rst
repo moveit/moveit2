@@ -2,6 +2,78 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Contributors: Tom Noble
+
+2.11.0 (2024-09-16)
+-------------------
+* Replace obsolete header (`#2978 <https://github.com/moveit/moveit2/issues/2978>`_)
+* Fixed segmentation fault in depth_image_octomap_updater (`#2963 <https://github.com/moveit/moveit2/issues/2963>`_)
+* Fix deprecation warning (`#2922 <https://github.com/moveit/moveit2/issues/2922>`_)
+* Contributors: CihatAltiparmak, Robert Haschke, Sebastian Jahr
+
+2.10.0 (2024-06-13)
+-------------------
+* Fix segmentation fault in mesh_filter/gl_renderer (`#2834 <https://github.com/moveit/moveit2/issues/2834>`_)
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: CihatAltiparmak, Robert Haschke, Sebastian Jahr, Tyler Weaver
+
+2.9.0 (2024-01-09)
+------------------
+* (moveit_ros) add missing CYLINDER check (`#2640 <https://github.com/ros-planning/moveit2/issues/2640>`_)
+  As this check was missing, the CYLINDER check later on was unreachable
+* Node logging in moveit_core (`#2503 <https://github.com/ros-planning/moveit2/issues/2503>`_)
+* Use node logging in moveit_ros (`#2482 <https://github.com/ros-planning/moveit2/issues/2482>`_)
+* Add new clang-tidy style rules (`#2177 <https://github.com/ros-planning/moveit2/issues/2177>`_)
+* Update pre-commit and add to .codespell_words (`#2465 <https://github.com/ros-planning/moveit2/issues/2465>`_)
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Update clang-format-14 with QualifierAlignment (`#2362 <https://github.com/ros-planning/moveit2/issues/2362>`_)
+  * Set qualifier order in .clang-format
+  * Ran pre-commit to update according to new style guide
+* Converts float to double (`#2343 <https://github.com/ros-planning/moveit2/issues/2343>`_)
+  * Limiting the scope of variables `#874 <https://github.com/ros-planning/moveit2/issues/874>`_
+  Limited the scope of variables in moveit_core/collision_detection
+  * Update moveit_core/collision_detection/src/collision_octomap_filter.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_core/collision_detection/src/collision_octomap_filter.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_core/collision_detection/src/collision_octomap_filter.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * convert float to double
+  * change double to float
+  * Feedback fixes
+  * Introduced variables removed from previous merge commit
+  * Updated GL_Renderer function definitions with double instead of float
+  * Changed update() function arguments to float since it is a derived virtual function and needs to be overriden
+  * Fixed all override errors in visualization
+  * *Fixed override errors in perception
+  *Changed reinterpret_cast to double* from float*
+  * change variable types to fit function definition
+  * Fixed clang-tidy warnings
+  * Fixed scope of reusable variables
+  ---------
+  Co-authored-by: Salah Soliman <salahsoliman96@gmail.com>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Marq Rasmussen, Matthijs van der Burgh, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+* Replaced numbers with SystemDefaultsQos() (`#2271 <https://github.com/ros-planning/moveit2/issues/2271>`_)
+* Use `isnan` in `DepthImageOctomapUpdater` (`#2201 <https://github.com/ros-planning/moveit2/issues/2201>`_)
+* Contributors: Ezra Brooks, Shobuj Paul
+
 2.7.4 (2023-05-18)
 ------------------
 

@@ -1,0 +1,28 @@
+# This file contains the parameters for all of MoveIt's default PlanResponseAdapters
+default_response_adapter_parameters:
+  totg:
+    path_tolerance: {
+      type: double,
+      description: "AddTimeOptimalParameterization: Tolerance per joint in which the time parameterization is allowed to deviate from the original path.",
+      default_value: 0.1,
+    }
+    resample_dt: {
+      type: double,
+      description: "AddTimeOptimalParameterization: Time steps between two adjacent waypoints of the parameterized trajectory. The trajectory is re-sampled from the original path.",
+      default_value: 0.1,
+    }
+    min_angle_change: {
+      type: double,
+      description: "AddTimeOptimalParameterization: Minimum joint value change to consider two waypoints unique.",
+      default_value: 0.001,
+    }
+  display_path_topic: {
+    type: string,
+    description: "If motion plans are computed, they can be sent to this topic by the DisplayMotionPathAdapter (moveit_msgs::msg::DisplayTrajectory).",
+    default_value: "display_planned_path",
+  }
+  display_contacts_topic: {
+    type: string,
+    description: "If contacts are found in the solution path, they can be published as markers to this topic (visualization_msgs::MarkerArray). An empty string disables the publisher.",
+    default_value: "display_contacts",
+  }

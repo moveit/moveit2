@@ -32,14 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/global_planner/moveit_planning_pipeline.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_state/conversions.h>
-
-namespace
-{
-const rclcpp::Logger LOGGER = rclcpp::get_logger("global_planner_component");
-}
+#include <moveit/global_planner/moveit_planning_pipeline.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
 namespace moveit::hybrid_planning
 {
@@ -65,7 +60,7 @@ bool MoveItPlanningPipeline::initialize(const rclcpp::Node::SharedPtr& node)
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "planning_time", 1.0);
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_velocity_scaling_factor", 1.0);
   node->declare_parameter<double>(PLAN_REQUEST_PARAM_NS + "max_acceleration_scaling_factor", 1.0);
-  node->declare_parameter<std::string>("ompl.planning_plugin", "ompl_interface/OMPLPlanner");
+  node->declare_parameter<std::vector<std::string>>("ompl.planning_plugins", { "ompl_interface/OMPLPlanner" });
 
   // Planning Scene options
   node->declare_parameter<std::string>(PLANNING_SCENE_MONITOR_NS + "name", UNDEFINED);
@@ -101,7 +96,8 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
 
   if ((global_goal_handle->get_goal())->motion_sequence.items.empty())
   {
-    RCLCPP_WARN(LOGGER, "Global planner received motion sequence request with no items. At least one is needed.");
+    RCLCPP_WARN(node_ptr_->get_logger(),
+                "Global planner received motion sequence request with no items. At least one is needed.");
     response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return response;
   }
@@ -109,9 +105,10 @@ moveit_msgs::msg::MotionPlanResponse MoveItPlanningPipeline::plan(
   // Process goal
   if ((global_goal_handle->get_goal())->motion_sequence.items.size() > 1)
   {
-    RCLCPP_WARN(LOGGER, "Global planner received motion sequence request with more than one item but the "
-                        "'moveit_planning_pipeline' plugin only accepts one item. Just using the first item as global "
-                        "planning goal!");
+    RCLCPP_WARN(node_ptr_->get_logger(),
+                "Global planner received motion sequence request with more than one item but the "
+                "'moveit_planning_pipeline' plugin only accepts one item. Just using the first item as global "
+                "planning goal!");
   }
   auto motion_plan_req = (global_goal_handle->get_goal())->motion_sequence.items[0].req;
 

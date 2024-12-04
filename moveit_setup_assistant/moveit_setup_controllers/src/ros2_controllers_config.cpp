@@ -192,7 +192,7 @@ bool ROS2ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter&
       emitter << YAML::Value;
       emitter << YAML::BeginMap;
       {
-        if (ci.joints_.size() != 1)
+        if (ci.type_ != "position_controllers/GripperActionController")
         {
           emitter << YAML::Key << "joints" << YAML::Value << ci.joints_;
         }
@@ -206,6 +206,7 @@ bool ROS2ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter&
           const ControlInterfaces interfaces = parent_.getControlInterfaces(ci.joints_);
           emitter << YAML::Key << "command_interfaces" << YAML::Value << interfaces.command_interfaces;
           emitter << YAML::Key << "state_interfaces" << YAML::Value << interfaces.state_interfaces;
+          emitter << YAML::Key << "allow_nonzero_velocity_at_trajectory_end" << YAML::Value << true;
         }
       }
       emitter << YAML::EndMap;

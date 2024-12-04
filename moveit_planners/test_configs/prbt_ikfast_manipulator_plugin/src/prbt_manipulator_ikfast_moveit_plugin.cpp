@@ -50,8 +50,8 @@
 #include <rclcpp/parameter_value.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_kdl/tf2_kdl.hpp>
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <prbt_ikfast_kinematics_parameters.hpp>
 
 using namespace moveit::core;
@@ -358,7 +358,7 @@ private:
   double enforceLimits(double val, double min, double max) const;
 
   void fillFreeParams(int count, int* array);
-  bool getCount(int& count, const int& max_count, const int& min_count) const;
+  bool getCount(int& count, int max_count, int min_count) const;
 
   /**
    * @brief samples the designated redundant joint using the chosen discretization method
@@ -732,7 +732,7 @@ void IKFastKinematicsPlugin::fillFreeParams(int count, int* array)
     free_params_.push_back(array[i]);
 }
 
-bool IKFastKinematicsPlugin::getCount(int& count, const int& max_count, const int& min_count) const
+bool IKFastKinematicsPlugin::getCount(int& count, int max_count, int min_count) const
 {
   if (count > 0)
   {
@@ -805,12 +805,12 @@ bool IKFastKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_
     return false;
   }
 
-  IkReal angles[num_joints_];
+  std::vector<IkReal> angles(num_joints_, 0);
   for (unsigned char i = 0; i < num_joints_; i++)
     angles[i] = joint_angles[i];
 
   // IKFast56/61
-  ComputeFk(angles, eetrans, eerot);
+  ComputeFk(angles.data(), eetrans, eerot);
 
   for (int i = 0; i < 3; ++i)
     p_out.p.data[i] = eetrans[i];

@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/rviz_plugin_render_tools/render_shapes.h>
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
+#include <moveit/rviz_plugin_render_tools/render_shapes.hpp>
+#include <moveit/rviz_plugin_render_tools/octomap_render.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/mesh_operations.h>
 
@@ -71,7 +71,7 @@ void RenderShapes::clear()
 
 void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, const Eigen::Isometry3d& p,
                                OctreeVoxelRenderMode octree_voxel_rendering, OctreeVoxelColorMode octree_color_mode,
-                               const Ogre::ColourValue& color, float alpha)
+                               const Ogre::ColourValue& color, double alpha)
 {
   rviz_rendering::Shape* ogre_shape = nullptr;
   Eigen::Vector3d translation = p.translation();
@@ -192,7 +192,7 @@ void RenderShapes::renderShape(Ogre::SceneNode* node, const shapes::Shape* s, co
   }
 }
 
-void RenderShapes::updateShapeColors(float r, float g, float b, float a)
+void RenderShapes::updateShapeColors(double r, double g, double b, double a)
 {
   for (const std::unique_ptr<rviz_rendering::Shape>& shape : scene_shapes_)
     shape->setColor(r, g, b, a);

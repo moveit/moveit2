@@ -34,13 +34,20 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/constraint_samplers/constraint_sampler.h>
+#include <moveit/constraint_samplers/constraint_sampler.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace constraint_samplers
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constraint_samplers.constraint_sampler");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.core.constraint_sampler");
+}
+}  // namespace
 
 constraint_samplers::ConstraintSampler::ConstraintSampler(const planning_scene::PlanningSceneConstPtr& scene,
                                                           const std::string& group_name)
@@ -48,7 +55,7 @@ constraint_samplers::ConstraintSampler::ConstraintSampler(const planning_scene::
 {
   if (!jmg_)
   {
-    RCLCPP_ERROR(LOGGER, "A JointModelGroup should have been specified for the constraint sampler");
+    RCLCPP_ERROR(getLogger(), "A JointModelGroup should have been specified for the constraint sampler");
   }
 }
 

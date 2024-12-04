@@ -2,6 +2,44 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Contributors: Tom Noble
+
+2.11.0 (2024-09-16)
+-------------------
+
+2.10.0 (2024-06-13)
+-------------------
+* Revert "Simplify controller manager namespacing (`#2210 <https://github.com/moveit/moveit2/issues/2210>`_)"
+  This reverts commit 55df0bccd5e884649780b4ceeee80891e563b57b.
+  The deprecated constructor was being used in the same file
+  for the exact use case of enabling namespaces that are not
+  specified by the parameter. There is no replacement for
+  supporting a dynamic server lookup, however the parameter
+  logic could still use simplification.
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Henning Kayser, Sebastian Jahr, Tyler Weaver
+
+2.9.0 (2024-01-09)
+------------------
+* Fix warning and cleanup unneeded placeholders (`#2566 <https://github.com/ros-planning/moveit2/issues/2566>`_)
+  * Fix warning and cleanup unneeded placeholders
+  * Make clang-tidy happy
+  * Remove print statement
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Sebastian Jahr, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+* Simplify controller manager namespacing (`#2210 <https://github.com/ros-planning/moveit2/issues/2210>`_)
+* Minor cleanup to ros_control_interface and trajectory execution (`#2208 <https://github.com/ros-planning/moveit2/issues/2208>`_)
+* Contributors: Stephanie Eng
+
 2.7.4 (2023-05-18)
 ------------------
 

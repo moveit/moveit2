@@ -35,7 +35,8 @@
 /* Author: Sachin Chitta, E. Gil Jones */
 
 #include <angles/angles.h>
-#include "pr2_arm_ik.h"
+#include <moveit/utils/logger.hpp>
+#include "pr2_arm_ik.hpp"
 
 /**** List of angles (for reference) *******
       th1 = shoulder/turret pan
@@ -49,7 +50,13 @@
 using namespace angles;
 namespace pr2_arm_kinematics
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_constaint_samplers.test.pr2_arm_ik");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.core.moveit_constaint_samplers.test.pr2_arm_ik");
+}
+}  // namespace
 
 PR2ArmIK::PR2ArmIK()
 {
@@ -69,11 +76,11 @@ bool PR2ArmIK::init(const urdf::ModelInterface& robot_model, const std::string& 
     {
       if (link->parent_joint)
       {
-        RCLCPP_ERROR(LOGGER, "Could not find joint: %s", link->parent_joint->name.c_str());
+        RCLCPP_ERROR(getLogger(), "Could not find joint: %s", link->parent_joint->name.c_str());
       }
       else
       {
-        RCLCPP_ERROR(LOGGER, "Link %s has no parent joint", link->name.c_str());
+        RCLCPP_ERROR(getLogger(), "Link %s has no parent joint", link->name.c_str());
       }
       return false;
     }
@@ -82,7 +89,8 @@ bool PR2ArmIK::init(const urdf::ModelInterface& robot_model, const std::string& 
       link_offset.push_back(link->parent_joint->parent_to_joint_origin_transform);
       angle_multipliers_.push_back(joint->axis.x * fabs(joint->axis.x) + joint->axis.y * fabs(joint->axis.y) +
                                    joint->axis.z * fabs(joint->axis.z));
-      RCLCPP_DEBUG(LOGGER, "Joint axis: %d, %f, %f, %f", 6 - num_joints, joint->axis.x, joint->axis.y, joint->axis.z);
+      RCLCPP_DEBUG(getLogger(), "Joint axis: %d, %f, %f, %f", 6 - num_joints, joint->axis.x, joint->axis.y,
+                   joint->axis.z);
       if (joint->type != urdf::Joint::CONTINUOUS)
       {
         if (joint->safety)
@@ -101,7 +109,7 @@ bool PR2ArmIK::init(const urdf::ModelInterface& robot_model, const std::string& 
           {
             min_angles_.push_back(0.0);
             max_angles_.push_back(0.0);
-            RCLCPP_WARN(LOGGER, "No joint limits or joint '%s'", joint->name.c_str());
+            RCLCPP_WARN(getLogger(), "No joint limits or joint '%s'", joint->name.c_str());
           }
         }
         continuous_joint_.push_back(false);
@@ -133,7 +141,8 @@ bool PR2ArmIK::init(const urdf::ModelInterface& robot_model, const std::string& 
 
   if (num_joints != 7)
   {
-    RCLCPP_ERROR(LOGGER, "PR2ArmIK:: Chain from %s to %s does not have 7 joints", root_name.c_str(), tip_name.c_str());
+    RCLCPP_ERROR(getLogger(), "PR2ArmIK:: Chain from %s to %s does not have 7 joints", root_name.c_str(),
+                 tip_name.c_str());
     return false;
   }
 
@@ -198,7 +207,7 @@ void PR2ArmIK::getSolverInfo(moveit_msgs::msg::KinematicSolverInfo& info)
   info = solver_info_;
 }
 
-void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double& t1_in,
+void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, double t1_in,
                                     std::vector<std::vector<double> >& solution) const
 {
   // t1 = shoulder/turret pan is specified
@@ -463,7 +472,7 @@ void PR2ArmIK::computeIKShoulderPan(const Eigen::Isometry3f& g_in, const double&
   }
 }
 
-void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double& t3,
+void PR2ArmIK::computeIKShoulderRoll(const Eigen::Isometry3f& g_in, const double t3,
                                      std::vector<std::vector<double> >& solution) const
 {
   std::vector<double> solution_ik(NUM_JOINTS_ARM7DOF, 0.0);
@@ -779,7 +788,7 @@ bool PR2ArmIK::checkJointLimits(const std::vector<double>& joint_values) const
   return true;
 }
 
-bool PR2ArmIK::checkJointLimits(const double& joint_value, const int& joint_num) const
+bool PR2ArmIK::checkJointLimits(const double joint_value, const int joint_num) const
 {
   double jv;
   if (continuous_joint_[joint_num])
@@ -795,6 +804,6 @@ bool PR2ArmIK::checkJointLimits(const double& joint_value, const int& joint_num)
     jv = angles::normalize_angle(joint_value * angle_multipliers_[joint_num]);
   }
 
-  return !(jv < min_angles_[joint_num] || jv > max_angles_[joint_num]);
+  return jv >= min_angles_[joint_num] && jv <= max_angles_[joint_num];
 }
 }  // namespace pr2_arm_kinematics

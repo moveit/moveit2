@@ -34,10 +34,10 @@
 
 /* Author: Mathias Lüdtke */
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/utils/rclcpp_utils.h>
-#include <moveit_ros_control_interface/ControllerHandle.h>
-#include <moveit/controller_manager/controller_manager.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/utils/rclcpp_utils.hpp>
+#include <moveit_ros_control_interface/ControllerHandle.hpp>
+#include <moveit/controller_manager/controller_manager.hpp>
 #include <controller_manager_msgs/srv/list_controllers.hpp>
 #include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <pluginlib/class_list_macros.hpp>
@@ -54,13 +54,21 @@
 #include <map>
 #include <memory>
 #include <queue>
+#include <moveit/utils/logger.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.ros_control_interface");
 static const rclcpp::Duration CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1.0);
 static const double SERVICE_CALL_TIMEOUT = 1.0;
 
 namespace moveit_ros_control_interface
 {
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.plugins.ros_control_interface");
+}
+}  // namespace
+
 /**
  * \brief Get joint name from resource name reported by ros2_control, since claimed_interfaces return by ros2_control
  * will have the interface name as suffix joint_name/INTERFACE_TYPE
@@ -135,8 +143,6 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
     // Skip if controller stamp is too new for new discovery, enforce update if force==true
     if (!force && ((node_->now() - controllers_stamp_) < CONTROLLER_INFORMATION_VALIDITY_AGE))
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Controller information from " << list_controllers_service_->get_service_name()
-                                                                << " is out of date, skipping discovery");
       return;
     }
 
@@ -146,9 +152,9 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
     auto result_future = list_controllers_service_->async_send_request(request);
     if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Failed to read controllers from " << list_controllers_service_->get_service_name()
-                                                                    << " within " << SERVICE_CALL_TIMEOUT
-                                                                    << " seconds");
+      RCLCPP_WARN_STREAM(getLogger(), "Failed to read controllers from "
+                                          << list_controllers_service_->get_service_name() << " within "
+                                          << SERVICE_CALL_TIMEOUT << " seconds");
       return;
     }
 
@@ -249,25 +255,30 @@ public:
    * \brief Configure interface with namespace
    * @param ns namespace of ros_control node (without /controller_manager/)
    */
-  [[deprecated("Ros2ControlManager constructor with namespace is deprecated. Set namespace via the "
-               "ros_control_namespace parameter.")]] Ros2ControlManager(const std::string& ns)
+  Ros2ControlManager(const std::string& ns)
     : ns_(ns), loader_("moveit_ros_control_interface", "moveit_ros_control_interface::ControllerHandleAllocator")
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Started moveit_ros_control_interface::Ros2ControlManager for namespace " << ns_);
+    RCLCPP_INFO_STREAM(getLogger(), "Started moveit_ros_control_interface::Ros2ControlManager for namespace " << ns_);
   }
 
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    // Set the namespace from the ros_control_namespace parameter, or default to "/"
-    if (!node_->has_parameter("ros_control_namespace"))
+    if (!ns_.empty())
     {
-      ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
+      if (!node_->has_parameter("ros_control_namespace"))
+      {
+        ns_ = node_->declare_parameter<std::string>("ros_control_namespace", "/");
+      }
+      else
+      {
+        node_->get_parameter<std::string>("ros_control_namespace", ns_);
+      }
     }
-    else
+    else if (node->has_parameter("ros_control_namespace"))
     {
       node_->get_parameter<std::string>("ros_control_namespace", ns_);
-      RCLCPP_INFO_STREAM(LOGGER, "Namespace for controller manager was specified, namespace: " << ns_);
+      RCLCPP_INFO_STREAM(getLogger(), "Namespace for controller manager was specified, namespace: " << ns_);
     }
 
     list_controllers_service_ = node_->create_client<controller_manager_msgs::srv::ListControllers>(
@@ -474,9 +485,9 @@ public:
       auto result_future = switch_controller_service_->async_send_request(request);
       if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
-                                                                      << " within " << SERVICE_CALL_TIMEOUT
-                                                                      << " seconds");
+        RCLCPP_ERROR_STREAM(getLogger(), "Couldn't switch controllers at "
+                                             << switch_controller_service_->get_service_name() << " within "
+                                             << SERVICE_CALL_TIMEOUT << " seconds");
         return false;
       }
       discover(true);
@@ -500,8 +511,9 @@ public:
     {
       if (controller.chain_connections.size() > 1)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Controller with name %s chains to more than one controller. Chaining to more than "
-                                    "one controller is not supported.");
+        RCLCPP_ERROR_STREAM(getLogger(),
+                            "Controller with name %s chains to more than one controller. Chaining to more than "
+                            "one controller is not supported.");
         return false;
       }
       dependency_map_[controller.name].clear();
@@ -559,7 +571,7 @@ class Ros2ControlMultiManager : public moveit_controller_manager::MoveItControll
         std::string ns = service_name.substr(0, found);
         if (controller_managers_.find(ns) == controller_managers_.end())
         {  // create Ros2ControlManager if it does not exist
-          RCLCPP_INFO_STREAM(LOGGER, "Adding controller_manager interface for node at namespace " << ns);
+          RCLCPP_INFO_STREAM(getLogger(), "Adding controller_manager interface for node at namespace " << ns);
           auto controller_manager = std::make_shared<moveit_ros_control_interface::Ros2ControlManager>(ns);
           controller_manager->initialize(node_);
           controller_managers_.insert(std::make_pair(ns, controller_manager));

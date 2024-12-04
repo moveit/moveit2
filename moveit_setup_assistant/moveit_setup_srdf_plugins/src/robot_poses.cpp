@@ -35,7 +35,7 @@
 /* Author: David V. Lu!! */
 
 #include <moveit_setup_srdf_plugins/robot_poses.hpp>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 
 namespace moveit_setup
 {
@@ -51,7 +51,7 @@ void RobotPoses::onInit()
   // Set the planning scene
   // srdf_config_->getPlanningScene()->setName("MoveIt Planning Scene");
 
-  // Collision Detection initializtion -------------------------------
+  // Collision Detection initialization -------------------------------
 
   // Setup the request
   request_.contacts = true;

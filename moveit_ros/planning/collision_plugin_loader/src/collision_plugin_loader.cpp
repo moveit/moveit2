@@ -32,19 +32,21 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/collision_plugin_loader/collision_plugin_loader.h>
+#include <moveit/collision_plugin_loader/collision_plugin_loader.hpp>
+#include <moveit/utils/logger.hpp>
 
-static const std::string LOGNAME = "collision_detection";
 namespace collision_detection
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_plugin_loader");
+CollisionPluginLoader::CollisionPluginLoader() : logger_(moveit::getLogger("moveit.ros.collision_plugin_loader"))
+{
+}
 
 void CollisionPluginLoader::setupScene(const rclcpp::Node::SharedPtr& node,
                                        const planning_scene::PlanningScenePtr& scene)
 {
   if (!scene)
   {
-    RCLCPP_WARN(LOGGER, "Cannot setup scene, PlanningScenePtr is null.");
+    RCLCPP_WARN(logger_, "Cannot setup scene, PlanningScenePtr is null.");
     return;
   }
 
@@ -73,7 +75,7 @@ void CollisionPluginLoader::setupScene(const rclcpp::Node::SharedPtr& node,
   }
 
   activate(collision_detector_name, scene);
-  RCLCPP_INFO(LOGGER, "Using collision detector: %s", scene->getCollisionDetectorName().c_str());
+  RCLCPP_INFO(logger_, "Using collision detector: %s", scene->getCollisionDetectorName().c_str());
 }
 
 }  // namespace collision_detection

@@ -55,11 +55,12 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
-      - uses: actions/checkout@v3
-      - uses: testspace-com/setup-testspace@v1
-        if: github.repository == 'ros-planning/moveit2'
-        with:
-          domain: ros-planning
+      - uses: actions/checkout@v4
+# Testspace disabled temporarily: https://github.com/moveit/moveit2/issues/2852
+#      - uses: testspace-com/setup-testspace@v1
+#        if: github.repository == 'moveit/moveit2'
+#        with:
+#          domain: ros-planning
       - name: Get latest release date for rosdistro
         id: rosdistro_release_date
         uses: JafarAbdi/latest-rosdistro-release-date-action@main
@@ -71,21 +72,24 @@ jobs:
         with:
           file: moveit2.repos
       - name: Cache upstream workspace
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: rhaschke/cache@main
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
+          GHA_CACHE_SAVE: always
           CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ steps.repos_edit_timestamp.outputs.timestamp }}-rolling-ci-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: rhaschke/cache@main
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-rolling-ci-ccov-${{ github.sha }}-${{ github.run_id }}
           restore-keys: |
             ccache-rolling-ci-ccov-${{ github.sha }}
             ccache-rolling-ci-ccov
+        env:
+          GHA_CACHE_SAVE: always
       - name: Configure ccache
         run: |
           mkdir -p ${{ env.CCACHE_DIR }}
@@ -99,6 +103,7 @@ jobs:
         with:
           docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
+          lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Install ccache
         run: sudo apt install ccache build-essential
@@ -107,7 +112,7 @@ jobs:
         run: cat ${{ github.workspace }}/.work/target_ws/coverage.info
       - name: Install sonar-scanner
         if: steps.ici.outputs.target_test_results == '0'
-        uses: SonarSource/sonarcloud-github-c-cpp@v1
+        uses: SonarSource/sonarcloud-github-c-cpp@v3
       - name: Run sonar-scanner
         if: steps.ici.outputs.target_test_results == '0'
         env:

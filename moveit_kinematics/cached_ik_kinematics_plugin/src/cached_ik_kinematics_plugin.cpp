@@ -34,20 +34,14 @@
 
 /* Author: Mark Moll */
 
-#include <moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_plugin.h>
-#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
-// compilation error: KDL and LMA kinematics plugins declare same types
-//#include <moveit/lma_kinematics_plugin/lma_kinematics_plugin.h>
-#include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.h>
+#include <moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_plugin.hpp>
+#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.hpp>
+#include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
 // register CachedIKKinematicsPlugin<KDLKinematicsPlugin> as a KinematicsBase implementation
 PLUGINLIB_EXPORT_CLASS(cached_ik_kinematics_plugin::CachedIKKinematicsPlugin<kdl_kinematics_plugin::KDLKinematicsPlugin>,
                        kinematics::KinematicsBase);
-
-// register CachedIKKinematicsPlugin<SrvKinematicsPlugin> as a KinematicsBase implementation
-// PLUGINLIB_EXPORT_CLASS(cached_ik_kinematics_plugin::CachedIKKinematicsPlugin<lma_kinematics_plugin::LMAKinematicsPlugin>,
-// kinematics::KinematicsBase);
 
 // register CachedIKKinematicsPlugin<SrvKinematicsPlugin> as a KinematicsBase implementation
 PLUGINLIB_EXPORT_CLASS(cached_ik_kinematics_plugin::CachedIKKinematicsPlugin<srv_kinematics_plugin::SrvKinematicsPlugin>,

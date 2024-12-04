@@ -34,13 +34,14 @@
 
 /* Author: Ioan Sucan, Jens Petit */
 
-#include <moveit/collision_detection_fcl/collision_env_fcl.h>
-#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
-#include <moveit/collision_detection_fcl/collision_common.h>
+#include <moveit/collision_detection_fcl/collision_env_fcl.hpp>
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.hpp>
+#include <moveit/collision_detection_fcl/collision_common.hpp>
 
-#include <moveit/collision_detection_fcl/fcl_compat.h>
+#include <moveit/collision_detection_fcl/fcl_compat.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
 #if (MOVEIT_FCL_VERSION >= FCL_VERSION_CHECK(0, 6, 0))
 #include <fcl/broadphase/broadphase_dynamic_AABB_tree.h>
@@ -48,11 +49,15 @@
 
 namespace collision_detection
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection_fcl.collision_env_fcl");
 const std::string CollisionDetectorAllocatorFCL::NAME("FCL");
 
 namespace
 {
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.core.collision_detection_fcl");
+}
+
 // Check whether this FCL version supports the requested computations
 void checkFCLCapabilities(const DistanceRequest& req)
 {
@@ -63,7 +68,7 @@ void checkFCLCapabilities(const DistanceRequest& req)
     //   https://github.com/flexible-collision-library/fcl/issues/171,
     //   https://github.com/flexible-collision-library/fcl/pull/288
     rclcpp::Clock steady_clock(RCL_STEADY_TIME);
-    RCLCPP_ERROR_THROTTLE(LOGGER, steady_clock, 2000,
+    RCLCPP_ERROR_THROTTLE(getLogger(), steady_clock, 2000,
                           "You requested a distance check with enable_nearest_points=true, "
                           "but the FCL version MoveIt was compiled against (%d.%d.%d) "
                           "is known to return bogus nearest points. Please update your FCL "
@@ -103,7 +108,7 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
             std::make_shared<const fcl::CollisionObjectd>(link_geometry->collision_geometry_));
       }
       else
-        RCLCPP_ERROR(LOGGER, "Unable to construct collision geometry for link '%s'", link->getName().c_str());
+        RCLCPP_ERROR(getLogger(), "Unable to construct collision geometry for link '%s'", link->getName().c_str());
     }
   }
 
@@ -141,7 +146,7 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
         robot_fcl_objs_[index] = std::make_shared<const fcl::CollisionObjectd>(g->collision_geometry_);
       }
       else
-        RCLCPP_ERROR(LOGGER, "Unable to construct collision geometry for link '%s'", link->getName().c_str());
+        RCLCPP_ERROR(getLogger(), "Unable to construct collision geometry for link '%s'", link->getName().c_str());
     }
   }
 
@@ -285,6 +290,10 @@ void CollisionEnvFCL::checkSelfCollisionHelper(const CollisionRequest& req, Coll
     dreq.enableGroup(getRobotModel());
     distanceSelf(dreq, dres, state);
     res.distance = dres.minimum_distance.distance;
+    if (req.detailed_distance)
+    {
+      res.distance_result = dres;
+    }
   }
 }
 
@@ -305,7 +314,7 @@ void CollisionEnvFCL::checkRobotCollision(const CollisionRequest& /*req*/, Colli
                                           const moveit::core::RobotState& /*state1*/,
                                           const moveit::core::RobotState& /*state2*/) const
 {
-  RCLCPP_ERROR(LOGGER, "Continuous collision not implemented");
+  RCLCPP_ERROR(getLogger(), "Continuous collision not implemented");
 }
 
 void CollisionEnvFCL::checkRobotCollision(const CollisionRequest& /*req*/, CollisionResult& /*res*/,
@@ -313,7 +322,7 @@ void CollisionEnvFCL::checkRobotCollision(const CollisionRequest& /*req*/, Colli
                                           const moveit::core::RobotState& /*state2*/,
                                           const AllowedCollisionMatrix& /*acm*/) const
 {
-  RCLCPP_ERROR(LOGGER, "Not implemented");
+  RCLCPP_ERROR(getLogger(), "Not implemented");
 }
 
 void CollisionEnvFCL::checkRobotCollisionHelper(const CollisionRequest& req, CollisionResult& res,
@@ -338,6 +347,10 @@ void CollisionEnvFCL::checkRobotCollisionHelper(const CollisionRequest& req, Col
     dreq.enableGroup(getRobotModel());
     distanceRobot(dreq, dres, state);
     res.distance = dres.minimum_distance.distance;
+    if (req.detailed_distance)
+    {
+      res.distance_result = dres;
+    }
   }
 }
 
@@ -437,6 +450,38 @@ void CollisionEnvFCL::notifyObjectChange(const ObjectConstPtr& obj, World::Actio
     }
     cleanCollisionGeometryCache();
   }
+  else if (action == World::MOVE_SHAPE)
+  {
+    auto it = fcl_objs_.find(obj->id_);
+    if (it == fcl_objs_.end())
+    {
+      RCLCPP_ERROR(getLogger(), "Cannot move shapes of unknown FCL object: '%s'", obj->id_.c_str());
+      return;
+    }
+
+    if (obj->global_shape_poses_.size() != it->second.collision_objects_.size())
+    {
+      RCLCPP_ERROR(getLogger(),
+                   "Cannot move shapes, shape size mismatch between FCL object and world object: '%s'. Respectively "
+                   "%zu and %zu.",
+                   obj->id_.c_str(), it->second.collision_objects_.size(), it->second.collision_objects_.size());
+      return;
+    }
+
+    for (std::size_t i = 0; i < it->second.collision_objects_.size(); ++i)
+    {
+      it->second.collision_objects_[i]->setTransform(transform2fcl(obj->global_shape_poses_[i]));
+
+      // compute AABB, order matters
+      it->second.collision_geometry_[i]->collision_geometry_->computeLocalAABB();
+      it->second.collision_objects_[i]->computeAABB();
+    }
+
+    // update AABB in the FCL broadphase manager tree
+    // see https://github.com/moveit/moveit/pull/3601 for benchmarks
+    it->second.unregisterFrom(manager_.get());
+    it->second.registerTo(manager_.get());
+  }
   else
   {
     updateFCLObject(obj->id_);
@@ -466,7 +511,7 @@ void CollisionEnvFCL::updatedPaddingOrScaling(const std::vector<std::string>& li
       }
     }
     else
-      RCLCPP_ERROR(LOGGER, "Updating padding or scaling for unknown link: '%s'", link.c_str());
+      RCLCPP_ERROR(getLogger(), "Updating padding or scaling for unknown link: '%s'", link.c_str());
   }
 }
 

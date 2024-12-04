@@ -35,10 +35,10 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/common_planning_interface_objects/common_objects.h>
-#include <moveit/planning_scene_rviz_plugin/planning_scene_display.h>
-#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
+#include <moveit/common_planning_interface_objects/common_objects.hpp>
+#include <moveit/planning_scene_rviz_plugin/planning_scene_display.hpp>
+#include <moveit/rviz_plugin_render_tools/robot_state_visualization.hpp>
+#include <moveit/rviz_plugin_render_tools/octomap_render.hpp>
 
 #include <rviz_common/transformation/transformation_manager.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
@@ -55,16 +55,19 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
-#include <moveit/utils/rclcpp_utils.h>
+#include <moveit/utils/rclcpp_utils.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.planning_scene_display");
 // ******************************************************************************************
 // Base class constructor
 // ******************************************************************************************
 PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool show_scene_robot)
-  : Display(), planning_scene_needs_render_(true), current_scene_time_(0.0f)
+  : Display()
+  , planning_scene_needs_render_(true)
+  , current_scene_time_(0.0f)
+  , logger_(moveit::getLogger("moveit.ros.planning_scene_display"))
 {
   move_group_ns_property_ = new rviz_common::properties::StringProperty("Move Group Namespace", "",
                                                                         "The name of the ROS namespace in "
@@ -273,7 +276,7 @@ void PlanningSceneDisplay::executeMainLoopJobs()
     }
     catch (std::exception& ex)
     {
-      RCLCPP_ERROR(LOGGER, "Exception caught executing main loop job: %s", ex.what());
+      RCLCPP_ERROR(logger_, "Exception caught executing main loop job: %s", ex.what());
     }
     main_loop_jobs_lock_.lock();
   }
@@ -353,10 +356,10 @@ void PlanningSceneDisplay::changedSceneName()
 void PlanningSceneDisplay::renderPlanningScene()
 {
   QColor color = scene_color_property_->getColor();
-  Ogre::ColourValue env_color(color.redF(), color.greenF(), color.blueF());
+  Ogre::ColourValue env_color(color.redF(), color.greenF(), color.blueF(), scene_alpha_property_->getFloat());
   if (attached_body_color_property_)
     color = attached_body_color_property_->getColor();
-  Ogre::ColourValue attached_color(color.redF(), color.greenF(), color.blueF());
+  Ogre::ColourValue attached_color(color.redF(), color.greenF(), color.blueF(), robot_alpha_property_->getFloat());
 
   try
   {
@@ -375,7 +378,7 @@ void PlanningSceneDisplay::renderPlanningScene()
   }
   catch (std::exception& ex)
   {
-    RCLCPP_ERROR(LOGGER, "Caught %s while rendering planning scene", ex.what());
+    RCLCPP_ERROR(logger_, "Caught %s while rendering planning scene", ex.what());
   }
   planning_scene_render_->getGeometryNode()->setVisible(scene_enabled_property_->getBool());
 }
@@ -670,7 +673,7 @@ void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
     updateInternal(wall_dt, ros_dt);
 }
 
-void PlanningSceneDisplay::updateInternal(float wall_dt, float /*ros_dt*/)
+void PlanningSceneDisplay::updateInternal(double wall_dt, double /*ros_dt*/)
 {
   current_scene_time_ += wall_dt;
   if (planning_scene_render_ &&

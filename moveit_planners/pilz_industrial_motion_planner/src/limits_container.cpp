@@ -32,12 +32,19 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
 #include <rclcpp/logger.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("pilz_industrial_motion_planner.limits_container");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.limits_container");
+}
+}  // namespace
 
 LimitsContainer::LimitsContainer() : has_joint_limits_(false), has_cartesian_limits_(false)
 {
@@ -61,7 +68,7 @@ const JointLimitsContainer& LimitsContainer::getJointLimitContainer() const
 
 void LimitsContainer::printCartesianLimits() const
 {
-  RCLCPP_DEBUG(LOGGER,
+  RCLCPP_DEBUG(getLogger(),
                "Pilz Cartesian Limits - Max Trans Vel : %f, Max Trans Acc : %f, Max Trans Dec : %f, Max Rot Vel : %f",
                cartesian_limits_.max_trans_vel, cartesian_limits_.max_trans_acc, cartesian_limits_.max_trans_dec,
                cartesian_limits_.max_rot_vel);

@@ -38,7 +38,7 @@
 #include <moveit_setup_framework/data/package_settings_config.hpp>
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
-#include <moveit/rdf_loader/rdf_loader.h>
+#include <moveit/rdf_loader/rdf_loader.hpp>
 #include <boost/program_options.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -90,7 +90,6 @@ int main(int argc, char* argv[])
 
   rclcpp::init(argc, argv);
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("collision_updater");
-  static const rclcpp::Logger LOGGER = rclcpp::get_logger("collision_updater");
   moveit_setup::DataWarehousePtr config_data = std::make_shared<moveit_setup::DataWarehouse>(node);
 
   moveit_setup::srdf_setup::DefaultCollisions setup_step;
@@ -105,18 +104,18 @@ int main(int argc, char* argv[])
     }
     catch (const std::runtime_error& e)
     {
-      RCLCPP_ERROR_STREAM(LOGGER, "Could not load config at '" << config_pkg_path << "'. " << e.what());
+      RCLCPP_ERROR_STREAM(node->get_logger(), "Could not load config at '" << config_pkg_path << "'. " << e.what());
       return 1;
     }
   }
   else if (urdf_path.empty() || srdf_path.empty())
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Please provide config package or URDF and SRDF path");
+    RCLCPP_ERROR_STREAM(node->get_logger(), "Please provide config package or URDF and SRDF path");
     return 1;
   }
   else if (rdf_loader::RDFLoader::isXacroFile(srdf_path) && output_path.empty())
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Please provide a different output file for SRDF xacro input file");
+    RCLCPP_ERROR_STREAM(node->get_logger(), "Please provide a different output file for SRDF xacro input file");
     return 1;
   }
 
@@ -150,12 +149,12 @@ int main(int argc, char* argv[])
   {
     if (thread_progress - last_progress > 10)
     {
-      RCLCPP_INFO(LOGGER, "%d%% complete...", thread_progress);
+      RCLCPP_INFO(node->get_logger(), "%d%% complete...", thread_progress);
       last_progress = thread_progress;
     }
   }
   setup_step.joinGenerationThread();
-  RCLCPP_INFO(LOGGER, "100%% complete...");
+  RCLCPP_INFO(node->get_logger(), "100%% complete...");
 
   size_t skip_mask = 0;
   if (!include_default)

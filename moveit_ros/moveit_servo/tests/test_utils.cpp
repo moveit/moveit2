@@ -43,7 +43,7 @@
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils/common.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
 namespace
@@ -53,11 +53,12 @@ TEST(ServoUtilsUnitTests, JointLimitVelocityScaling)
 {
   using moveit::core::loadTestingRobotModel;
   moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
-  moveit::core::JointBoundsVector joint_bounds = robot_model->getActiveJointModelsBounds();
+  const auto joint_model_group = robot_model->getJointModelGroup("panda_arm");
+  const auto joint_bounds = joint_model_group->getActiveJointModelsBounds();
 
   // Get the upper bound for the velocities of each joint.
   Eigen::VectorXd incoming_velocities(joint_bounds.size());
-  for (size_t i = 0; i < joint_bounds.size(); i++)
+  for (size_t i = 0; i < joint_bounds.size(); ++i)
   {
     const auto joint_bound = (*joint_bounds[i])[0];
     if (joint_bound.velocity_bounded_)
@@ -72,12 +73,26 @@ TEST(ServoUtilsUnitTests, JointLimitVelocityScaling)
   incoming_velocities(1) *= 1.05;
   incoming_velocities.tail<5>() *= 0.7;
 
-  // The resulting scaling factor selected should be approximately 0.95238
+  constexpr double tol = 0.001;
+
+  // The resulting scaling factor from joints should be 1 / 1.1 = 0.90909
   double user_velocity_override = 0.0;
   double scaling_factor =
       moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
-  constexpr double tol = 0.001;
-  ASSERT_NEAR(scaling_factor, 0.95238, tol);
+  ASSERT_NEAR(scaling_factor, 1.0 / 1.1, tol);
+
+  // With a scaling override lower than the joint limit scaling, it should use the override value.
+  user_velocity_override = 0.5;
+  scaling_factor =
+      moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
+  ASSERT_NEAR(scaling_factor, 0.5, tol);
+
+  // With a scaling override higher than the joint limit scaling, it should still use the joint limits.
+  // Safety always first!
+  user_velocity_override = 1.0;
+  scaling_factor =
+      moveit_servo::jointLimitVelocityScalingFactor(incoming_velocities, joint_bounds, user_velocity_override);
+  ASSERT_NEAR(scaling_factor, 1.0 / 1.1, tol);
 }
 
 TEST(ServoUtilsUnitTests, validVector)
@@ -150,10 +165,9 @@ TEST(ServoUtilsUnitTests, ApproachingSingularityScaling)
 
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
@@ -176,10 +190,9 @@ TEST(ServoUtilsUnitTests, HaltForSingularityScaling)
 
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
   Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
@@ -203,11 +216,10 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
 
   servo::Params servo_params;
   servo_params.move_group_name = "panda_arm";
-  const moveit::core::JointModelGroup* joint_model_group =
-      robot_state->getJointModelGroup(servo_params.move_group_name);
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  robot_state->setToDefaultValues();
 
-  rclcpp::sleep_for(std::chrono::milliseconds(500));
-  Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  Eigen::Vector<double, 6> cartesian_delta{ -0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
   // Home state
   Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
@@ -215,18 +227,56 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
   auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
 
-  // Approach singularity
-  Eigen::Vector<double, 7> state_approaching_singularity{ 0.0, 0.334, 0.0, -1.177, 0.0, 1.510, 0.785 };
-  robot_state->setJointGroupActivePositions(joint_model_group, state_approaching_singularity);
-  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
-  ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
-
   // Move away from singularity
-  cartesian_delta(0) *= -1;
   Eigen::Vector<double, 7> state_leaving_singularity{ 0.0, 0.3458, 0.0, -1.1424, 0.0, 1.4865, 0.785 };
   robot_state->setJointGroupActivePositions(joint_model_group, state_leaving_singularity);
   scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY);
+}
+
+TEST(ServoUtilsUnitTests, ExtractRobotState)
+{
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+  std::string joint_model_group = "panda_arm";
+  moveit_servo::KinematicState current_state;
+  current_state.positions = Eigen::VectorXd::Ones(7);
+  robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
+  auto new_state = moveit_servo::extractRobotState(robot_state, joint_model_group);
+
+  ASSERT_EQ(current_state.positions, new_state.positions);
+}
+
+TEST(ServoUtilsUnitTests, SlidingWinodw)
+{
+  double latency = .3;
+  moveit_servo::KinematicState current_state;
+  current_state.positions = Eigen::VectorXd::Ones(7);
+  current_state.joint_names = { "j1", "j2", "j3", "j4", "j5", "j6", "j7" };
+  std::deque<moveit_servo::KinematicState> window;
+  for (size_t i = 0; i < 10; ++i)
+  {
+    moveit_servo::updateSlidingWindow(current_state, window, latency, rclcpp::Time(100, i * 1E8, RCL_ROS_TIME));
+  }
+  // Add command at end of window with same timestamp. This should replace the command instead of adding it
+  moveit_servo::updateSlidingWindow(current_state, window, latency, rclcpp::Time(100, 9 * 1E8, RCL_ROS_TIME));
+
+  ASSERT_EQ(window.size(), 7ul);
+  servo::Params params;
+  auto msg = moveit_servo::composeTrajectoryMessage(params, window);
+  ASSERT_TRUE(msg.has_value());
+  ASSERT_EQ(msg.value().points.size(), 6ul);
+
+  // remove all but MIN_POINTS_FOR_TRAJ_MSG - 1 points
+  constexpr int min_points_for_traj_msg = 3;
+  while (window.size() > min_points_for_traj_msg - 1)
+  {
+    window.pop_front();
+  }
+  // ensure message is empty
+  msg = moveit_servo::composeTrajectoryMessage(params, window);
+  ASSERT_FALSE(msg.has_value());
 }
 
 }  // namespace

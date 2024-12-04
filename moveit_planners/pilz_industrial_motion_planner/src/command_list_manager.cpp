@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/command_list_manager.h>
+#include <pilz_industrial_motion_planner/command_list_manager.hpp>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -40,19 +40,26 @@
 #include <functional>
 #include <sstream>
 
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include "cartesian_limits_parameters.hpp"
-#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
-#include <pilz_industrial_motion_planner/tip_frame_getter.h>
-#include <pilz_industrial_motion_planner/trajectory_blend_request.h>
-#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.h>
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.hpp>
+#include <pilz_industrial_motion_planner/tip_frame_getter.hpp>
+#include <pilz_industrial_motion_planner/trajectory_blend_request.hpp>
+#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.hpp>
 
 namespace pilz_industrial_motion_planner
 {
-static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.command_list_manager");
+namespace
+{
+const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.command_list_manager");
+}
+}  // namespace
 
 CommandListManager::CommandListManager(const rclcpp::Node::SharedPtr& node,
                                        const moveit::core::RobotModelConstPtr& model)
@@ -105,6 +112,7 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
                               // therefore: "i-1".
                               (i > 0 ? radii.at(i - 1) : 0.));
   }
+
   return plan_comp_builder_.build();
 }
 
@@ -174,7 +182,8 @@ void CommandListManager::setStartState(const MotionResponseCont& motion_plan_res
   RobotState_OptRef rob_state_op{ getPreviousEndState(motion_plan_responses, group_name) };
   if (rob_state_op)
   {
-    moveit::core::robotStateToRobotStateMsg(rob_state_op.value(), start_state);
+    moveit::core::robotStateToRobotStateMsg(rob_state_op.value(), start_state, false);
+    start_state.is_diff = true;
   }
 }
 
@@ -191,16 +200,16 @@ bool CommandListManager::isInvalidBlendRadii(const moveit::core::RobotModel& mod
   // No blending between different groups
   if (item_A.req.group_name != item_B.req.group_name)
   {
-    RCLCPP_WARN_STREAM(LOGGER, "Blending between different groups (in this case: \""
-                                   << item_A.req.group_name << "\" and \"" << item_B.req.group_name
-                                   << "\") not allowed");
+    RCLCPP_WARN_STREAM(getLogger(), "Blending between different groups (in this case: \""
+                                        << item_A.req.group_name << "\" and \"" << item_B.req.group_name
+                                        << "\") not allowed");
     return true;
   }
 
   // No blending for groups without solver
   if (!hasSolver(model.getJointModelGroup(item_A.req.group_name)))
   {
-    RCLCPP_WARN_STREAM(LOGGER, "Blending for groups without solver not allowed");
+    RCLCPP_WARN_STREAM(getLogger(), "Blending for groups without solver not allowed");
     return true;
   }
 
@@ -216,8 +225,8 @@ CommandListManager::extractBlendRadii(const moveit::core::RobotModel& model,
   {
     if (isInvalidBlendRadii(model, req_list.items.at(i), req_list.items.at(i + 1)))
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Invalid blend radii between commands: [" << i << "] and [" << i + 1
-                                                                           << "] => Blend radii set to zero");
+      RCLCPP_WARN_STREAM(getLogger(), "Invalid blend radii between commands: [" << i << "] and [" << i + 1
+                                                                                << "] => Blend radii set to zero");
       continue;
     }
     radii.at(i) = req_list.items.at(i).blend_radius;
@@ -239,7 +248,11 @@ CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstP
     setStartState(motion_plan_responses, req.group_name, req.start_state);
 
     planning_interface::MotionPlanResponse res;
-    planning_pipeline->generatePlan(planning_scene, req, res);
+    if (!planning_pipeline->generatePlan(planning_scene, req, res))
+    {
+      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed.");
+      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    }
     if (res.error_code.val != res.error_code.SUCCESS)
     {
       std::ostringstream os;
@@ -247,7 +260,7 @@ CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstP
       throw PlanningPipelineException(os.str(), res.error_code.val);
     }
     motion_plan_responses.emplace_back(res);
-    RCLCPP_DEBUG_STREAM(LOGGER, "Solved [" << ++curr_req_index << '/' << num_req << ']');
+    RCLCPP_DEBUG_STREAM(getLogger(), "Solved [" << ++curr_req_index << '/' << num_req << ']');
   }
   return motion_plan_responses;
 }

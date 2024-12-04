@@ -34,11 +34,12 @@
 
 /* Author: Mrinal Kalakrishnan */
 
-#include <chomp_motion_planner/chomp_optimizer.h>
-#include <chomp_motion_planner/chomp_utils.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/conversions.h>
+#include <chomp_motion_planner/chomp_optimizer.hpp>
+#include <chomp_motion_planner/chomp_utils.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -49,7 +50,13 @@
 
 namespace chomp
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("chomp_optimizer");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.chomp.optimizer");
+}
+}  // namespace
 
 ChompOptimizer::ChompOptimizer(ChompTrajectory* trajectory, const planning_scene::PlanningSceneConstPtr& planning_scene,
                                const std::string& planning_group, const ChompParameters* parameters,
@@ -64,13 +71,13 @@ ChompOptimizer::ChompOptimizer(ChompTrajectory* trajectory, const planning_scene
   , start_state_(start_state)
   , initialized_(false)
 {
-  RCLCPP_INFO(LOGGER, "Active collision detector is: %s", planning_scene->getCollisionDetectorName().c_str());
+  RCLCPP_INFO(getLogger(), "Active collision detector is: %s", planning_scene->getCollisionDetectorName().c_str());
 
   hy_env_ = dynamic_cast<const collision_detection::CollisionEnvHybrid*>(
       planning_scene->getCollisionEnv(planning_scene->getCollisionDetectorName()).get());
   if (!hy_env_)
   {
-    RCLCPP_WARN(LOGGER, "Could not initialize hybrid collision world from planning scene");
+    RCLCPP_WARN(getLogger(), "Could not initialize hybrid collision world from planning scene");
     return;
   }
 
@@ -93,7 +100,7 @@ void ChompOptimizer::initialize()
 
   const auto wt = std::chrono::system_clock::now();
   hy_env_->getCollisionGradients(req, res, state_, &planning_scene_->getAllowedCollisionMatrix(), gsr_);
-  RCLCPP_INFO(LOGGER, "First coll check took %f sec",
+  RCLCPP_INFO(getLogger(), "First coll check took %f sec",
               std::chrono::duration<double>(std::chrono::system_clock::now() - wt).count());
   num_collision_points_ = 0;
   for (const collision_detection::GradientInfo& gradient : gsr_->gradients_)
@@ -180,7 +187,7 @@ void ChompOptimizer::initialize()
   for (int i = 0; i < num_joints_; ++i)
   {
     joint_names_.push_back(joint_model_group_->getActiveJointModels()[i]->getName());
-    // RCLCPP_INFO(LOGGER,"Got joint %s", joint_names_[i].c_str());
+    // RCLCPP_INFO(getLogger(),"Got joint %s", joint_names_[i].c_str());
     registerParents(joint_model_group_->getActiveJointModels()[i]);
     fixed_link_resolution_map[joint_names_[i]] = joint_names_[i];
   }
@@ -198,26 +205,15 @@ void ChompOptimizer::initialize()
   {
     if (fixed_link_resolution_map.find(link->getParentJointModel()->getName()) == fixed_link_resolution_map.end())
     {
-      const moveit::core::JointModel* parent_model = nullptr;
-      bool found_root = false;
-
-      while (!found_root)
+      const moveit::core::JointModel* parent_model = link->getParentJointModel();
+      while (true)  // traverse up the tree until we find a joint we know about in joint_names_
       {
-        if (parent_model == nullptr)
-        {
-          parent_model = link->getParentJointModel();
-        }
-        else
-        {
-          parent_model = parent_model->getParentLinkModel()->getParentJointModel();
-          for (const std::string& joint_name : joint_names_)
-          {
-            if (parent_model->getName() == joint_name)
-            {
-              found_root = true;
-            }
-          }
-        }
+        if (parent_model->getParentLinkModel() == nullptr)
+          break;
+
+        parent_model = parent_model->getParentLinkModel()->getParentJointModel();
+        if (std::find(joint_names_.begin(), joint_names_.end(), parent_model->getName()) != joint_names_.end())
+          break;
       }
       fixed_link_resolution_map[link->getParentJointModel()->getName()] = parent_model->getName();
     }
@@ -238,7 +234,7 @@ void ChompOptimizer::initialize()
         }
         else
         {
-          RCLCPP_ERROR(LOGGER, "Couldn't find joint %s!", info.joint_name.c_str());
+          RCLCPP_ERROR(getLogger(), "Couldn't find joint %s!", info.joint_name.c_str());
         }
         j++;
       }
@@ -266,12 +262,12 @@ void ChompOptimizer::registerParents(const moveit::core::JointModel* model)
     {
       if (model->getParentLinkModel() == nullptr)
       {
-        RCLCPP_ERROR(LOGGER, "Model %s not root but has nullptr link model parent", model->getName().c_str());
+        RCLCPP_ERROR(getLogger(), "Model %s not root but has nullptr link model parent", model->getName().c_str());
         return;
       }
       else if (model->getParentLinkModel()->getParentJointModel() == nullptr)
       {
-        RCLCPP_ERROR(LOGGER, "Model %s not root but has nullptr joint model parent", model->getName().c_str());
+        RCLCPP_ERROR(getLogger(), "Model %s not root but has nullptr joint model parent", model->getName().c_str());
         return;
       }
       parent_model = model->getParentLinkModel()->getParentJointModel();
@@ -311,7 +307,7 @@ bool ChompOptimizer::optimize()
     double s_cost = getSmoothnessCost();
     double cost = c_cost + s_cost;
 
-    RCLCPP_DEBUG(LOGGER, "Collision cost %f, smoothness cost: %f", c_cost, s_cost);
+    RCLCPP_DEBUG(getLogger(), "Collision cost %f, smoothness cost: %f", c_cost, s_cost);
 
     /// TODO: HMC BASED COMMENTED CODE BELOW, Need to uncomment and perform extensive testing by varying the HMC
     /// parameters values in the chomp_planning.yaml file so that CHOMP can find optimal paths
@@ -371,11 +367,11 @@ bool ChompOptimizer::optimize()
 
     if (iteration_ % 10 == 0)
     {
-      RCLCPP_DEBUG(LOGGER, "iteration: %d", iteration_);
+      RCLCPP_DEBUG(getLogger(), "iteration: %d", iteration_);
       if (isCurrentTrajectoryMeshToMeshCollisionFree())
       {
         num_collision_free_iterations_ = 0;
-        RCLCPP_INFO(LOGGER, "Chomp Got mesh to mesh safety at iter %d. Breaking out early.", iteration_);
+        RCLCPP_INFO(getLogger(), "Chomp Got mesh to mesh safety at iter %d. Breaking out early.", iteration_);
         is_collision_free_ = true;
         iteration_++;
         should_break_out = true;
@@ -390,13 +386,13 @@ bool ChompOptimizer::optimize()
       // if(safety == CollisionProximitySpace::MeshToMeshSafe)
       // {
       //   num_collision_free_iterations_ = 0;
-      //   RCLCPP_INFO(LOGGER,"Chomp Got mesh to mesh safety at iter %d. Breaking out early.", iteration_);
+      //   RCLCPP_INFO(getLogger(),"Chomp Got mesh to mesh safety at iter %d. Breaking out early.", iteration_);
       //   is_collision_free_ = true;
       //   iteration_++;
       //   should_break_out = true;
       // } else if(safety == CollisionProximitySpace::InCollisionSafe) {
       //   num_collision_free_iterations_ = parameters_->getMaxIterationsAfterCollisionFree();
-      //   RCLCPP_INFO(LOGGER,"Chomp Got in collision safety at iter %d. Breaking out soon.", iteration_);
+      //   RCLCPP_INFO(getLogger(),"Chomp Got in collision safety at iter %d. Breaking out soon.", iteration_);
       //   is_collision_free_ = true;
       //   iteration_++;
       //   should_break_out = true;
@@ -418,14 +414,14 @@ bool ChompOptimizer::optimize()
       }
       else
       {
-        RCLCPP_DEBUG(LOGGER, "cCost %f over threshold %f", c_cost, parameters_->collision_threshold_);
+        RCLCPP_DEBUG(getLogger(), "cCost %f over threshold %f", c_cost, parameters_->collision_threshold_);
       }
     }
 
     if (std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() >
         parameters_->planning_time_limit_)
     {
-      RCLCPP_WARN(LOGGER, "Breaking out early due to time limit constraints.");
+      RCLCPP_WARN(getLogger(), "Breaking out early due to time limit constraints.");
       break;
     }
 
@@ -435,7 +431,7 @@ bool ChompOptimizer::optimize()
     // if(fabs(averageCostVelocity) < minimaThreshold && currentCostIter == -1 && !is_collision_free_ &&
     // parameters_->getAddRandomness())
     // {
-    //   RCLCPP_INFO(LOGGER,"Detected local minima. Attempting to break out!");
+    //   RCLCPP_INFO(getLogger(),"Detected local minima. Attempting to break out!");
     //   int iter = 0;
     //   bool success = false;
     //   while(iter < 20 && !success)
@@ -451,7 +447,7 @@ bool ChompOptimizer::optimize()
     //     iter ++;
     //     if(new_cost < original_cost)
     //     {
-    //       RCLCPP_INFO(LOGGER,"Got out of minimum in %d iters!", iter);
+    //       RCLCPP_INFO(getLogger(),"Got out of minimum in %d iters!", iter);
     //       averageCostVelocity = 0.0;
     //       currentCostIter = 0;
     //       success = true;
@@ -469,7 +465,7 @@ bool ChompOptimizer::optimize()
 
     //   if(!success)
     //   {
-    //     RCLCPP_INFO(LOGGER,"Failed to exit minimum!");
+    //     RCLCPP_INFO(getLogger(),"Failed to exit minimum!");
     //   }
     //}
     // else if (currentCostIter == -1)
@@ -500,22 +496,22 @@ bool ChompOptimizer::optimize()
   if (is_collision_free_)
   {
     optimization_result = true;
-    RCLCPP_INFO(LOGGER, "Chomp path is collision free");
+    RCLCPP_INFO(getLogger(), "Chomp path is collision free");
   }
   else
   {
     optimization_result = false;
-    RCLCPP_ERROR(LOGGER, "Chomp path is not collision free!");
+    RCLCPP_ERROR(getLogger(), "Chomp path is not collision free!");
   }
 
   group_trajectory_.getTrajectory() = best_group_trajectory_;
   updateFullTrajectory();
 
-  RCLCPP_INFO(LOGGER, "Terminated after %d iterations, using path from iteration %d", iteration_,
+  RCLCPP_INFO(getLogger(), "Terminated after %d iterations, using path from iteration %d", iteration_,
               last_improvement_iteration_);
-  RCLCPP_INFO(LOGGER, "Optimization core finished in %f sec",
+  RCLCPP_INFO(getLogger(), "Optimization core finished in %f sec",
               std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count());
-  RCLCPP_INFO(LOGGER, "Time per iteration %f sec",
+  RCLCPP_INFO(getLogger(), "Time per iteration %f sec",
               std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count() / (iteration_ * 1.0));
 
   return optimization_result;
@@ -539,40 +535,6 @@ bool ChompOptimizer::isCurrentTrajectoryMeshToMeshCollisionFree() const
   moveit::core::robotStateToRobotStateMsg(start_state_, start_state_msg);
   return planning_scene_->isPathValid(start_state_msg, traj, planning_group_);
 }
-
-/// TODO: HMC BASED COMMENTED CODE BELOW, Need to uncomment and perform extensive testing by varying the HMC parameters
-/// values in the chomp_planning.yaml file so that CHOMP can find optimal paths
-
-// CollisionProximitySpace::TrajectorySafety ChompOptimizer::checkCurrentIterValidity()
-// {
-//   JointTrajectory jointTrajectory;
-//   jointTrajectory.joint_names = joint_names_;
-//   jointTrajectory.header.frame_id = collision_space_->getCollisionModelsInterface()->getRobotFrameId();
-//   jointTrajectory.header.stamp = ros::Time::now();
-//   Constraints goalConstraints;
-//   Constraints pathConstraints;
-//   ArmNavigationErrorCodes errorCode;
-//   vector<ArmNavigationErrorCodes> trajectoryErrorCodes;
-//   for(int i = 0; i < group_trajectory_.getNumPoints(); ++i)
-//   {
-//     JointTrajectoryPoint point;
-//     for(int j = 0; j < group_trajectory_.getNumJoints(); ++j)
-//     {
-//       point.positions.push_back(best_group_trajectory_(i, j));
-//     }
-//     jointTrajectory.points.push_back(point);
-//   }
-
-//   return collision_space_->isTrajectorySafe(jointTrajectory, goalConstraints, pathConstraints, planning_group_);
-//   /*
-//     bool valid = collision_space_->getCollisionModelsInterface()->isJointTrajectoryValid(*state_,
-//     jointTrajectory,
-//     goalConstraints,
-//     pathConstraints, errorCode,
-//     trajectoryErrorCodes, false);
-//   */
-
-// }
 
 void ChompOptimizer::calculateSmoothnessIncrements()
 {
@@ -952,16 +914,6 @@ void ChompOptimizer::performForwardKinematics()
           if (point_is_in_collision_[i][j])
           {
             state_is_in_collision_[i] = true;
-            // if(is_collision_free_ == true) {
-            //   RCLCPP_INFO(LOGGER,"We know it's not collision free " << g);
-            //   RCLCPP_INFO(LOGGER,"Sphere location " << info.sphere_locations[k].x() << " " <<
-            //   info.sphere_locations[k].y() << " " << info.sphere_locations[k].z());
-            //   RCLCPP_INFO(LOGGER,"Gradient " << info.gradients[k].x() << " " << info.gradients[k].y() << " " <<
-            //   info.gradients[k].z() << " distance " << info.distances[k] << " radii " << info.sphere_radii[k]);
-            //   RCLCPP_INFO(LOGGER,"Radius " << info.sphere_radii[k] << " potential " <<
-            //   collision_point_potential_[i][j]);
-            // }
-
             is_collision_free_ = false;
           }
           j++;
@@ -969,8 +921,6 @@ void ChompOptimizer::performForwardKinematics()
       }
     }
   }
-
-  // RCLCPP_INFO(LOGGER,"Total dur " << total_dur << " total checks " << end-start+1);
 
   // now, get the vel and acc for each collision point (using finite differencing)
   for (int i = free_vars_start_; i <= free_vars_end_; ++i)
@@ -1002,7 +952,7 @@ void ChompOptimizer::setRobotStateFromPoint(ChompTrajectory& group_trajectory, i
   for (size_t j = 0; j < group_trajectory.getNumJoints(); ++j)
     joint_states.emplace_back(point(0, j));
 
-  state_.setJointGroupPositions(planning_group_, joint_states);
+  state_.setJointGroupActivePositions(planning_group_, joint_states);
   state_.update();
 }
 
@@ -1038,85 +988,5 @@ void ChompOptimizer::perturbTrajectory()
         joint_costs_[i].getQuadraticCostInverse().col(mp_free_vars_index) * random_state_(i);
   }
 }
-
-/// TODO: HMC BASED COMMENTED CODE BELOW, Need to uncomment and perform extensive testing by varying the HMC parameters
-/// values in the chomp_planning.yaml file so that CHOMP can find optimal paths
-// void ChompOptimizer::getRandomState(const RobotState currentState, const string& groupName, Eigen::VectorXd&
-// state_vec)
-// {
-//   const vector<RobotState *::JointState*>& jointStates =
-//     currentState->getJointStateGroup(groupName)->getJointStateVector();
-//   for(size_t i = 0; i < jointStates.size(); ++i)
-//   {
-
-//     bool continuous = false;
-
-//     RobotState *::JointState* jointState = jointStates[i];
-//     const RevoluteJointModel* revolute_joint
-//       = dynamic_cast<const RevoluteJointModel*>(jointState->getJointModel());
-//     if(revolute_joint && revolute_joint->continuous_) {
-//       continuous = true;
-//     }
-
-//     map<string, pair<double, double> > bounds = jointState->getJointModel()->getAllVariableBounds();
-//     int j = 0;
-//     for(map<string, pair<double, double> >::iterator it = bounds.begin(); it != bounds.end(); ++it)
-//     {
-//       double randVal = jointState->getJointStateValues()[j] + (rsl::uniform_real(0., 1.)
-//                                                                * (parameters_->getRandomJumpAmount()) -
-//                                                                rsl::uniform_real(0., 1.) *
-//                                                                (parameters_->getRandomJumpAmount()));
-
-//       if(!continuous)
-//       {
-//         if(randVal > it->second.second)
-//         {
-//           randVal = it->second.second;
-//         }
-//         else if(randVal < it->second.first)
-//         {
-//           randVal = it->second.first;
-//         }
-//       }
-
-//       ROS_DEBUG("Joint " << it->first << " old value " << jointState->getJointStateValues()[j] << " new value
-//       " << randVal);
-//       state_vec(i) = randVal;
-
-//       j++;
-//     }
-//   }
-// }
-
-/*
-void ChompOptimizer::getRandomMomentum()
-{
-  if (is_collision_free_)
-    random_momentum_.setZero(num_vars_free_, num_joints_);
-  else
-    for (int i = 0; i < num_joints_; ++i)
-    {
-      multivariate_gaussian_[i].sample(random_joint_momentum_);
-      random_momentum_.col(i) = stochasticity_factor_ * random_joint_momentum_;
-    }
-}
-
-void ChompOptimizer::updateMomentum()
-{
-  // double alpha = 1.0 - parameters_->getHmcStochasticity();
-  double eps = parameters_->getHmcDiscretization();
-  if (iteration_ > 0)
-    momentum_ = (momentum_ + eps * final_increments_);
-  else
-    momentum_ = random_momentum_;
-  // momentum_ = alpha * (momentum_ + eps*final_increments_) + sqrt(1.0-alpha*alpha)*random_momentum_;
-}
-
-void ChompOptimizer::updatePositionFromMomentum()
-{
-  double eps = parameters_->getHmcDiscretization();
-  group_trajectory_.getFreeTrajectoryBlock() += eps * momentum_;
-}
-*/
 
 }  // namespace chomp

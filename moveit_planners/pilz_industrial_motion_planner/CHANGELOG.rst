@@ -2,6 +2,87 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Fix: Resolve race condition in MoveGroupSequenceAction (`#3125 <https://github.com/ros-planning/moveit2/issues/3125>`_)
+* Fixes pilz tests (`#3095 <https://github.com/ros-planning/moveit2/issues/3095>`_)
+* Allow RobotState::setFromIK to work with subframes (`#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_)
+* Enhancement/ports moveit 3522 (`#3070 <https://github.com/ros-planning/moveit2/issues/3070>`_)
+* Ports moveit/moveit/pull/3519 to ros2 (`#3055 <https://github.com/ros-planning/moveit2/issues/3055>`_)
+* Enhancement/moveit ros1 ports (`#3041 <https://github.com/ros-planning/moveit2/issues/3041>`_)
+* Contributors: Maxwell.L, Tom Noble
+
+2.11.0 (2024-09-16)
+-------------------
+* Fix Pilz blending times... the right way (`#2961 <https://github.com/moveit/moveit2/issues/2961>`_)
+* Deduplicate joint trajectory points in Pilz Move Group Sequence capability (`#2943 <https://github.com/moveit/moveit2/issues/2943>`_)
+* Contributors: Chris Schindlbeck, Sebastian Castro
+
+2.10.0 (2024-06-13)
+-------------------
+* Apply clang-tidy fixes
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* Add parameter api integration test (`#2662 <https://github.com/moveit/moveit2/issues/2662>`_)
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Robert Haschke, Sebastian Jahr, Tyler Weaver
+
+2.9.0 (2024-01-09)
+------------------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* [Planning Pipeline Refactoring] `#2 <https://github.com/ros-planning/moveit2/issues/2>`_ Enable chaining planners (`#2457 <https://github.com/ros-planning/moveit2/issues/2457>`_)
+  * Enable chaining multiple planners
+* [Planning Pipeline Refactoring] `#1 <https://github.com/ros-planning/moveit2/issues/1>`_ Simplify Adapter - Planner chain (`#2429 <https://github.com/ros-planning/moveit2/issues/2429>`_)
+* Add new clang-tidy style rules (`#2177 <https://github.com/ros-planning/moveit2/issues/2177>`_)
+* Do not pass and return simple types by const ref (`#2453 <https://github.com/ros-planning/moveit2/issues/2453>`_)
+  Co-authored-by: Nils <nilsmailiseke@gmail.com>
+* Update pre-commit and add to .codespell_words (`#2465 <https://github.com/ros-planning/moveit2/issues/2465>`_)
+* Use generate parameters library in PlanningPipelineClass + general cleanups (`#2288 <https://github.com/ros-planning/moveit2/issues/2288>`_)
+  * Don't discard stuff
+  * Move constants into source file
+  * Move static consts into header
+  * Don't ignore pipeline result
+  * Use generate parameter library for planning pipeline parameters
+  * Fix CI
+  * More CI fixes
+  * Remove more state from planning pipeline
+  * Small cleanups
+  * Assert planner_instance\_ is not a nullptr
+  * Remove valid variable
+  * Simplify logic for trajectory printing
+  * More helpful comments
+  * Small logic simplification by using break
+  * Fix clang-tidy
+  * Pre-commit + Deprecate functions instead of removing them
+  * Fix CI
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Fix for already declared deceleration parameters when using Pilz (`#2388 <https://github.com/ros-planning/moveit2/issues/2388>`_)
+  * Fix for already declare deceleration parameters when using Pilz
+  * Updated formatting
+  * Updated formatting
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Update clang-format-14 with QualifierAlignment (`#2362 <https://github.com/ros-planning/moveit2/issues/2362>`_)
+  * Set qualifier order in .clang-format
+  * Ran pre-commit to update according to new style guide
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Jens Vanhooydonck, Marq Rasmussen, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+* Fx class_loader warnings in PILZ unittests (`#2296 <https://github.com/ros-planning/moveit2/issues/2296>`_)
+* Always set response planner id and warn if it is not set (`#2236 <https://github.com/ros-planning/moveit2/issues/2236>`_)
+* Pilz multi-group incompatibility (`#1856 <https://github.com/ros-planning/moveit2/issues/1856>`_)
+* Enhance PILZ service request checks (`#2087 <https://github.com/ros-planning/moveit2/issues/2087>`_)
+* Contributors: Marco Magri, Sebastian Jahr, Yang Lin
+
 2.7.4 (2023-05-18)
 ------------------
 

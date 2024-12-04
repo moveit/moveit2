@@ -1,4 +1,4 @@
-# ghcr.io/ros-planning/moveit2:${ROS_DISTRO}-ci
+# ghcr.io/moveit/moveit2:${ROS_DISTRO}-ci
 # ROS base image augmented with all MoveIt dependencies to use for CI
 
 ARG ROS_DISTRO=rolling
@@ -18,7 +18,7 @@ COPY . src/moveit2
 RUN \
     # Update apt package list as previous containers clear the cache
     apt-get -q update && \
-    apt-get -q -y upgrade --with-new-pkgs && \
+    apt-get -q -y upgrade && \
     #
     # Install some base dependencies
     apt-get -q install --no-install-recommends -y \

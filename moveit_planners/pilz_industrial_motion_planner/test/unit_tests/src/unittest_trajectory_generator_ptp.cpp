@@ -36,13 +36,13 @@
 
 #include <gtest/gtest.h>
 
-#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
-#include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
-#include "test_utils.h"
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_ptp.hpp>
+#include "test_utils.hpp"
 
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 #include <pluginlib/class_loader.hpp>
 
 #include <rclcpp/rclcpp.hpp>
@@ -207,8 +207,9 @@ TEST_F(TrajectoryGeneratorPTPTest, emptyRequest)
 
   EXPECT_FALSE(res.trajectory->empty());
 
-  EXPECT_FALSE(ptp_->generate(planning_scene_, req, res));
+  ptp_->generate(planning_scene_, req, res);
 
+  EXPECT_FALSE(res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
   EXPECT_TRUE(res.trajectory->empty());
 }
 
@@ -374,7 +375,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testCartesianGoal)
   //****************************************
   //*** test robot model without gripper ***
   //****************************************
-  ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
+  ptp_->generate(planning_scene_, req, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
   moveit_msgs::msg::MotionPlanResponse res_msg;
@@ -422,12 +423,12 @@ TEST_F(TrajectoryGeneratorPTPTest, testCartesianGoalMissingLinkNameConstraints)
 
   planning_interface::MotionPlanRequest req_no_position_constaint_link_name = req;
   req_no_position_constaint_link_name.goal_constraints.front().position_constraints.front().link_name = "";
-  ASSERT_FALSE(ptp_->generate(planning_scene_, req_no_position_constaint_link_name, res));
+  ptp_->generate(planning_scene_, req_no_position_constaint_link_name, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
 
   planning_interface::MotionPlanRequest req_no_orientation_constaint_link_name = req;
   req_no_orientation_constaint_link_name.goal_constraints.front().orientation_constraints.front().link_name = "";
-  ASSERT_FALSE(ptp_->generate(planning_scene_, req_no_orientation_constaint_link_name, res));
+  ptp_->generate(planning_scene_, req_no_orientation_constaint_link_name, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
 }
 
@@ -454,7 +455,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testInvalidCartesianGoal)
       kinematic_constraints::constructGoalConstraints(target_link_, pose, tolerance_pose, tolerance_angle);
   req.goal_constraints.push_back(pose_goal);
 
-  ASSERT_FALSE(ptp_->generate(planning_scene_, req, res));
+  ptp_->generate(planning_scene_, req, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   EXPECT_EQ(res.trajectory, nullptr);
 }
@@ -480,7 +481,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testJointGoalAlreadyReached)
   req.goal_constraints.push_back(gc);
 
   // TODO lin and circ has different settings
-  ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
+  ptp_->generate(planning_scene_, req, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
   moveit_msgs::msg::MotionPlanResponse res_msg;
@@ -552,7 +553,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testScalingFactor)
   req.max_velocity_scaling_factor = 0.5;
   req.max_acceleration_scaling_factor = 1.0 / 3.0;
 
-  ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
+  ptp_->generate(planning_scene_, req, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
   moveit_msgs::msg::MotionPlanResponse res_msg;
@@ -679,7 +680,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testJointGoalAndAlmostZeroStartVelocity)
   gc.joint_constraints.push_back(jc);
   req.goal_constraints.push_back(gc);
 
-  ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
+  ptp_->generate(planning_scene_, req, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
   moveit_msgs::msg::MotionPlanResponse res_msg;
@@ -821,7 +822,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testJointGoalNoStartVel)
   gc.joint_constraints.push_back(jc);
   req.goal_constraints.push_back(gc);
 
-  ASSERT_TRUE(ptp_->generate(planning_scene_, req, res));
+  ptp_->generate(planning_scene_, req, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
   moveit_msgs::msg::MotionPlanResponse res_msg;

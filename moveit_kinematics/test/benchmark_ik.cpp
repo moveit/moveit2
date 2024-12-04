@@ -37,13 +37,12 @@
 #include <chrono>
 #include <rclcpp/rclcpp.hpp>
 #include <boost/program_options.hpp>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace po = boost::program_options;
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("cached_ik.measure_ik_call_cost");
 
 // Benchmark program measuring time to solve inverse kinematics of robot described in robot_description
 int main(int argc, char* argv[])
@@ -78,6 +77,7 @@ int main(int argc, char* argv[])
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("benchmark_ik");
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);
+  moveit::setNodeLoggerName(node->get_name());
 
   // TODO(henningkayser): Load robot model from robot_description, fix kinematic param config
   // robot_model_loader::RobotModelLoader robot_model_loader(node);
@@ -106,7 +106,8 @@ int main(int argc, char* argv[])
     // skip group if there's no IK solver
     if (group->getSolverInstance() == nullptr)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "No kinematic solver configured for group '" << group->getName() << "' - skipping");
+      RCLCPP_WARN_STREAM(node->get_logger(),
+                         "No kinematic solver configured for group '" << group->getName() << "' - skipping");
       continue;
     }
 
@@ -167,14 +168,14 @@ int main(int argc, char* argv[])
       ++i;
       if (i % 100 == 0)
       {
-        RCLCPP_INFO(LOGGER,
+        RCLCPP_INFO(node->get_logger(),
                     "Avg. time per IK solver call is %g after %d calls. %g%% of calls failed to return a solution. "
                     "%g%% of random joint configurations were ignored due to self-collisions.",
                     ik_time.count() / static_cast<double>(i), i, 100. * num_failed_calls / i,
                     100. * num_self_collisions / (num_self_collisions + i));
       }
     }
-    RCLCPP_INFO(LOGGER, "Summary for group %s: %g %g %g", group->getName().c_str(),
+    RCLCPP_INFO(node->get_logger(), "Summary for group %s: %g %g %g", group->getName().c_str(),
                 ik_time.count() / static_cast<double>(i), 100. * num_failed_calls / i,
                 100. * num_self_collisions / (num_self_collisions + i));
   }

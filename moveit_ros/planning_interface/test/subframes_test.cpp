@@ -36,7 +36,7 @@
 /* Author: Felix von Drigalski, Jacob Aas, Tyler Weaver, Boston Cleek */
 
 /* This integration test is based on the tutorial for using subframes
- * https://ros-planning.github.io/moveit_tutorials/doc/subframes/subframes_tutorial.html
+ * https://moveit.github.io/moveit_tutorials/doc/subframes/subframes_tutorial.html
  */
 
 // C++
@@ -50,9 +50,9 @@
 #include <gtest/gtest.h>
 
 // MoveIt
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 
 // TF2
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>

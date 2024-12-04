@@ -6,6 +6,7 @@ name: CI
 on:
   workflow_dispatch:
   pull_request:
+  merge_group:
   push:
     branches:
       - main
@@ -19,24 +20,26 @@ jobs:
           - IMAGE: rolling-ci
             CCOV: true
             ROS_DISTRO: rolling
-          - IMAGE: rolling-ci-testing
+          - IMAGE: rolling-ci
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
           - IMAGE: humble-ci
             ROS_DISTRO: humble
-          - IMAGE: humble-ci-testing
-            ROS_DISTRO: humble
+          - IMAGE: jazzy-ci
+            ROS_DISTRO: jazzy
     env:
+      # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
+      # https://stackoverflow.com/a/41673702
       CXXFLAGS: >-
-        -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls
+        -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unknown-warning-option -Wno-cpp
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
       DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: >
         moveit2.repos
         $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
       # Pull any updates to the upstream workspace (after restoring it from cache)
-      AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
+      AFTER_SETUP_UPSTREAM_WORKSPACE: apt remove -y ros-$ROS_DISTRO-geometric-shapes; vcs pull $BASEDIR/upstream_ws/src
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       # Clear the ccache stats before and log the stats after the build
       AFTER_SETUP_CCACHE: ccache --zero-stats --max-size=10.0G
@@ -49,7 +52,7 @@ jobs:
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
-        -DCMAKE_CXX_FLAGS="-Werror $CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer'}}"
+        -DCMAKE_CXX_FLAGS="-Werror $CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer' || ''}}"
       UPSTREAM_CMAKE_ARGS: "-DCMAKE_CXX_FLAGS=''"
       DOWNSTREAM_CMAKE_ARGS: -DCMAKE_CXX_FLAGS="-Wall -Wextra"
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -60,6 +63,7 @@ jobs:
         (cd $TARGET_REPO_PATH; clang-tidy --list-checks)
         # Disable clang-tidy for ikfast plugins as we cannot fix the generated code
         find $BASEDIR/target_ws/build -iwholename "*_ikfast_plugin/compile_commands.json" -exec rm {} \;
+        find $BASEDIR/target_ws/build -iwholename "*_ikfast_manipulator_plugin/compile_commands.json" -exec rm {} \;
       CC: ${{ matrix.env.CLANG_TIDY && 'clang' }}
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
       ADDITIONAL_DEBS: lld
@@ -81,11 +85,13 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
-      - uses: actions/checkout@v3
-      - uses: testspace-com/setup-testspace@v1
-        if: github.repository == 'ros-planning/moveit2'
-        with:
-          domain: ros-planning
+      - uses: actions/checkout@v4
+# NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
+# See: https://github.com/moveit/moveit2/issues/2852
+#       - uses: testspace-com/setup-testspace@v1
+#         if: github.repository == 'moveit/moveit2'
+#         with:
+#           domain: moveit
       - name: Get latest release date for rosdistro
         id: rosdistro_release_date
         uses: JafarAbdi/latest-rosdistro-release-date-action@main
@@ -97,26 +103,28 @@ jobs:
         with:
           file: moveit2.repos
       - name: Cache upstream workspace
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: rhaschke/cache@main
         with:
           path: ${{ env.BASEDIR }}/upstream_ws
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
+          GHA_CACHE_SAVE: always
           CACHE_PREFIX: ${{ steps.rosdistro_release_date.outputs.date }}-upstream_ws-${{ steps.repos_edit_timestamp.outputs.timestamp }}-${{ matrix.env.IMAGE }}-${{ hashFiles('moveit2*.repos', '.github/workflows/ci.yaml') }}
       # The target directory cache doesn't include the source directory because
       # that comes from the checkout.  See "prepare target_ws for cache" task below
       - name: Cache target workspace
         if: "!matrix.env.CCOV"
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: rhaschke/cache@main
         with:
           path: ${{ env.BASEDIR }}/target_ws
           key: ${{ env.CACHE_PREFIX }}-${{ github.run_id }}
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
+          GHA_CACHE_SAVE: always
           CACHE_PREFIX: target_ws${{ matrix.env.CCOV && '-ccov' || '' }}-${{ matrix.env.IMAGE }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
-        uses: pat-s/always-upload-cache@v3.0.11
+        uses: rhaschke/cache@main
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ env.CACHE_PREFIX }}-${{ github.sha }}-${{ github.run_id }}
@@ -124,6 +132,7 @@ jobs:
             ${{ env.CACHE_PREFIX }}-${{ github.sha }}
             ${{ env.CACHE_PREFIX }}
         env:
+          GHA_CACHE_SAVE: always
           CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
       - name: Configure ccache
         run: |
@@ -136,12 +145,14 @@ jobs:
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
-      - name: Push result to Testspace
-        if: always() && (github.repository == 'ros-planning/moveit2')
-        run: |
-          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
+# NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
+# See: https://github.com/moveit/moveit2/issues/2852
+#      - name: Push result to Testspace
+#        if: always() && (github.repository == 'moveit/moveit2')
+#        run: |
+#          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
         with:
           name: test-results-${{ matrix.env.IMAGE }}
@@ -152,9 +163,10 @@ jobs:
         with:
           docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
+          lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
           files: ${{ env.BASEDIR }}/target_ws/coverage.info

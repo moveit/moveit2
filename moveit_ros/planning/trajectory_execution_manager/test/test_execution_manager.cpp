@@ -43,8 +43,8 @@
 #include <gtest/gtest.h>
 
 // Main class
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/moveit_cpp/planning_component.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/moveit_cpp/planning_component.hpp>
 // Msgs
 #include <geometry_msgs/PointStamped.h>
 
@@ -109,8 +109,6 @@ TEST_F(MoveItCppTest, PushExecuteAndWaitTest)
 }
 
 }  // namespace moveit_cpp
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.trajectory_execution_manager.test_app");
 
 int main(int argc, char** argv)
 {

@@ -36,21 +36,28 @@
 
 #include <sys/types.h>
 #include <signal.h>
-#include <moveit/warehouse/warehouse_connector.h>
+#include <moveit/warehouse/warehouse_connector.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/utilities.hpp>
+#include <moveit/utils/logger.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.warehouse_connector");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.ros.warehouse_connector");
+}
+}  // namespace
 
 #ifdef _WIN32
 void kill(int, int)
 {
-  RCLCPP_ERROR(LOGGER, "Warehouse connector not supported on Windows");
+  RCLCPP_ERROR(getLogger(), "Warehouse connector not supported on Windows");
 }  // Should never be called
 int fork()
 {
-  RCLCPP_ERROR(LOGGER, "Warehouse connector not supported on Windows");
+  RCLCPP_ERROR(getLogger(), "Warehouse connector not supported on Windows");
   return -1;
 }
 #else
@@ -77,7 +84,7 @@ bool WarehouseConnector::connectToDatabase(const std::string& dirname)
   child_pid_ = fork();
   if (child_pid_ == -1)
   {
-    RCLCPP_ERROR(LOGGER, "Error forking process.");
+    RCLCPP_ERROR(getLogger(), "Error forking process.");
     child_pid_ = 0;
     return false;
   }
@@ -105,7 +112,7 @@ bool WarehouseConnector::connectToDatabase(const std::string& dirname)
       delete[] argv[1];
       delete[] argv[2];
       delete[] argv;
-      RCLCPP_ERROR_STREAM(LOGGER,
+      RCLCPP_ERROR_STREAM(getLogger(),
                           "execv() returned " << code << ", errno=" << errno << " string errno = " << strerror(errno));
     }
     return false;

@@ -34,15 +34,21 @@
 
 /* Author: Acorn Pooley, Ioan Sucan */
 
-#include <moveit/collision_detection/world.h>
+#include <moveit/collision_detection/world.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace collision_detection
 {
-// Logger
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_collision_detection.world");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.core.collision_detection_world");
+}
+}  // namespace
 
 World::World()
 {
@@ -74,7 +80,7 @@ void World::addToObject(const std::string& object_id, const Eigen::Isometry3d& p
 {
   if (shapes.size() != shape_poses.size())
   {
-    RCLCPP_ERROR(LOGGER,
+    RCLCPP_ERROR(getLogger(),
                  "Number of shapes and number of poses do not match. Not adding this object to collision world.");
     return;
   }
@@ -103,6 +109,7 @@ void World::addToObject(const std::string& object_id, const Eigen::Isometry3d& p
 std::vector<std::string> World::getObjectIds() const
 {
   std::vector<std::string> ids;
+  ids.reserve(objects_.size());
   for (const auto& object : objects_)
     ids.push_back(object.first);
   return ids;
@@ -207,7 +214,7 @@ const Eigen::Isometry3d& World::getGlobalShapeTransform(const std::string& objec
   }
   else
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not find global shape transform for object " << object_id);
+    RCLCPP_ERROR_STREAM(getLogger(), "Could not find global shape transform for object " << object_id);
     static const Eigen::Isometry3d IDENTITY_TRANSFORM = Eigen::Isometry3d::Identity();
     return IDENTITY_TRANSFORM;
   }
@@ -222,7 +229,7 @@ const EigenSTL::vector_Isometry3d& World::getGlobalShapeTransforms(const std::st
   }
   else
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Could not find global shape transforms for object " << object_id);
+    RCLCPP_ERROR_STREAM(getLogger(), "Could not find global shape transforms for object " << object_id);
     static const EigenSTL::vector_Isometry3d IDENTITY_TRANSFORM_VECTOR;
     return IDENTITY_TRANSFORM_VECTOR;
   }
@@ -247,6 +254,26 @@ bool World::moveShapeInObject(const std::string& object_id, const shapes::ShapeC
         notify(it->second, MOVE_SHAPE);
         return true;
       }
+    }
+  }
+  return false;
+}
+
+bool World::moveShapesInObject(const std::string& object_id, const EigenSTL::vector_Isometry3d& shape_poses)
+{
+  auto it = objects_.find(object_id);
+  if (it != objects_.end())
+  {
+    if (shape_poses.size() == it->second->shapes_.size())
+    {
+      for (std::size_t i = 0; i < shape_poses.size(); ++i)
+      {
+        ASSERT_ISOMETRY(shape_poses[i])  // unsanitized input, could contain a non-isometry
+        it->second->shape_poses_[i] = shape_poses[i];
+        it->second->global_shape_poses_[i] = it->second->pose_ * shape_poses[i];
+      }
+      notify(it->second, MOVE_SHAPE);
+      return true;
     }
   }
   return false;

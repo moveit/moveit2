@@ -36,7 +36,7 @@
 /* Author: Tyler Weaver, Boston Cleek */
 
 /* These integration tests are based on the tutorials for using move_group:
- * https://ros-planning.github.io/moveit_tutorials/doc/move_group_interface/move_group_interface_tutorial.html
+ * https://moveit.github.io/moveit_tutorials/doc/move_group_interface/move_group_interface_tutorial.html
  */
 
 // C++
@@ -52,10 +52,10 @@
 #include <gtest/gtest.h>
 
 // MoveIt
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/common_planning_interface_objects/common_objects.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
+#include <moveit/common_planning_interface_objects/common_objects.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 
 // TF2
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -238,6 +238,10 @@ TEST_F(MoveGroupTestFixture, PathConstraintCollisionTest)
 
   // clear path constraints
   move_group_->clearPathConstraints();
+
+  // move back to ready pose
+  move_group_->setNamedTarget("ready");
+  planAndMove();
 }
 
 TEST_F(MoveGroupTestFixture, ModifyPlanningSceneAsyncInterfaces)
@@ -311,11 +315,10 @@ TEST_F(MoveGroupTestFixture, CartPathTest)
   waypoints.push_back(target_waypoint);  // up and left
 
   moveit_msgs::RobotTrajectory trajectory;
-  const auto jump_threshold = 0.0;
   const auto eef_step = 0.01;
 
   // test below is meaningless if Cartesian planning did not succeed
-  ASSERT_GE(EPSILON + move_group_->computeCartesianPath(waypoints, eef_step, jump_threshold, trajectory), 1.0);
+  ASSERT_GE(EPSILON + move_group_->computeCartesianPath(waypoints, eef_step, trajectory), 1.0);
 
   // Execute trajectory
   EXPECT_EQ(move_group_->execute(trajectory), moveit::core::MoveItErrorCode::SUCCESS);

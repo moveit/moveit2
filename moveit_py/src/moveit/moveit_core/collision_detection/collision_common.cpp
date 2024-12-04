@@ -34,13 +34,13 @@
 
 /* Author: Peter David Fagan */
 
-#include "collision_common.h"
+#include "collision_common.hpp"
 
 namespace moveit_py
 {
 namespace bind_collision_detection
 {
-void init_collision_request(py::module& m)
+void initCollisionRequest(py::module& m)
 {
   py::module collision_detection = m.def_submodule("collision_detection");
 
@@ -96,13 +96,16 @@ void init_collision_request(py::module& m)
                      )");
 }
 
-void init_collision_result(py::module& m)
+void initCollisionResult(py::module& m)
 {
   py::module collision_detection = m.def_submodule("collision_detection");
 
   py::class_<collision_detection::CollisionResult>(collision_detection, "CollisionResult", R"(
       Representation of a collision checking result.
       )")
+
+      .def(py::init<>())
+
       .def_readwrite("collision", &collision_detection::CollisionResult::collision,
                      R"(
                      bool: True if collision was found, false otherwise.

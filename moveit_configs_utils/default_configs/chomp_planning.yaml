@@ -1,12 +1,15 @@
-planning_plugin: chomp_interface/CHOMPPlanner
+planning_plugins:
+  - chomp_interface/CHOMPPlanner
 enable_failure_recovery: true
-jiggle_fraction: 0.05
-request_adapters: >-
-    default_planner_request_adapters/AddTimeOptimalParameterization
-    default_planner_request_adapters/ResolveConstraintFrames
-    default_planner_request_adapters/FixWorkspaceBounds
-    default_planner_request_adapters/FixStartStateBounds
-    default_planner_request_adapters/FixStartStateCollision
-    default_planner_request_adapters/FixStartStatePathConstraints
+# The order of the elements in the adapter corresponds to the order they are processed by the motion planning pipeline.
+request_adapters:
+  - default_planning_request_adapters/ResolveConstraintFrames
+  - default_planning_request_adapters/ValidateWorkspaceBounds
+  - default_planning_request_adapters/CheckStartStateBounds
+  - default_planning_request_adapters/CheckStartStateCollision
+response_adapters:
+  - default_planning_response_adapters/AddTimeOptimalParameterization
+  - default_planning_response_adapters/ValidateSolution
+  - default_planning_response_adapters/DisplayMotionPath
+
 ridge_factor: 0.01
-start_state_max_bounds_error: 0.1

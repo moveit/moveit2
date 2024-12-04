@@ -43,19 +43,23 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 
 // MoveIt
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/rdf_loader/rdf_loader.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/rdf_loader/rdf_loader.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.hpp>
 
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/robot_model_test_utils.hpp>
+#include <moveit/utils/logger.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("test_kinematics_plugin");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.kinematics.test_kinematics_plugin");
+}
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
 const double DEFAULT_SEARCH_DISCRETIZATION = 0.01f;
 const double EXPECTED_SUCCESS_RATE = 0.8;
@@ -85,7 +89,7 @@ class SharedData
   int num_nearest_ik_tests_;
   bool publish_trajectory_;
 
-  SharedData(SharedData const&) = delete;  // this is a singleton
+  SharedData(const SharedData&) = delete;  // this is a singleton
   SharedData()
   {
     initialize();
@@ -97,7 +101,7 @@ class SharedData
     node_options.automatically_declare_parameters_from_overrides(true);
     node_ = rclcpp::Node::make_shared("moveit_kinematics_test", node_options);
 
-    RCLCPP_INFO_STREAM(LOGGER, "Loading robot model from " << node_->get_name() << '.' << ROBOT_DESCRIPTION_PARAM);
+    RCLCPP_INFO_STREAM(getLogger(), "Loading robot model from " << node_->get_name() << '.' << ROBOT_DESCRIPTION_PARAM);
     // load robot model
     rdf_loader::RDFLoader rdf_loader(node_, ROBOT_DESCRIPTION_PARAM);
     robot_model_ = std::make_shared<moveit::core::RobotModel>(rdf_loader.getURDF(), rdf_loader.getSRDF());
@@ -183,7 +187,7 @@ protected:
   {
     *this = SharedData::instance();
 
-    RCLCPP_INFO_STREAM(LOGGER, "Loading " << ik_plugin_name_);
+    RCLCPP_INFO_STREAM(getLogger(), "Loading " << ik_plugin_name_);
     kinematics_solver_ = SharedData::instance().createUniqueInstance(ik_plugin_name_);
     ASSERT_TRUE(bool(kinematics_solver_)) << "Failed to load plugin: " << ik_plugin_name_;
 
@@ -386,7 +390,7 @@ TEST_F(KinematicsTest, randomWalkIK)
     if (!diff.isZero(1.05 * NEAR_JOINT))
     {
       ++failures;
-      RCLCPP_WARN_STREAM(LOGGER, "jump in [" << i << "]: " << diff.transpose());
+      RCLCPP_WARN_STREAM(getLogger(), "jump in [" << i << "]: " << diff.transpose());
     }
 
     // update robot state to found pose
@@ -446,14 +450,15 @@ TEST_F(KinematicsTest, unitIK)
   Eigen::Isometry3d initial, goal;
   tf2::fromMsg(poses[0], initial);
 
-  RCLCPP_DEBUG(LOGGER, "Initial: %f %f %f %f %f %f %f\n", poses[0].position.x, poses[0].position.y, poses[0].position.z,
-               poses[0].orientation.x, poses[0].orientation.y, poses[0].orientation.z, poses[0].orientation.w);
+  RCLCPP_DEBUG(getLogger(), "Initial: %f %f %f %f %f %f %f\n", poses[0].position.x, poses[0].position.y,
+               poses[0].position.z, poses[0].orientation.x, poses[0].orientation.y, poses[0].orientation.z,
+               poses[0].orientation.w);
 
   auto validate_ik = [&](const geometry_msgs::msg::Pose& goal, std::vector<double>& truth) {
     // compute IK
     moveit_msgs::msg::MoveItErrorCodes error_code;
 
-    RCLCPP_DEBUG(LOGGER, "Goal %f %f %f %f %f %f %f\n", goal.position.x, goal.position.y, goal.position.z,
+    RCLCPP_DEBUG(getLogger(), "Goal %f %f %f %f %f %f %f\n", goal.position.x, goal.position.y, goal.position.z,
                  goal.orientation.x, goal.orientation.y, goal.orientation.z, goal.orientation.w);
 
     kinematics_solver_->searchPositionIK(goal, seed_, timeout_,
@@ -571,7 +576,7 @@ TEST_F(KinematicsTest, searchIK)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_tests_);
+    RCLCPP_INFO_STREAM(getLogger(), "Success Rate: " << static_cast<double>(success) / num_ik_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_tests_);
 }
@@ -621,7 +626,7 @@ TEST_F(KinematicsTest, searchIKWithCallback)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_cb_tests_);
+    RCLCPP_INFO_STREAM(getLogger(), "Success Rate: " << static_cast<double>(success) / num_ik_cb_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_cb_tests_);
 }
@@ -696,7 +701,7 @@ TEST_F(KinematicsTest, getIKMultipleSolutions)
 
   if (num_ik_cb_tests_ > 0)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Success Rate: " << static_cast<double>(success) / num_ik_multiple_tests_);
+    RCLCPP_INFO_STREAM(getLogger(), "Success Rate: " << static_cast<double>(success) / num_ik_multiple_tests_);
   }
   EXPECT_GE(success, EXPECTED_SUCCESS_RATE * num_ik_multiple_tests_);
 }

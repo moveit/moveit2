@@ -35,15 +35,15 @@
 
 /* Authors: Ioan Sucan, Michael Goerner */
 
-#include <moveit/ompl_interface/ompl_interface.h>
-#include <moveit/ompl_interface/detail/constraints_library.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/ompl_interface/ompl_interface.hpp>
+#include <moveit/ompl_interface/detail/constraints_library.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/utils/message_checks.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/utils/message_checks.hpp>
 
 #include <boost/math/constants/constants.hpp>
 #include <sstream>
@@ -54,8 +54,8 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 static const std::string CONSTRAINT_PARAMETER = "constraints";
 
-static bool get_uint_parameter_or(const rclcpp::Node::SharedPtr& node, const std::string& param_name,
-                                  size_t&& result_value, const size_t default_value)
+static bool getUintParameterOr(const rclcpp::Node::SharedPtr& node, const std::string& param_name,
+                               size_t&& result_value, const size_t default_value)
 {
   int param_value;
   if (node->get_parameter(param_name, param_value))
@@ -83,17 +83,17 @@ struct GenerateStateDatabaseParameters
     node->get_parameter_or("use_current_scene", use_current_scene, false);
 
     // number of states in joint space approximation
-    get_uint_parameter_or(node, "state_cnt", construction_opts.samples, 10000);
+    getUintParameterOr(node, "state_cnt", construction_opts.samples, 10000);
 
     // generate edges together with states?
-    get_uint_parameter_or(node, "edges_per_sample", construction_opts.edges_per_sample, 0);
+    getUintParameterOr(node, "edges_per_sample", construction_opts.edges_per_sample, 0);
 
     node->get_parameter_or("max_edge_length", construction_opts.max_edge_length, 0.2);
 
     // verify constraint validity on edges
     node->get_parameter_or("explicit_motions", construction_opts.explicit_motions, true);
     node->get_parameter_or("explicit_points_resolution", construction_opts.explicit_points_resolution, 0.05);
-    get_uint_parameter_or(node, "max_explicit_points", construction_opts.max_explicit_points, 200);
+    getUintParameterOr(node, "max_explicit_points", construction_opts.max_explicit_points, 200);
 
     // local planning in JointModel state space
     node->get_parameter_or("state_space_parameterization", construction_opts.state_space_parameterization,

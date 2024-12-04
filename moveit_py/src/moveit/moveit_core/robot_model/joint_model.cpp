@@ -34,15 +34,15 @@
 
 /* Author: Jafar Uruç */
 
-#include "joint_model.h"
-#include <moveit/robot_model/joint_model.h>
+#include "joint_model.hpp"
+#include <moveit/robot_model/joint_model.hpp>
 
 namespace moveit_py
 {
 namespace bind_robot_model
 {
 
-void init_joint_model(py::module& m)
+void initJointModel(py::module& m)
 {
   py::module robot_model = m.def_submodule("robot_model");
 

@@ -32,8 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
-#include <moveit/robot_state/conversions.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_ptp.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/logger.hpp>
 
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
@@ -46,8 +47,13 @@
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_ptp");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.ptp");
+}
+}  // namespace
 TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
                                                const LimitsContainer& planner_limits, const std::string& group_name)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
@@ -85,14 +91,14 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelCon
     }
   }
 
-  RCLCPP_INFO(LOGGER, "Initialized Point-to-Point Trajectory Generator.");
+  RCLCPP_INFO(getLogger(), "Initialized Point-to-Point Trajectory Generator.");
 }
 
 void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_pos,
                                      const std::map<std::string, double>& goal_pos,
                                      trajectory_msgs::msg::JointTrajectory& joint_trajectory,
-                                     const double& velocity_scaling_factor, const double& acceleration_scaling_factor,
-                                     const double& sampling_time)
+                                     double velocity_scaling_factor, double acceleration_scaling_factor,
+                                     double sampling_time)
 {
   // initialize joint names
   for (const auto& item : goal_pos)
@@ -102,7 +108,7 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
 
   // check if goal already reached
   bool goal_reached = true;
-  for (auto const& goal : goal_pos)
+  for (const auto& goal : goal_pos)
   {
     if (fabs(start_pos.at(goal.first) - goal.second) >= MIN_MOVEMENT)
     {
@@ -112,7 +118,7 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
   }
   if (goal_reached)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "Goal already reached, set one goal point explicitly.");
+    RCLCPP_INFO_STREAM(getLogger(), "Goal already reached, set one goal point explicitly.");
     if (joint_trajectory.points.empty())
     {
       trajectory_msgs::msg::JointTrajectoryPoint point;
@@ -215,13 +221,6 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::Plannin
 {
   info.group_name = req.group_name;
 
-  // extract start state information
-  info.start_joint_position.clear();
-  for (std::size_t i = 0; i < req.start_state.joint_state.name.size(); ++i)
-  {
-    info.start_joint_position[req.start_state.joint_state.name[i]] = req.start_state.joint_state.position[i];
-  }
-
   // extract goal
   info.goal_joint_position.clear();
   if (!req.goal_constraints.at(0).joint_constraints.empty())
@@ -234,18 +233,39 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::Plannin
   // solve the ik
   else
   {
-    Eigen::Isometry3d goal_pose = getConstraintPose(req.goal_constraints.front());
-    if (!computePoseIK(scene, req.group_name, req.goal_constraints.at(0).position_constraints.at(0).link_name,
-                       goal_pose, robot_model_->getModelFrame(), info.start_joint_position, info.goal_joint_position))
+    std::string frame_id;
+
+    info.link_name = req.goal_constraints.front().position_constraints.front().link_name;
+    if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
+        req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
     {
-      throw PtpNoIkSolutionForGoalPose("No IK solution for goal pose");
+      RCLCPP_WARN(getLogger(), "Frame id is not set in position/orientation constraints of "
+                               "goal. Use model frame as default");
+      frame_id = robot_model_->getModelFrame();
+    }
+    else
+    {
+      frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
+    }
+
+    // goal pose with optional offset wrt. the planning frame
+    info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
+    frame_id = robot_model_->getModelFrame();
+
+    // check goal pose ik before Cartesian motion plan start
+    if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
+                       info.goal_joint_position))
+    {
+      std::ostringstream os;
+      os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
+      throw PtpNoIkSolutionForGoalPose(os.str());
     }
   }
 }
 
 void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& /*scene*/,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                  double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // plan the ptp trajectory
   planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory,

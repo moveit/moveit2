@@ -35,9 +35,9 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/exceptions/exceptions.h>
-#include <moveit/robot_model/joint_model.h>
-#include <moveit/robot_model/link_model.h>
+#include <moveit/exceptions/exceptions.hpp>
+#include <moveit/robot_model/joint_model.hpp>
+#include <moveit/robot_model/link_model.hpp>
 #include <algorithm>
 
 namespace moveit

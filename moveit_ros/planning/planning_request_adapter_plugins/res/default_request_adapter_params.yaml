@@ -1,0 +1,12 @@
+# This file contains the parameters for all of MoveIt's default PlanRequestAdapters
+default_request_adapter_parameters:
+  fix_start_state: {
+    type: bool,
+    description: "CheckStartStateBounds: If set true and the start state is out of bounds, the MotionPlanRequests start will be updated to a start state with enforced bounds for revolute or continuous joints.",
+    default_value: false,
+  }
+  default_workspace_bounds: {
+    type: double,
+    description: "ValidateWorkspaceBounds: Default workspace bounds representing a cube around the robot's origin whose edge length this parameter defines.",
+    default_value: 1000000000000.0, # TODO ideally, this should be inf or 1e308, but this notation is not working in version 0.3.8
+  }

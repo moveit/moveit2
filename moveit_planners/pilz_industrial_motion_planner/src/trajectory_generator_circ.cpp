@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_circ.h>
-#include <pilz_industrial_motion_planner/path_circle_generator.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_circ.hpp>
+#include <pilz_industrial_motion_planner/path_circle_generator.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -42,17 +42,23 @@
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
 #include <kdl/utilities/utility.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_circ");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.circ");
+}
+}  // namespace
 TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,
                                                  const LimitsContainer& planner_limits,
                                                  const std::string& /*group_name*/)
@@ -88,10 +94,10 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
                                                     const planning_interface::MotionPlanRequest& req,
                                                     TrajectoryGenerator::MotionPlanInfo& info) const
 {
-  RCLCPP_DEBUG(LOGGER, "Extract necessary information from motion plan request.");
+  RCLCPP_DEBUG(getLogger(), "Extract necessary information from motion plan request.");
 
   info.group_name = req.group_name;
-  std::string frame_id{ robot_model_->getModelFrame() };
+  moveit::core::RobotState robot_state = scene->getCurrentState();
 
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
@@ -118,77 +124,83 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_scene::Planni
       info.goal_joint_position[joint_item.joint_name] = joint_item.position;
     }
 
-    computeLinkFK(scene, info.link_name, info.goal_joint_position, info.goal_pose);
+    computeLinkFK(robot_state, info.link_name, info.goal_joint_position, info.goal_pose);
   }
   // goal given in Cartesian space
   else
   {
+    std::string frame_id;
     info.link_name = req.goal_constraints.front().position_constraints.front().link_name;
     if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
         req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
     {
-      RCLCPP_WARN(LOGGER, "Frame id is not set in position/orientation constraints of "
-                          "goal. Use model frame as default");
+      RCLCPP_WARN(getLogger(), "Frame id is not set in position/orientation constraints of "
+                               "goal. Use model frame as default");
       frame_id = robot_model_->getModelFrame();
     }
     else
     {
       frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
     }
-    info.goal_pose = getConstraintPose(req.goal_constraints.front());
-  }
 
-  assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
-  for (const auto& joint_name : robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames())
-  {
-    auto it{ std::find(req.start_state.joint_state.name.cbegin(), req.start_state.joint_state.name.cend(), joint_name) };
-    if (it == req.start_state.joint_state.name.cend())
+    // goal pose with optional offset wrt. the planning frame
+    info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
+    frame_id = robot_model_->getModelFrame();
+
+    // check goal pose ik before Cartesian motion plan starts
+    std::map<std::string, double> ik_solution;
+    if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
+                       ik_solution))
     {
+      // LCOV_EXCL_START
       std::ostringstream os;
-      os << "Could not find joint \"" << joint_name << "\" of group \"" << req.group_name
-         << "\" in start state of request";
-      throw CircJointMissingInStartState(os.str());
+      os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
+      throw CircInverseForGoalIncalculable(os.str());
+      // LCOV_EXCL_STOP // not able to trigger here since lots of checks before
+      // are in place
     }
-    size_t index = it - req.start_state.joint_state.name.cbegin();
-    info.start_joint_position[joint_name] = req.start_state.joint_state.position[index];
   }
 
-  computeLinkFK(scene, info.link_name, info.start_joint_position, info.start_pose);
+  computeLinkFK(robot_state, info.link_name, info.start_joint_position, info.start_pose);
 
-  // check goal pose ik before Cartesian motion plan starts
-  std::map<std::string, double> ik_solution;
-  if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
-                     ik_solution))
-  {
-    // LCOV_EXCL_START
-    std::ostringstream os;
-    os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
-    throw CircInverseForGoalIncalculable(os.str());
-    // LCOV_EXCL_STOP // not able to trigger here since lots of checks before
-    // are in place
-  }
+  // center point with wrt. the planning frame
+  std::string center_point_frame_id;
+
   info.circ_path_point.first = req.path_constraints.name;
-  if (!req.goal_constraints.front().position_constraints.empty())
+  if (req.path_constraints.position_constraints.front().header.frame_id.empty())
   {
-    const moveit_msgs::msg::Constraints& goal = req.goal_constraints.front();
-    info.circ_path_point.second =
-        getConstraintPose(
-            req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front().position,
-            goal.orientation_constraints.front().orientation, goal.position_constraints.front().target_point_offset)
-            .translation();
+    RCLCPP_WARN(getLogger(), "Frame id is not set in position constraints of "
+                             "path. Use model frame as default");
+    center_point_frame_id = robot_model_->getModelFrame();
   }
   else
   {
-    Eigen::Vector3d circ_path_point;
-    tf2::fromMsg(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front().position,
-                 circ_path_point);
-    info.circ_path_point.second = circ_path_point;
+    center_point_frame_id = req.path_constraints.position_constraints.front().header.frame_id;
+  }
+
+  Eigen::Isometry3d center_point_pose;
+  tf2::fromMsg(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.front(),
+               center_point_pose);
+
+  center_point_pose = scene->getFrameTransform(center_point_frame_id) * center_point_pose;
+
+  if (!req.goal_constraints.front().position_constraints.empty())
+  {
+    const moveit_msgs::msg::Constraints& goal = req.goal_constraints.front();
+    geometry_msgs::msg::Point center_point = tf2::toMsg(Eigen::Vector3d(center_point_pose.translation()));
+    info.circ_path_point.second = getConstraintPose(center_point, goal.orientation_constraints.front().orientation,
+                                                    goal.position_constraints.front().target_point_offset)
+                                      .translation();
+  }
+  else
+  {
+    info.circ_path_point.second = center_point_pose.translation();
   }
 }
 
 void TrajectoryGeneratorCIRC::plan(const planning_scene::PlanningSceneConstPtr& scene,
                                    const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                   const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                   double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   std::unique_ptr<KDL::Path> cart_path(setPathCIRC(plan_info));
   std::unique_ptr<KDL::VelocityProfile> vel_profile(
@@ -214,7 +226,7 @@ void TrajectoryGeneratorCIRC::plan(const planning_scene::PlanningSceneConstPtr& 
 
 std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlanInfo& info) const
 {
-  RCLCPP_DEBUG(LOGGER, "Set Cartesian path for CIRC command.");
+  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for CIRC command.");
 
   KDL::Frame start_pose, goal_pose;
   tf2::transformEigenToKDL(info.start_pose, start_pose);

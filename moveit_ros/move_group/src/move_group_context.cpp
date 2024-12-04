@@ -34,17 +34,26 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/move_group/move_group_context.h>
+#include <moveit/move_group/move_group_context.hpp>
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/plan_execution/plan_execution.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/plan_execution/plan_execution.hpp>
+#include <moveit/utils/logger.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_move_group_capabilities_base.move_group_context");
+namespace move_group
+{
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.ros.move_group.context");
+}
+}  // namespace
 
-move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& moveit_cpp,
-                                               const std::string& default_planning_pipeline,
-                                               bool allow_trajectory_execution, bool debug)
+MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& moveit_cpp,
+                                   const std::string& default_planning_pipeline, bool allow_trajectory_execution,
+                                   bool debug)
   : moveit_cpp_(moveit_cpp)
   , planning_scene_monitor_(moveit_cpp->getPlanningSceneMonitorNonConst())
   , allow_trajectory_execution_(allow_trajectory_execution)
@@ -56,18 +65,11 @@ move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& m
   if (default_pipeline_it != pipelines.end())
   {
     planning_pipeline_ = default_pipeline_it->second;
-
-    // configure the planning pipeline
-    planning_pipeline_->displayComputedMotionPlans(true);
-    planning_pipeline_->checkSolutionPaths(true);
-
-    if (debug_)
-      planning_pipeline_->publishReceivedRequests(true);
   }
   else
   {
     RCLCPP_ERROR(
-        LOGGER,
+        getLogger(),
         "Failed to find default PlanningPipeline '%s' - please check MoveGroup's planning pipeline configuration.",
         default_planning_pipeline.c_str());
   }
@@ -80,7 +82,7 @@ move_group::MoveGroupContext::MoveGroupContext(const moveit_cpp::MoveItCppPtr& m
   }
 }
 
-move_group::MoveGroupContext::~MoveGroupContext()
+MoveGroupContext::~MoveGroupContext()
 {
   plan_execution_.reset();
   trajectory_execution_manager_.reset();
@@ -88,18 +90,20 @@ move_group::MoveGroupContext::~MoveGroupContext()
   planning_scene_monitor_.reset();
 }
 
-bool move_group::MoveGroupContext::status() const
+bool MoveGroupContext::status() const
 {
-  const planning_interface::PlannerManagerPtr& planner_interface = planning_pipeline_->getPlannerManager();
-  if (planner_interface)
+  if (planning_pipeline_)
   {
-    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context using planning plugin " << planning_pipeline_->getPlannerPluginName());
-    RCLCPP_INFO_STREAM(LOGGER, "MoveGroup context initialization complete");
+    RCLCPP_INFO_STREAM(getLogger(), "MoveGroup context using pipeline " << planning_pipeline_->getName().c_str());
+    RCLCPP_INFO_STREAM(getLogger(), "MoveGroup context initialization complete");
     return true;
   }
   else
   {
-    RCLCPP_WARN_STREAM(LOGGER, "MoveGroup running was unable to load " << planning_pipeline_->getPlannerPluginName());
+    RCLCPP_WARN_STREAM(getLogger(),
+                       "MoveGroup running was unable to load pipeline " << planning_pipeline_->getName().c_str());
     return false;
   }
 }
+
+}  // namespace move_group

@@ -36,9 +36,12 @@
    Description: A first-order Butterworth low-pass filter. There is only one parameter to tune.
  */
 
-#include <moveit/online_signal_smoothing/butterworth_filter.h>
+#include <moveit/online_signal_smoothing/butterworth_filter.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logging.hpp>
+
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 
 namespace online_signal_smoothing
 {
@@ -111,39 +114,37 @@ bool ButterworthFilterPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::c
   return true;
 };
 
-bool ButterworthFilterPlugin::doSmoothing(std::vector<double>& position_vector)
+bool ButterworthFilterPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& /* unused */,
+                                          Eigen::VectorXd& /* unused */)
 {
-  if (position_vector.size() != position_filters_.size())
+  const size_t num_positions = positions.size();
+  if (num_positions != position_filters_.size())
   {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be smoothed does not have the right length.");
-#pragma GCC diagnostic pop
     return false;
   }
-  for (size_t i = 0; i < position_vector.size(); ++i)
+  for (size_t i = 0; i < num_positions; ++i)
   {
     // Lowpass filter the position command
-    position_vector[i] = position_filters_.at(i).filter(position_vector[i]);
+    positions[i] = position_filters_.at(i).filter(positions[i]);
   }
   return true;
 };
 
-bool ButterworthFilterPlugin::reset(const std::vector<double>& joint_positions)
+bool ButterworthFilterPlugin::reset(const Eigen::VectorXd& positions, const Eigen::VectorXd& /* unused */,
+                                    const Eigen::VectorXd& /* unused */)
 {
-  if (joint_positions.size() != position_filters_.size())
+  const size_t num_positions = positions.size();
+  if (num_positions != position_filters_.size())
   {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
     RCLCPP_ERROR_THROTTLE(node_->get_logger(), *node_->get_clock(), 1000,
                           "Position vector to be reset does not have the right length.");
-#pragma GCC diagnostic pop
     return false;
   }
-  for (size_t joint_idx = 0; joint_idx < joint_positions.size(); ++joint_idx)
+  for (size_t joint_idx = 0; joint_idx < num_positions; ++joint_idx)
   {
-    position_filters_.at(joint_idx).reset(joint_positions.at(joint_idx));
+    position_filters_.at(joint_idx).reset(positions[joint_idx]);
   }
   return true;
 };

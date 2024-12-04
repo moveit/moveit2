@@ -36,16 +36,17 @@
 
 #include <string>
 
-#include <moveit/benchmarks/BenchmarkOptions.h>
-#include <moveit/benchmarks/BenchmarkExecutor.h>
+#include <moveit/benchmarks/BenchmarkOptions.hpp>
+#include <moveit/benchmarks/BenchmarkExecutor.hpp>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/node_options.hpp>
 #include <rclcpp/utilities.hpp>
+#include <moveit/utils/logger.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.benchmarks.RunBenchmark");
+using moveit::getLogger;
 
 int main(int argc, char** argv)
 {
@@ -54,6 +55,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("moveit_run_benchmark", node_options);
+  moveit::setNodeLoggerName(node->get_name());
 
   // Read benchmark options from param server
   moveit_ros_benchmarks::BenchmarkOptions options(node);
@@ -64,7 +66,7 @@ int main(int argc, char** argv)
   options.getPlanningPipelineNames(planning_pipelines);
   if (!server.initialize(planning_pipelines))
   {
-    RCLCPP_ERROR(LOGGER, "Failed to initialize benchmark server.");
+    RCLCPP_ERROR(node->get_logger(), "Failed to initialize benchmark server.");
     rclcpp::shutdown();
     return 1;
   }
@@ -81,28 +83,28 @@ int main(int argc, char** argv)
       {
         auto planning_scene_storage = moveit_warehouse::PlanningSceneStorage(warehouse_connection);
         planning_scene_storage.getPlanningSceneNames(scene_names);
-        RCLCPP_INFO(LOGGER, "Loaded scene names");
+        RCLCPP_INFO(node->get_logger(), "Loaded scene names");
       }
       else
       {
-        RCLCPP_ERROR(LOGGER, "Failed to load scene names from DB");
+        RCLCPP_ERROR(node->get_logger(), "Failed to load scene names from DB");
         rclcpp::shutdown();
         return 1;
       }
     }
     catch (std::exception& e)
     {
-      RCLCPP_ERROR(LOGGER, "Failed to load scene names from DB: '%s'", e.what());
+      RCLCPP_ERROR(node->get_logger(), "Failed to load scene names from DB: '%s'", e.what());
       rclcpp::shutdown();
       return 1;
     }
     // Running benchmarks
-    for (auto const& name : scene_names)
+    for (const auto& name : scene_names)
     {
       options.scene_name = name;
       if (!server.runBenchmarks(options))
       {
-        RCLCPP_ERROR(LOGGER, "Failed to run all benchmarks");
+        RCLCPP_ERROR(node->get_logger(), "Failed to run all benchmarks");
       }
     }
   }
@@ -110,11 +112,11 @@ int main(int argc, char** argv)
   {
     if (!server.runBenchmarks(options))
     {
-      RCLCPP_ERROR(LOGGER, "Failed to run all benchmarks");
+      RCLCPP_ERROR(node->get_logger(), "Failed to run all benchmarks");
     }
   }
 
-  RCLCPP_INFO(LOGGER, "Finished benchmarking");
+  RCLCPP_INFO(node->get_logger(), "Finished benchmarking");
   rclcpp::spin(node);
   rclcpp::shutdown();
   return 0;

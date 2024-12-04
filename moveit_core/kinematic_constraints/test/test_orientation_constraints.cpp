@@ -34,7 +34,7 @@
 
 /* Author: Jeroen De Maeyer */
 
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/kinematic_constraints/kinematic_constraint.hpp>
 #include <gtest/gtest.h>
 
 #include <urdf_parser/urdf_parser.h>
@@ -42,7 +42,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <math.h>
 
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 class SphericalRobot : public testing::Test
 {
@@ -126,14 +126,14 @@ protected:
 };
 
 /** Helper function to create a quaternion from Euler angles. **/
-inline Eigen::Quaterniond xyz_intrinsix_to_quat(double rx, double ry, double rz)
+inline Eigen::Quaterniond xyzIntrinsixToQuaternion(double rx, double ry, double rz)
 {
   return Eigen::AngleAxisd(rx, Eigen::Vector3d::UnitX()) * Eigen::AngleAxisd(ry, Eigen::Vector3d::UnitY()) *
          Eigen::AngleAxisd(rz, Eigen::Vector3d::UnitZ());
 }
 
 /** Helper function to create a quaternion from a rotation vector. **/
-inline Eigen::Quaterniond rotation_vector_to_quat(double rx, double ry, double rz)
+inline Eigen::Quaterniond rotationVectorToQuaternion(double rx, double ry, double rz)
 {
   Eigen::Vector3d v{ rx, ry, rz };
   Eigen::Matrix3d m{ Eigen::AngleAxisd(v.norm(), v.normalized()) };
@@ -415,16 +415,16 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
   EXPECT_TRUE(oc_rotvec.decide(robot_state, true).satisfied);
 
   // some trivial test cases
-  setRobotEndEffectorOrientation(robot_state, xyz_intrinsix_to_quat(0.1, 0.2, -0.3));
+  setRobotEndEffectorOrientation(robot_state, xyzIntrinsixToQuaternion(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_euler.decide(robot_state).satisfied);
 
-  setRobotEndEffectorOrientation(robot_state, xyz_intrinsix_to_quat(0.1, 0.2, -0.6));
+  setRobotEndEffectorOrientation(robot_state, xyzIntrinsixToQuaternion(0.1, 0.2, -0.6));
   EXPECT_FALSE(oc_euler.decide(robot_state).satisfied);
 
-  setRobotEndEffectorOrientation(robot_state, rotation_vector_to_quat(0.1, 0.2, -0.3));
+  setRobotEndEffectorOrientation(robot_state, rotationVectorToQuaternion(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_rotvec.decide(robot_state).satisfied);
 
-  setRobotEndEffectorOrientation(robot_state, rotation_vector_to_quat(0.1, 0.2, -0.6));
+  setRobotEndEffectorOrientation(robot_state, rotationVectorToQuaternion(0.1, 0.2, -0.6));
   EXPECT_FALSE(oc_rotvec.decide(robot_state).satisfied);
 
   // more extensive testing using the test data hardcoded at the top of this file
@@ -457,22 +457,58 @@ TEST_F(FloatingJointRobot, OrientationConstraintsParameterization)
   robot_state.update();
 
   ocm.parameterization = moveit_msgs::msg::OrientationConstraint::XYZ_EULER_ANGLES;
-  ocm.orientation = tf2::toMsg(xyz_intrinsix_to_quat(0.1, 0.2, -0.3));
+  ocm.orientation = tf2::toMsg(xyzIntrinsixToQuaternion(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_euler.configure(ocm, tf));
   EXPECT_TRUE(oc_euler.decide(robot_state).satisfied);
 
-  ocm.orientation = tf2::toMsg(xyz_intrinsix_to_quat(0.1, 0.2, -0.6));
+  ocm.orientation = tf2::toMsg(xyzIntrinsixToQuaternion(0.1, 0.2, -0.6));
   EXPECT_TRUE(oc_euler.configure(ocm, tf));
   EXPECT_FALSE(oc_euler.decide(robot_state).satisfied);
 
   ocm.parameterization = moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR;
-  ocm.orientation = tf2::toMsg(rotation_vector_to_quat(0.1, 0.2, -0.3));
+  ocm.orientation = tf2::toMsg(rotationVectorToQuaternion(0.1, 0.2, -0.3));
   EXPECT_TRUE(oc_rotvec.configure(ocm, tf));
   EXPECT_TRUE(oc_rotvec.decide(robot_state).satisfied);
 
-  ocm.orientation = tf2::toMsg(rotation_vector_to_quat(0.1, 0.2, -0.6));
+  ocm.orientation = tf2::toMsg(rotationVectorToQuaternion(0.1, 0.2, -0.6));
   EXPECT_TRUE(oc_rotvec.configure(ocm, tf));
   EXPECT_FALSE(oc_rotvec.decide(robot_state).satisfied);
+}
+
+TEST_F(FloatingJointRobot, ToleranceInRefFrame)
+{
+  moveit::core::RobotState robot_state(robot_model_);
+  robot_state.setToDefaultValues();
+  auto base = rotationVectorToQuaternion(M_PI / 2.0, 0, 0);  // base rotation: 90° about x
+  setRobotEndEffectorOrientation(robot_state, base);
+  robot_state.update();
+
+  moveit::core::Transforms tf(robot_model_->getModelFrame());
+
+  // create message to configure orientation constraints
+  moveit_msgs::msg::OrientationConstraint ocm;
+  ocm.link_name = "ee";
+  ocm.header.frame_id = robot_model_->getModelFrame();
+  ocm.parameterization = moveit_msgs::msg::OrientationConstraint::ROTATION_VECTOR;
+  ocm.orientation = tf2::toMsg(base);
+  ocm.absolute_x_axis_tolerance = 0.2;
+  ocm.absolute_y_axis_tolerance = 0.2;
+  ocm.absolute_z_axis_tolerance = 1.0;
+  ocm.weight = 1.0;
+
+  kinematic_constraints::OrientationConstraint oc(robot_model_);
+  EXPECT_TRUE(oc.configure(ocm, tf));
+
+  EXPECT_TRUE(oc.decide(robot_state).satisfied);  // link and target are perfectly aligned
+
+  // strong rotation w.r.t. base frame is ok
+  auto delta = rotationVectorToQuaternion(0.1, 0.1, 0.9);
+  setRobotEndEffectorOrientation(robot_state, delta * base);
+  EXPECT_TRUE(oc.decide(robot_state).satisfied);
+
+  // strong rotation w.r.t. link frame is not ok
+  setRobotEndEffectorOrientation(robot_state, base * delta);
+  EXPECT_FALSE(oc.decide(robot_state).satisfied);  // link and target are perfectly aligned
 }
 
 int main(int argc, char** argv)

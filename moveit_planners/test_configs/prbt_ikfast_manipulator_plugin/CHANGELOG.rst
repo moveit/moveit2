@@ -2,6 +2,38 @@
 Changelog for package moveit_resources_prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Contributors: Tom Noble
+
+2.11.0 (2024-09-16)
+-------------------
+
+2.10.0 (2024-06-13)
+-------------------
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Robert Haschke, Tyler Weaver
+
+2.9.0 (2024-01-09)
+------------------
+* Do not pass and return simple types by const ref (`#2453 <https://github.com/ros-planning/moveit2/issues/2453>`_)
+  Co-authored-by: Nils <nilsmailiseke@gmail.com>
+* Update pre-commit and add to .codespell_words (`#2465 <https://github.com/ros-planning/moveit2/issues/2465>`_)
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* PRBT IkFast patch from robostack (`#2395 <https://github.com/ros-planning/moveit2/issues/2395>`_)
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Marq Rasmussen, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+
 2.7.4 (2023-05-18)
 ------------------
 

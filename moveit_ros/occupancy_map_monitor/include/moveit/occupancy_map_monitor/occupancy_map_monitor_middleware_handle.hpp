@@ -36,8 +36,8 @@
 
 #pragma once
 
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
+#include <moveit/occupancy_map_monitor/occupancy_map_updater.hpp>
 
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -110,6 +110,7 @@ private:
       updater_plugin_loader_; /*!< Pluginlib loader for OccupancyMapUpdater */
 
   OccupancyMapMonitor::Parameters parameters_; /*!< ROS parameters for OccupancyMapMonitor */
+  rclcpp::Logger logger_;
 };
 
 }  // namespace occupancy_map_monitor

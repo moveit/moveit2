@@ -33,11 +33,11 @@
  *********************************************************************/
 
 /* Author: Ioan Sucan */
-#include <moveit/warehouse/planning_scene_storage.h>
-#include <moveit/warehouse/constraints_storage.h>
-#include <moveit/warehouse/state_storage.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.h>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/warehouse/planning_scene_storage.hpp>
+#include <moveit/warehouse/constraints_storage.hpp>
+#include <moveit/warehouse/state_storage.hpp>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_frame.hpp>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.hpp>
 
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/window_manager_interface.hpp>
@@ -49,7 +49,6 @@
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_frame_context");
 
 void MotionPlanningFrame::databaseConnectButtonClicked()
 {
@@ -112,7 +111,7 @@ void MotionPlanningFrame::resetDbButtonClicked()
 
 void MotionPlanningFrame::computeDatabaseConnectButtonClicked()
 {
-  RCLCPP_INFO(LOGGER, "Connect to database: {host: %s, port: %d}", ui_->database_host->text().toStdString().c_str(),
+  RCLCPP_INFO(logger_, "Connect to database: {host: %s, port: %d}", ui_->database_host->text().toStdString().c_str(),
               ui_->database_port->value());
   if (planning_scene_storage_)
   {
@@ -143,7 +142,7 @@ void MotionPlanningFrame::computeDatabaseConnectButtonClicked()
     catch (std::exception& ex)
     {
       planning_display_->addMainLoopJob([this] { computeDatabaseConnectButtonClickedHelper(3); });
-      RCLCPP_ERROR(LOGGER, "%s", ex.what());
+      RCLCPP_ERROR(logger_, "%s", ex.what());
       return;
     }
     planning_display_->addMainLoopJob([this] { computeDatabaseConnectButtonClickedHelper(4); });

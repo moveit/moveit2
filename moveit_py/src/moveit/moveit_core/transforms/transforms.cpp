@@ -34,19 +34,19 @@
 
 /* Author: Peter David Fagan */
 
-#include "transforms.h"
+#include "transforms.hpp"
 
 namespace moveit_py
 {
 namespace bind_transforms
 {
-Eigen::MatrixXd get_transform(std::shared_ptr<moveit::core::Transforms>& transforms, std::string& from_frame)
+Eigen::MatrixXd getTransform(std::shared_ptr<moveit::core::Transforms>& transforms, std::string& from_frame)
 {
   auto transform = transforms->getTransform(from_frame);
   return transform.matrix();
 }
 
-std::map<std::string, Eigen::MatrixXd> get_all_transforms(std::shared_ptr<moveit::core::Transforms>& transforms)
+std::map<std::string, Eigen::MatrixXd> getAllTransforms(std::shared_ptr<moveit::core::Transforms>& transforms)
 {
   std::map<std::string, Eigen::MatrixXd> transforms_map;
   for (auto& transform : transforms->getAllTransforms())
@@ -56,7 +56,7 @@ std::map<std::string, Eigen::MatrixXd> get_all_transforms(std::shared_ptr<moveit
   return transforms_map;
 }
 
-void init_transforms(py::module& m)
+void initTransforms(py::module& m)
 {
   py::module transforms = m.def_submodule("transforms");
 
@@ -67,10 +67,10 @@ void init_transforms(py::module& m)
 
       .def("get_target_frame", &moveit::core::Transforms::getTargetFrame, R"(Get the target frame.)")
 
-      .def("get_transform", &moveit_py::bind_transforms::get_transform, py::arg("from_frame"),
+      .def("get_transform", &moveit_py::bind_transforms::getTransform, py::arg("from_frame"),
            R"(Get the transform for from_frame with respect to the target frame.)")
 
-      .def("get_all_transforms", &moveit_py::bind_transforms::get_all_transforms,
+      .def("get_all_transforms", &moveit_py::bind_transforms::getAllTransforms,
            R"(Get all transforms with respect to the target frame.)");
 
   // TODO(peterdavidfagan): Add methods for applying transforms.

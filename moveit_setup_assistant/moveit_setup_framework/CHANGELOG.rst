@@ -2,6 +2,60 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Update urdf/model.h -> urdf/model.hpp (`#3003 <https://github.com/ros-planning/moveit2/issues/3003>`_)
+* Contributors: Robert Haschke, Tom Noble
+
+2.11.0 (2024-09-16)
+-------------------
+* Cast of "max_velocity" and "max_acceleration" values to double (`#2803 <https://github.com/moveit/moveit2/issues/2803>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: Jorge Pérez Ramos
+
+2.10.0 (2024-06-13)
+-------------------
+* Apply clang-tidy fixes
+* Migrate ros-planning org to moveit (`#2847 <https://github.com/moveit/moveit2/issues/2847>`_)
+  * Rename github.com/ros-planning -> github.com/moveit
+  * Rename ros-planning.github.io -> moveit.github.io
+  * Rename ros-planning organization in docker and CI workflow files
+  - ghcr.io/ros-planning -> ghcr.io/moveit
+  - github.repository == 'moveit/*''
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Robert Haschke, Sebastian Jahr, Tyler Weaver
+
+2.9.0 (2024-01-09)
+------------------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* Update pre-commit and add to .codespell_words (`#2465 <https://github.com/ros-planning/moveit2/issues/2465>`_)
+* Fix `#1971 <https://github.com/ros-planning/moveit2/issues/1971>`_ (`#2428 <https://github.com/ros-planning/moveit2/issues/2428>`_)
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Fix collisions_updater CLI if no package is used (`#2344 <https://github.com/ros-planning/moveit2/issues/2344>`_)
+  * Fix collisions_updater CLI if no package is used
+  The exceptions introduced with https://github.com/ros-planning/moveit2/pull/2032
+  prevented from running the collisions updater CLI without a ROS package.
+  This fix makes ROS packages optional again, allowing to use the CLI with absolute
+  paths only.
+  * Improve warn message wording
+* Contributors: David V. Lu!!, Henning Kayser, Sebastian Jahr, Shobuj Paul, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+* Replaced boost::algorithm::join with fmt::join (`#2273 <https://github.com/ros-planning/moveit2/issues/2273>`_)
+  * Replaced boost::algorithm::join with fmt::join
+  * Made changes in CMakeLists.txt to accomodate fmt
+  * Updated package.xml files
+  * removed redundant boost dependencies
+  * Rename variables -> variable
+  ---------
+  Co-authored-by: Sebastian Castro <4603398+sea-bass@users.noreply.github.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Contributors: Shobuj Paul
+
 2.7.4 (2023-05-18)
 ------------------
 

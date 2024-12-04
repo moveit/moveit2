@@ -34,21 +34,25 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/warehouse/planning_scene_storage.h>
-#include <moveit/warehouse/constraints_storage.h>
-#include <moveit/warehouse/state_storage.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/warehouse/planning_scene_storage.hpp>
+#include <moveit/warehouse/constraints_storage.hpp>
+#include <moveit/warehouse/state_storage.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <moveit/utils/logger.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.warehouse.planning_scene_storage");
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.ros.import_from_text");
+}
 
 void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* psm,
                 moveit_warehouse::RobotStateStorage* rs)
@@ -90,7 +94,7 @@ void parseStart(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* 
         st.setVariablePositions(v);
         moveit_msgs::msg::RobotState msg;
         moveit::core::robotStateToRobotStateMsg(st, msg);
-        RCLCPP_INFO(LOGGER, "Parsed start state '%s'", name.c_str());
+        RCLCPP_INFO(getLogger(), "Parsed start state '%s'", name.c_str());
         rs->addRobotState(msg, name);
       }
     }
@@ -135,7 +139,7 @@ void parseLinkConstraint(std::istream& in, planning_scene_monitor::PlanningScene
                                Eigen::AngleAxisd(y, Eigen::Vector3d::UnitZ()));
     }
     else
-      RCLCPP_ERROR(LOGGER, "Unknown link constraint element: '%s'", type.c_str());
+      RCLCPP_ERROR(getLogger(), "Unknown link constraint element: '%s'", type.c_str());
     in >> type;
   }
 
@@ -150,7 +154,7 @@ void parseLinkConstraint(std::istream& in, planning_scene_monitor::PlanningScene
     pose.header.frame_id = psm->getRobotModel()->getModelFrame();
     moveit_msgs::msg::Constraints constr = kinematic_constraints::constructGoalConstraints(link_name, pose);
     constr.name = name;
-    RCLCPP_INFO(LOGGER, "Parsed link constraint '%s'", name.c_str());
+    RCLCPP_INFO(getLogger(), "Parsed link constraint '%s'", name.c_str());
     cs->addConstraints(constr);
   }
 }
@@ -180,7 +184,7 @@ void parseGoal(std::istream& in, planning_scene_monitor::PlanningSceneMonitor* p
         }
         else
         {
-          RCLCPP_INFO(LOGGER, "Unknown goal type: '%s'", type.c_str());
+          RCLCPP_INFO(getLogger(), "Unknown goal type: '%s'", type.c_str());
         }
       }
     }
@@ -209,7 +213,7 @@ void parseQueries(std::istream& in, planning_scene_monitor::PlanningSceneMonitor
       }
       else
       {
-        RCLCPP_ERROR(LOGGER, "Unknown query type: '%s'", type.c_str());
+        RCLCPP_ERROR(getLogger(), "Unknown query type: '%s'", type.c_str());
       }
     }
   }
@@ -222,6 +226,7 @@ int main(int argc, char** argv)
   node_options.allow_undeclared_parameters(true);
   node_options.automatically_declare_parameters_from_overrides(true);
   rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared("import_from_text_to_warehouse", node_options);
+  moveit::setNodeLoggerName(node->get_name());
 
   // clang-format off
   boost::program_options::options_description desc;
@@ -251,7 +256,7 @@ int main(int argc, char** argv)
   planning_scene_monitor::PlanningSceneMonitor psm(node, ROBOT_DESCRIPTION);
   if (!psm.getPlanningScene())
   {
-    RCLCPP_ERROR(LOGGER, "Unable to initialize PlanningSceneMonitor");
+    RCLCPP_ERROR(node->get_logger(), "Unable to initialize PlanningSceneMonitor");
     return 1;
   }
 

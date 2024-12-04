@@ -32,14 +32,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_lin.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_lin.hpp>
 
-#include <pilz_industrial_motion_planner/tip_frame_getter.h>
+#include <pilz_industrial_motion_planner/tip_frame_getter.hpp>
 
 #include <cassert>
 #include <sstream>
 #include <time.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <kdl/path_line.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
@@ -49,11 +49,17 @@
 #include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <moveit/utils/logger.hpp>
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER =
-    rclcpp::get_logger("moveit.pilz_industrial_motion_planner.trajectory_generator_lin");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.lin");
+}
+}  // namespace
 TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
                                                const LimitsContainer& planner_limits, const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
@@ -65,10 +71,10 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
                                                    const planning_interface::MotionPlanRequest& req,
                                                    TrajectoryGenerator::MotionPlanInfo& info) const
 {
-  RCLCPP_DEBUG(LOGGER, "Extract necessary information from motion plan request.");
+  RCLCPP_DEBUG(getLogger(), "Extract necessary information from motion plan request.");
 
   info.group_name = req.group_name;
-  std::string frame_id{ robot_model_->getModelFrame() };
+  moveit::core::RobotState robot_state = scene->getCurrentState();
 
   // goal given in joint space
   if (!req.goal_constraints.front().joint_constraints.empty())
@@ -91,61 +97,49 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
       info.goal_joint_position[joint_item.joint_name] = joint_item.position;
     }
 
-    // Ignored return value because at this point the function should always
-    // return 'true'.
-    computeLinkFK(scene, info.link_name, info.goal_joint_position, info.goal_pose);
+    computeLinkFK(robot_state, info.link_name, info.goal_joint_position, info.goal_pose);
   }
   // goal given in Cartesian space
   else
   {
+    std::string frame_id;
+
     info.link_name = req.goal_constraints.front().position_constraints.front().link_name;
     if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
         req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
     {
-      RCLCPP_WARN(LOGGER, "Frame id is not set in position/orientation constraints of "
-                          "goal. Use model frame as default");
+      RCLCPP_WARN(getLogger(), "Frame id is not set in position/orientation constraints of "
+                               "goal. Use model frame as default");
       frame_id = robot_model_->getModelFrame();
     }
     else
     {
       frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
     }
-    info.goal_pose = getConstraintPose(req.goal_constraints.front());
-  }
 
-  assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
-  for (const auto& joint_name : robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames())
-  {
-    auto it{ std::find(req.start_state.joint_state.name.cbegin(), req.start_state.joint_state.name.cend(), joint_name) };
-    if (it == req.start_state.joint_state.name.cend())
+    // goal pose with optional offset wrt. the planning frame
+    info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
+    frame_id = robot_model_->getModelFrame();
+
+    // check goal pose ik before Cartesian motion plan starts
+    std::map<std::string, double> ik_solution;
+    if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
+                       ik_solution))
     {
       std::ostringstream os;
-      os << "Could not find joint \"" << joint_name << "\" of group \"" << req.group_name
-         << "\" in start state of request";
-      throw LinJointMissingInStartState(os.str());
+      os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
+      throw LinInverseForGoalIncalculable(os.str());
     }
-    size_t index = it - req.start_state.joint_state.name.cbegin();
-    info.start_joint_position[joint_name] = req.start_state.joint_state.position[index];
   }
 
   // Ignored return value because at this point the function should always
   // return 'true'.
-  computeLinkFK(scene, info.link_name, info.start_joint_position, info.start_pose);
-
-  // check goal pose ik before Cartesian motion plan starts
-  std::map<std::string, double> ik_solution;
-  if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
-                     ik_solution))
-  {
-    std::ostringstream os;
-    os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
-    throw LinInverseForGoalIncalculable(os.str());
-  }
+  computeLinkFK(robot_state, info.link_name, info.start_joint_position, info.start_pose);
 }
 
 void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& scene,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  const double& sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                  double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // create Cartesian path for lin
   std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));
@@ -176,7 +170,7 @@ void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& s
 std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affine3d& start_pose,
                                                               const Eigen::Affine3d& goal_pose) const
 {
-  RCLCPP_DEBUG(LOGGER, "Set Cartesian path for LIN command.");
+  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for LIN command.");
 
   KDL::Frame kdl_start_pose, kdl_goal_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);

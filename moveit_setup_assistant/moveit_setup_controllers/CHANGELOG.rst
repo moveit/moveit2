@@ -2,6 +2,40 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Contributors: Tom Noble
+
+2.11.0 (2024-09-16)
+-------------------
+* Fix key duplication in moveit_setup_assistant for FollowJointTrajectory (`#2959 <https://github.com/moveit/moveit2/issues/2959>`_)
+* Replace deprecated load_yaml with xacro.load_yaml in ros2_control.xacro template (`#2934 <https://github.com/moveit/moveit2/issues/2934>`_)
+* Remove additional word 'hardware' in Moveit Controllers section of MoveIt Setup Assistant (`#2936 <https://github.com/moveit/moveit2/issues/2936>`_)
+* Contributors: Chris Schindlbeck
+
+2.10.0 (2024-06-13)
+-------------------
+* Add allow_nonzero_velocity_at_trajectory_end parameter to exported ros2_controllers config file (`#2751 <https://github.com/moveit/moveit2/issues/2751>`_)
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Sebastian Castro, Tyler Weaver
+
+2.9.0 (2024-01-09)
+------------------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* Don't assume gripper controller for single joint control in MoveIt Setup Assistant (`#2555 <https://github.com/ros-planning/moveit2/issues/2555>`_)
+  * For single joint controllers which are not gripper controllers, still output joints list
+  * Use OR
+  * Only check for GripperActionController
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Forrest Rogers-Marcovitz, Sebastian Jahr, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+
 2.7.4 (2023-05-18)
 ------------------
 

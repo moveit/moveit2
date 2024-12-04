@@ -35,7 +35,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/revolute_joint_model.h>
+#include <moveit/robot_model/revolute_joint_model.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <algorithm>
 #include <cmath>
@@ -189,7 +189,7 @@ bool RevoluteJointModel::satisfiesPositionBounds(const double* values, const Bou
   }
   else
   {
-    return !(values[0] < bounds[0].min_position_ - margin || values[0] > bounds[0].max_position_ + margin);
+    return values[0] >= bounds[0].min_position_ - margin && values[0] <= bounds[0].max_position_ + margin;
   }
 }
 

@@ -34,13 +34,13 @@
 
 /* Author: Jafar Uruç */
 
-#include "world.h"
+#include "world.hpp"
 
 namespace moveit_py
 {
 namespace bind_collision_detection
 {
-void init_world(py::module& m)
+void initWorld(py::module& m)
 {
   py::module collision_detection = m.def_submodule("collision_detection");
 

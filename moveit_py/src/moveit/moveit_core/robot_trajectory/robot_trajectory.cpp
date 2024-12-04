@@ -34,16 +34,17 @@
 
 /* Author: Peter David Fagan */
 
-#include "robot_trajectory.h"
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
+#include "robot_trajectory.hpp"
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
 
 namespace moveit_py
 {
 namespace bind_robot_trajectory
 {
 moveit_msgs::msg::RobotTrajectory
-get_robot_trajectory_msg(const robot_trajectory::RobotTrajectoryConstPtr& robot_trajectory,
-                         const std::vector<std::string>& joint_filter)
+getRobotTrajectoryMsg(const robot_trajectory::RobotTrajectoryConstPtr& robot_trajectory,
+                      const std::vector<std::string>& joint_filter)
 {
   moveit_msgs::msg::RobotTrajectory msg;
   robot_trajectory->getRobotTrajectoryMsg(msg, joint_filter);
@@ -51,13 +52,13 @@ get_robot_trajectory_msg(const robot_trajectory::RobotTrajectoryConstPtr& robot_
 }
 
 robot_trajectory::RobotTrajectory
-set_robot_trajectory_msg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
-                         const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg)
+setRobotTrajectoryMsg(const std::shared_ptr<robot_trajectory::RobotTrajectory>& robot_trajectory,
+                      const moveit::core::RobotState& robot_state, const moveit_msgs::msg::RobotTrajectory& msg)
 {
   return robot_trajectory->setRobotTrajectoryMsg(robot_state, msg);
 }
 
-void init_robot_trajectory(py::module& m)
+void initRobotTrajectory(py::module& m)
 {
   py::module robot_trajectory = m.def_submodule("robot_trajectory");
 
@@ -134,18 +135,53 @@ void init_robot_trajectory(py::module& m)
            Returns:
                list of float: The duration from previous of each waypoint in the trajectory.
            )")
-      .def("get_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::get_robot_trajectory_msg,
+      .def("apply_totg_time_parameterization", &trajectory_processing::applyTOTGTimeParameterization,
+           py::arg("velocity_scaling_factor"), py::arg("acceleration_scaling_factor"), py::kw_only(),
+           py::arg("path_tolerance") = 0.1, py::arg("resample_dt") = 0.1, py::arg("min_angle_change") = 0.001,
+           R"(
+           Adds time parameterization to the trajectory using the Time-Optimal Trajectory Generation (TOTG) algorithm.
+
+           Args:
+               velocity_scaling_factor (float): The velocity scaling factor.
+               acceleration_scaling_factor (float): The acceleration scaling factor.
+               path_tolerance (float): The path tolerance to use for time parameterization (default: 0.1).
+               resample_dt (float): The time step to use for time parameterization (default: 0.1).
+               min_angle_change (float): The minimum angle change to use for time parameterization (default: 0.001).
+           Returns:
+               bool: True if the trajectory was successfully retimed, false otherwise.
+           )")
+      .def("apply_ruckig_smoothing", &trajectory_processing::applyRuckigSmoothing, py::arg("velocity_scaling_factor"),
+           py::arg("acceleration_scaling_factor"), py::kw_only(), py::arg("mitigate_overshoot") = false,
+           py::arg("overshoot_threshold") = 0.01,
+           R"(
+           Applies Ruckig smoothing to the trajectory.
+
+           Args:
+               velocity_scaling_factor (float): The velocity scaling factor.
+               acceleration_scaling_factor (float): The acceleration scaling factor.
+               mitigate_overshoot (bool): Whether to mitigate overshoot during smoothing (default: false).
+               overshoot_threshold (float): The maximum allowed overshoot during smoothing (default: 0.01).
+           Returns:
+               bool: True if the trajectory was successfully retimed, false otherwise.
+           )")
+      .def("get_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::getRobotTrajectoryMsg,
            py::arg("joint_filter") = std::vector<std::string>(),
            R"(
            Get the trajectory as a moveit_msgs.msg.RobotTrajectory message.
 
-	   Returns:
+           Args:
+               joint_filter (list[string]): List of joints to consider in creating the message. If empty, uses all joints.
+           Returns:
                moveit_msgs.msg.RobotTrajectory: A ROS robot trajectory message.
            )")
-      .def("set_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::set_robot_trajectory_msg,
-           py::arg("robot_state"), py::arg("msg"),
+      .def("set_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::setRobotTrajectoryMsg, py::arg("robot_state"),
+           py::arg("msg"),
            R"(
            Set the trajectory from a moveit_msgs.msg.RobotTrajectory message.
+
+           Args:
+               robot_state (:py:class:`moveit_py.core.RobotState`): The reference robot starting state.
+               msg (moveit_msgs.msg.RobotTrajectory): A ROS robot trajectory message.
            )");
   // TODO (peterdavidfagan): support other methods such as appending trajectories
 }

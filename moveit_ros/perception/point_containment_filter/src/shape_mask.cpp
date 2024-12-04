@@ -34,13 +34,20 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/point_containment_filter/shape_mask.h>
+#include <moveit/point_containment_filter/shape_mask.hpp>
 #include <geometric_shapes/body_operations.h>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
+#include <moveit/utils/logger.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ros.perception.shape_mask");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.ros.shape_mask");
+}
+}  // namespace
 
 point_containment_filter::ShapeMask::ShapeMask(const TransformCallback& transform_callback)
   : transform_callback_(transform_callback), next_handle_(1), min_handle_(1)
@@ -81,7 +88,9 @@ point_containment_filter::ShapeHandle point_containment_filter::ShapeMask::addSh
     ss.handle = next_handle_;
     std::pair<std::set<SeeShape, SortBodies>::iterator, bool> insert_op = bodies_.insert(ss);
     if (!insert_op.second)
-      RCLCPP_ERROR(LOGGER, "Internal error in management of bodies in ShapeMask. This is a serious error.");
+    {
+      RCLCPP_ERROR(getLogger(), "Internal error in management of bodies in ShapeMask. This is a serious error.");
+    }
     used_handles_[next_handle_] = insert_op.first;
   }
   else
@@ -114,7 +123,7 @@ void point_containment_filter::ShapeMask::removeShape(ShapeHandle handle)
     min_handle_ = handle;
   }
   else
-    RCLCPP_ERROR(LOGGER, "Unable to remove shape handle %u", handle);
+    RCLCPP_ERROR(getLogger(), "Unable to remove shape handle %u", handle);
 }
 
 void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg::PointCloud2& data_in,
@@ -141,11 +150,12 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg
       {
         if (!it->body)
         {
-          RCLCPP_ERROR_STREAM(LOGGER, "Missing transform for shape with handle " << it->handle << " without a body");
+          RCLCPP_ERROR_STREAM(getLogger(),
+                              "Missing transform for shape with handle " << it->handle << " without a body");
         }
         else
         {
-          RCLCPP_ERROR_STREAM(LOGGER,
+          RCLCPP_ERROR_STREAM(getLogger(),
                               "Missing transform for shape " << it->body->getType() << " with handle " << it->handle);
         }
       }

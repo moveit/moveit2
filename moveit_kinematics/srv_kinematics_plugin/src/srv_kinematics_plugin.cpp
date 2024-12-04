@@ -35,10 +35,11 @@
 /* Author: Dave Coleman, Masaki Murooka */
 
 #include <moveit_msgs/srv/get_position_ik.hpp>
-#include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.h>
+#include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.hpp>
 #include <class_loader/class_loader.hpp>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <iterator>
+#include <moveit/utils/logger.hpp>
 
 // Eigen
 #include <Eigen/Core>
@@ -49,7 +50,13 @@ CLASS_LOADER_REGISTER_CLASS(srv_kinematics_plugin::SrvKinematicsPlugin, kinemati
 
 namespace srv_kinematics_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_srv_kinematics_plugin.srv_kinematics_plugin");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.kinematics.srv_kinematics_plugin");
+}
+}  // namespace
 
 SrvKinematicsPlugin::SrvKinematicsPlugin() : active_(false)
 {
@@ -62,7 +69,7 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   node_ = node;
   bool debug = false;
 
-  RCLCPP_INFO(LOGGER, "SrvKinematicsPlugin initializing");
+  RCLCPP_INFO(getLogger(), "SrvKinematicsPlugin initializing");
 
   // Get Solver Parameters
   std::string kinematics_param_prefix = "robot_description_kinematics." + group_name;
@@ -84,10 +91,10 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
   // Get the dimension of the planning group
   dimension_ = joint_model_group_->getVariableCount();
-  RCLCPP_INFO_STREAM(LOGGER, "Dimension planning group '"
-                                 << group_name << "': " << dimension_
-                                 << ". Active Joints Models: " << joint_model_group_->getActiveJointModels().size()
-                                 << ". Mimic Joint Models: " << joint_model_group_->getMimicJointModels().size());
+  RCLCPP_INFO_STREAM(getLogger(), "Dimension planning group '"
+                                      << group_name << "': " << dimension_
+                                      << ". Active Joints Models: " << joint_model_group_->getActiveJointModels().size()
+                                      << ". Mimic Joint Models: " << joint_model_group_->getMimicJointModels().size());
 
   // Copy joint names
   for (std::size_t i = 0; i < joint_model_group_->getJointModels().size(); ++i)
@@ -97,7 +104,7 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
   if (debug)
   {
-    RCLCPP_ERROR(LOGGER, "tip links available:");
+    RCLCPP_ERROR(getLogger(), "tip links available:");
     std::copy(tip_frames_.begin(), tip_frames_.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
   }
 
@@ -106,7 +113,8 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   {
     if (!joint_model_group_->hasLinkModel(tip_frame))
     {
-      RCLCPP_ERROR(LOGGER, "Could not find tip name '%s' in joint group '%s'", tip_frame.c_str(), group_name.c_str());
+      RCLCPP_ERROR(getLogger(), "Could not find tip name '%s' in joint group '%s'", tip_frame.c_str(),
+                   group_name.c_str());
       return false;
     }
     ik_group_info_.link_names.push_back(tip_frame);
@@ -117,22 +125,22 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   robot_state_->setToDefaultValues();
 
   // Create the ROS2 service client
-  RCLCPP_DEBUG(LOGGER, "IK Service client topic : %s", params_.kinematics_solver_service_name.c_str());
+  RCLCPP_DEBUG(getLogger(), "IK Service client topic : %s", params_.kinematics_solver_service_name.c_str());
   ik_service_client_ = node_->create_client<moveit_msgs::srv::GetPositionIK>(params_.kinematics_solver_service_name);
 
   if (!ik_service_client_->wait_for_service(std::chrono::seconds(1)))
   {  // wait 0.1 seconds, blocking
-    RCLCPP_WARN_STREAM(LOGGER,
+    RCLCPP_WARN_STREAM(getLogger(),
                        "Unable to connect to ROS service client with name: " << ik_service_client_->get_service_name());
   }
   else
   {
-    RCLCPP_INFO_STREAM(LOGGER,
+    RCLCPP_INFO_STREAM(getLogger(),
                        "Service client started with ROS service name: " << ik_service_client_->get_service_name());
   }
 
   active_ = true;
-  RCLCPP_DEBUG(LOGGER, "ROS service-based kinematics solver initialized");
+  RCLCPP_DEBUG(getLogger(), "ROS service-based kinematics solver initialized");
   return true;
 }
 
@@ -140,12 +148,12 @@ bool SrvKinematicsPlugin::setRedundantJoints(const std::vector<unsigned int>& re
 {
   if (num_possible_redundant_joints_ < 0)
   {
-    RCLCPP_ERROR(LOGGER, "This group cannot have redundant joints");
+    RCLCPP_ERROR(getLogger(), "This group cannot have redundant joints");
     return false;
   }
   if (int(redundant_joints.size()) > num_possible_redundant_joints_)
   {
-    RCLCPP_ERROR(LOGGER, "This group can only have %d redundant joints", num_possible_redundant_joints_);
+    RCLCPP_ERROR(getLogger(), "This group can only have %d redundant joints", num_possible_redundant_joints_);
     return false;
   }
 
@@ -154,7 +162,7 @@ bool SrvKinematicsPlugin::setRedundantJoints(const std::vector<unsigned int>& re
 
 bool SrvKinematicsPlugin::isRedundantJoint(unsigned int index) const
 {
-  for (const unsigned int& redundant_joint_indice : redundant_joint_indices_)
+  for (unsigned int redundant_joint_indice : redundant_joint_indices_)
   {
     if (redundant_joint_indice == index)
       return true;
@@ -247,7 +255,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   // Check if active
   if (!active_)
   {
-    RCLCPP_ERROR(LOGGER, "kinematics not active");
+    RCLCPP_ERROR(getLogger(), "kinematics not active");
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -255,7 +263,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   // Check if seed state correct
   if (ik_seed_state.size() != dimension_)
   {
-    RCLCPP_ERROR_STREAM(LOGGER,
+    RCLCPP_ERROR_STREAM(getLogger(),
                         "Seed state must have size " << dimension_ << " instead of size " << ik_seed_state.size());
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
@@ -264,9 +272,9 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   // Check that we have the same number of poses as tips
   if (tip_frames_.size() != ik_poses.size())
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "Mismatched number of pose requests (" << ik_poses.size() << ") to tip frames ("
-                                                                       << tip_frames_.size()
-                                                                       << ") in searchPositionIK");
+    RCLCPP_ERROR_STREAM(getLogger(), "Mismatched number of pose requests (" << ik_poses.size() << ") to tip frames ("
+                                                                            << tip_frames_.size()
+                                                                            << ") in searchPositionIK");
     error_code.val = error_code.NO_IK_SOLUTION;
     return false;
   }
@@ -302,7 +310,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
     ik_srv->ik_request.ik_link_name = getTipFrames()[0];
   }
 
-  RCLCPP_DEBUG(LOGGER, "Calling service: %s", ik_service_client_->get_service_name());
+  RCLCPP_DEBUG(getLogger(), "Calling service: %s", ik_service_client_->get_service_name());
   auto result_future = ik_service_client_->async_send_request(ik_srv);
   const auto& response = result_future.get();
   if (rclcpp::spin_until_future_complete(node_, result_future) == rclcpp::FutureReturnCode::SUCCESS)
@@ -312,34 +320,35 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
     if (error_code.val != error_code.SUCCESS)
     {
       // TODO (JafarAbdi) Print the entire message for ROS2?
-      // RCLCPP_DEBUG("srv", "An IK that satisifes the constraints and is collision free could not be found."
+      // RCLCPP_DEBUG("srv", "An IK that satisfies the constraints and is collision free could not be found."
       //                                   << "\nRequest was: \n"
       //                                   << ik_srv.request.ik_request << "\nResponse was: \n"
       //                                   << ik_srv.response.solution);
       switch (error_code.val)
       {
         case moveit_msgs::msg::MoveItErrorCodes::FAILURE:
-          RCLCPP_ERROR(LOGGER, "Service failed with with error code: FAILURE");
+          RCLCPP_ERROR(getLogger(), "Service failed with with error code: FAILURE");
           break;
         case moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION:
-          RCLCPP_DEBUG(LOGGER, "Service failed with with error code: NO IK SOLUTION");
+          RCLCPP_DEBUG(getLogger(), "Service failed with with error code: NO IK SOLUTION");
           break;
         default:
-          RCLCPP_DEBUG_STREAM(LOGGER, "Service failed with with error code: " << error_code.val);
+          RCLCPP_DEBUG_STREAM(getLogger(), "Service failed with with error code: " << error_code.val);
       }
       return false;
     }
   }
   else
   {
-    RCLCPP_DEBUG_STREAM(LOGGER, "Service call failed to connect to service: " << ik_service_client_->get_service_name());
+    RCLCPP_DEBUG_STREAM(getLogger(),
+                        "Service call failed to connect to service: " << ik_service_client_->get_service_name());
     error_code.val = error_code.FAILURE;
     return false;
   }
   // Convert the robot state message to our robot_state representation
   if (!moveit::core::robotStateMsgToRobotState(response->solution, *robot_state_))
   {
-    RCLCPP_ERROR(LOGGER, "An error occurred converting received robot state message into internal robot state.");
+    RCLCPP_ERROR(getLogger(), "An error occurred converting received robot state message into internal robot state.");
     error_code.val = error_code.FAILURE;
     return false;
   }
@@ -350,7 +359,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
   // Run the solution callback (i.e. collision checker) if available
   if (solution_callback)
   {
-    RCLCPP_DEBUG(LOGGER, "Calling solution callback on IK solution");
+    RCLCPP_DEBUG(getLogger(), "Calling solution callback on IK solution");
 
     // hack: should use all poses, not just the 0th
     solution_callback(ik_poses[0], solution, error_code);
@@ -360,20 +369,20 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
       switch (error_code.val)
       {
         case moveit_msgs::msg::MoveItErrorCodes::FAILURE:
-          RCLCPP_ERROR(LOGGER, "IK solution callback failed with with error code: FAILURE");
+          RCLCPP_ERROR(getLogger(), "IK solution callback failed with with error code: FAILURE");
           break;
         case moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION:
-          RCLCPP_ERROR(LOGGER, "IK solution callback failed with with error code: "
-                               "NO IK SOLUTION");
+          RCLCPP_ERROR(getLogger(), "IK solution callback failed with with error code: "
+                                    "NO IK SOLUTION");
           break;
         default:
-          RCLCPP_ERROR_STREAM(LOGGER, "IK solution callback failed with with error code: " << error_code.val);
+          RCLCPP_ERROR_STREAM(getLogger(), "IK solution callback failed with with error code: " << error_code.val);
       }
       return false;
     }
   }
 
-  RCLCPP_INFO(LOGGER, "IK Solver Succeeded!");
+  RCLCPP_INFO(getLogger(), "IK Solver Succeeded!");
   return true;
 }
 
@@ -383,17 +392,17 @@ bool SrvKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_nam
 {
   if (!active_)
   {
-    RCLCPP_ERROR(LOGGER, "kinematics not active");
+    RCLCPP_ERROR(getLogger(), "kinematics not active");
     return false;
   }
   poses.resize(link_names.size());
   if (joint_angles.size() != dimension_)
   {
-    RCLCPP_ERROR(LOGGER, "Joint angles vector must have size: %d", dimension_);
+    RCLCPP_ERROR(getLogger(), "Joint angles vector must have size: %d", dimension_);
     return false;
   }
 
-  RCLCPP_ERROR(LOGGER, "Forward kinematics not implemented");
+  RCLCPP_ERROR(getLogger(), "Forward kinematics not implemented");
 
   return false;
 }

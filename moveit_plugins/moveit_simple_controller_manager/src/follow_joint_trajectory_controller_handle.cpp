@@ -35,7 +35,7 @@
 
 /* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
 
-#include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.h>
+#include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.hpp>
 
 using namespace std::placeholders;
 
@@ -135,14 +135,13 @@ inline double& variable<ACCELERATION>(control_msgs::msg::JointTolerance& msg)
   return msg.acceleration;
 }
 
-static const std::map<ToleranceVariables, std::string> VAR_NAME = { { POSITION, "position" },
-                                                                    { VELOCITY, "velocity" },
-                                                                    { ACCELERATION, "acceleration" } };
-static const std::map<ToleranceVariables, decltype(&variable<POSITION>)> VAR_ACCESS = {
-  { POSITION, &variable<POSITION> },
-  { VELOCITY, &variable<VELOCITY> },
-  { ACCELERATION, &variable<ACCELERATION> }
-};
+const std::map<ToleranceVariables, std::string> VAR_NAME = { { POSITION, "position" },
+                                                             { VELOCITY, "velocity" },
+                                                             { ACCELERATION, "acceleration" } };
+const std::map<ToleranceVariables, decltype(&variable<POSITION>)> VAR_ACCESS = { { POSITION, &variable<POSITION> },
+                                                                                 { VELOCITY, &variable<VELOCITY> },
+                                                                                 { ACCELERATION,
+                                                                                   &variable<ACCELERATION> } };
 
 const char* errorCodeToMessage(int error_code)
 {

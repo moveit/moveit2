@@ -2,6 +2,36 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Contributors: Tom Noble
+
+2.11.0 (2024-09-16)
+-------------------
+
+2.10.0 (2024-06-13)
+-------------------
+* Apply clang-tidy fixes
+* Unify log names (`#2720 <https://github.com/moveit/moveit2/issues/2720>`_)
+  Co-authored-by: Abishalini Sivaraman <abi.gpuram@gmail.com>
+* CMake format and lint in pre-commit (`#2683 <https://github.com/moveit/moveit2/issues/2683>`_)
+* Contributors: Robert Haschke, Sebastian Jahr, Tyler Weaver
+
+2.9.0 (2024-01-09)
+------------------
+* Node logging for the rest of MoveIt (`#2599 <https://github.com/ros-planning/moveit2/issues/2599>`_)
+* fix typos in compute_default_collisions.cpp (`#2461 <https://github.com/ros-planning/moveit2/issues/2461>`_)
+  * fix typos in compute_default_collisions.cpp
+  * Fix typo
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@tuta.io>
+* Merge branch 'main' into dependabot/github_actions/SonarSource/sonarcloud-github-c-cpp-2
+* Contributors: Sebastian Jahr, Surav Shrestha, Tyler Weaver
+
+2.8.0 (2023-09-10)
+------------------
+
 2.7.4 (2023-05-18)
 ------------------
 

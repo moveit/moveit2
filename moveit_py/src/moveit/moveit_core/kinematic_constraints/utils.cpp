@@ -34,20 +34,20 @@
 
 /* Author: Peter David Fagan */
 
-#include "utils.h"
+#include "utils.hpp"
 #include <rclcpp/rclcpp.hpp>
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
-#include <moveit/kinematic_constraints/utils.h>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
 
 namespace moveit_py
 {
 namespace bind_kinematic_constraints
 {
-moveit_msgs::msg::Constraints construct_link_constraint(const std::string& link_name, const std::string& source_frame,
-                                                        std::optional<std::vector<double>> cartesian_position,
-                                                        std::optional<double> cartesian_position_tolerance,
-                                                        std::optional<std::vector<double>> orientation,
-                                                        std::optional<double> orientation_tolerance)
+moveit_msgs::msg::Constraints constructLinkConstraint(const std::string& link_name, const std::string& source_frame,
+                                                      std::optional<std::vector<double>> cartesian_position,
+                                                      std::optional<double> cartesian_position_tolerance,
+                                                      std::optional<std::vector<double>> orientation,
+                                                      std::optional<double> orientation_tolerance)
 {
   // check that link cartesian and/or orientation constraints are specified
   if (!cartesian_position && !orientation)
@@ -119,9 +119,9 @@ moveit_msgs::msg::Constraints construct_link_constraint(const std::string& link_
   return constraints_cpp;
 }
 
-moveit_msgs::msg::Constraints construct_joint_constraint(moveit::core::RobotState& robot_state,
-                                                         moveit::core::JointModelGroup* joint_model_group,
-                                                         double tolerance)
+moveit_msgs::msg::Constraints constructJointConstraint(moveit::core::RobotState& robot_state,
+                                                       moveit::core::JointModelGroup* joint_model_group,
+                                                       double tolerance)
 {
   // generate joint constraint message
   moveit_msgs::msg::Constraints joint_constraints =
@@ -130,8 +130,8 @@ moveit_msgs::msg::Constraints construct_joint_constraint(moveit::core::RobotStat
   return joint_constraints;
 }
 
-moveit_msgs::msg::Constraints construct_constraints_from_node(const std::shared_ptr<rclcpp::Node>& node_name,
-                                                              const std::string& ns)
+moveit_msgs::msg::Constraints constructConstraintsFromNode(const std::shared_ptr<rclcpp::Node>& node_name,
+                                                           const std::string& ns)
 {
   // construct constraint message
   moveit_msgs::msg::Constraints constraints_cpp;
@@ -140,18 +140,18 @@ moveit_msgs::msg::Constraints construct_constraints_from_node(const std::shared_
   return constraints_cpp;
 }
 
-void init_kinematic_constraints(py::module& m)
+void initKinematicConstraints(py::module& m)
 {
   py::module kinematic_constraints = m.def_submodule("kinematic_constraints");
 
-  kinematic_constraints.def("construct_link_constraint", &construct_link_constraint, py::arg("link_name"),
+  kinematic_constraints.def("construct_link_constraint", &constructLinkConstraint, py::arg("link_name"),
                             py::arg("source_frame"), py::arg("cartesian_position") = nullptr,
                             py::arg("cartesian_position_tolerance") = nullptr, py::arg("orientation") = nullptr,
                             py::arg("orientation_tolerance") = nullptr, "Construct a link constraint message");
-  kinematic_constraints.def("construct_joint_constraint", &construct_joint_constraint, py::arg("robot_state"),
+  kinematic_constraints.def("construct_joint_constraint", &constructJointConstraint, py::arg("robot_state"),
                             py::arg("joint_model_group"), py::arg("tolerance") = 0.01,
                             "Construct a joint constraint message");
-  kinematic_constraints.def("construct_constraints_from_node", &construct_constraints_from_node, py::arg("node_name"),
+  kinematic_constraints.def("construct_constraints_from_node", &constructConstraintsFromNode, py::arg("node_name"),
                             py::arg("ns"), "Construct a constraint message from a node");
 }
 

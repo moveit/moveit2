@@ -34,10 +34,11 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 #include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/utilities.hpp>
+#include <moveit/utils/logger.hpp>
 
 static const std::string ROBOT_DESCRIPTION = "robot_description";
 
@@ -47,6 +48,7 @@ int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("print_model_info_to_console");
+  moveit::setNodeLoggerName(node->get_name());
 
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node);

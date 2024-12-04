@@ -32,28 +32,35 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/joint_limits_container.h>
+#include <pilz_industrial_motion_planner/joint_limits_container.hpp>
 #include <cmath>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <stdexcept>
+#include <moveit/utils/logger.hpp>
 
 namespace pilz_industrial_motion_planner
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.pilz_industrial_motion_planner.joint_limits_container");
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.planners.pilz.joint_limits_container");
+}
+}  // namespace
 bool JointLimitsContainer::addLimit(const std::string& joint_name,
                                     pilz_industrial_motion_planner::JointLimit joint_limit)
 {
   if (joint_limit.has_deceleration_limits && joint_limit.max_deceleration >= 0)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "joint_limit.max_deceleration MUST be negative!");
+    RCLCPP_ERROR_STREAM(getLogger(), "joint_limit.max_deceleration MUST be negative!");
     return false;
   }
   const auto& insertion_result{ container_.insert(std::pair<std::string, JointLimit>(joint_name, joint_limit)) };
   if (!insertion_result.second)
   {
-    RCLCPP_ERROR_STREAM(LOGGER, "joint_limit for joint " << joint_name << " already contained.");
+    RCLCPP_ERROR_STREAM(getLogger(), "joint_limit for joint " << joint_name << " already contained.");
     return false;
   }
   return true;
@@ -111,26 +118,26 @@ std::map<std::string, JointLimit>::const_iterator JointLimitsContainer::end() co
 
 bool JointLimitsContainer::verifyPositionLimit(const std::string& joint_name, double joint_position) const
 {
-  return (!(hasLimit(joint_name) && getLimit(joint_name).has_position_limits &&
-            (joint_position < getLimit(joint_name).min_position || joint_position > getLimit(joint_name).max_position)));
+  return !hasLimit(joint_name) || !getLimit(joint_name).has_position_limits ||
+         (joint_position >= getLimit(joint_name).min_position && joint_position <= getLimit(joint_name).max_position);
 }
 
 bool JointLimitsContainer::verifyVelocityLimit(const std::string& joint_name, double joint_velocity) const
 {
-  return (!(hasLimit(joint_name) && getLimit(joint_name).has_velocity_limits &&
-            fabs(joint_velocity) > getLimit(joint_name).max_velocity));
+  return !hasLimit(joint_name) || !getLimit(joint_name).has_velocity_limits ||
+         fabs(joint_velocity) <= getLimit(joint_name).max_velocity;
 }
 
 bool JointLimitsContainer::verifyAccelerationLimit(const std::string& joint_name, double joint_acceleration) const
 {
-  return (!(hasLimit(joint_name) && getLimit(joint_name).has_acceleration_limits &&
-            fabs(joint_acceleration) > getLimit(joint_name).max_acceleration));
+  return !hasLimit(joint_name) || !getLimit(joint_name).has_acceleration_limits ||
+         fabs(joint_acceleration) <= getLimit(joint_name).max_acceleration;
 }
 
 bool JointLimitsContainer::verifyDecelerationLimit(const std::string& joint_name, double joint_acceleration) const
 {
-  return (!(hasLimit(joint_name) && getLimit(joint_name).has_deceleration_limits &&
-            fabs(joint_acceleration) > -1.0 * getLimit(joint_name).max_deceleration));
+  return !hasLimit(joint_name) || !getLimit(joint_name).has_deceleration_limits ||
+         fabs(joint_acceleration) <= -1.0 * getLimit(joint_name).max_deceleration;
 }
 
 void JointLimitsContainer::updateCommonLimit(const JointLimit& joint_limit, JointLimit& common_limit)

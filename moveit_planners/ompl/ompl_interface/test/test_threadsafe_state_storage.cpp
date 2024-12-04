@@ -38,11 +38,9 @@ This test checks if a state can be set in TSSafeStateStorage and correctly retri
 The skeleton of this test was taken from test_state_validity_checker.cpp by Jeroen De Maeyer.
 */
 
-#include "load_test_robot.h"
-#include <moveit/ompl_interface/detail/threadsafe_state_storage.h>
+#include "load_test_robot.hpp"
+#include <moveit/ompl_interface/detail/threadsafe_state_storage.hpp>
 #include <gtest/gtest.h>
-
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.ompl_planning.test.test_thread_safe_storage");
 
 /** \brief Generic implementation of the tests that can be executed on different robots. **/
 class TestThreadSafeStateStorage : public ompl_interface_testing::LoadTestRobot, public testing::Test
@@ -68,10 +66,10 @@ public:
     auto robot_state_stored = tss.getStateStorage();
 
     // Check if robot_state_stored's joint angles matches with what we set
-    for (auto const& joint_name : robot_state_->getVariableNames())
+    for (const auto& joint_name : robot_state_->getVariableNames())
     {
-      auto const expected_value = robot_state_->getVariablePosition(joint_name);
-      auto const actual_value = robot_state_stored->getVariablePosition(joint_name);
+      const auto expected_value = robot_state_->getVariablePosition(joint_name);
+      const auto actual_value = robot_state_stored->getVariablePosition(joint_name);
       EXPECT_EQ(actual_value, expected_value) << "Expecting joint value for " << joint_name << " to match.";
     }
   }

@@ -34,17 +34,44 @@
 
 /* Author: Peter David Fagan */
 
-#include "planning_scene.h"
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
+#include "planning_scene.hpp"
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
 #include <pybind11/operators.h>
+
+#include <fstream>
+
+namespace
+{
+bool saveGeometryToFile(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
+                        const std::string& file_path_and_name)
+{
+  std::ofstream file(file_path_and_name);
+  if (!file.is_open())
+  {
+    return false;
+  }
+  planning_scene->saveGeometryToStream(file);
+  file.close();
+  return true;
+}
+
+bool loadGeometryFromFile(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
+                          const std::string& file_path_and_name)
+{
+  std::ifstream file(file_path_and_name);
+  planning_scene->loadGeometryFromStream(file);
+  file.close();
+  return true;
+}
+}  // namespace
 
 namespace moveit_py
 {
 namespace bind_planning_scene
 {
-void apply_collision_object(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
-                            moveit_msgs::msg::CollisionObject& collision_object_msg,
-                            std::optional<moveit_msgs::msg::ObjectColor> color_msg)
+void applyCollisionObject(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
+                          moveit_msgs::msg::CollisionObject& collision_object_msg,
+                          std::optional<moveit_msgs::msg::ObjectColor> color_msg)
 {
   // apply collision object
   planning_scene->processCollisionObjectMsg(collision_object_msg);
@@ -57,24 +84,26 @@ void apply_collision_object(std::shared_ptr<planning_scene::PlanningScene>& plan
   }
 }
 
-Eigen::MatrixXd get_frame_transform(std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
-                                    const std::string& id)
+Eigen::MatrixXd getFrameTransform(std::shared_ptr<planning_scene::PlanningScene>& planning_scene, const std::string& id)
 {
   auto transformation = planning_scene->getFrameTransform(id);
   return transformation.matrix();
 }
 
-moveit_msgs::msg::PlanningScene get_planning_scene_msg(std::shared_ptr<planning_scene::PlanningScene>& planning_scene)
+moveit_msgs::msg::PlanningScene getPlanningSceneMsg(std::shared_ptr<planning_scene::PlanningScene>& planning_scene)
 {
   moveit_msgs::msg::PlanningScene planning_scene_msg;
   planning_scene->getPlanningSceneMsg(planning_scene_msg);
   return planning_scene_msg;
 }
 
-void init_planning_scene(py::module& m)
+void initPlanningScene(py::module& m)
 {
   py::module planning_scene = m.def_submodule("planning_scene");
 
+// Remove once checkCollisionUnpadded is removed
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   py::class_<planning_scene::PlanningScene, std::shared_ptr<planning_scene::PlanningScene>>(planning_scene,
                                                                                             "PlanningScene",
                                                                                             R"(
@@ -108,11 +137,13 @@ void init_planning_scene(py::module& m)
                     :py:class:`moveit_py.core.RobotState`: The current state of the robot.
                     )")
 
-      .def_property("planning_scene_message", &moveit_py::bind_planning_scene::get_planning_scene_msg, nullptr,
+      .def_property("planning_scene_message", &moveit_py::bind_planning_scene::getPlanningSceneMsg, nullptr,
                     py::return_value_policy::move)
 
       .def_property("transforms", py::overload_cast<>(&planning_scene::PlanningScene::getTransforms), nullptr)
-
+      .def_property("allowed_collision_matrix", &planning_scene::PlanningScene::getAllowedCollisionMatrix,
+                    &planning_scene::PlanningScene::setAllowedCollisionMatrix,
+                    py::return_value_policy::reference_internal)
       // methods
       .def("__copy__",
            [](const planning_scene::PlanningScene* self) {
@@ -150,7 +181,7 @@ void init_planning_scene(py::module& m)
                bool: True if the transform is known, false otherwise.
            )")
 
-      .def("get_frame_transform", &moveit_py::bind_planning_scene::get_frame_transform, py::arg("frame_id"),
+      .def("get_frame_transform", &moveit_py::bind_planning_scene::getFrameTransform, py::arg("frame_id"),
            R"(
            Get the transform corresponding to the frame id.
            This will be known if id is a link name, an attached body id or a collision object. Return identity when no transform is available.
@@ -171,7 +202,7 @@ void init_planning_scene(py::module& m)
                msg (:py:class:`moveit_msgs.msg.PlanningSceneWorld`): The planning scene world message.
            )")
 
-      .def("apply_collision_object", &moveit_py::bind_planning_scene::apply_collision_object,
+      .def("apply_collision_object", &moveit_py::bind_planning_scene::applyCollisionObject,
            py::arg("collision_object_msg"), py::arg("color_msg") = nullptr,
            R"(
            Apply a collision object to the planning scene.
@@ -332,7 +363,7 @@ void init_planning_scene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
+      // DEPRECATED! Use check_collision instead
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&>(
                &planning_scene::PlanningScene::checkCollisionUnpadded),
@@ -347,7 +378,7 @@ void init_planning_scene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
+      // DEPRECATED! Use check_collision instead
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
                              moveit::core::RobotState&>(&planning_scene::PlanningScene::checkCollisionUnpadded,
@@ -364,7 +395,7 @@ void init_planning_scene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
+      // DEPRECATED! Use check_collision instead
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
                              moveit::core::RobotState&, const collision_detection::AllowedCollisionMatrix&>(
@@ -382,7 +413,6 @@ void init_planning_scene(py::module& m)
 	   Returns:
                bool: true if state is in collision otherwise false.
            )")
-
       .def("check_self_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&>(
                &planning_scene::PlanningScene::checkSelfCollision),
@@ -430,7 +460,30 @@ void init_planning_scene(py::module& m)
 
 	   Returns:
                bool: true if state is in self collision otherwise false.
+           )")
+
+      .def("save_geometry_to_file", &saveGeometryToFile, py::arg("file_path_and_name"),
+           R"(
+           Save the CollisionObjects in the PlanningScene to a file
+
+     Args:
+               file_path_and_name (str): The file to save the CollisionObjects to.
+
+     Returns:
+               bool: true if save to file was successful otherwise false.
+           )")
+
+      .def("load_geometry_from_file", &loadGeometryFromFile, py::arg("file_path_and_name"),
+           R"(
+           Load the CollisionObjects from a file to the PlanningScene
+
+     Args:
+               file_path_and_name (str): The file to load the CollisionObjects from.
+
+     Returns:
+               bool: true if load from file was successful otherwise false.
            )");
+#pragma GCC diagnostic pop  // TODO remove once checkCollisionUnpadded is removed
 }
 }  // namespace bind_planning_scene
 }  // namespace moveit_py

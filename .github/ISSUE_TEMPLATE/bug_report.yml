@@ -1,0 +1,100 @@
+name: Bug report
+description: Create a report to help us improve
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: Overview of your issue here.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: distro
+    attributes:
+      label: ROS Distro
+      # Keep this updated when new distros come out!
+      options:
+        - Humble
+        - Iron
+        - Jazzy
+        - Rolling
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS and version
+      placeholder: e.g. Ubuntu 22.04
+    validations:
+      required: true
+
+  - type: dropdown
+    id: build-type
+    attributes:
+      label: Source or binary build?
+      options:
+        - Source
+        - Binary
+    validations:
+      required: true
+
+  - type: input
+    id: binary-version
+    attributes:
+      label: If binary, which release version?
+    validations:
+      required: false
+
+  - type: input
+    id: source-version
+    attributes:
+      label: If source, which branch?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: middleware
+    attributes:
+      label: Which RMW are you using?
+      options:
+        - FastRTPS
+        - CycloneDDS
+
+  - type: markdown
+    attributes:
+      value: "## If you're on Humble and responded FastRTPS to the above question, try CycloneDDS first!"
+
+  - type: textarea
+    id: repro-steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: Tell us how to reproduce this issue. Attempt to provide a working demo, perhaps using Docker.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: Tell us what should happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: Tell us what happens instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Backtrace or Console output
+      placeholder: Use a GitHub Gist to copy-paste the console output or segfault backtrace using gdb.
+    validations:
+      required: false

@@ -34,8 +34,8 @@
 
 /* Author: Robert Haschke */
 
-#include <moveit/motion_planning_rviz_plugin/motion_planning_param_widget.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_param_widget.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <rviz_common/properties/int_property.hpp>
 #include <rviz_common/properties/float_property.hpp>
 #include <rviz_common/properties/string_property.hpp>
@@ -44,7 +44,6 @@ namespace mpi = moveit::planning_interface;
 
 namespace moveit_rviz_plugin
 {
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_param_widget");
 
 MotionPlanningParamWidget::MotionPlanningParamWidget(QWidget* parent)
   : rviz_common::properties::PropertyTreeWidget(parent)
@@ -73,14 +72,14 @@ void MotionPlanningParamWidget::setGroupName(const std::string& group_name)
   property_tree_model_ = nullptr;
 }
 
-bool try_lexical_convert(const QString& value, long& lvalue)
+bool tryLexicalConvert(const QString& value, long& lvalue)
 {
   bool ok;
   lvalue = value.toLong(&ok);
   return ok;
 }
 
-bool try_lexical_convert(const QString& value, double& dvalue)
+bool tryLexicalConvert(const QString& value, double& dvalue)
 {
   bool ok;
   dvalue = value.toDouble(&ok);
@@ -101,11 +100,11 @@ rviz_common::properties::Property* MotionPlanningParamWidget::createPropertyTree
     long value_long;
     double value_double;
 
-    if (try_lexical_convert(value, value_long))
+    if (tryLexicalConvert(value, value_long))
     {
       new rviz_common::properties::IntProperty(key, value_long, QString(), root, SLOT(changedValue()), this);
     }
-    else if (try_lexical_convert(value, value_double))
+    else if (tryLexicalConvert(value, value_double))
     {
       new rviz_common::properties::FloatProperty(key, value_double, QString(), root, SLOT(changedValue()), this);
     }

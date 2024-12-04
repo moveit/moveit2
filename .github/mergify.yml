@@ -1,22 +1,4 @@
 pull_request_rules:
-  - name: backport to foxy at reviewers discretion
-    conditions:
-      - base=main
-      - "label=backport-foxy"
-    actions:
-      backport:
-        branches:
-          - foxy
-
-  - name: backport to galactic at reviewers discretion
-    conditions:
-      - base=main
-      - "label=backport-galactic"
-    actions:
-      backport:
-        branches:
-          - galactic
-
   - name: backport to humble at reviewers discretion
     conditions:
       - base=main
@@ -34,6 +16,15 @@ pull_request_rules:
       backport:
         branches:
           - iron
+
+  - name: backport to jazzy at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-jazzy"
+    actions:
+      backport:
+        branches:
+          - jazzy
 
   - name: ask to resolve conflict
     conditions:
