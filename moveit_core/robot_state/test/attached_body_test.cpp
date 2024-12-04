@@ -38,7 +38,7 @@
 #include <moveit/robot_state/attached_body.hpp>
 #include <moveit/robot_model/robot_model.hpp>
 #include <moveit/robot_state/robot_state.hpp>
-#include <urdf_parser/urdf_parser.hpp>
+#include <urdf_parser/urdf_parser.h>
 #include <gtest/gtest.h>
 
 class SingleLinkRobot : public testing::Test
@@ -92,60 +92,55 @@ public:
     robot_model_ = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
   }
 
-virtual void TearDown() override {
-}
+  virtual void TearDown() override
+  {
+  }
 
 protected:
   moveit::core::RobotModelConstPtr robot_model_;
 };
 
-class SingleAttachedBody: public SingleLinkRobot {
-  public:
-    
-    virtual void SetUp() override {
-      const moveit::core::LinkModel* link = robot_model_->getLinkModel("link");
-      std::string name = "root_body";
-      Eigen::Isometry3d pose;
-      pose = Eigen::Translation3d(1, 2, 3);
-      auto box = std::make_shared<shapes::Box>(0.1, 0.2, 0.3);
-      std::vector<shapes::ShapeConstPtr> shapes = {box};
-      EigenSTL::vector_Isometry3d shape_poses;
-      Eigen::Isometry3d shape_pose;
-      shape_pose = Eigen::Translation3d(4, 5, 6);
-      shape_poses.push_back(shape_pose);
-      std::set<std::string> touch_links = {"link"};
-      trajectory_msgs::msg::JointTrajectory detach_posture;
-      detach_posture.joint_names.push_back("joint");
-      trajectory_msgs::msg::JointTrajectoryPoint p;
-      p.positions.push_back(0.1);
-      detach_posture.points.push_back(p);
-      Eigen::Isometry3d subframe_pose;
-      subframe_pose = Eigen::Translation3d(7, 8, 9);
-      moveit::core::FixedTransformsMap subframes{{"subframe", subframe_pose}};
-      root_body_ = std::make_shared<moveit::core::AttachedBody>(
-        link,
-        name,
-        pose,
-        shapes,
-        shape_poses,
-        touch_links,
-        detach_posture,
-        subframes
-      );
-    }
+class SingleAttachedBody : public SingleLinkRobot
+{
+public:
+  virtual void SetUp() override
+  {
+    const moveit::core::LinkModel* link = robot_model_->getLinkModel("link");
+    std::string name = "root_body";
+    Eigen::Isometry3d pose;
+    pose = Eigen::Translation3d(1, 2, 3);
+    auto box = std::make_shared<shapes::Box>(0.1, 0.2, 0.3);
+    std::vector<shapes::ShapeConstPtr> shapes = { box };
+    EigenSTL::vector_Isometry3d shape_poses;
+    Eigen::Isometry3d shape_pose;
+    shape_pose = Eigen::Translation3d(4, 5, 6);
+    shape_poses.push_back(shape_pose);
+    std::set<std::string> touch_links = { "link" };
+    trajectory_msgs::msg::JointTrajectory detach_posture;
+    detach_posture.joint_names.push_back("joint");
+    trajectory_msgs::msg::JointTrajectoryPoint p;
+    p.positions.push_back(0.1);
+    detach_posture.points.push_back(p);
+    Eigen::Isometry3d subframe_pose;
+    subframe_pose = Eigen::Translation3d(7, 8, 9);
+    moveit::core::FixedTransformsMap subframes{ { "subframe", subframe_pose } };
+    root_body_ = std::make_shared<moveit::core::AttachedBody>(link, name, pose, shapes, shape_poses, touch_links,
+                                                              detach_posture, subframes);
+  }
 
-    virtual void TearDown() override {
+  virtual void TearDown() override
+  {
+  }
 
-    }
-  
-  protected:
-    std::shared_ptr<moveit::core::AttachedBody> root_body_;
+protected:
+  std::shared_ptr<moveit::core::AttachedBody> root_body_;
 };
 
 // Verifies that a single body attached to a link works as intended
 
-TEST_F(SingleAttachedBody, RootBodyHasCorrecAttachedLink) {
-    ASSERT_EQ(root_body_->getName(), "root_body");
+TEST_F(SingleAttachedBody, RootBodyHasCorrecAttachedLink)
+{
+  ASSERT_EQ(root_body_->getName(), "root_body");
 }
 
 int main(int argc, char** argv)
