@@ -44,7 +44,7 @@
 class SingleLinkRobot : public ::testing::Test
 {
 public:
-  virtual void SetUp() override
+  SingleLinkRobot()
   {
     static const std::string URDF_XML = R"(
       <?xml version="1.0" ?>
@@ -90,9 +90,8 @@ protected:
 class SingleAttachedBody : public SingleLinkRobot
 {
 public:
-  virtual void SetUp() override
+  SingleAttachedBody()
   {
-    SingleLinkRobot::SetUp();  // Is this necessary?
     const moveit::core::LinkModel* link = robot_model_->getLinkModel("link");
     std::string name = "root_body";
     Eigen::Isometry3d pose;
