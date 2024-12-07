@@ -36,21 +36,21 @@
 
 // Modified by Pilz GmbH & Co. KG
 
-#include <pilz_industrial_motion_planner/move_group_sequence_action.h>
+#include <pilz_industrial_motion_planner/move_group_sequence_action.hpp>
 
 #include <time.h>
 
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/plan_execution/plan_execution.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/plan_execution/plan_execution.hpp>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/utils/logger.hpp>
 
-#include <pilz_industrial_motion_planner/command_list_manager.h>
-#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.h>
+#include <pilz_industrial_motion_planner/command_list_manager.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generation_exceptions.hpp>
 
 namespace pilz_industrial_motion_planner
 {
@@ -72,8 +72,10 @@ void MoveGroupSequenceAction::initialize()
 {
   // start the move action server
   RCLCPP_INFO_STREAM(getLogger(), "initialize move group sequence action");
+  // Use MutuallyExclusiveCallbackGroup to prevent race conditions in callbacks.
+  // See: https://github.com/moveit/moveit2/issues/3117 for details.
   action_callback_group_ =
-      context_->moveit_cpp_->getNode()->create_callback_group(rclcpp::CallbackGroupType::Reentrant);
+      context_->moveit_cpp_->getNode()->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   move_action_server_ = rclcpp_action::create_server<moveit_msgs::action::MoveGroupSequence>(
       context_->moveit_cpp_->getNode(), "sequence_move_group",
       [](const rclcpp_action::GoalUUID& /* unused */,

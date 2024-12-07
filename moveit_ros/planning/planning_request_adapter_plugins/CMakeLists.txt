@@ -14,3 +14,14 @@ set_target_properties(moveit_default_planning_request_adapter_plugins
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 ament_target_dependencies(moveit_default_planning_request_adapter_plugins
                           moveit_core rclcpp pluginlib)
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_gmock REQUIRED)
+
+  ament_add_gmock(test_check_start_state_bounds
+                  test/test_check_start_state_bounds.cpp)
+  target_link_libraries(test_check_start_state_bounds moveit_planning_pipeline
+                        moveit_default_planning_request_adapter_plugins)
+
+endif()

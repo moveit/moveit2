@@ -32,11 +32,11 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <chomp_interface/chomp_planning_context.h>
-#include <moveit/collision_distance_field/collision_detector_allocator_hybrid.h>
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model/robot_model.h>
+#include <chomp_interface/chomp_planning_context.hpp>
+#include <moveit/collision_distance_field/collision_detector_allocator_hybrid.hpp>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_model/robot_model.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_list_macros.hpp>

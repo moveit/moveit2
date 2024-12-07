@@ -34,11 +34,11 @@
 
 /* Author: Peter David Fagan */
 
-#include "robot_state.h"
+#include "robot_state.hpp"
 #include <pybind11/stl.h>
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 
 namespace moveit_py
 {

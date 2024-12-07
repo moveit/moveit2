@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/planner_logic_plugins/single_plan_execution.h>
+#include <moveit/planner_logic_plugins/single_plan_execution.hpp>
 
 namespace moveit::hybrid_planning
 {

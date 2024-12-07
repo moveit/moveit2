@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan, E. Gil Jones */
 
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>

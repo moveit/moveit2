@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.h>
+#include <moveit/constraint_sampler_manager_loader/constraint_sampler_manager_loader.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <boost/tokenizer.hpp>
 #include <rclcpp/logger.hpp>

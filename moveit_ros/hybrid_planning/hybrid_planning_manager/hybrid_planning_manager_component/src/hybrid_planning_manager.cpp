@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/hybrid_planning_manager/hybrid_planning_manager.h>
-#include <moveit/hybrid_planning_manager/hybrid_planning_events.h>
+#include <moveit/hybrid_planning_manager/hybrid_planning_manager.hpp>
+#include <moveit/hybrid_planning_manager/hybrid_planning_events.hpp>
 #include <hp_manager_parameters.hpp>
 #include <moveit/utils/logger.hpp>
 

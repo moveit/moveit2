@@ -37,7 +37,7 @@
  * that is the case, a warning is created but the planning process is not interrupted.
  */
 
-#include <moveit/planning_interface/planning_request_adapter.h>
+#include <moveit/planning_interface/planning_request_adapter.hpp>
 #include <class_loader/class_loader.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>

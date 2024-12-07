@@ -34,7 +34,7 @@
 
 /* Author: Julius Kammerl */
 
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
+#include <moveit/rviz_plugin_render_tools/octomap_render.hpp>
 
 #include <octomap_msgs/msg/octomap.hpp>
 #include <octomap/octomap.h>

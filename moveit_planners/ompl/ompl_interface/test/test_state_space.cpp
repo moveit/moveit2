@@ -36,14 +36,14 @@
 
 #include <limits>
 
-#include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
-#include <moveit/ompl_interface/parameterization/work_space/pose_model_state_space.h>
+#include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.hpp>
+#include <moveit/ompl_interface/parameterization/work_space/pose_model_state_space.hpp>
 
 #include <urdf_parser/urdf_parser.h>
 
 #include <ompl/util/Exception.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <moveit/utils/logger.hpp>
 #include <gtest/gtest.h>
 #include <fstream>

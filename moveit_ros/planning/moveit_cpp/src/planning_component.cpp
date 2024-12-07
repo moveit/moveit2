@@ -36,11 +36,11 @@
 
 #include <stdexcept>
 
-#include <moveit/moveit_cpp/planning_component.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/moveit_cpp/planning_component.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <thread>
 #include <moveit/utils/logger.hpp>
 

@@ -34,12 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#include "state_validation_service_capability.h"
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/collision_detection/collision_tools.h>
-#include <moveit/move_group/capability_names.h>
+#include "state_validation_service_capability.hpp"
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/collision_detection/collision_tools.hpp>
+#include <moveit/move_group/capability_names.hpp>
 
 namespace move_group
 {

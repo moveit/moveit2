@@ -2,6 +2,11 @@
 Changelog for package moveit_planners
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* have moveit_planners depend on chomp (`#3015 <https://github.com/ros-planning/moveit2/issues/3015>`_)
+* Contributors: Michael Ferguson
+
 2.11.0 (2024-09-16)
 -------------------
 

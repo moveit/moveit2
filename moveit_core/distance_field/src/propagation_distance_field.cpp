@@ -34,7 +34,7 @@
 
 /* Author: Mrinal Kalakrishnan, Ken Anderson */
 
-#include <moveit/distance_field/propagation_distance_field.h>
+#include <moveit/distance_field/propagation_distance_field.hpp>
 #include <visualization_msgs/msg/marker.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>

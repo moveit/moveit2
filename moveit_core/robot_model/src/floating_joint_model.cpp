@@ -39,7 +39,7 @@
 #include <Eigen/Geometry>
 #include <geometric_shapes/check_isometry.h>
 #include <limits>
-#include <moveit/robot_model/floating_joint_model.h>
+#include <moveit/robot_model/floating_joint_model.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <moveit/utils/logger.hpp>

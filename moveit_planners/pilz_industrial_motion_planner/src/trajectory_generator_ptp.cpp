@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
-#include <moveit/robot_state/conversions.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_ptp.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <rclcpp/duration.hpp>

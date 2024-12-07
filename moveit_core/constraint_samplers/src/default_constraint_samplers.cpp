@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/constraint_samplers/default_constraint_samplers.h>
+#include <moveit/constraint_samplers/default_constraint_samplers.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <cassert>

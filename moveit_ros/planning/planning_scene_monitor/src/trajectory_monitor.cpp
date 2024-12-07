@@ -34,9 +34,9 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene_monitor/trajectory_monitor.h>
+#include <moveit/planning_scene_monitor/trajectory_monitor.hpp>
 #include <moveit/planning_scene_monitor/trajectory_monitor_middleware_handle.hpp>
-#include <moveit/trajectory_processing/trajectory_tools.h>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
 #include <limits>
 #include <memory>
 #include <moveit/utils/logger.hpp>

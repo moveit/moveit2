@@ -37,7 +37,7 @@
 
 #include <moveit_setup_srdf_plugins/srdf_step.hpp>
 #include <moveit_setup_srdf_plugins/group_meta_config.hpp>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 #include <vector>
 
 namespace moveit_setup

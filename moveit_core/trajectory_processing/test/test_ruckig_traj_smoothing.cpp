@@ -34,9 +34,9 @@
 /* Author: Andy Zelenak */
 
 #include <gtest/gtest.h>
-#include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/trajectory_processing/ruckig_traj_smoothing.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 namespace
 {

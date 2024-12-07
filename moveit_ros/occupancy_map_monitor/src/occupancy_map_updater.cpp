@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan, Jon Binney */
 
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
+#include <moveit/occupancy_map_monitor/occupancy_map_updater.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

@@ -35,6 +35,6 @@
 /* Author: Ioan Sucan */
 
 #include <class_loader/class_loader.hpp>
-#include <moveit/motion_planning_rviz_plugin/motion_planning_display.h>
+#include <moveit/motion_planning_rviz_plugin/motion_planning_display.hpp>
 
 CLASS_LOADER_REGISTER_CLASS(moveit_rviz_plugin::MotionPlanningDisplay, rviz_common::Display)

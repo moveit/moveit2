@@ -56,7 +56,7 @@
 #include <QVBoxLayout>
 
 #include <regex>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 
 namespace moveit_setup
 {

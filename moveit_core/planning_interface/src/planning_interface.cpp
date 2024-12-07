@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_interface/planning_interface.hpp>
 #include <mutex>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

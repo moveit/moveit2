@@ -39,8 +39,8 @@
 
 #pragma once
 
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 
 namespace stomp_moveit
 {

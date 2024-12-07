@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/move_group/move_group_capability.h>
+#include <moveit/move_group/move_group_capability.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <fmt/format.h>
 

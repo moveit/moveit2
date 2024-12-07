@@ -34,10 +34,10 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/move_group/move_group_capability.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/moveit_error_code.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/move_group/move_group_capability.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/utils/logger.hpp>
 

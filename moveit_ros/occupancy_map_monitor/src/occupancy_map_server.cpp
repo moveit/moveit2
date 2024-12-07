@@ -34,7 +34,7 @@
 
 /* Author: Jon Binney, Ioan Sucan */
 
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 
 #include <octomap_msgs/conversions.h>
 #include <tf2_ros/transform_listener.h>

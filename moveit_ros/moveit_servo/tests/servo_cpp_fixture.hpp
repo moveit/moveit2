@@ -40,6 +40,8 @@
  *      Description : Resources used by servo c++ integration tests
  */
 
+#pragma once
+
 #include <gtest/gtest.h>
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils/command.hpp>

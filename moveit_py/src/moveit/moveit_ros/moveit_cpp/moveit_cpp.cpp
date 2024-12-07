@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "moveit_cpp.h"
+#include "moveit_cpp.hpp"
 #include <moveit/utils/logger.hpp>
 
 namespace moveit_py

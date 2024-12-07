@@ -43,9 +43,9 @@
 
 #include <moveit_servo_lib_parameters.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_model/joint_model_group.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_model/joint_model_group.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>

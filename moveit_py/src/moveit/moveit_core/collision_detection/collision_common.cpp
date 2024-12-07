@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "collision_common.h"
+#include "collision_common.hpp"
 
 namespace moveit_py
 {

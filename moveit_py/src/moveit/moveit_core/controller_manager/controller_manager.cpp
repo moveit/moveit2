@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "controller_manager.h"
+#include "controller_manager.hpp"
 
 namespace moveit_py
 {

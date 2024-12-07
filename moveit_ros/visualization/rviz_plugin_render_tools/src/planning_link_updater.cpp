@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/rviz_plugin_render_tools/planning_link_updater.h>
+#include <moveit/rviz_plugin_render_tools/planning_link_updater.hpp>
 #include <Ogre.h>
 
 bool moveit_rviz_plugin::PlanningLinkUpdater::getLinkTransforms(const std::string& link_name,

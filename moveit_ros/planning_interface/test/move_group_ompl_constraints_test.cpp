@@ -45,9 +45,9 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 
 // MoveIt
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/macros/console_colors.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
+#include <moveit/planning_scene_interface/planning_scene_interface.hpp>
+#include <moveit/macros/console_colors.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
 // accuracy tested for position and orientation

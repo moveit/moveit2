@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/collision_plugin_loader/collision_plugin_loader.h>
+#include <moveit/collision_plugin_loader/collision_plugin_loader.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace collision_detection

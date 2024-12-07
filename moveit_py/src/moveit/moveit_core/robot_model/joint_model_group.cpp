@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "joint_model_group.h"
+#include "joint_model_group.hpp"
 #include <exception>
 
 namespace moveit_py

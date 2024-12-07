@@ -34,7 +34,7 @@
 
 /* Author: Yannick Jonetzko */
 
-#include <moveit/rviz_plugin_render_tools/trajectory_panel.h>
+#include <moveit/rviz_plugin_render_tools/trajectory_panel.hpp>
 #include <QHBoxLayout>
 
 namespace moveit_rviz_plugin

@@ -37,8 +37,8 @@
 
 #pragma once
 
-#include <moveit/planning_interface/planning_response.h>
-#include <moveit/planning_interface/planning_request.h>
+#include <moveit/planning_interface/planning_response.hpp>
+#include <moveit/planning_interface/planning_request.hpp>
 
 namespace moveit
 {

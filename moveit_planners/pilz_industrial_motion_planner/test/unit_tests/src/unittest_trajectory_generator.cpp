@@ -36,7 +36,7 @@
 
 #include <gtest/gtest.h>
 
-#include <pilz_industrial_motion_planner/trajectory_generator.h>
+#include <pilz_industrial_motion_planner/trajectory_generator.hpp>
 
 using namespace pilz_industrial_motion_planner;
 

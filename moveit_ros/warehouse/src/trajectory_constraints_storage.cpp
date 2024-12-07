@@ -34,7 +34,7 @@
 
 /* Author: Mario Prats, Ioan Sucan */
 
-#include <moveit/warehouse/trajectory_constraints_storage.h>
+#include <moveit/warehouse/trajectory_constraints_storage.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <utility>

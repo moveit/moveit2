@@ -32,10 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/local_constraint_solver_plugins/forward_trajectory.h>
-#include <moveit/local_planner/feedback_types.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/local_constraint_solver_plugins/forward_trajectory.hpp>
+#include <moveit/local_planner/feedback_types.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
 namespace
 {

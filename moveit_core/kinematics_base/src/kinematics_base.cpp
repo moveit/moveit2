@@ -34,8 +34,8 @@
 
 /* Author: Sachin Chitta, Dave Coleman */
 
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/robot_model/joint_model_group.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/robot_model/joint_model_group.hpp>
 #include <rclcpp/logger.hpp>
 #include <moveit/utils/logger.hpp>
 

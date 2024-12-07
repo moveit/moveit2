@@ -37,13 +37,13 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
-#include <moveit/rviz_plugin_render_tools/trajectory_visualization.h>
+#include <moveit/rviz_plugin_render_tools/trajectory_visualization.hpp>
 
-#include <moveit/rviz_plugin_render_tools/planning_link_updater.h>
-#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
+#include <moveit/rviz_plugin_render_tools/planning_link_updater.hpp>
+#include <moveit/rviz_plugin_render_tools/robot_state_visualization.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <moveit/utils/logger.hpp>
-#include <moveit/trajectory_processing/trajectory_tools.h>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/properties/bool_property.hpp>
 #include <rviz_common/properties/color_property.hpp>

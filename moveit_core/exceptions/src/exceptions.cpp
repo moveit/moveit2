@@ -34,7 +34,7 @@
 
 /* Author: Acorn Pooley, Ioan Sucan */
 
-#include <moveit/exceptions/exceptions.h>
+#include <moveit/exceptions/exceptions.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <moveit/utils/logger.hpp>

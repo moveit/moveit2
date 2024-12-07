@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/version.h>
+#include <moveit/version.hpp>
 #include <iostream>
 #include <cstring>
 

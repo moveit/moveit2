@@ -34,9 +34,9 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
-#include <moveit/ompl_interface/ompl_interface.h>
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/ompl_interface/ompl_interface.hpp>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <ompl/util/Console.h>

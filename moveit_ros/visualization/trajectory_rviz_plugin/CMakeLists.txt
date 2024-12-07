@@ -1,5 +1,5 @@
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
-set(HEADERS include/moveit/trajectory_rviz_plugin/trajectory_display.h)
+set(HEADERS include/moveit/trajectory_rviz_plugin/trajectory_display.hpp)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 

@@ -35,9 +35,9 @@
 /* Author: Dave Coleman, Masaki Murooka */
 
 #include <moveit_msgs/srv/get_position_ik.hpp>
-#include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.h>
+#include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.hpp>
 #include <class_loader/class_loader.hpp>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <iterator>
 #include <moveit/utils/logger.hpp>
 

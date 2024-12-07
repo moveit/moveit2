@@ -34,7 +34,7 @@
 
 /* Author: Acorn Pooley, Ioan Sucan */
 
-#include <moveit/collision_detection/world.h>
+#include <moveit/collision_detection/world.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

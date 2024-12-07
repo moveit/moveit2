@@ -34,10 +34,10 @@
 
 /* Author: Jens Petit */
 
-#include <moveit/collision_detection_bullet/collision_env_bullet.h>
-#include <moveit/collision_detection_bullet/collision_detector_allocator_bullet.h>
-#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.h>
-#include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h>
+#include <moveit/collision_detection_bullet/collision_env_bullet.hpp>
+#include <moveit/collision_detection_bullet/collision_detector_allocator_bullet.hpp>
+#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.hpp>
+#include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.hpp>
 #include <functional>
 #include <bullet/btBulletCollisionCommon.h>
 #include <rclcpp/logger.hpp>

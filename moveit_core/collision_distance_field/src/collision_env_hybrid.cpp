@@ -34,8 +34,8 @@
 
 /* Author: E. Gil Jones, Jens Petit */
 
-#include <moveit/collision_distance_field/collision_detector_allocator_hybrid.h>
-#include <moveit/collision_distance_field/collision_env_hybrid.h>
+#include <moveit/collision_distance_field/collision_detector_allocator_hybrid.hpp>
+#include <moveit/collision_distance_field/collision_env_hybrid.hpp>
 
 namespace collision_detection
 {

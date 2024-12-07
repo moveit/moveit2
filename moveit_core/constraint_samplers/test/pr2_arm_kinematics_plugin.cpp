@@ -40,9 +40,9 @@
 #include <algorithm>
 #include <cmath>
 
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 #include <moveit/utils/logger.hpp>
-#include "pr2_arm_kinematics_plugin.h"
+#include "pr2_arm_kinematics_plugin.hpp"
 
 using namespace KDL;
 using namespace std;

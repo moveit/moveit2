@@ -36,9 +36,9 @@
 
 #include <gtest/gtest.h>
 
-#include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.h>
-#include <pilz_industrial_motion_planner/planning_context_loader_ptp.h>
-#include <pilz_industrial_motion_planner/planning_exceptions.h>
+#include <pilz_industrial_motion_planner/pilz_industrial_motion_planner.hpp>
+#include <pilz_industrial_motion_planner/planning_context_loader_ptp.hpp>
+#include <pilz_industrial_motion_planner/planning_exceptions.hpp>
 
 using namespace pilz_industrial_motion_planner;
 

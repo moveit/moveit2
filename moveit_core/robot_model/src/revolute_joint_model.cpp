@@ -35,7 +35,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/revolute_joint_model.h>
+#include <moveit/robot_model/revolute_joint_model.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <algorithm>
 #include <cmath>

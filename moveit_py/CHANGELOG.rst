@@ -2,6 +2,13 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Add use_padding flag + deprecate checkCollisionUnpadded() functions (`#3088 <https://github.com/ros-planning/moveit2/issues/3088>`_)
+* Fixed Typo get_trajectory_execution_manager in planning.pyi file (`#3029 <https://github.com/ros-planning/moveit2/issues/3029>`_)
+* Contributors: Jens Vanhooydonck, Sebastian Jahr, Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 * Add python bindings for saving and loading geometry from a .scene file (`#2971 <https://github.com/moveit/moveit2/issues/2971>`_)

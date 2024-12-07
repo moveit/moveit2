@@ -35,9 +35,9 @@
 
 /* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
 
-#include <moveit_simple_controller_manager/action_based_controller_handle.h>
-#include <moveit_simple_controller_manager/gripper_controller_handle.h>
-#include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.h>
+#include <moveit_simple_controller_manager/action_based_controller_handle.hpp>
+#include <moveit_simple_controller_manager/gripper_controller_handle.hpp>
+#include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <pluginlib/class_list_macros.hpp>
 #include <rclcpp/logger.hpp>

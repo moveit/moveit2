@@ -36,8 +36,8 @@
    Desc: Response adapter to display the motion path in RVIZ by publishing as EE pose marker array via ROS topic.
 */
 
-#include <moveit/planning_interface/planning_response_adapter.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_interface/planning_response_adapter.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <class_loader/class_loader.hpp>
 #include <moveit/utils/logger.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>

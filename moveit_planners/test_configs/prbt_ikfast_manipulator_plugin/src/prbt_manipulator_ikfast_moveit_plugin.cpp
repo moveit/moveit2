@@ -50,8 +50,8 @@
 #include <rclcpp/parameter_value.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_kdl/tf2_kdl.hpp>
-#include <moveit/kinematics_base/kinematics_base.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <prbt_ikfast_kinematics_parameters.hpp>
 
 using namespace moveit::core;

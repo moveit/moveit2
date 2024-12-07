@@ -36,9 +36,9 @@
 /* Author: Acorn Pooley, Ioan Sucan */
 
 #include <gtest/gtest.h>
-#include <moveit/robot_interaction/locked_robot_state.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_interaction/locked_robot_state.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <urdf_parser/urdf_parser.h>
 
 static const char* const URDF_STR =

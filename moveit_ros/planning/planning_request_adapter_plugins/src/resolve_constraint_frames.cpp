@@ -38,8 +38,8 @@
    attached object are not known to a planner.
 */
 
-#include <moveit/planning_interface/planning_request_adapter.h>
-#include <moveit/kinematic_constraints/utils.h>
+#include <moveit/planning_interface/planning_request_adapter.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
 #include <class_loader/class_loader.hpp>
 #include <moveit/utils/logger.hpp>
 

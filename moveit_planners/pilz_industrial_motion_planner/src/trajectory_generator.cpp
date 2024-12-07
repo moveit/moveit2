@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator.h>
+#include <pilz_industrial_motion_planner/trajectory_generator.hpp>
 
 #include <cassert>
 
@@ -41,10 +41,10 @@
 #include <boost/range/combine.hpp>
 
 #include <kdl/velocityprofile_trap.hpp>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_state/conversions.hpp>
 #include <moveit/utils/logger.hpp>
 
-#include <pilz_industrial_motion_planner/limits_container.h>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
 
 namespace pilz_industrial_motion_planner
 {

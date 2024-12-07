@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include "test_moveit_controller_manager.h"
+#include "test_moveit_controller_manager.hpp"
 #include <pluginlib/class_list_macros.hpp>
 
 PLUGINLIB_EXPORT_CLASS(test_moveit_controller_manager::TestRos2ControlManager,

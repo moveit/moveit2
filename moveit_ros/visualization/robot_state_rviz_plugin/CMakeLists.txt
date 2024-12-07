@@ -1,7 +1,7 @@
 add_library(
   moveit_robot_state_rviz_plugin_core SHARED
   src/robot_state_display.cpp
-  include/moveit/robot_state_rviz_plugin/robot_state_display.h)
+  include/moveit/robot_state_rviz_plugin/robot_state_display.hpp)
 set_target_properties(moveit_robot_state_rviz_plugin_core
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_robot_state_rviz_plugin_core

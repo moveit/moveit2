@@ -17,6 +17,15 @@ pull_request_rules:
         branches:
           - iron
 
+  - name: backport to jazzy at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-jazzy"
+    actions:
+      backport:
+        branches:
+          - jazzy
+
   - name: ask to resolve conflict
     conditions:
       - conflict

@@ -34,10 +34,10 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/exceptions/exceptions.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/exceptions/exceptions.hpp>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 #include <moveit/utils/logger.hpp>
 

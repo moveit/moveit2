@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Re-enable flaky PSM test (`#3124 <https://github.com/ros-planning/moveit2/issues/3124>`_)
+* Add use_padding flag + deprecate checkCollisionUnpadded() functions (`#3088 <https://github.com/ros-planning/moveit2/issues/3088>`_)
+* Remove plugins from export set (`#3024 <https://github.com/ros-planning/moveit2/issues/3024>`_)
+* Update urdf/model.h -> urdf/model.hpp (`#3003 <https://github.com/ros-planning/moveit2/issues/3003>`_)
+* Contributors: Paul Gesel, Robert Haschke, Sebastian Castro, Sebastian Jahr, Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 

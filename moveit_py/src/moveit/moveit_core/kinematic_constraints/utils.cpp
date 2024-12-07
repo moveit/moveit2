@@ -34,10 +34,10 @@
 
 /* Author: Peter David Fagan */
 
-#include "utils.h"
+#include "utils.hpp"
 #include <rclcpp/rclcpp.hpp>
-#include <moveit_py/moveit_py_utils/ros_msg_typecasters.h>
-#include <moveit/kinematic_constraints/utils.h>
+#include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
 
 namespace moveit_py
 {

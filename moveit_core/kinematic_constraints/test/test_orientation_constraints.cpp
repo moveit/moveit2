@@ -34,7 +34,7 @@
 
 /* Author: Jeroen De Maeyer */
 
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/kinematic_constraints/kinematic_constraint.hpp>
 #include <gtest/gtest.h>
 
 #include <urdf_parser/urdf_parser.h>
@@ -42,7 +42,7 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <math.h>
 
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 class SphericalRobot : public testing::Test
 {

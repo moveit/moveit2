@@ -34,7 +34,7 @@
 
 /* Author: Ryan Luna */
 
-#include <moveit/benchmarks/BenchmarkOptions.h>
+#include <moveit/benchmarks/BenchmarkOptions.hpp>
 #include <moveit/utils/logger.hpp>
 
 using moveit::getLogger;

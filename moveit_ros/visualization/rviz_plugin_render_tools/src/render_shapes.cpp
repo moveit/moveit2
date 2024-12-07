@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/rviz_plugin_render_tools/render_shapes.h>
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
+#include <moveit/rviz_plugin_render_tools/render_shapes.hpp>
+#include <moveit/rviz_plugin_render_tools/octomap_render.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <geometric_shapes/mesh_operations.h>
 

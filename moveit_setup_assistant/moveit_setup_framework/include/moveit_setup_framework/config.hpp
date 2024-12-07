@@ -38,7 +38,7 @@
 
 #include <moveit_setup_framework/generated_file.hpp>
 #include <moveit_setup_framework/templates.hpp>
-#include <moveit/macros/class_forward.h>
+#include <moveit/macros/class_forward.hpp>
 #include <rclcpp/node.hpp>
 #include <yaml-cpp/yaml.h>
 

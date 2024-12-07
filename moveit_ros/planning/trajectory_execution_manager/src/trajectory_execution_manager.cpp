@@ -34,9 +34,9 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <geometric_shapes/check_isometry.h>
 #include <memory>
 #include <tf2_eigen/tf2_eigen.hpp>

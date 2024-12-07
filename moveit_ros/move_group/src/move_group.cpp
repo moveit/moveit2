@@ -34,14 +34,14 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <tf2_ros/transform_listener.h>
-#include <moveit/move_group/move_group_capability.h>
-#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
+#include <moveit/move_group/move_group_capability.hpp>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.hpp>
 #include <boost/tokenizer.hpp>
-#include <moveit/macros/console_colors.h>
-#include <moveit/move_group/move_group_context.h>
+#include <moveit/macros/console_colors.hpp>
+#include <moveit/move_group/move_group_context.hpp>
 #include <memory>
 #include <set>
 #include <moveit/utils/logger.hpp>

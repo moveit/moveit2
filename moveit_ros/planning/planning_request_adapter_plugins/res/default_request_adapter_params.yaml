@@ -1,8 +1,8 @@
-# This file contains the parameters for all of MoveIt's default PlanRequestAdapters
+# This file contains the parameters for all of MoveIt's default PlanningRequestAdapters
 default_request_adapter_parameters:
   fix_start_state: {
     type: bool,
-    description: "CheckStartStateBounds: If set true and the start state is out of bounds, the MotionPlanRequests start will be updated to a start state with enforced bounds for revolute or continuous joints.",
+    description: "CheckStartStateBounds: If true and the start state has continuous, planar, or floating joints, the start state of the MotionPlanRequest will be updated to normalize the rotation values of those joints.",
     default_value: false,
   }
   default_workspace_bounds: {

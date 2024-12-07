@@ -13,7 +13,7 @@ message(
 
 # https://stackoverflow.com/questions/13920072/how-to-always-run-command-when-building-regardless-of-any-dependency
 add_custom_command(
-  OUTPUT ${CMAKE_BINARY_DIR}/include/moveit/version.h always_rebuild
+  OUTPUT ${CMAKE_BINARY_DIR}/include/moveit/version.hpp always_rebuild
   COMMENT "Generate version header"
   COMMAND
     ${CMAKE_COMMAND} -DVERSION_FILE_PATH="${CMAKE_BINARY_DIR}/include"
@@ -23,16 +23,16 @@ add_custom_command(
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_custom_target(
-  version_h
+  version_hpp
   DEPENDS always_rebuild
-  COMMENT "Generating version.h")
+  COMMENT "Generating version.hpp")
 
 add_executable(moveit_version version.cpp)
-add_dependencies(moveit_version version_h)
+add_dependencies(moveit_version version_hpp)
 
 target_include_directories(moveit_version
                            PRIVATE ${CMAKE_BINARY_DIR}/include/moveit_core)
 
-install(FILES "${CMAKE_BINARY_DIR}/include/moveit_core/moveit/version.h"
+install(FILES "${CMAKE_BINARY_DIR}/include/moveit_core/moveit/version.hpp"
         DESTINATION include/moveit_core/moveit)
 install(TARGETS moveit_version RUNTIME DESTINATION bin)

@@ -34,14 +34,14 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
-#include <moveit/constraint_samplers/default_constraint_samplers.h>
-#include <moveit/constraint_samplers/union_constraint_sampler.h>
-#include <moveit/constraint_samplers/constraint_sampler_manager.h>
-#include <moveit/constraint_samplers/constraint_sampler_tools.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/kinematic_constraints/kinematic_constraint.hpp>
+#include <moveit/constraint_samplers/default_constraint_samplers.hpp>
+#include <moveit/constraint_samplers/union_constraint_sampler.hpp>
+#include <moveit/constraint_samplers/constraint_sampler_manager.hpp>
+#include <moveit/constraint_samplers/constraint_sampler_tools.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 #include <geometric_shapes/shape_operations.h>
 #include <visualization_msgs/msg/marker_array.hpp>
@@ -52,7 +52,7 @@
 #include <fstream>
 #include <functional>
 
-#include "pr2_arm_kinematics_plugin.h"
+#include "pr2_arm_kinematics_plugin.hpp"
 
 class LoadPlanningModelsPr2 : public testing::Test
 {

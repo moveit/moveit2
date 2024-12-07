@@ -34,7 +34,7 @@
 
 /* Author: E. Gil Jones */
 
-#include <moveit/collision_distance_field/collision_common_distance_field.h>
+#include <moveit/collision_distance_field/collision_common_distance_field.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

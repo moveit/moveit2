@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/prismatic_joint_model.h>
+#include <moveit/robot_model/prismatic_joint_model.hpp>
 #include <limits>
 
 namespace moveit

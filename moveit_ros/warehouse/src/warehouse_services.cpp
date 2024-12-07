@@ -34,7 +34,7 @@
 
 /* Author: Dan Greenwald */
 
-#include <moveit/warehouse/state_storage.h>
+#include <moveit/warehouse/state_storage.hpp>
 #include <moveit_msgs/srv/save_robot_state_to_warehouse.hpp>
 #include <moveit_msgs/srv/list_robot_states_in_warehouse.hpp>
 #include <moveit_msgs/srv/get_robot_state_from_warehouse.hpp>

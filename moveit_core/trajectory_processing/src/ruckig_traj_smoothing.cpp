@@ -39,7 +39,7 @@
 #include <cmath>
 #include <Eigen/Geometry>
 #include <limits>
-#include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
+#include <moveit/trajectory_processing/ruckig_traj_smoothing.hpp>
 #include <vector>
 #include <moveit/utils/logger.hpp>
 

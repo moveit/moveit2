@@ -34,9 +34,9 @@
 
 /* Author: Michael Goerner */
 
-#include "apply_planning_scene_service_capability.h"
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/move_group/capability_names.h>
+#include "apply_planning_scene_service_capability.hpp"
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace move_group

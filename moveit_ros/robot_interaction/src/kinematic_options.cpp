@@ -34,7 +34,7 @@
 
 /* Author: Acorn Pooley */
 
-#include <moveit/robot_interaction/kinematic_options.h>
+#include <moveit/robot_interaction/kinematic_options.hpp>
 #include <rclcpp/logging.hpp>
 #include <moveit/utils/logger.hpp>
 

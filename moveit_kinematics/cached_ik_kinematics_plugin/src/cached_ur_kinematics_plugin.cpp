@@ -34,7 +34,7 @@
 
 /* Author: Mark Moll */
 
-#include <moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_plugin.h>
+#include <moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_plugin.hpp>
 #include <ur_kinematics/ur_moveit_plugin.h>
 
 #include <pluginlib/class_list_macros.hpp>

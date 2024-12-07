@@ -36,7 +36,7 @@
 
 #include <sys/types.h>
 #include <signal.h>
-#include <moveit/warehouse/warehouse_connector.h>
+#include <moveit/warehouse/warehouse_connector.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/utilities.hpp>

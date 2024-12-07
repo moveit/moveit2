@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/warehouse/constraints_storage.h>
+#include <moveit/warehouse/constraints_storage.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <utility>

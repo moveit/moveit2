@@ -35,7 +35,7 @@
 /* Author: Acorn Pooley */
 
 #include <gtest/gtest.h>
-#include <moveit/collision_detection/world.h>
+#include <moveit/collision_detection/world.hpp>
 #include <geometric_shapes/shapes.h>
 #include <functional>
 

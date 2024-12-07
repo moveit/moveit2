@@ -38,10 +38,10 @@
 #pragma once
 
 #include <moveit/planning_pipeline_interfaces/plan_responses_container.hpp>
-#include <moveit/planning_interface/planning_response.h>
-#include <moveit/planning_interface/planning_request.h>
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_interface/planning_response.hpp>
+#include <moveit/planning_interface/planning_request.hpp>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
 
 namespace moveit
 {

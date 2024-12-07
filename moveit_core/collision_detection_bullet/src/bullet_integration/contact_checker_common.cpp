@@ -33,11 +33,11 @@
  * Author: Levi Armstrong
  */
 
-#include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.h>
+#include <moveit/collision_detection_bullet/bullet_integration/contact_checker_common.hpp>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.h>
+#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.hpp>
 
 namespace collision_detection_bullet
 {

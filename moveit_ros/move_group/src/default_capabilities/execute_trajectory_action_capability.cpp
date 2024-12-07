@@ -34,13 +34,13 @@
 
 /* Author: Kentaro Wada */
 
-#include "execute_trajectory_action_capability.h"
+#include "execute_trajectory_action_capability.hpp"
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/plan_execution/plan_execution.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/move_group/capability_names.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/plan_execution/plan_execution.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace move_group

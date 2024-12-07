@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan, Jens Petit */
 
-#include <moveit/collision_detection/collision_env.h>
+#include <moveit/collision_detection/collision_env.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <limits>

@@ -34,7 +34,7 @@
 
 /* Author: Matthijs van der Burgh */
 
-#include "trajectory_execution_manager.h"
+#include "trajectory_execution_manager.hpp"
 
 namespace moveit_py
 {

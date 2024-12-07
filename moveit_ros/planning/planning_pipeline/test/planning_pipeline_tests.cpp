@@ -36,8 +36,8 @@
 
 #include <gtest/gtest.h>
 
-#include <moveit/planning_pipeline/planning_pipeline.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 namespace
 {

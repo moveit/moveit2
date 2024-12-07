@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan, Mathias Lüdtke, Dave Coleman */
 
 // MoveIt
-#include <moveit/rdf_loader/rdf_loader.h>
+#include <moveit/rdf_loader/rdf_loader.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>

@@ -35,8 +35,8 @@
 /* Author: Ioan Sucan, Adam Leeper */
 
 #include <math.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <rclcpp/duration.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

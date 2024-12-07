@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include <moveit/ompl_interface/detail/ompl_constraints.h>
+#include <moveit/ompl_interface/detail/ompl_constraints.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <tf2_eigen/tf2_eigen.hpp>

@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan, Sachin Chitta */
 
 #include <chrono>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <thread>

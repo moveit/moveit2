@@ -39,11 +39,11 @@
 
 #include <ros/ros.h>
 
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/robot_trajectory/robot_trajectory.h>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/robot_trajectory/robot_trajectory.hpp>
 
-#include <pilz_industrial_motion_planner/plan_components_builder.h>
-#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.h>
+#include <pilz_industrial_motion_planner/plan_components_builder.hpp>
+#include <pilz_industrial_motion_planner/trajectory_blender_transition_window.hpp>
 
 const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
 const std::string ROBOT_DESCRIPTION_STR{ "robot_description" };

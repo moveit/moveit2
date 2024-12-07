@@ -37,7 +37,7 @@
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 // MoveIt
-#include <moveit/semantic_world/semantic_world.h>
+#include <moveit/semantic_world/semantic_world.hpp>
 #include <geometric_shapes/shape_operations.h>
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <moveit/utils/logger.hpp>

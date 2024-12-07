@@ -37,7 +37,7 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 
 // moveit modules
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 namespace moveit_ros

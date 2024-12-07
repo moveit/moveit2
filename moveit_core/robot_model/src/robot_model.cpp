@@ -35,7 +35,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model/robot_model.hpp>
 #include <geometric_shapes/shape_operations.h>
 #include <rclcpp/logger.hpp>
 #include <algorithm>

@@ -35,9 +35,9 @@
 /* Author: Michael 'v4hn' Goerner */
 
 #include <gtest/gtest.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <sstream>

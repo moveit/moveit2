@@ -35,16 +35,16 @@
 /* Author: Ioan Sucan */
 
 #include <boost/algorithm/string.hpp>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/collision_detection/occupancy_map.h>
-#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/collision_detection/occupancy_map.hpp>
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.hpp>
 #include <geometric_shapes/shape_operations.h>
-#include <moveit/collision_detection/collision_tools.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/exceptions/exceptions.h>
-#include <moveit/robot_state/attached_body.h>
-#include <moveit/utils/message_checks.h>
+#include <moveit/collision_detection/collision_tools.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/exceptions/exceptions.hpp>
+#include <moveit/robot_state/attached_body.hpp>
+#include <moveit/utils/message_checks.hpp>
 #include <octomap_msgs/conversions.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

@@ -52,10 +52,10 @@
 #include <gtest/gtest.h>
 
 // MoveIt
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/common_planning_interface_objects/common_objects.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
+#include <moveit/common_planning_interface_objects/common_objects.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 
 // TF2
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>

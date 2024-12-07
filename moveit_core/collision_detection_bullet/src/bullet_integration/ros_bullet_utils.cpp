@@ -31,7 +31,7 @@
 
 /* Author: Jorge Nicho*/
 
-#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.h>
+#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.hpp>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

@@ -35,6 +35,6 @@
 /* Author: Ioan Sucan */
 
 #include <class_loader/class_loader.hpp>
-#include <moveit/robot_state_rviz_plugin/robot_state_display.h>
+#include <moveit/robot_state_rviz_plugin/robot_state_display.hpp>
 
 CLASS_LOADER_REGISTER_CLASS(moveit_rviz_plugin::RobotStateDisplay, rviz_common::Display)

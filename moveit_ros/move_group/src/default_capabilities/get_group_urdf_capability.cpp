@@ -34,10 +34,10 @@
 
 /* Author: Sebastian Jahr */
 
-#include "get_group_urdf_capability.h"
+#include "get_group_urdf_capability.hpp"
 
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/move_group/capability_names.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
 #include <urdf_parser/urdf_parser.h>
 

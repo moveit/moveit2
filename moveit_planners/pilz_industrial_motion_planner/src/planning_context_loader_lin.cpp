@@ -32,10 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/planning_context_loader_lin.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <pilz_industrial_motion_planner/planning_context_base.h>
-#include <pilz_industrial_motion_planner/planning_context_lin.h>
+#include <pilz_industrial_motion_planner/planning_context_loader_lin.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <pilz_industrial_motion_planner/planning_context_base.hpp>
+#include <pilz_industrial_motion_planner/planning_context_lin.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_list_macros.hpp>

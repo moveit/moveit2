@@ -36,7 +36,7 @@
    Description: A first-order Butterworth low-pass filter. There is only one parameter to tune.
  */
 
-#include <moveit/online_signal_smoothing/butterworth_filter.h>
+#include <moveit/online_signal_smoothing/butterworth_filter.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logging.hpp>
 
