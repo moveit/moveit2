@@ -588,8 +588,10 @@ public:
 
   /**
    * @brief Get the lower and upper position limits of all active variables in the group.
-   *
-   * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the lower and upper joint limits for all active variables.
+   * @details In the case of variable without position bounds (e.g. continuous joints), the lower and upper limits are
+   * set to infinity.
+   * @return std::pair<Eigen::VectorXd, Eigen::VectorXd> Containing the lower and upper joint limits for all active
+   * variables.
    */
   [[nodiscard]] std::pair<Eigen::VectorXd, Eigen::VectorXd> getLowerAndUpperLimits() const;
 
