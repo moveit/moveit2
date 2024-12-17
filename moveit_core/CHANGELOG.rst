@@ -2,6 +2,11 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* handle continuous joints in getLowerAndUpperLimits (`#3153 <https://github.com/ros-planning/moveit2/issues/3153>`_) (`#3155 <https://github.com/ros-planning/moveit2/issues/3155>`_)
+* Contributors: Mario Prats
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
