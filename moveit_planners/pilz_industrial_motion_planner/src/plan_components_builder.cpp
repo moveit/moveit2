@@ -54,6 +54,11 @@ std::vector<robot_trajectory::RobotTrajectoryPtr> PlanComponentsBuilder::build()
 void PlanComponentsBuilder::appendWithStrictTimeIncrease(robot_trajectory::RobotTrajectory& result,
                                                          const robot_trajectory::RobotTrajectory& source)
 {
+  if (!source.getWayPointCount())
+  {
+    return;
+  }
+
   if (result.empty())
   {
     result.append(source, 0.0);
@@ -62,7 +67,14 @@ void PlanComponentsBuilder::appendWithStrictTimeIncrease(robot_trajectory::Robot
   if (!pilz_industrial_motion_planner::isRobotStateEqual(result.getLastWayPoint(), source.getFirstWayPoint(),
                                                          result.getGroupName(), ROBOT_STATE_EQUALITY_EPSILON))
   {
-    result.append(source, source.getWayPointDurationFromStart(0));
+    if (source.getWayPointDurationFromPrevious(0) == 0)
+    {
+      result.append(source, source.getWayPointDurationFromStart(0));
+    }
+    else
+    {
+      result.append(source, 0.0);
+    }
     return;
   }
 
