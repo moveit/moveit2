@@ -88,8 +88,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_generator_lin", node_options);
 
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
@@ -131,6 +131,11 @@ protected:
     ASSERT_NE(nullptr, lin_) << "Failed to create LIN trajectory generator.";
   }
 
+  void TearDown() override
+  {
+    robot_model_.reset();
+  }
+
   bool checkLinResponse(const planning_interface::MotionPlanRequest& req,
                         const planning_interface::MotionPlanResponse& res)
   {
@@ -159,6 +164,7 @@ protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
   // lin trajectory generator using model without gripper
@@ -188,11 +194,6 @@ TEST_F(TrajectoryGeneratorLINTest, TestExceptionErrorCodeMapping)
   {
     std::shared_ptr<JointNumberMismatch> jnm_ex{ new JointNumberMismatch("") };
     EXPECT_EQ(jnm_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
-  }
-
-  {
-    std::shared_ptr<LinJointMissingInStartState> ljmiss_ex{ new LinJointMissingInStartState("") };
-    EXPECT_EQ(ljmiss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
   }
 
   {
@@ -420,24 +421,6 @@ TEST_F(TrajectoryGeneratorLINTest, IncorrectJointNumber)
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(lin_->generate(planning_scene_, lin_joint_req, res));
   EXPECT_TRUE(res.error_code_.val == moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
-}
-
-/**
- * @brief test invalid motion plan request with incomplete start state and
- * cartesian goal
- */
-TEST_F(TrajectoryGeneratorLINTest, cartGoalIncompleteStartState)
-{
-  // construct motion plan request
-  moveit_msgs::msg::MotionPlanRequest lin_cart_req{ tdp_->getLinCart("lin2").toRequest() };
-  EXPECT_GT(lin_cart_req.start_state.joint_state.name.size(), 1u);
-  lin_cart_req.start_state.joint_state.name.resize(1);
-  lin_cart_req.start_state.joint_state.position.resize(1);  // prevent failing check for equal sizes
-
-  // generate lin trajectory
-  planning_interface::MotionPlanResponse res;
-  EXPECT_FALSE(lin_->generate(planning_scene_, lin_cart_req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
 }
 
 /**

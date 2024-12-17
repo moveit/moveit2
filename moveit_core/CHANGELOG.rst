@@ -2,6 +2,94 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* Allow RobotState::setFromIK to work with subframes (backport `#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_) (`#3085 <https://github.com/ros-planning/moveit2/issues/3085>`_)
+* Fixes flaky RobotState test (backport `#3105 <https://github.com/ros-planning/moveit2/issues/3105>`_) (`#3107 <https://github.com/ros-planning/moveit2/issues/3107>`_)
+* Fix flipped comments in `joint_model.h` (`#3047 <https://github.com/ros-planning/moveit2/issues/3047>`_) (`#3049 <https://github.com/ros-planning/moveit2/issues/3049>`_)
+* Fix RobotState::getRigidlyConnectedParentLinkModel() (`#2985 <https://github.com/ros-planning/moveit2/issues/2985>`_, `#2993 <https://github.com/ros-planning/moveit2/issues/2993>`_)
+* Backport to Humble: Pass more distance information out from FCL collision check `#2572 <https://github.com/ros-planning/moveit2/issues/2572>`_ (`#2979 <https://github.com/ros-planning/moveit2/issues/2979>`_)
+* Fix doc reference to non-existent function (`#2765 <https://github.com/ros-planning/moveit2/issues/2765>`_) (`#2766 <https://github.com/ros-planning/moveit2/issues/2766>`_)
+* Update moveit::core::error_msg_to_string (`#2689 <https://github.com/ros-planning/moveit2/issues/2689>`_)
+* [TOTG] Exit loop when position can't change (backport `#2307 <https://github.com/ros-planning/moveit2/issues/2307>`_) (`#2646 <https://github.com/ros-planning/moveit2/issues/2646>`_)
+* Fix angular distance calculation in floating joint model (backport `#2538 <https://github.com/ros-planning/moveit2/issues/2538>`_) (`#2543 <https://github.com/ros-planning/moveit2/issues/2543>`_)
+* Change `collision_detection_bullet` install path back to `include/moveit` (`#2403 <https://github.com/ros-planning/moveit2/issues/2403>`_)
+* Use find_package for fcl (backport `#2399 <https://github.com/ros-planning/moveit2/issues/2399>`_) (`#2400 <https://github.com/ros-planning/moveit2/issues/2400>`_)
+* Contributors: Chris Schindlbeck, Gabriel Pacheco, Nacho Mellado, Tom Noble, Sebastian Castro, reidchristopher, Robert Haschke, Henning Kayser, Tyler Weaver, mergify[bot]
+
+2.5.5 (2023-09-10)
+------------------
+* Don't use ament_export_targets from package sub folder (backport `#1889 <https://github.com/ros-planning/moveit2/issues/1889>`_) (`#1893 <https://github.com/ros-planning/moveit2/issues/1893>`_)
+* Fix comment formatting (`#2276 <https://github.com/ros-planning/moveit2/issues/2276>`_) (`#2278 <https://github.com/ros-planning/moveit2/issues/2278>`_)
+  (cherry picked from commit 83892d6a7cb2f84485ebd96d41adb3acd8c44bee)
+  Co-authored-by: Stephanie Eng <stephanie-eng@users.noreply.github.com>
+* fix for kinematic constraints parsing (`#2267 <https://github.com/ros-planning/moveit2/issues/2267>`_) (`#2268 <https://github.com/ros-planning/moveit2/issues/2268>`_)
+  (cherry picked from commit b0f0f680c3f86b8074d208a1e78c92cfa75cf5ca)
+  Co-authored-by: Jorge Nicho <jrgnichodevel@gmail.com>
+* Added butterworth_filter_coeff parameter (`#2129 <https://github.com/ros-planning/moveit2/issues/2129>`_)
+  * Added butterworth_filter_coeff parameter
+  * Added formating like in original PR `#2091 <https://github.com/ros-planning/moveit2/issues/2091>`_
+  * Update moveit_core/online_signal_smoothing/src/butterworth_filter.cpp
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Update moveit_core/online_signal_smoothing/include/moveit/online_signal_smoothing/butterworth_filter.h
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  * Alphabetized dependencies
+  * Update moveit_core/package.xml
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  ---------
+  Co-authored-by: andrey <>
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+* Fix ci-testing build issues (backport `#1998 <https://github.com/ros-planning/moveit2/issues/1998>`_) (`#2002 <https://github.com/ros-planning/moveit2/issues/2002>`_)
+* Fix invalid case style for private member in RobotTrajectory
+  (cherry picked from commit 31e07d3d6a6c1d59bca5876cc0acc51abb960997)
+* Fix unreachable child logger instance
+  (cherry picked from commit 1323d05c89a8815450f8f4edf7a1d7b520871d18)
+* Fix clang compiler warnings (backport of `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_) (`#1896 <https://github.com/ros-planning/moveit2/issues/1896>`_)
+  - Fix warning: definition of implicit copy assignment operator is deprecated
+  - Fix warning: expression with side effects will be evaluated
+  - Fix warning: passing by value
+  - Enable -Werror
+  - Fix -Wdelete-non-abstract-non-virtual-dtor
+  - Fix more clang warnings
+  - Modernize gtest: TYPED_TEST_CASE -> TYPED_TEST_SUITE
+  - Fix GoogleTestVerification.UninstantiatedTypeParameterizedTestSuite
+  - Add default copy/move constructors/assignment operators
+  As a user-declared destructor deletes any implicitly-defined move constructor/assignment operator,
+  we need to declared them manually. This in turn requires to declare the copy constructor/assignment as well.
+  - Explicitly declare overrides
+  - Add default constructors as they are not implicitly declared anymore
+  - Declare selected classes as final
+  - Add noexcept specifier to constructors
+  - Fixup gmock/gtest warnings
+* Switch to clang-format-14 (`#1877 <https://github.com/ros-planning/moveit2/issues/1877>`_) (`#1880 <https://github.com/ros-planning/moveit2/issues/1880>`_)
+  * Switch to clang-format-14
+  * Fix clang-format-14
+  (cherry picked from commit 7fa5eaf1ac21ab8a99c5adae53bd0a2d4abf98f6)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Cleanup msg includes: Use C++ instead of C header (backport `#1844 <https://github.com/ros-planning/moveit2/issues/1844>`_)
+  * Cleanup msg includes: Use C++ instead of C header
+  * Remove obsolete include: moveit_msgs/srv/execute_known_trajectory.hpp
+* Fix moveit_core dependency on tf2_kdl (`#1817 <https://github.com/ros-planning/moveit2/issues/1817>`_) (`#1823 <https://github.com/ros-planning/moveit2/issues/1823>`_)
+  This is a proper dependency, and not only a test dependency. It is still
+  needed when building moveit_core with -DBUILD_TESTING=OFF.
+  (cherry picked from commit 9f7d6df9cac9b55d10f6fee6c29e41ff1d1bf44c)
+  Co-authored-by: Scott K Logan <logans@cottsay.net>
+* Use <> for non-local headers (`#1765 <https://github.com/ros-planning/moveit2/issues/1765>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+  (cherry picked from commit 7a1f2a101f9aeb8557e8a31656bbe1a6d53b430e)
+* Add `-Wunused-function` (`#1754 <https://github.com/ros-planning/moveit2/issues/1754>`_) (`#1755 <https://github.com/ros-planning/moveit2/issues/1755>`_)
+  (cherry picked from commit ed9c3317bc1335b66afb0b2e7478b95ddb5c4b33)
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: Chris Thrasher, Henning Kayser, Robert Haschke, andrey-pr, mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Free functions for calculating properties of trajectories (`#1503 <https://github.com/ros-planning/moveit2/issues/1503>`_) (`#1657 <https://github.com/ros-planning/moveit2/issues/1657>`_)

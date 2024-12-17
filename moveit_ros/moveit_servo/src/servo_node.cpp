@@ -90,6 +90,7 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
       node_, robot_description_name, "planning_scene_monitor");
   planning_scene_monitor_->startStateMonitor(servo_parameters->joint_topic);
   planning_scene_monitor_->startSceneMonitor(servo_parameters->monitored_planning_scene_topic);
+  planning_scene_monitor_->startWorldGeometryMonitor();
   planning_scene_monitor_->setPlanningScenePublishingFrequency(25);
   planning_scene_monitor_->getStateMonitor()->enableCopyDynamics(true);
   planning_scene_monitor_->startPublishingPlanningScene(planning_scene_monitor::PlanningSceneMonitor::UPDATE_SCENE,

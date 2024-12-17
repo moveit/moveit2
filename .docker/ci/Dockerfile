@@ -6,6 +6,8 @@ FROM ros:${ROS_DISTRO}-ros-base
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
 ENV TERM xterm
+# Allow non-interactive installation of ros-humble-rmw-connextdds
+ENV RTI_NC_LICENSE_ACCEPTED yes
 
 # Setup (temporary) ROS workspace
 WORKDIR /root/ws_moveit

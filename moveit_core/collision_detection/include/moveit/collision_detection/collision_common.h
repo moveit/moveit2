@@ -141,91 +141,6 @@ struct CostSource
   }
 };
 
-/** \brief Representation of a collision checking result */
-struct CollisionResult
-{
-  CollisionResult() : collision(false), distance(std::numeric_limits<double>::max()), contact_count(0)
-  {
-  }
-  using ContactMap = std::map<std::pair<std::string, std::string>, std::vector<Contact> >;
-
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-  /** \brief Clear a previously stored result */
-  void clear()
-  {
-    collision = false;
-    distance = std::numeric_limits<double>::max();
-    contact_count = 0;
-    contacts.clear();
-    cost_sources.clear();
-  }
-
-  /** \brief Throttled warning printing the first collision pair, if any. All collisions are logged at DEBUG level */
-  void print() const;
-
-  /** \brief True if collision was found, false otherwise */
-  bool collision;
-
-  /** \brief Closest distance between two bodies */
-  double distance;
-
-  /** \brief Number of contacts returned */
-  std::size_t contact_count;
-
-  /** \brief A map returning the pairs of body ids in contact, plus their contact details */
-  ContactMap contacts;
-
-  /** \brief These are the individual cost sources when costs are computed */
-  std::set<CostSource> cost_sources;
-};
-
-/** \brief Representation of a collision checking request */
-struct CollisionRequest
-{
-  CollisionRequest()
-    : distance(false)
-    , cost(false)
-    , contacts(false)
-    , max_contacts(1)
-    , max_contacts_per_pair(1)
-    , max_cost_sources(1)
-    , verbose(false)
-  {
-  }
-  virtual ~CollisionRequest()
-  {
-  }
-
-  /** \brief The group name to check collisions for (optional; if empty, assume the complete robot) */
-  std::string group_name;
-
-  /** \brief If true, compute proximity distance */
-  bool distance;
-
-  /** \brief If true, a collision cost is computed */
-  bool cost;
-
-  /** \brief If true, compute contacts. Otherwise only a binary collision yes/no is reported. */
-  bool contacts;
-
-  /** \brief Overall maximum number of contacts to compute */
-  std::size_t max_contacts;
-
-  /** \brief Maximum number of contacts to compute per pair of bodies (multiple bodies may be in contact at different
-   * configurations) */
-  std::size_t max_contacts_per_pair;
-
-  /** \brief When costs are computed, this value defines how many of the top cost sources should be returned */
-  std::size_t max_cost_sources;
-
-  /** \brief Function call that decides whether collision detection should stop. */
-  std::function<bool(const CollisionResult&)> is_done;
-
-  /** \brief Flag indicating whether information about detected collisions should be reported */
-  bool verbose;
-};
-
 namespace DistanceRequestTypes
 {
 enum DistanceRequestType
@@ -381,4 +296,93 @@ struct DistanceResult
     distances.clear();
   }
 };
+
+/** \brief Representation of a collision checking result */
+struct CollisionResult
+{
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  /** \brief Clear a previously stored result */
+  void clear()
+  {
+    collision = false;
+    distance = std::numeric_limits<double>::max();
+    distance_result.clear();
+    contact_count = 0;
+    contacts.clear();
+    cost_sources.clear();
+  }
+
+  /** \brief Throttled warning printing the first collision pair, if any. All collisions are logged at DEBUG level */
+  void print() const;
+
+  /** \brief True if collision was found, false otherwise */
+  bool collision = false;
+
+  /** \brief Closest distance between two bodies */
+  double distance = std::numeric_limits<double>::max();
+
+  /** \brief Distance data for each link */
+  DistanceResult distance_result;
+
+  /** \brief Number of contacts returned */
+  std::size_t contact_count = 0;
+
+  /** \brief A map returning the pairs of body ids in contact, plus their contact details */
+  using ContactMap = std::map<std::pair<std::string, std::string>, std::vector<Contact> >;
+  ContactMap contacts;
+
+  /** \brief These are the individual cost sources when costs are computed */
+  std::set<CostSource> cost_sources;
+};
+
+/** \brief Representation of a collision checking request */
+struct CollisionRequest
+{
+  CollisionRequest()
+    : distance(false)
+    , cost(false)
+    , contacts(false)
+    , max_contacts(1)
+    , max_contacts_per_pair(1)
+    , max_cost_sources(1)
+    , verbose(false)
+  {
+  }
+  virtual ~CollisionRequest()
+  {
+  }
+
+  /** \brief The group name to check collisions for (optional; if empty, assume the complete robot) */
+  std::string group_name;
+
+  /** \brief If true, compute proximity distance */
+  bool distance;
+
+  /** \brief If true, return detailed distance information. Distance must be set to true as well */
+  bool detailed_distance = false;
+
+  /** \brief If true, a collision cost is computed */
+  bool cost;
+
+  /** \brief If true, compute contacts. Otherwise only a binary collision yes/no is reported. */
+  bool contacts;
+
+  /** \brief Overall maximum number of contacts to compute */
+  std::size_t max_contacts;
+
+  /** \brief Maximum number of contacts to compute per pair of bodies (multiple bodies may be in contact at different
+   * configurations) */
+  std::size_t max_contacts_per_pair;
+
+  /** \brief When costs are computed, this value defines how many of the top cost sources should be returned */
+  std::size_t max_cost_sources;
+
+  /** \brief Function call that decides whether collision detection should stop. */
+  std::function<bool(const CollisionResult&)> is_done;
+
+  /** \brief Flag indicating whether information about detected collisions should be reported */
+  bool verbose;
+};
+
 }  // namespace collision_detection

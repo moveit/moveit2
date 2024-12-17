@@ -70,8 +70,8 @@ protected:
     node_ = rclcpp::Node::make_shared("unittest_trajectory_generator_circ", node_options);
 
     // load robot model
-    robot_model_loader::RobotModelLoader rm_loader(node_);
-    robot_model_ = rm_loader.getModel();
+    rm_loader_ = std::make_unique<robot_model_loader::RobotModelLoader>(node_);
+    robot_model_ = rm_loader_->getModel();
     ASSERT_TRUE(bool(robot_model_)) << "Failed to load robot model";
     planning_scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
 
@@ -160,6 +160,11 @@ protected:
     }
   }
 
+  void TearDown() override
+  {
+    robot_model_.reset();
+  }
+
   void getCircCenter(const planning_interface::MotionPlanRequest& req,
                      const planning_interface::MotionPlanResponse& res, Eigen::Vector3d& circ_center)
   {
@@ -192,6 +197,7 @@ protected:
   // ros stuff
   rclcpp::Node::SharedPtr node_;
   moveit::core::RobotModelConstPtr robot_model_;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> rm_loader_;
   planning_scene::PlanningSceneConstPtr planning_scene_;
 
   std::unique_ptr<TrajectoryGeneratorCIRC> circ_;
@@ -258,11 +264,6 @@ TEST_F(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
   }
 
   {
-    std::shared_ptr<CircJointMissingInStartState> cjmiss_ex{ new CircJointMissingInStartState("") };
-    EXPECT_EQ(cjmiss_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
-  }
-
-  {
     std::shared_ptr<CircInverseForGoalIncalculable> cifgi_ex{ new CircInverseForGoalIncalculable("") };
     EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
   }
@@ -276,24 +277,6 @@ TEST_F(TrajectoryGeneratorCIRCTest, noLimits)
   LimitsContainer planner_limits;
   EXPECT_THROW(TrajectoryGeneratorCIRC(this->robot_model_, planner_limits, planning_group_),
                TrajectoryGeneratorInvalidLimitsException);
-}
-
-/**
- * @brief test invalid motion plan request with incomplete start state and
- * cartesian goal
- */
-TEST_F(TrajectoryGeneratorCIRCTest, incompleteStartState)
-{
-  auto circ{ tdp_->getCircCartCenterCart("circ1_center_2") };
-
-  planning_interface::MotionPlanRequest req{ circ.toRequest() };
-  EXPECT_GT(req.start_state.joint_state.name.size(), 1u);
-  req.start_state.joint_state.name.resize(1);
-  req.start_state.joint_state.position.resize(1);  // prevent failing check for equal sizes
-
-  planning_interface::MotionPlanResponse res;
-  EXPECT_FALSE(circ_->generate(planning_scene_, req, res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_ROBOT_STATE);
 }
 
 /**

@@ -2,6 +2,18 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+
+2.5.5 (2023-09-10)
+------------------
+* Switch to clang-format-14 (`#1877 <https://github.com/ros-planning/moveit2/issues/1877>`_) (`#1880 <https://github.com/ros-planning/moveit2/issues/1880>`_)
+  * Switch to clang-format-14
+  * Fix clang-format-14
+  (cherry picked from commit 7fa5eaf1ac21ab8a99c5adae53bd0a2d4abf98f6)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+* Contributors: mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * updated comment formatting for correct doxygen generation (`#1582 <https://github.com/ros-planning/moveit2/issues/1582>`_) (`#1664 <https://github.com/ros-planning/moveit2/issues/1664>`_)

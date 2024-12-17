@@ -2,6 +2,12 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+
+2.5.5 (2023-09-10)
+------------------
+
 2.5.4 (2022-11-04)
 ------------------
 * Improve CMake usage (`#1550 <https://github.com/ros-planning/moveit2/issues/1550>`_) (`#1555 <https://github.com/ros-planning/moveit2/issues/1555>`_)

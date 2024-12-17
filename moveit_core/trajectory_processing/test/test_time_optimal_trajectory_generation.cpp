@@ -496,6 +496,36 @@ TEST(time_optimal_trajectory_generation, testPluginAPI)
   ASSERT_EQ(first_trajectory_msg_end, third_trajectory_msg_end);
 }
 
+TEST(time_optimal_trajectory_generation, testRelevantZeroMaxAccelerationsInvalidateTrajectory)
+{
+  const Eigen::Vector2d max_velocity(1, 1);
+  const Path path(std::list<Eigen::VectorXd>{ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) });
+
+  EXPECT_FALSE(Trajectory(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(0, 1)).isValid());
+  EXPECT_FALSE(Trajectory(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(1, 0)).isValid());
+  EXPECT_FALSE(Trajectory(path, max_velocity, /*max_acceleration=*/Eigen::Vector2d(0, 0)).isValid());
+}
+
+TEST(time_optimal_trajectory_generation, testIrrelevantZeroMaxAccelerationsDontInvalidateTrajectory)
+{
+  const Eigen::Vector2d max_velocity(1, 1);
+
+  EXPECT_TRUE(Trajectory(Path(std::list<Eigen::VectorXd>{ Eigen::Vector2d(0, 0), Eigen::Vector2d(0, 1) }), max_velocity,
+                         /*max_acceleration=*/Eigen::Vector2d(0, 1))
+                  .isValid());
+  EXPECT_TRUE(Trajectory(Path(std::list<Eigen::VectorXd>{ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 0) }), max_velocity,
+                         /*max_acceleration=*/Eigen::Vector2d(1, 0))
+                  .isValid());
+}
+
+TEST(time_optimal_trajectory_generation, testTimeStepZeroMakesTrajectoryInvalid)
+{
+  EXPECT_FALSE(Trajectory(Path(std::list<Eigen::VectorXd>{ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) }),
+                          /*max_velocity=*/Eigen::Vector2d(1, 1), /*max_acceleration=*/Eigen::Vector2d(1, 1),
+                          /*time_step=*/0)
+                   .isValid());
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

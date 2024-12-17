@@ -406,7 +406,7 @@ public:
   void interpolate(const double* from, const double* to, double t, double* state) const;
 
   /** \brief Get the number of variables that describe this joint group. This includes variables necessary for mimic
-      joints, so will always be >= the number of items returned by getActiveVariableNames() */
+      joints, so will always be >= getActiveVariableCount() */
   unsigned int getVariableCount() const
   {
     return variable_count_;

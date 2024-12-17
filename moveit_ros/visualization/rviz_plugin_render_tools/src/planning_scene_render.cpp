@@ -91,7 +91,7 @@ void PlanningSceneRender::renderPlanningScene(const planning_scene::PlanningScen
     color.r = default_attached_color.r;
     color.g = default_attached_color.g;
     color.b = default_attached_color.b;
-    color.a = 1.0f;
+    color.a = default_attached_color.a;
     planning_scene::ObjectColorMap color_map;
     scene->getKnownObjectColors(color_map);
     scene_robot_->update(moveit::core::RobotStateConstPtr(rs), color, color_map);
@@ -109,6 +109,7 @@ void PlanningSceneRender::renderPlanningScene(const planning_scene::PlanningScen
       color.r = c.r;
       color.g = c.g;
       color.b = c.b;
+      color.a = c.a;
       alpha = c.a;
     }
     for (std::size_t j = 0; j < object->shapes_.size(); ++j)

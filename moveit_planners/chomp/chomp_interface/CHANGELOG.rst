@@ -2,6 +2,18 @@
 Changelog for package chomp_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+
+2.5.5 (2023-09-10)
+------------------
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Add planner configurations to CHOMP and PILZ (`#1522 <https://github.com/ros-planning/moveit2/issues/1522>`_) (`#1656 <https://github.com/ros-planning/moveit2/issues/1656>`_)

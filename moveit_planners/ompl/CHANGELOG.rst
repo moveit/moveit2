@@ -2,6 +2,40 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* Invoke OMPL debug print only when debug logging is enabled (backport `#2608 <https://github.com/ros-planning/moveit2/issues/2608>`_) (`#2762 <https://github.com/ros-planning/moveit2/issues/2762>`_)
+* Map ompl's APPROXIMATE_SOLUTION -> TIMED_OUT / PLANNING_FAILED (`#2455 <https://github.com/ros-planning/moveit2/issues/2455>`_) (`#2459 <https://github.com/ros-planning/moveit2/issues/2459>`_)
+* Contributors: Igor Medvedev, Robert Hashcke, mergify[bot]
+
+2.5.5 (2023-09-10)
+------------------
+* Fix Constraint Planning Segfault (`#2130 <https://github.com/ros-planning/moveit2/issues/2130>`_) (`#2173 <https://github.com/ros-planning/moveit2/issues/2173>`_)
+  * Fix Constraint Planning Segfault
+  * Reuse planner data
+  * apply clang formatting
+  * apply clang formatting round 2
+  * add FIXME note and verbose output of planning graph size
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  (cherry picked from commit 92a7951f74baaf26d07356612a2f5dca0bac5065)
+  Co-authored-by: Marq Rasmussen <marq.razz@gmail.com>
+* Cleanup msg includes: Use C++ instead of C header (backport `#1844 <https://github.com/ros-planning/moveit2/issues/1844>`_)
+  * Cleanup msg includes: Use C++ instead of C header
+  * Remove obsolete include: moveit_msgs/srv/execute_known_trajectory.hpp
+* Use <> for non-local headers (`#1765 <https://github.com/ros-planning/moveit2/issues/1765>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+  (cherry picked from commit 7a1f2a101f9aeb8557e8a31656bbe1a6d53b430e)
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: Chris Thrasher, Robert Haschke, mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * simplify_solution per planning context (`#1437 <https://github.com/ros-planning/moveit2/issues/1437>`_) (`#1646 <https://github.com/ros-planning/moveit2/issues/1646>`_)

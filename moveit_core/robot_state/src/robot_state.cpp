@@ -801,26 +801,11 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
 
 const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
 {
-  const moveit::core::LinkModel* link{ nullptr };
-
-  size_t idx = 0;
-  if ((idx = frame.find('/')) != std::string::npos)
-  {  // resolve sub frame
-    std::string object{ frame.substr(0, idx) };
-    if (!hasAttachedBody(object))
-      return nullptr;
-    auto body{ getAttachedBody(object) };
-    if (!body->hasSubframeTransform(frame))
-      return nullptr;
-    link = body->getAttachedLink();
-  }
-  else if (hasAttachedBody(frame))
-  {
-    link = getAttachedBody(frame)->getAttachedLink();
-  }
-  else if (getRobotModel()->hasLinkModel(frame))
-    link = getLinkModel(frame);
-
+  bool found;
+  const LinkModel* link{ nullptr };
+  getFrameInfo(frame, link, found);
+  if (!found)
+    RCLCPP_ERROR(LOGGER, "Unable to find link for frame '%s'", frame.c_str());
   return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
 }
 
@@ -1683,40 +1668,34 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
 
       if (pose_frame != solver_tip_frame)
       {
-        if (hasAttachedBody(pose_frame))
+        auto* pose_parent = getRigidlyConnectedParentLinkModel(pose_frame);
+        if (!pose_parent)
         {
-          const AttachedBody* body = getAttachedBody(pose_frame);
-          pose_frame = body->getAttachedLinkName();
-          pose = pose * body->getPose().inverse();
+          RCLCPP_ERROR_STREAM(LOGGER, "The following Pose Frame does not exist: " << pose_frame);
+          return false;
         }
-        if (pose_frame != solver_tip_frame)
+        Eigen::Isometry3d pose_parent_to_frame = getFrameTransform(pose_frame);
+        auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame);
+        if (!tip_parent)
         {
-          const moveit::core::LinkModel* link_model = getLinkModel(pose_frame);
-          if (!link_model)
-          {
-            RCLCPP_ERROR(LOGGER, "The following Pose Frame does not exist: %s", pose_frame.c_str());
-            return false;
-          }
-          const moveit::core::LinkTransformMap& fixed_links = link_model->getAssociatedFixedTransforms();
-          for (const std::pair<const LinkModel* const, Eigen::Isometry3d>& fixed_link : fixed_links)
-            if (Transforms::sameFrame(fixed_link.first->getName(), solver_tip_frame))
-            {
-              pose_frame = solver_tip_frame;
-              pose = pose * fixed_link.second;
-              break;
-            }
+          RCLCPP_ERROR_STREAM(LOGGER, "The following Solver Tip Frame does not exist: " << solver_tip_frame);
+          return false;
         }
-
-      }  // end if pose_frame
-
-      // Check if this pose frame works
-      if (pose_frame == solver_tip_frame)
+        Eigen::Isometry3d tip_parent_to_tip = getFrameTransform(solver_tip_frame);
+        if (pose_parent == tip_parent)
+        {
+          // transform goal pose as target for solver_tip_frame (instead of pose_frame)
+          pose = pose * pose_parent_to_frame.inverse() * tip_parent_to_tip;
+          found_valid_frame = true;
+          break;
+        }
+      }
+      else
       {
         found_valid_frame = true;
         break;
-      }
-
-    }  // end for solver_tip_frames
+      }  // end if pose_frame
+    }    // end for solver_tip_frames
 
     // Make sure one of the tip frames worked
     if (!found_valid_frame)

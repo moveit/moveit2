@@ -2,6 +2,21 @@
 Changelog for package moveit_resources_prbt_ikfast_manipulator_plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* PRBT IkFast patch from robostack (`#2395 <https://github.com/ros-planning/moveit2/issues/2395>`_) (`#2397 <https://github.com/ros-planning/moveit2/issues/2397>`_)
+* Contributors: Tyler Weaver, mergify[bot]
+
+2.5.5 (2023-09-10)
+------------------
+* Used C++ style casting for int type (backport `#1627 <https://github.com/ros-planning/moveit2/issues/1627>`_) (`#1819 <https://github.com/ros-planning/moveit2/issues/1819>`_)
+  (cherry picked from commit 1f32ab0e43f488e9c5bd1957c7677e302c406df0)
+  Co-authored-by: Abhijeet Das Gupta <75399048+abhijelly@users.noreply.github.com>
+* Add `-Wunused-parameter` (`#1756 <https://github.com/ros-planning/moveit2/issues/1756>`_) (`#1757 <https://github.com/ros-planning/moveit2/issues/1757>`_)
+  (cherry picked from commit be474ec5ba6d0210379d009d518bdd631cc46ad9)
+  Co-authored-by: Chris Thrasher <chrisjthrasher@gmail.com>
+* Contributors: mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Use pragma once as header include guard (`#1525 <https://github.com/ros-planning/moveit2/issues/1525>`_) (`#1652 <https://github.com/ros-planning/moveit2/issues/1652>`_)

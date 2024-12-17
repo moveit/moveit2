@@ -2,6 +2,50 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* Don't assume gripper controller for single joint control in MoveIt Setup Assistant (backport `#2555 <https://github.com/ros-planning/moveit2/issues/2555>`_) (`#2559 <https://github.com/ros-planning/moveit2/issues/2559>`_)
+  * For single joint controllers which are not gripper controllers, still output joints list
+  * Use OR
+  * Only check for GripperActionController
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  ---------
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+  (cherry picked from commit 81094a63898ace7829687d2d6aa3ccb3cdd81b58)
+  Co-authored-by: Forrest Rogers-Marcovitz <39061824+forrest-rm@users.noreply.github.com>
+* Contributors: Forrest Rogers-Marcovitz, mergify[bot]
+
+2.5.5 (2023-09-10)
+------------------
+* add missing dependencies on config utils (backport `#1962 <https://github.com/ros-planning/moveit2/issues/1962>`_) (`#2206 <https://github.com/ros-planning/moveit2/issues/2206>`_)
+  when installing ros-humble-moveit-setup-assistant from debs,
+  the package cannot currently run due to this missing depend
+  (cherry picked from commit cc635471aadfb9446398ece319ae31c6b72bec86)
+  Co-authored-by: Michael Ferguson <mfergs7@gmail.com>
+* Fix clang compiler warnings (backport of `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_) (`#1896 <https://github.com/ros-planning/moveit2/issues/1896>`_)
+  - Fix warning: definition of implicit copy assignment operator is deprecated
+  - Fix warning: expression with side effects will be evaluated
+  - Fix warning: passing by value
+  - Enable -Werror
+  - Fix -Wdelete-non-abstract-non-virtual-dtor
+  - Fix more clang warnings
+  - Modernize gtest: TYPED_TEST_CASE -> TYPED_TEST_SUITE
+  - Fix GoogleTestVerification.UninstantiatedTypeParameterizedTestSuite
+  - Add default copy/move constructors/assignment operators
+  As a user-declared destructor deletes any implicitly-defined move constructor/assignment operator,
+  we need to declared them manually. This in turn requires to declare the copy constructor/assignment as well.
+  - Explicitly declare overrides
+  - Add default constructors as they are not implicitly declared anymore
+  - Declare selected classes as final
+  - Add noexcept specifier to constructors
+  - Fixup gmock/gtest warnings
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: Robert Haschke, mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * MSA: write the default controller namespace (`#1515 <https://github.com/ros-planning/moveit2/issues/1515>`_) (`#1651 <https://github.com/ros-planning/moveit2/issues/1651>`_)

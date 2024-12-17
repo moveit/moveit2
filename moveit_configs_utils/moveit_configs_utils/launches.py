@@ -1,3 +1,5 @@
+import os
+
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
@@ -57,6 +59,7 @@ def generate_moveit_rviz_launch(moveit_config):
     rviz_parameters = [
         moveit_config.planning_pipelines,
         moveit_config.robot_description_kinematics,
+        moveit_config.joint_limits,
     ]
 
     add_debuggable_node(
@@ -195,9 +198,19 @@ def generate_move_group_launch(moveit_config):
         DeclareBooleanLaunchArg("publish_monitored_planning_scene", default_value=True)
     )
     # load non-default MoveGroup capabilities (space separated)
-    ld.add_action(DeclareLaunchArgument("capabilities", default_value=""))
+    ld.add_action(
+        DeclareLaunchArgument(
+            "capabilities",
+            default_value=moveit_config.move_group_capabilities["capabilities"],
+        )
+    )
     # inhibit these default MoveGroup capabilities (space separated)
-    ld.add_action(DeclareLaunchArgument("disable_capabilities", default_value=""))
+    ld.add_action(
+        DeclareLaunchArgument(
+            "disable_capabilities",
+            default_value=moveit_config.move_group_capabilities["disable_capabilities"],
+        )
+    )
 
     # do not copy dynamics information from /joint_states to internal robot monitoring
     # default to false, because almost nothing in move_group relies on this information
@@ -237,14 +250,16 @@ def generate_move_group_launch(moveit_config):
         parameters=move_group_params,
         extra_debug_args=["--debug"],
         # Set the display variable, in case OpenGL code is used internally
-        additional_env={"DISPLAY": ":0"},
+        additional_env={"DISPLAY": os.environ["DISPLAY"]},
     )
     return ld
 
 
-def generate_demo_launch(moveit_config):
+def generate_demo_launch(moveit_config, launch_package_path=None):
     """
     Launches a self contained demo
+
+    launch_package_path is optional to use different launch and config packages
 
     Includes
      * static_virtual_joint_tfs
@@ -254,6 +269,9 @@ def generate_demo_launch(moveit_config):
      * warehouse_db (optional)
      * ros2_control_node + controller spawners
     """
+    if launch_package_path == None:
+        launch_package_path = moveit_config.package_path
+
     ld = LaunchDescription()
     ld.add_action(
         DeclareBooleanLaunchArg(
@@ -270,11 +288,11 @@ def generate_demo_launch(moveit_config):
         )
     )
     ld.add_action(DeclareBooleanLaunchArg("use_rviz", default_value=True))
-
     # If there are virtual joints, broadcast static tf by including virtual_joints launch
     virtual_joints_launch = (
-        moveit_config.package_path / "launch/static_virtual_joint_tfs.launch.py"
+        launch_package_path / "launch/static_virtual_joint_tfs.launch.py"
     )
+
     if virtual_joints_launch.exists():
         ld.add_action(
             IncludeLaunchDescription(
@@ -286,7 +304,7 @@ def generate_demo_launch(moveit_config):
     ld.add_action(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                str(moveit_config.package_path / "launch/rsp.launch.py")
+                str(launch_package_path / "launch/rsp.launch.py")
             ),
         )
     )
@@ -294,7 +312,7 @@ def generate_demo_launch(moveit_config):
     ld.add_action(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                str(moveit_config.package_path / "launch/move_group.launch.py")
+                str(launch_package_path / "launch/move_group.launch.py")
             ),
         )
     )
@@ -303,7 +321,7 @@ def generate_demo_launch(moveit_config):
     ld.add_action(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                str(moveit_config.package_path / "launch/moveit_rviz.launch.py")
+                str(launch_package_path / "launch/moveit_rviz.launch.py")
             ),
             condition=IfCondition(LaunchConfiguration("use_rviz")),
         )
@@ -313,7 +331,7 @@ def generate_demo_launch(moveit_config):
     ld.add_action(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                str(moveit_config.package_path / "launch/warehouse_db.launch.py")
+                str(launch_package_path / "launch/warehouse_db.launch.py")
             ),
             condition=IfCondition(LaunchConfiguration("db")),
         )
@@ -334,7 +352,7 @@ def generate_demo_launch(moveit_config):
     ld.add_action(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(
-                str(moveit_config.package_path / "launch/spawn_controllers.launch.py")
+                str(launch_package_path / "launch/spawn_controllers.launch.py")
             ),
         )
     )

@@ -2,6 +2,43 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* Allow RobotState::setFromIK to work with subframes (backport `#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_) (`#3085 <https://github.com/ros-planning/moveit2/issues/3085>`_)
+* Enhancement/ports moveit 3522 (backport `#3070 <https://github.com/ros-planning/moveit2/issues/3070>`_) (`#3074 <https://github.com/ros-planning/moveit2/issues/3074>`_)
+* Ports moveit/moveit/pull/3519 to ros2 (backport `#3055 <https://github.com/ros-planning/moveit2/issues/3055>`_) (`#3061 <https://github.com/ros-planning/moveit2/issues/3061>`_)
+* Fix Pilz blending times (backport `#2961 <https://github.com/ros-planning/moveit2/issues/2961>`_) (`#3000 <https://github.com/ros-planning/moveit2/issues/3000>`_)
+* PILZ: Throw if IK solver doesn't exist (`#2082 <https://github.com/ros-planning/moveit2/issues/2082>`_) (`#2921 <https://github.com/ros-planning/moveit2/issues/2921>`_)
+* Contributors: Tom Noble, Sebastian Castro, Sebastian Jahr, Robert Haschke, mergify[bot]
+
+2.5.5 (2023-09-10)
+------------------
+* Pilz multi-group incompatibility (`#1856 <https://github.com/ros-planning/moveit2/issues/1856>`_) (`#2306 <https://github.com/ros-planning/moveit2/issues/2306>`_)
+  (cherry picked from commit 5bbe21b3574d3e3ef2a2c681b3962f70c3db7e78)
+  Co-authored-by: Marco Magri <94347649+MarcoMagriDev@users.noreply.github.com>
+  Co-authored-by: Sebastian Jahr <sebastian.jahr@picknik.ai>
+* Fx class_loader warnings in PILZ unittests (`#2296 <https://github.com/ros-planning/moveit2/issues/2296>`_) (`#2303 <https://github.com/ros-planning/moveit2/issues/2303>`_)
+  (cherry picked from commit d4dcea36d9767605fc1921716a67a0c6e9be2a2e)
+  Co-authored-by: Yang Lin <todoubaba@gmail.com>
+* fix: resolve bugs in MoveGroupSequenceAction class (main branch) (`#1797 <https://github.com/ros-planning/moveit2/issues/1797>`_) (`#1809 <https://github.com/ros-planning/moveit2/issues/1809>`_)
+  * fix: resolve bugs in MoveGroupSequenceAction class
+  * style: adopt .clang-format
+  Co-authored-by: Marco Magri <marco.magri@fraunhofer.it>
+  (cherry picked from commit fca8e9bd3f41e6bff5aadbf75c494b5cc3fa25ee)
+  Co-authored-by: Marco Magri <94347649+MarcoMagriDev@users.noreply.github.com>
+* Use <> for non-local headers (`#1765 <https://github.com/ros-planning/moveit2/issues/1765>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+  (cherry picked from commit 7a1f2a101f9aeb8557e8a31656bbe1a6d53b430e)
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: Chris Thrasher, mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Backport to Humble (`#1642 <https://github.com/ros-planning/moveit2/issues/1642>`_)

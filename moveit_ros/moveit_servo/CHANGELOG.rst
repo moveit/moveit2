@@ -2,6 +2,51 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* Make `moveit_servo` listen to Octomap updates (backport `#2601 <https://github.com/ros-planning/moveit2/issues/2601>`_) (`#2606 <https://github.com/ros-planning/moveit2/issues/2606>`_)
+* Use ACM in all MoveIt Servo collision checks (`#2643 <https://github.com/ros-planning/moveit2/issues/2643>`_)
+* Contributors: Amal Nanavati, Sebastian Castro, mergify[bot]
+
+2.5.5 (2023-09-10)
+------------------
+* Replaced numbers with SystemDefaultsQos() (`#2271 <https://github.com/ros-planning/moveit2/issues/2271>`_) (`#2277 <https://github.com/ros-planning/moveit2/issues/2277>`_)
+  (cherry picked from commit 5506dd516a91bc145e462b493668ef8623d43521)
+  Co-authored-by: Shobuj Paul <72087882+Shobuj-Paul@users.noreply.github.com>
+* [Servo] CI simplification (backport `#1556 <https://github.com/ros-planning/moveit2/issues/1556>`_) (`#1980 <https://github.com/ros-planning/moveit2/issues/1980>`_)
+* Fix clang compiler warnings (backport of `#1712 <https://github.com/ros-planning/moveit2/issues/1712>`_) (`#1896 <https://github.com/ros-planning/moveit2/issues/1896>`_)
+  - Fix warning: definition of implicit copy assignment operator is deprecated
+  - Fix warning: expression with side effects will be evaluated
+  - Fix warning: passing by value
+  - Enable -Werror
+  - Fix -Wdelete-non-abstract-non-virtual-dtor
+  - Fix more clang warnings
+  - Modernize gtest: TYPED_TEST_CASE -> TYPED_TEST_SUITE
+  - Fix GoogleTestVerification.UninstantiatedTypeParameterizedTestSuite
+  - Add default copy/move constructors/assignment operators
+  As a user-declared destructor deletes any implicitly-defined move constructor/assignment operator,
+  we need to declared them manually. This in turn requires to declare the copy constructor/assignment as well.
+  - Explicitly declare overrides
+  - Add default constructors as they are not implicitly declared anymore
+  - Declare selected classes as final
+  - Add noexcept specifier to constructors
+  - Fixup gmock/gtest warnings
+* Cleanup msg includes: Use C++ instead of C header (backport `#1844 <https://github.com/ros-planning/moveit2/issues/1844>`_)
+  * Cleanup msg includes: Use C++ instead of C header
+  * Remove obsolete include: moveit_msgs/srv/execute_known_trajectory.hpp
+* Use <> for non-local headers (`#1765 <https://github.com/ros-planning/moveit2/issues/1765>`_)
+  Unless a header lives in the same or a child directory of the file
+  including it, it's recommended to use <> for the #include statement.
+  For more information, see the C++ Core Guidelines item SF.12
+  https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#sf12-prefer-the-quoted-form-of-include-for-files-relative-to-the-including-file-and-the-angle-bracket-form-everywhere-else
+  (cherry picked from commit 7a1f2a101f9aeb8557e8a31656bbe1a6d53b430e)
+* Re-enable clang-tidy check `performance-unnecessary-value-param` (backport `#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Re-enable clang-tidy check performance-unnecessary-value-param (`#1703 <https://github.com/ros-planning/moveit2/issues/1703>`_)
+  * Fix clang-tidy issues (`#1706 <https://github.com/ros-planning/moveit2/issues/1706>`_)
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: AndyZe, Chris Thrasher, Robert Haschke, mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * [Servo] Remove the option for "stop distance"-based collision checking (`#1574 <https://github.com/ros-planning/moveit2/issues/1574>`_) (`#1663 <https://github.com/ros-planning/moveit2/issues/1663>`_)

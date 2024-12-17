@@ -2,6 +2,20 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.6 (2024-11-17)
+------------------
+* Use the non-deprecated service fields for switching controllers (`#2927 <https://github.com/ros-planning/moveit2/issues/2927>`_)
+* Contributors: Sai Kishor Kothakota
+
+2.5.5 (2023-09-10)
+------------------
+* Fix parameters for ros2_control namespaces (`#1833 <https://github.com/ros-planning/moveit2/issues/1833>`_) (`#1897 <https://github.com/ros-planning/moveit2/issues/1897>`_)
+  Co-authored-by: AndyZe <andyz@utexas.edu>
+  Co-authored-by: Henning Kayser <henningkayser@picknik.ai>
+  (cherry picked from commit 5838ce890975e3a058cdc9ab699b27941374c3a2)
+  Co-authored-by: Pablo Iñigo Blasco <pablo.inigo.blasco@gmail.com>
+* Contributors: mergify[bot]
+
 2.5.4 (2022-11-04)
 ------------------
 * Rename MoveItControllerManager. Add deprecation warning (`#1601 <https://github.com/ros-planning/moveit2/issues/1601>`_) (`#1666 <https://github.com/ros-planning/moveit2/issues/1666>`_)

@@ -140,7 +140,11 @@ void MeshShape::clear()
   if (entity_)
   {
     entity_->detachFromParent();
-    Ogre::MeshManager::getSingleton().remove(entity_->getMesh()->getName());
+    const auto& mesh_name = entity_->getMesh()->getName();
+    if (Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton().getByName(mesh_name))
+    {
+      Ogre::MeshManager::getSingleton().remove(mesh);
+    }
     scene_manager_->destroyEntity(entity_);
     entity_ = nullptr;
   }
