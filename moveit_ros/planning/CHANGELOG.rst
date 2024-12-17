@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.1 (2024-12-16)
+-------------------
 * Fix logic in CheckStartStateBounds adapter (`#3143 <https://github.com/ros-planning/moveit2/issues/3143>`_) (`#3148 <https://github.com/ros-planning/moveit2/issues/3148>`_)
 * Contributors: Sebastian Castro
 
