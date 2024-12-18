@@ -2,6 +2,12 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.1 (2024-12-18)
+-------------------
+* re-enable cmake warnings (`#3028 <https://github.com/ros-planning/moveit2/issues/3028>`_) (backport `#3172 <https://github.com/ros-planning/moveit2/issues/3172>`_) (`#3173 <https://github.com/ros-planning/moveit2/issues/3173>`_)
+  * Add conditional include for realtime_helpers.hpp
+* Contributors: Michael Ferguson, Sebastian Castro
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)

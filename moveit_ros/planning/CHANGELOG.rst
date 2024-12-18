@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.1 (2024-12-18)
+-------------------
+* Fix logic in CheckStartStateBounds adapter (`#3143 <https://github.com/ros-planning/moveit2/issues/3143>`_) (`#3148 <https://github.com/ros-planning/moveit2/issues/3148>`_)
+* Contributors: Sebastian Castro
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
