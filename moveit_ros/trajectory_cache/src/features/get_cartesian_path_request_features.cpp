@@ -307,66 +307,40 @@ MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsInsertMetadata(Metad
 
   // Waypoints.
 
-  // Restating them in terms of the robot model frame (usually base_link)
-  double x_offset = 0;
-  double y_offset = 0;
-  double z_offset = 0;
-
-  geometry_msgs::msg::Quaternion quat_offset;
-  quat_offset.x = 0;
-  quat_offset.y = 0;
-  quat_offset.z = 0;
-  quat_offset.w = 1;
-
-  if (base_frame != path_request_frame_id)
-  {
-    try
-    {
-      auto transform = move_group.getTF()->lookupTransform(path_request_frame_id, base_frame, tf2::TimePointZero);
-      x_offset = transform.transform.translation.x;
-      y_offset = transform.transform.translation.y;
-      z_offset = transform.transform.translation.z;
-      quat_offset = transform.transform.rotation;
-    }
-    catch (tf2::TransformException& ex)
-    {
-      // NOTE: methyldragon -
-      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
-      //   supported.
-      std::stringstream ss;
-      ss << "Skipping " << name_ << " metadata append: "
-         << "Could not get transform for translation " << base_frame << " to " << path_request_frame_id << ": "
-         << ex.what();
-      return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
-    }
-  }
-
-  tf2::Quaternion tf2_quat_frame_offset(quat_offset.x, quat_offset.y, quat_offset.z, quat_offset.w);
-  tf2_quat_frame_offset.normalize();
-
   size_t waypoint_idx = 0;
-  for (auto& waypoint : source.waypoints)
+  for (const auto& waypoint : source.waypoints)
   {
     std::string meta_name = name_ + ".waypoints_" + std::to_string(waypoint_idx++);
 
-    // Apply offsets
+    geometry_msgs::msg::Point canonical_position = waypoint.position;
+    geometry_msgs::msg::Quaternion canonical_orientation = waypoint.orientation;
+
+    // Canonicalize to robot base frame if necessary.
+    if (path_request_frame_id != base_frame)
+    {
+      if (MoveItErrorCode status = restateInNewFrame(move_group.getTF(), path_request_frame_id, base_frame,
+                                                     &canonical_position, &canonical_orientation, tf2::TimePointZero);
+          status != MoveItErrorCode::SUCCESS)
+      {
+        // NOTE: methyldragon -
+        //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+        //   supported.
+        std::stringstream ss;
+        ss << "Skipping " << name_ << " metadata append: " << status.message;
+        return MoveItErrorCode(status.val, status.message);
+      }
+    }
+
     // Position
-    metadata.append(meta_name + ".position.x", x_offset + waypoint.position.x);
-    metadata.append(meta_name + ".position.y", y_offset + waypoint.position.y);
-    metadata.append(meta_name + ".position.z", z_offset + waypoint.position.z);
+    metadata.append(meta_name + ".position.x", canonical_position.x);
+    metadata.append(meta_name + ".position.y", canonical_position.y);
+    metadata.append(meta_name + ".position.z", canonical_position.z);
 
     // Orientation
-    tf2::Quaternion tf2_quat_goal_offset(waypoint.orientation.x, waypoint.orientation.y, waypoint.orientation.z,
-                                         waypoint.orientation.w);
-    tf2_quat_goal_offset.normalize();
-
-    auto final_quat = tf2_quat_goal_offset * tf2_quat_frame_offset;
-    final_quat.normalize();
-
-    metadata.append(meta_name + ".orientation.x", final_quat.getX());
-    metadata.append(meta_name + ".orientation.y", final_quat.getY());
-    metadata.append(meta_name + ".orientation.z", final_quat.getZ());
-    metadata.append(meta_name + ".orientation.w", final_quat.getW());
+    metadata.append(meta_name + ".orientation.x", canonical_orientation.x);
+    metadata.append(meta_name + ".orientation.y", canonical_orientation.y);
+    metadata.append(meta_name + ".orientation.z", canonical_orientation.z);
+    metadata.append(meta_name + ".orientation.w", canonical_orientation.w);
   }
 
   return moveit::core::MoveItErrorCode::SUCCESS;
@@ -384,66 +358,40 @@ MoveItErrorCode CartesianWaypointsFeatures::appendFeaturesAsFetchQueryWithTolera
 
   // Waypoints.
 
-  // Restating them in terms of the robot model frame (usually base_link)
-  double x_offset = 0;
-  double y_offset = 0;
-  double z_offset = 0;
-
-  geometry_msgs::msg::Quaternion quat_offset;
-  quat_offset.x = 0;
-  quat_offset.y = 0;
-  quat_offset.z = 0;
-  quat_offset.w = 1;
-
-  if (base_frame != path_request_frame_id)
-  {
-    try
-    {
-      auto transform = move_group.getTF()->lookupTransform(path_request_frame_id, base_frame, tf2::TimePointZero);
-      x_offset = transform.transform.translation.x;
-      y_offset = transform.transform.translation.y;
-      z_offset = transform.transform.translation.z;
-      quat_offset = transform.transform.rotation;
-    }
-    catch (tf2::TransformException& ex)
-    {
-      // NOTE: methyldragon -
-      //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
-      //   supported.
-      std::stringstream ss;
-      ss << "Skipping " << name_ << " query append: "
-         << "Could not get transform for translation " << base_frame << " to " << path_request_frame_id << ": "
-         << ex.what();
-      return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE, ss.str());
-    }
-  }
-
-  tf2::Quaternion tf2_quat_frame_offset(quat_offset.x, quat_offset.y, quat_offset.z, quat_offset.w);
-  tf2_quat_frame_offset.normalize();
-
   size_t waypoint_idx = 0;
-  for (auto& waypoint : source.waypoints)
+  for (const auto& waypoint : source.waypoints)
   {
     std::string meta_name = name_ + ".waypoints_" + std::to_string(waypoint_idx++);
 
-    // Apply offsets
+    geometry_msgs::msg::Point canonical_position = waypoint.position;
+    geometry_msgs::msg::Quaternion canonical_orientation = waypoint.orientation;
+
+    // Canonicalize to robot base frame if necessary.
+    if (path_request_frame_id != base_frame)
+    {
+      if (MoveItErrorCode status = restateInNewFrame(move_group.getTF(), path_request_frame_id, base_frame,
+                                                     &canonical_position, &canonical_orientation, tf2::TimePointZero);
+          status != MoveItErrorCode::SUCCESS)
+      {
+        // NOTE: methyldragon -
+        //   Ideally we would restore the original state here and undo our changes, however copy of the query is not
+        //   supported.
+        std::stringstream ss;
+        ss << "Skipping " << name_ << " query append: " << status.message;
+        return MoveItErrorCode(status.val, status.message);
+      }
+    }
+
     // Position
-    queryAppendCenterWithTolerance(query, meta_name + ".position.x", x_offset + waypoint.position.x, match_tolerance);
-    queryAppendCenterWithTolerance(query, meta_name + ".position.y", y_offset + waypoint.position.y, match_tolerance);
-    queryAppendCenterWithTolerance(query, meta_name + ".position.z", z_offset + waypoint.position.z, match_tolerance);
+    queryAppendCenterWithTolerance(query, meta_name + ".position.x", canonical_position.x, match_tolerance);
+    queryAppendCenterWithTolerance(query, meta_name + ".position.y", canonical_position.y, match_tolerance);
+    queryAppendCenterWithTolerance(query, meta_name + ".position.z", canonical_position.z, match_tolerance);
 
     // Orientation
-    tf2::Quaternion tf2_quat_goal_offset(waypoint.orientation.x, waypoint.orientation.y, waypoint.orientation.z,
-                                         waypoint.orientation.w);
-    tf2_quat_goal_offset.normalize();
-
-    auto final_quat = tf2_quat_goal_offset * tf2_quat_frame_offset;
-    final_quat.normalize();
-
-    queryAppendCenterWithTolerance(query, meta_name + ".orientation.x", final_quat.getX(), match_tolerance);
-    queryAppendCenterWithTolerance(query, meta_name + ".orientation.y", final_quat.getY(), match_tolerance);
-    queryAppendCenterWithTolerance(query, meta_name + ".orientation.z", final_quat.getZ(), match_tolerance);
-    queryAppendCenterWithTolerance(query, meta_name + ".orientation.w", final_quat.getW(), match_tolerance);
+    queryAppendCenterWithTolerance(query, meta_name + ".orientation.x", canonical_orientation.x, match_tolerance);
+    queryAppendCenterWithTolerance(query, meta_name + ".orientation.y", canonical_orientation.y, match_tolerance);
+    queryAppendCenterWithTolerance(query, meta_name + ".orientation.z", canonical_orientation.z, match_tolerance);
+    queryAppendCenterWithTolerance(query, meta_name + ".orientation.w", canonical_orientation.w, match_tolerance);
   }
 
   return moveit::core::MoveItErrorCode::SUCCESS;

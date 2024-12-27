@@ -22,10 +22,12 @@
 #include <string>
 #include <vector>
 
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
+
+#include <tf2_ros/buffer.h>
 
 #include <warehouse_ros/message_collection.h>
 
@@ -55,6 +57,21 @@ std::string getWorkspaceFrameId(const moveit::planning_interface::MoveGroupInter
  */
 std::string getCartesianPathRequestFrameId(const moveit::planning_interface::MoveGroupInterface& move_group,
                                            const moveit_msgs::srv::GetCartesianPath::Request& path_request);
+
+/** @brief Restates a translation and rotation in a new frame.
+ *
+ * @param[in] tf. The transform buffer to use.
+ * @param[in] target_frame. The frame to restate in.
+ * @param[in] source_frame. The frame to restate from.
+ * @param[in,out] translation. The translation to restate. Ignored if nullptr.
+ * @param[in,out] rotation. The rotation to restate. Ignored if nullptr.
+ * @returns MoveItErrorCode::SUCCESS if successfully restated. Otherwise, will return return
+ * MoveItErrorCode::FRAME_TRANSFORM_FAILURE if the transform could not be retrieved.
+ */
+moveit::core::MoveItErrorCode restateInNewFrame(std::shared_ptr<tf2_ros::Buffer> tf, const std::string target_frame,
+                                                const std::string source_frame, geometry_msgs::msg::Point* translation,
+                                                geometry_msgs::msg::Quaternion* rotation,
+                                                const tf2::TimePoint& lookup_time = tf2::TimePointZero);
 
 // Execution Time. =================================================================================
 

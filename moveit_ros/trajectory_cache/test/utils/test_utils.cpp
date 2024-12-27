@@ -25,10 +25,15 @@
 #include <moveit_msgs/msg/orientation_constraint.hpp>
 #include <moveit_msgs/msg/position_constraint.hpp>
 
+#include <tf2_ros/buffer.h>
+
 #include "../fixtures/warehouse_fixture.hpp"
 
 namespace
 {
+
+using ::testing::TestParamInfo;
+using ::testing::ValuesIn;
 
 using ::warehouse_ros::MessageCollection;
 using ::warehouse_ros::Metadata;
@@ -62,6 +67,182 @@ TEST_F(WarehouseFixture, QueryAppendCenterWithToleranceWorks)
   EXPECT_EQ(coll.queryList(related_query_in_range).size(), 1);
 }
 #endif
+
+// restateInNewFrame.
+
+TEST(RestateInNewFrameTest, NoopOnNullTranslationAndRotation)
+{
+  auto tf_buffer = std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME));
+
+  moveit::core::MoveItErrorCode result = moveit_ros::trajectory_cache::restateInNewFrame(
+      tf_buffer, "frame_a", "frame_b", nullptr, nullptr, tf2::TimePointZero);
+
+  EXPECT_EQ(result, moveit::core::MoveItErrorCode::SUCCESS);
+}
+
+TEST(RestateInNewFrameTest, NoopOnSameFrame)
+{
+  auto tf_buffer = std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME));
+  geometry_msgs::msg::Point translation;
+  translation.x = 1;
+  translation.y = 2;
+  translation.z = 3;
+  geometry_msgs::msg::Quaternion rotation;
+  rotation.x = 0;
+  rotation.y = 0;
+  rotation.z = 0;
+  rotation.w = 1;
+
+  moveit::core::MoveItErrorCode result = moveit_ros::trajectory_cache::restateInNewFrame(
+      tf_buffer, "frame_a", "frame_a", &translation, &rotation, tf2::TimePointZero);
+
+  EXPECT_EQ(result, moveit::core::MoveItErrorCode::SUCCESS);
+  EXPECT_EQ(translation.x, 1);
+  EXPECT_EQ(translation.y, 2);
+  EXPECT_EQ(translation.z, 3);
+  EXPECT_EQ(rotation.x, 0);
+  EXPECT_EQ(rotation.y, 0);
+  EXPECT_EQ(rotation.z, 0);
+  EXPECT_EQ(rotation.w, 1);
+}
+
+TEST(RestateInNewFrameTest, FailsOnMissingTransform)
+{
+  auto tf_buffer = std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME));
+  geometry_msgs::msg::Point translation;
+  geometry_msgs::msg::Quaternion rotation;
+
+  moveit::core::MoveItErrorCode result = moveit_ros::trajectory_cache::restateInNewFrame(
+      tf_buffer, "frame_a", "frame_c", &translation, &rotation, tf2::TimePointZero);
+
+  EXPECT_NE(result, moveit::core::MoveItErrorCode::SUCCESS);
+}
+
+struct RestateInNewFrameTestCase
+{
+  std::string test_name;
+  bool translate;
+  bool rotate;
+  double expected_translation_x;
+  double expected_translation_y;
+  double expected_translation_z;
+  double expected_rotation_x;
+  double expected_rotation_y;
+  double expected_rotation_z;
+  double expected_rotation_w;
+};
+
+class RestateInNewFrameParameterizedTest : public testing::WithParamInterface<RestateInNewFrameTestCase>,
+                                           public testing::Test
+{
+};
+
+INSTANTIATE_TEST_SUITE_P(RestateInNewFrameParameterizedTests, RestateInNewFrameParameterizedTest,
+                         ValuesIn<RestateInNewFrameTestCase>({ {
+                                                                   .test_name = "TranslateAndRotate",
+                                                                   .translate = true,
+                                                                   .rotate = true,
+                                                                   .expected_translation_x = 2,
+                                                                   .expected_translation_y = 4,
+                                                                   .expected_translation_z = 6,
+                                                                   .expected_rotation_x = 0,
+                                                                   .expected_rotation_y = 0,
+                                                                   .expected_rotation_z = 0.707,
+                                                                   .expected_rotation_w = 0.707,
+                                                               },
+                                                               {
+                                                                   .test_name = "NullTranslationIgnoresTranslation",
+                                                                   .translate = false,
+                                                                   .rotate = true,
+                                                                   .expected_translation_x = 1,
+                                                                   .expected_translation_y = 2,
+                                                                   .expected_translation_z = 3,
+                                                                   .expected_rotation_x = 0,
+                                                                   .expected_rotation_y = 0,
+                                                                   .expected_rotation_z = 0.707,
+                                                                   .expected_rotation_w = 0.707,
+                                                               },
+                                                               {
+                                                                   .test_name = "NullRotationIgnoresRotation",
+                                                                   .translate = true,
+                                                                   .rotate = false,
+                                                                   .expected_translation_x = 2,
+                                                                   .expected_translation_y = 4,
+                                                                   .expected_translation_z = 6,
+                                                                   .expected_rotation_x = 0,
+                                                                   .expected_rotation_y = 0,
+                                                                   .expected_rotation_z = 0,
+                                                                   .expected_rotation_w = 1,
+                                                               } }),
+                         [](const TestParamInfo<RestateInNewFrameParameterizedTest::ParamType>& info) {
+                           return info.param.test_name;
+                         });
+
+TEST_P(RestateInNewFrameParameterizedTest, RestateInNewFrame)
+{
+  auto tf_buffer = std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>(RCL_ROS_TIME));
+  geometry_msgs::msg::TransformStamped transform;
+  transform.header.frame_id = "frame_a";
+  transform.child_frame_id = "frame_b";
+  transform.transform.translation.x = 1;
+  transform.transform.translation.y = 2;
+  transform.transform.translation.z = 3;
+  transform.transform.rotation.x = 0;
+  transform.transform.rotation.y = 0;
+  transform.transform.rotation.z = 0.707;  // 90 degree rotation about the z-axis.
+  transform.transform.rotation.w = 0.707;
+  tf_buffer->setTransform(transform, "test");
+
+  geometry_msgs::msg::Point translation;
+  translation.x = 1;
+  translation.y = 2;
+  translation.z = 3;
+
+  geometry_msgs::msg::Quaternion rotation;
+  rotation.x = 0;
+  rotation.y = 0;
+  rotation.z = 0;
+  rotation.w = 1;
+
+  RestateInNewFrameTestCase params = GetParam();
+
+  moveit::core::MoveItErrorCode result =
+      moveit_ros::trajectory_cache::restateInNewFrame(tf_buffer, /*target_frame=*/"frame_a", /*source_frame=*/"frame_b",
+                                                      params.translate ? &translation : nullptr,
+                                                      params.rotate ? &rotation : nullptr, tf2::TimePointZero);
+
+  EXPECT_EQ(result, moveit::core::MoveItErrorCode::SUCCESS);
+
+  if (params.translate)
+  {
+    EXPECT_EQ(translation.x, params.expected_translation_x);
+    EXPECT_EQ(translation.y, params.expected_translation_y);
+    EXPECT_EQ(translation.z, params.expected_translation_z);
+  }
+  else
+  {
+    EXPECT_EQ(translation.x, 1);
+    EXPECT_EQ(translation.y, 2);
+    EXPECT_EQ(translation.z, 3);
+  }
+
+  if (params.rotate)
+  {
+    EXPECT_NEAR(rotation.x, params.expected_rotation_x, 1e-3);
+    EXPECT_NEAR(rotation.y, params.expected_rotation_y, 1e-3);
+    EXPECT_NEAR(rotation.z, params.expected_rotation_z, 1e-3);
+    EXPECT_NEAR(rotation.w, params.expected_rotation_w, 1e-3);
+  }
+  else
+  {
+    EXPECT_EQ(rotation.x, 0);
+    EXPECT_EQ(rotation.y, 0);
+    EXPECT_EQ(rotation.z, 0);
+    EXPECT_EQ(rotation.w, 1);
+  }
+}
+
+// Other utils.
 
 TEST(TestUtils, GetExecutionTimeWorks)
 {
