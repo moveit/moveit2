@@ -19,7 +19,7 @@
 #pragma once
 
 #include <gtest/gtest.h>
-#include <moveit/warehouse/moveit_message_storage.h>
+#include <moveit/warehouse/moveit_message_storage.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 /** @class WarehouseFixture

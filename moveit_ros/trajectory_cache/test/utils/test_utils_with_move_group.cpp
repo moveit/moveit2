@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit/trajectory_cache/utils/utils.hpp>
 
 #include "../fixtures/move_group_fixture.hpp"

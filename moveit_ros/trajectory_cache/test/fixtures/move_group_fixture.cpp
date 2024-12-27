@@ -19,8 +19,8 @@
 #include <thread>
 
 #include <gtest/gtest.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/warehouse/moveit_message_storage.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
+#include <moveit/warehouse/moveit_message_storage.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include "move_group_fixture.hpp"

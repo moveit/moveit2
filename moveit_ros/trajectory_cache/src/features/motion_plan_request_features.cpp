@@ -22,9 +22,9 @@
 #include <rclcpp/logging.hpp>
 #include <warehouse_ros/message_collection.h>
 
-#include <moveit/robot_state/conversions.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 
 #include <moveit/trajectory_cache/features/motion_plan_request_features.hpp>

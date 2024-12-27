@@ -35,7 +35,7 @@
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/move_group_interface/move_group_interface.hpp>
-#include <moveit/warehouse/moveit_message_storage.h>
+#include <moveit/warehouse/moveit_message_storage.hpp>
 #include <moveit/trajectory_cache/utils/utils.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <moveit/robot_state/robot_state.hpp>

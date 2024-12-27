@@ -22,7 +22,7 @@
 #include <warehouse_ros/message_collection.h>
 
 #include <geometry_msgs/msg/point.hpp>
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit/trajectory_cache/features/constant_features.hpp>
 
 #include "../fixtures/move_group_fixture.hpp"

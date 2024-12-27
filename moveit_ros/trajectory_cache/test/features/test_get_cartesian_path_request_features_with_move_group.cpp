@@ -32,7 +32,7 @@
 #include <gtest/gtest.h>
 #include <warehouse_ros/message_collection.h>
 
-#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
 #include <moveit/trajectory_cache/features/features_interface.hpp>

@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/warehouse/moveit_message_storage.h>
+#include <moveit/warehouse/moveit_message_storage.hpp>
 
 #include "warehouse_fixture.hpp"
 
