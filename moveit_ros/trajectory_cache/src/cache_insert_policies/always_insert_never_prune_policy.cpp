@@ -81,6 +81,7 @@ std::vector<std::unique_ptr<FeaturesInterface<MotionPlanRequest>>>
 AlwaysInsertNeverPrunePolicy::getSupportedFeatures(double start_tolerance, double goal_tolerance)
 {
   std::vector<std::unique_ptr<FeaturesInterface<MotionPlanRequest>>> out;
+  out.reserve(6);
 
   // Start.
   out.push_back(std::make_unique<WorkspaceFeatures>());
@@ -231,6 +232,7 @@ CartesianAlwaysInsertNeverPrunePolicy::getSupportedFeatures(double start_toleran
                                                             double min_fraction)
 {
   std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>> out;
+  out.reserve(7);
 
   // Start.
   out.push_back(std::make_unique<CartesianWorkspaceFeatures>());

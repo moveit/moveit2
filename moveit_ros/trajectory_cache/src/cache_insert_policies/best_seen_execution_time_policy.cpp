@@ -83,6 +83,7 @@ std::vector<std::unique_ptr<FeaturesInterface<MotionPlanRequest>>>
 BestSeenExecutionTimePolicy::getSupportedFeatures(double start_tolerance, double goal_tolerance)
 {
   std::vector<std::unique_ptr<FeaturesInterface<MotionPlanRequest>>> out;
+  out.reserve(6);
 
   // Start.
   out.push_back(std::make_unique<WorkspaceFeatures>());
@@ -280,6 +281,7 @@ CartesianBestSeenExecutionTimePolicy::getSupportedFeatures(double start_toleranc
                                                            double min_fraction)
 {
   std::vector<std::unique_ptr<FeaturesInterface<GetCartesianPath::Request>>> out;
+  out.reserve(7);
 
   // Start.
   out.push_back(std::make_unique<CartesianWorkspaceFeatures>());
