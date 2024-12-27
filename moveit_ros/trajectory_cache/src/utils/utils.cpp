@@ -160,9 +160,9 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
   // Make ignored members explicit.
 
   bool emit_position_constraint_warning = false;
-  for (auto& constraint : constraints)
+  for (const auto& constraint : constraints)
   {
-    for (auto& position_constraint : constraint.position_constraints)
+    for (const auto& position_constraint : constraint.position_constraints)
     {
       if (!position_constraint.constraint_region.primitives.empty())
       {
@@ -181,7 +181,7 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
   }
 
   bool emit_visibility_constraint_warning = false;
-  for (auto& constraint : constraints)
+  for (const auto& constraint : constraints)
   {
     if (!constraint.visibility_constraints.empty())
     {
@@ -197,7 +197,7 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
   // Begin extraction.
 
   size_t constraint_idx = 0;
-  for (auto& constraint : constraints)
+  for (auto& constraint : constraints)  // Non-const as constraints are sorted in-place.
   {
     // We sort to avoid cardinality.
     sortJointConstraints(constraint.joint_constraints);
@@ -208,7 +208,7 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
 
     // Joint constraints
     size_t joint_idx = 0;
-    for (auto& joint_constraint : constraint.joint_constraints)
+    for (const auto& joint_constraint : constraint.joint_constraints)
     {
       std::string meta_name = constraint_prefix + ".joint_constraints_" + std::to_string(joint_idx++);
       query.append(meta_name + ".joint_name", joint_constraint.joint_name);
@@ -224,7 +224,7 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
       query.append(constraint_prefix + ".position_constraints.header.frame_id", reference_frame_id);
 
       size_t position_idx = 0;
-      for (auto& position_constraint : constraint.position_constraints)
+      for (const auto& position_constraint : constraint.position_constraints)
       {
         std::string meta_name = constraint_prefix + ".position_constraints_" + std::to_string(position_idx++);
 
@@ -275,7 +275,7 @@ appendConstraintsAsFetchQueryWithTolerance(Query& query, std::vector<moveit_msgs
       query.append(constraint_prefix + ".orientation_constraints.header.frame_id", reference_frame_id);
 
       size_t ori_idx = 0;
-      for (auto& orientation_constraint : constraint.orientation_constraints)
+      for (const auto& orientation_constraint : constraint.orientation_constraints)
       {
         std::string meta_name = constraint_prefix + ".orientation_constraints_" + std::to_string(ori_idx++);
 
@@ -346,9 +346,9 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
   // Make ignored members explicit
 
   bool emit_position_constraint_warning = false;
-  for (auto& constraint : constraints)
+  for (const auto& constraint : constraints)
   {
-    for (auto& position_constraint : constraint.position_constraints)
+    for (const auto& position_constraint : constraint.position_constraints)
     {
       if (!position_constraint.constraint_region.primitives.empty())
       {
@@ -367,7 +367,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
   }
 
   bool emit_visibility_constraint_warning = false;
-  for (auto& constraint : constraints)
+  for (const auto& constraint : constraints)
   {
     if (!constraint.visibility_constraints.empty())
     {
@@ -383,7 +383,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
   // Begin extraction.
 
   size_t constraint_idx = 0;
-  for (auto& constraint : constraints)
+  for (auto& constraint : constraints)  // Non-const as constraints are sorted in-place.
   {
     // We sort to avoid cardinality.
     sortJointConstraints(constraint.joint_constraints);
@@ -394,7 +394,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
 
     // Joint constraints
     size_t joint_idx = 0;
-    for (auto& joint_constraint : constraint.joint_constraints)
+    for (const auto& joint_constraint : constraint.joint_constraints)
     {
       std::string meta_name = constraint_prefix + ".joint_constraints_" + std::to_string(joint_idx++);
       metadata.append(meta_name + ".joint_name", joint_constraint.joint_name);
@@ -410,7 +410,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
       metadata.append(constraint_prefix + ".position_constraints.header.frame_id", workspace_frame_id);
 
       size_t position_idx = 0;
-      for (auto& position_constraint : constraint.position_constraints)
+      for (const auto& position_constraint : constraint.position_constraints)
       {
         std::string meta_name = constraint_prefix + ".position_constraints_" + std::to_string(position_idx++);
 
@@ -457,7 +457,7 @@ moveit::core::MoveItErrorCode appendConstraintsAsInsertMetadata(Metadata& metada
       metadata.append(constraint_prefix + ".orientation_constraints.header.frame_id", workspace_frame_id);
 
       size_t ori_idx = 0;
-      for (auto& orientation_constraint : constraint.orientation_constraints)
+      for (const auto& orientation_constraint : constraint.orientation_constraints)
       {
         std::string meta_name = constraint_prefix + ".orientation_constraints_" + std::to_string(ori_idx++);
 
