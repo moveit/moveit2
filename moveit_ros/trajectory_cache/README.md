@@ -89,7 +89,7 @@ This trajectory cache package supports:
 - Cache namespacing and partitioning
 - Extension points for injecting your own feature keying, cache insert, cache prune, and cache sorting logic.
 
-The cache supports MotionPlanRequests and GetCartesianPaths::Requests out of the box!
+The cache supports `MotionPlanRequest` and `GetCartesianPaths::Request` out of the box!
 
 ### Fully Customizable Behavior
 
