@@ -31,11 +31,12 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 
+// moveit modules
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
-#include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/trajectory_cache/cache_insert_policies/cache_insert_policy_interface.hpp>
 #include <moveit/trajectory_cache/features/features_interface.hpp>
 

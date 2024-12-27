@@ -32,9 +32,9 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/trajectory_operator_plugins/simple_sampler.h>
+#include <moveit/trajectory_operator_plugins/simple_sampler.hpp>
 
-#include <moveit/kinematic_constraints/utils.h>
+#include <moveit/kinematic_constraints/utils.hpp>
 
 namespace moveit::hybrid_planning
 {

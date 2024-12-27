@@ -35,7 +35,7 @@
 /* Author: Ioan Sucan */
 
 #include <chrono>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

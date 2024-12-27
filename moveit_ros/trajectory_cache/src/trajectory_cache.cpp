@@ -34,11 +34,12 @@
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit/warehouse/moveit_message_storage.h>
 #include <moveit/trajectory_cache/utils/utils.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/warehouse/moveit_message_storage.hpp>
 
 // Cache insert policies.
 #include <moveit/trajectory_cache/cache_insert_policies/best_seen_execution_time_policy.hpp>

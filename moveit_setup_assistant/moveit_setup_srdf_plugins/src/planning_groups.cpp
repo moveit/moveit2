@@ -35,7 +35,7 @@
 /* Author: David V. Lu!! */
 
 #include <moveit_setup_srdf_plugins/planning_groups.hpp>
-#include <moveit/kinematics_base/kinematics_base.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
 #include <pluginlib/class_loader.hpp>  // for loading all avail kinematic planners
 
 //// Cycle checking

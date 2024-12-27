@@ -34,9 +34,9 @@
 
 /* Author: Mark Moll */
 
-#include <moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_plugin.h>
-#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
-#include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.h>
+#include <moveit/cached_ik_kinematics_plugin/cached_ik_kinematics_plugin.hpp>
+#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.hpp>
+#include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
 // register CachedIKKinematicsPlugin<KDLKinematicsPlugin> as a KinematicsBase implementation

@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/local_planner/feedback_types.h>
-#include <moveit/planner_logic_plugins/replan_invalidated_trajectory.h>
+#include <moveit/local_planner/feedback_types.hpp>
+#include <moveit/planner_logic_plugins/replan_invalidated_trajectory.hpp>
 
 namespace moveit::hybrid_planning
 {

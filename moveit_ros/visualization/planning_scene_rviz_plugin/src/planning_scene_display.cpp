@@ -35,10 +35,10 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/common_planning_interface_objects/common_objects.h>
-#include <moveit/planning_scene_rviz_plugin/planning_scene_display.h>
-#include <moveit/rviz_plugin_render_tools/robot_state_visualization.h>
-#include <moveit/rviz_plugin_render_tools/octomap_render.h>
+#include <moveit/common_planning_interface_objects/common_objects.hpp>
+#include <moveit/planning_scene_rviz_plugin/planning_scene_display.hpp>
+#include <moveit/rviz_plugin_render_tools/robot_state_visualization.hpp>
+#include <moveit/rviz_plugin_render_tools/octomap_render.hpp>
 
 #include <rviz_common/transformation/transformation_manager.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
@@ -55,7 +55,7 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>
 
-#include <moveit/utils/rclcpp_utils.h>
+#include <moveit/utils/rclcpp_utils.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace moveit_rviz_plugin

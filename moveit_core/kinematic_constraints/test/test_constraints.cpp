@@ -34,13 +34,13 @@
 
 /* Author: Ioan Sucan, E. Gil Jones */
 
-#include <moveit/kinematic_constraints/kinematic_constraint.h>
+#include <moveit/kinematic_constraints/kinematic_constraint.hpp>
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <math.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 class LoadPlanningModelsPr2 : public testing::Test
 {

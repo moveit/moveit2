@@ -36,9 +36,9 @@
 
 #include <stdexcept>
 
-#include <moveit/controller_manager/controller_manager.h>
+#include <moveit/controller_manager/controller_manager.hpp>
 #include <moveit/planning_pipeline_interfaces/planning_pipeline_interfaces.hpp>
-#include <moveit/moveit_cpp/moveit_cpp.h>
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <geometry_msgs/msg/quaternion_stamped.hpp>
 #include <moveit/utils/logger.hpp>

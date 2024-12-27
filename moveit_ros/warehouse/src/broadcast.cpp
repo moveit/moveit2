@@ -34,15 +34,15 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/warehouse/planning_scene_storage.h>
-#include <moveit/warehouse/constraints_storage.h>
-#include <moveit/warehouse/state_storage.h>
+#include <moveit/warehouse/planning_scene_storage.hpp>
+#include <moveit/warehouse/constraints_storage.hpp>
+#include <moveit/warehouse/state_storage.hpp>
 #include <moveit/utils/logger.hpp>
 #include <boost/program_options/cmdline.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <rclcpp/executors/static_single_threaded_executor.hpp>
+#include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
   if (!conn->connect())
     return 1;
 
-  rclcpp::executors::StaticSingleThreadedExecutor executor;
+  rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
   rclcpp::Rate rate(static_cast<int64_t>(delay) * 1000ms);

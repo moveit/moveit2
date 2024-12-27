@@ -35,10 +35,10 @@
 /* Author: Ioan Sucan */
 
 #include <gtest/gtest.h>
-#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <sstream>
@@ -47,8 +47,8 @@
 #include <octomap_msgs/conversions.h>
 #include <octomap/octomap.h>
 
-#include <moveit/collision_detection/collision_common.h>
-#include <moveit/collision_detection/collision_plugin_cache.h>
+#include <moveit/collision_detection/collision_common.hpp>
+#include <moveit/collision_detection/collision_plugin_cache.hpp>
 
 // Test not setting the object's pose should use the shape pose as the object pose
 TEST(PlanningScene, TestOneShapeObjectPose)

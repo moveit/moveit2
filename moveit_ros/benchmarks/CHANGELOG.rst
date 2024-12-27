@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_benchmarks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Add use_padding flag + deprecate checkCollisionUnpadded() functions (`#3088 <https://github.com/ros-planning/moveit2/issues/3088>`_)
+* Contributors: Sebastian Jahr, Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 

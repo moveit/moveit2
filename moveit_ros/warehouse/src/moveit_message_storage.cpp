@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/warehouse/moveit_message_storage.h>
+#include <moveit/warehouse/moveit_message_storage.hpp>
 #include <warehouse_ros/database_loader.h>
 #include <memory>
 #include <utility>

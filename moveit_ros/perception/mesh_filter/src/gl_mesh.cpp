@@ -34,7 +34,7 @@
 
 /* Author: Suat Gedikli */
 
-#include <moveit/mesh_filter/gl_mesh.h>
+#include <moveit/mesh_filter/gl_mesh.hpp>
 #include <geometric_shapes/shapes.h>
 #include <stdexcept>
 #include <Eigen/Eigen>

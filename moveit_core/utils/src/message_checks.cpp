@@ -34,7 +34,7 @@
 
 /* Author: Michael Goerner */
 
-#include <moveit/utils/message_checks.h>
+#include <moveit/utils/message_checks.hpp>
 
 namespace moveit
 {

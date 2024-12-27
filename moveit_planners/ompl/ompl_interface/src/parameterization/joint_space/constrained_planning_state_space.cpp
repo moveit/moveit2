@@ -34,7 +34,7 @@
 
 /* Author: Jeroen De Maeyer */
 
-#include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.h>
+#include <moveit/ompl_interface/parameterization/joint_space/constrained_planning_state_space.hpp>
 
 #include <ompl/base/spaces/constraint/ConstrainedStateSpace.h>
 

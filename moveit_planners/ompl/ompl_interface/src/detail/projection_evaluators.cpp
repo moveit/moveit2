@@ -34,9 +34,9 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/ompl_interface/detail/projection_evaluators.h>
-#include <moveit/ompl_interface/model_based_planning_context.h>
-#include <moveit/ompl_interface/parameterization/model_based_state_space.h>
+#include <moveit/ompl_interface/detail/projection_evaluators.hpp>
+#include <moveit/ompl_interface/model_based_planning_context.hpp>
+#include <moveit/ompl_interface/parameterization/model_based_state_space.hpp>
 
 #include <utility>
 

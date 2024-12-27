@@ -35,9 +35,9 @@
 /* Author: Sebastian Jahr */
 
 #include <chrono>
-#include <moveit/planning_interface/planning_interface.h>
-#include <moveit/planning_interface/planning_request_adapter.h>
-#include <moveit/planning_interface/planning_response_adapter.h>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/planning_interface/planning_request_adapter.hpp>
+#include <moveit/planning_interface/planning_response_adapter.hpp>
 #include <class_loader/class_loader.hpp>
 
 namespace planning_pipeline_test

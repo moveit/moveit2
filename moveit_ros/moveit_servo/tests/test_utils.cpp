@@ -43,7 +43,7 @@
 #include <moveit_servo/servo.hpp>
 #include <moveit_servo/utils/common.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
 namespace

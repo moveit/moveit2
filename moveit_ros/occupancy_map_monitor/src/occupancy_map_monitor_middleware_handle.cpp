@@ -35,7 +35,7 @@
 /* Author: Tyler Weaver */
 
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor_middleware_handle.hpp>
-#include <moveit/occupancy_map_monitor/occupancy_map_updater.h>
+#include <moveit/occupancy_map_monitor/occupancy_map_updater.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_loader.hpp>

@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/collision_detection/collision_common.h>
+#include <moveit/collision_detection/collision_common.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

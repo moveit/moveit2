@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <geometric_shapes/solid_primitive_dims.h>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/executors.hpp>
