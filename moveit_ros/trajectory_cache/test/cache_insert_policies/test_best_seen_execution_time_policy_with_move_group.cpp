@@ -217,6 +217,7 @@ TEST_F(MoveGroupFixture, BestSeenExecutionTimePolicyWorks)
       ASSERT_EQ(*feature_fetch[i], *policy_fetch[i]);
 
       auto longer_plan = msg_plan_pair.second;
+      longer_plan.trajectory.joint_trajectory.points.back().time_from_start.sec += 1;
       longer_plan.trajectory.joint_trajectory.points.back().time_from_start.sec *= 10;
 
       auto shorter_plan = msg_plan_pair.second;
@@ -348,7 +349,7 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     plan.fraction = move_group_->computeCartesianPath(msg.waypoints, msg.max_step, msg.jump_threshold, plan.solution);
 #pragma GCC diagnostic pop
-  } while (plan.fraction <= -1);  // Sometimes the plan fails with the random pose.
+  } while (plan.fraction <= -1 && plan.solution.joint_trajectory.points.size() < 2);  // Sometimes the plan fails with the random pose.
 
   do
   {
@@ -363,7 +364,7 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
     another_plan.fraction = move_group_->computeCartesianPath(another_msg.waypoints, another_msg.max_step,
                                                               another_msg.jump_threshold, another_plan.solution);
 #pragma GCC diagnostic pop
-  } while (another_plan.fraction <= -1);  // Sometimes the plan fails with the random pose.
+  } while (another_plan.fraction <= -1 && plan.solution.joint_trajectory.points.size() < 2);  // Sometimes the plan fails with the random pose.
 
   // Ensure that the entries are valid.
   {
@@ -424,6 +425,7 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
       ASSERT_EQ(*feature_fetch[i], *policy_fetch[i]);
 
       auto longer_plan = msg_plan_pair.second;
+      longer_plan.solution.joint_trajectory.points.back().time_from_start.sec += 1;
       longer_plan.solution.joint_trajectory.points.back().time_from_start.sec *= 10;
 
       auto shorter_plan = msg_plan_pair.second;
