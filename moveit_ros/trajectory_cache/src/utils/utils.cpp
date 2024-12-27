@@ -568,7 +568,7 @@ appendRobotStateJointStateAsFetchQueryWithTolerance(Query& query, const moveit_m
     moveit_msgs::msg::RobotState current_state_msg;
     robotStateToRobotStateMsg(*current_state, current_state_msg);
 
-    for (size_t i = 0; i < current_state_msg.joint_state.name.size(); i++)
+    for (size_t i = 0; i < current_state_msg.joint_state.name.size(); ++i)
     {
       query.append(prefix + ".joint_state.name_" + std::to_string(i), current_state_msg.joint_state.name.at(i));
       queryAppendCenterWithTolerance(query, prefix + ".joint_state.position_" + std::to_string(i),
@@ -577,7 +577,7 @@ appendRobotStateJointStateAsFetchQueryWithTolerance(Query& query, const moveit_m
   }
   else
   {
-    for (size_t i = 0; i < robot_state.joint_state.name.size(); i++)
+    for (size_t i = 0; i < robot_state.joint_state.name.size(); ++i)
     {
       query.append(prefix + ".joint_state.name_" + std::to_string(i), robot_state.joint_state.name.at(i));
       queryAppendCenterWithTolerance(query, prefix + ".joint_state.position_" + std::to_string(i),
@@ -636,7 +636,7 @@ appendRobotStateJointStateAsInsertMetadata(Metadata& metadata, const moveit_msgs
     moveit_msgs::msg::RobotState current_state_msg;
     robotStateToRobotStateMsg(*current_state, current_state_msg);
 
-    for (size_t i = 0; i < current_state_msg.joint_state.name.size(); i++)
+    for (size_t i = 0; i < current_state_msg.joint_state.name.size(); ++i)
     {
       metadata.append(prefix + ".joint_state.name_" + std::to_string(i), current_state_msg.joint_state.name.at(i));
       metadata.append(prefix + ".joint_state.position_" + std::to_string(i),
@@ -645,7 +645,7 @@ appendRobotStateJointStateAsInsertMetadata(Metadata& metadata, const moveit_msgs
   }
   else
   {
-    for (size_t i = 0; i < robot_state.joint_state.name.size(); i++)
+    for (size_t i = 0; i < robot_state.joint_state.name.size(); ++i)
     {
       metadata.append(prefix + ".joint_state.name_" + std::to_string(i), robot_state.joint_state.name.at(i));
       metadata.append(prefix + ".joint_state.position_" + std::to_string(i), robot_state.joint_state.position.at(i));
