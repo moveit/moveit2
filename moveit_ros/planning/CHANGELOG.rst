@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.7 (2024-12-29)
+------------------
 * Add sleep in setup of flaky PSM test fixture (`#3126 <https://github.com/ros-planning/moveit2/issues/3126>`_)
 * Contributors: Sebastian Castro
 

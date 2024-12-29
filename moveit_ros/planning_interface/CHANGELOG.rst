@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.7 (2024-12-29)
+------------------
 * Enhancement/moveit ros1 ports (backport `#3041 <https://github.com/ros-planning/moveit2/issues/3041>`_) (`#3118 <https://github.com/ros-planning/moveit2/issues/3118>`_)
 * Contributors: Tom Noble, Mark Johnson
 

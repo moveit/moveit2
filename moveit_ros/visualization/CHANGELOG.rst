@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.7 (2024-12-29)
+------------------
 * Fix MeshShape::clear() for safer mesh removal (`#3164 <https://github.com/ros-planning/moveit2/issues/3164>`_) (`#3166 <https://github.com/ros-planning/moveit2/issues/3166>`_)
 * Contributors: Matt Wang
 
