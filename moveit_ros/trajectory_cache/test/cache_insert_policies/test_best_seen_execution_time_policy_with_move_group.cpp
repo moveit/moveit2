@@ -429,8 +429,8 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
 
       // This guarantees that the longer plan will have a larger time_from_start than the shorter plan.
       auto longer_plan = msg_plan_pair.second;
-      longer_plan.trajectory.joint_trajectory.points.back().time_from_start.sec = 100;
-      longer_plan.trajectory.joint_trajectory.points.back().time_from_start.nanosec = 0;
+      longer_plan.solution.joint_trajectory.points.back().time_from_start.sec = 100;
+      longer_plan.solution.joint_trajectory.points.back().time_from_start.nanosec = 0;
 
       auto shorter_plan = msg_plan_pair.second;
       shorter_plan.solution.joint_trajectory.points.back().time_from_start.sec = 0;
