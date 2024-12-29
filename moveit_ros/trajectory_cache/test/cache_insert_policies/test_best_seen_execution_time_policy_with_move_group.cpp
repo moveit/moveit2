@@ -266,7 +266,8 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyChecks)
     valid_plan.fraction = move_group_->computeCartesianPath(valid_msg.waypoints, valid_msg.max_step,
                                                             valid_msg.jump_threshold, valid_plan.solution);
 #pragma GCC diagnostic pop
-  } while (valid_plan.fraction <= 0);  // Sometimes the plan fails with the random pose.
+  } while (valid_plan.fraction <= 0 &&
+           valid_plan.solution.joint_trajectory.points.size() < 2);  // Sometimes the plan fails with the random pose.
 
   // Valid case, as control.
   {
@@ -350,7 +351,7 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     plan.fraction = move_group_->computeCartesianPath(msg.waypoints, msg.max_step, msg.jump_threshold, plan.solution);
 #pragma GCC diagnostic pop
-  } while (plan.fraction <= -1 &&
+  } while (plan.fraction <= 0 &&
            plan.solution.joint_trajectory.points.size() < 2);  // Sometimes the plan fails with the random pose.
 
   do
@@ -366,8 +367,8 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
     another_plan.fraction = move_group_->computeCartesianPath(another_msg.waypoints, another_msg.max_step,
                                                               another_msg.jump_threshold, another_plan.solution);
 #pragma GCC diagnostic pop
-  } while (another_plan.fraction <= -1 &&
-           plan.solution.joint_trajectory.points.size() < 2);  // Sometimes the plan fails with the random pose.
+  } while (another_plan.fraction <= 0 &&
+           another_plan.solution.joint_trajectory.points.size() < 2);  // Sometimes the plan fails with the random pose.
 
   // Ensure that the entries are valid.
   {
