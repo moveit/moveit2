@@ -62,4 +62,7 @@ CheckOptions:
     value:           UPPER_CASE
   - key:             readability-identifier-naming.ClassConstantCase
     value:           UPPER_CASE
+  # Allow passing pointers by value
+  - key:             performance-unnecessary-value-param.AllowedTypes
+    value:           std::shared_ptr;std::unique_ptr
 ...
