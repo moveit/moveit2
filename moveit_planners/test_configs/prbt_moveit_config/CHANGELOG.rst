@@ -2,6 +2,9 @@
 Changelog for package moveit_resources_prbt_moveit_config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.6 (2024-11-17)
 ------------------
 

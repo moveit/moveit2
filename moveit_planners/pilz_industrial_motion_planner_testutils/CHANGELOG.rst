@@ -2,6 +2,9 @@
 Changelog for package pilz_industrial_motion_planner_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.6 (2024-11-17)
 ------------------
 

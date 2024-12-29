@@ -2,6 +2,9 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.6 (2024-11-17)
 ------------------
 * Don't assume gripper controller for single joint control in MoveIt Setup Assistant (backport `#2555 <https://github.com/ros-planning/moveit2/issues/2555>`_) (`#2559 <https://github.com/ros-planning/moveit2/issues/2559>`_)

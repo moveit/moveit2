@@ -2,6 +2,12 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix: Resolve race condition in MoveGroupSequenceAction (backport `#3125 <https://github.com/ros-planning/moveit2/issues/3125>`_) (`#3127 <https://github.com/ros-planning/moveit2/issues/3127>`_)
+* Enhancement/moveit ros1 ports (backport `#3041 <https://github.com/ros-planning/moveit2/issues/3041>`_) (`#3118 <https://github.com/ros-planning/moveit2/issues/3118>`_)
+* Contributors: Maxwell.L, Tom Noble, Mark Johnson
+
 2.5.6 (2024-11-17)
 ------------------
 * Allow RobotState::setFromIK to work with subframes (backport `#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_) (`#3085 <https://github.com/ros-planning/moveit2/issues/3085>`_)

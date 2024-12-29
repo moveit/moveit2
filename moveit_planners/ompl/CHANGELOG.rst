@@ -2,6 +2,9 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.6 (2024-11-17)
 ------------------
 * Invoke OMPL debug print only when debug logging is enabled (backport `#2608 <https://github.com/ros-planning/moveit2/issues/2608>`_) (`#2762 <https://github.com/ros-planning/moveit2/issues/2762>`_)
