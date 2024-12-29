@@ -2,6 +2,11 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.7 (2024-12-29)
+------------------
+* Bug fix: RobotTrajectory append() (`#1813 <https://github.com/ros-planning/moveit2/issues/1813>`_) (`#1821 <https://github.com/ros-planning/moveit2/issues/1821>`_)
+* Contributors: AndyZe
+
 2.5.6 (2024-11-17)
 ------------------
 * Allow RobotState::setFromIK to work with subframes (backport `#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_) (`#3085 <https://github.com/ros-planning/moveit2/issues/3085>`_)

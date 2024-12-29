@@ -2,6 +2,9 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.7 (2024-12-29)
+------------------
+
 2.5.6 (2024-11-17)
 ------------------
 * Cast of "max_velocity" and "max_acceleration" values to double (`#2803 <https://github.com/ros-planning/moveit2/issues/2803>`_) (`#3038 <https://github.com/ros-planning/moveit2/issues/3038>`_)

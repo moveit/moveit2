@@ -2,6 +2,9 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.7 (2024-12-29)
+------------------
+
 2.5.6 (2024-11-17)
 ------------------
 * Make `moveit_servo` listen to Octomap updates (backport `#2601 <https://github.com/ros-planning/moveit2/issues/2601>`_) (`#2606 <https://github.com/ros-planning/moveit2/issues/2606>`_)

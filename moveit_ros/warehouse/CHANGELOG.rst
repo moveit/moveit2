@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_warehouse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.7 (2024-12-29)
+------------------
+
 2.5.6 (2024-11-17)
 ------------------
 * Use node logging in warehouse broadcast (`#2432 <https://github.com/ros-planning/moveit2/issues/2432>`_) (`#2443 <https://github.com/ros-planning/moveit2/issues/2443>`_)

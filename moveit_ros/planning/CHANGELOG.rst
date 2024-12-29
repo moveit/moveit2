@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.7 (2024-12-29)
+------------------
+* Add sleep in setup of flaky PSM test fixture (`#3126 <https://github.com/ros-planning/moveit2/issues/3126>`_)
+* Contributors: Sebastian Castro
+
 2.5.6 (2024-11-17)
 ------------------
 * PSM: keep references to scene\_ valid upon receiving full scenes (`#2850 <https://github.com/ros-planning/moveit2/issues/2850>`_)

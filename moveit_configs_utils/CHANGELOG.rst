@@ -2,6 +2,11 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.7 (2024-12-29)
+------------------
+* Added joint limits to rviz launch file. (`#3091 <https://github.com/ros-planning/moveit2/issues/3091>`_) (`#3136 <https://github.com/ros-planning/moveit2/issues/3136>`_)
+* Contributors: Matthew Elwin
+
 2.5.6 (2024-11-17)
 ------------------
 * fix move_group_capabilities usage (`#3018 <https://github.com/ros-planning/moveit2/issues/3018>`_) (`#3033 <https://github.com/ros-planning/moveit2/issues/3033>`_)
