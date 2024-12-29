@@ -85,8 +85,8 @@ std::string getCartesianPathRequestFrameId(const MoveGroupInterface& move_group,
   }
 }
 
-MoveItErrorCode restateInNewFrame(std::shared_ptr<tf2_ros::Buffer> tf, const std::string target_frame,
-                                  const std::string source_frame, geometry_msgs::msg::Point* translation,
+MoveItErrorCode restateInNewFrame(std::shared_ptr<tf2_ros::Buffer> tf, const std::string& target_frame,
+                                  const std::string& source_frame, geometry_msgs::msg::Point* translation,
                                   geometry_msgs::msg::Quaternion* rotation, const tf2::TimePoint& lookup_time)
 {
   if (target_frame == source_frame)

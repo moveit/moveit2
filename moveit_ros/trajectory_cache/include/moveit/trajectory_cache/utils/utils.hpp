@@ -68,8 +68,8 @@ std::string getCartesianPathRequestFrameId(const moveit::planning_interface::Mov
  * @returns MoveItErrorCode::SUCCESS if successfully restated. Otherwise, will return return
  * MoveItErrorCode::FRAME_TRANSFORM_FAILURE if the transform could not be retrieved.
  */
-moveit::core::MoveItErrorCode restateInNewFrame(std::shared_ptr<tf2_ros::Buffer> tf, const std::string target_frame,
-                                                const std::string source_frame, geometry_msgs::msg::Point* translation,
+moveit::core::MoveItErrorCode restateInNewFrame(std::shared_ptr<tf2_ros::Buffer> tf, const std::string& target_frame,
+                                                const std::string& source_frame, geometry_msgs::msg::Point* translation,
                                                 geometry_msgs::msg::Quaternion* rotation,
                                                 const tf2::TimePoint& lookup_time = tf2::TimePointZero);
 
