@@ -149,14 +149,14 @@ TEST_F(MoveGroupFixture, AlwaysInsertNeverPrunePolicyWorks)
     ASSERT_TRUE(move_group_->setPoseTarget(move_group_->getRandomPose()));
     move_group_->constructMotionPlanRequest(msg);
     ret = move_group_->plan(plan);
-  } while (!ret && plan.trajectory.joint_trajectory.points.empty());  // Sometimes the plan fails with the random pose.
+  } while (!ret || plan.trajectory.joint_trajectory.points.empty());  // Sometimes the plan fails with the random pose.
 
   do
   {
     ASSERT_TRUE(move_group_->setPoseTarget(move_group_->getRandomPose()));
     move_group_->constructMotionPlanRequest(another_msg);
     another_ret = move_group_->plan(another_plan);
-  } while (another_msg == msg && !another_ret &&
+  } while (another_msg == msg || !another_ret ||
            another_plan.trajectory.joint_trajectory.points
                .empty());  // Also, sometimes the random pose happens to be the same.
 
