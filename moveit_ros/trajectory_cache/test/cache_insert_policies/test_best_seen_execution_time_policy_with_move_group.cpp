@@ -173,6 +173,13 @@ TEST_F(MoveGroupFixture, BestSeenExecutionTimePolicyWorks)
   // Core test. ====================================================================================
   // NOTE: Be mindful that the policy is stateful.
 
+  // Set the execution times for the plans to be between the shorter and longer plan execution times
+  // later.
+  plan.trajectory.joint_trajectory.points.back().time_from_start.sec = 10;
+  plan.trajectory.joint_trajectory.points.back().time_from_start.nanosec = 0;
+  another_plan.trajectory.joint_trajectory.points.back().time_from_start.sec = 10;
+  another_plan.trajectory.joint_trajectory.points.back().time_from_start.nanosec = 0;
+
   // Insert messages and check if policy-specific additional metadata are added.
   size_t count = 0;
   for (const auto& msg_plan_pair : { std::make_pair(msg, plan), std::make_pair(another_msg, another_plan) })
@@ -382,6 +389,13 @@ TEST_F(MoveGroupFixture, CartesianBestSeenExecutionTimePolicyWorks)
 
   // Core test. ====================================================================================
   // NOTE: Be mindful that the policy is stateful.
+
+  // Set the execution times for the plans to be between the shorter and longer plan execution times
+  // later.
+  plan.solution.joint_trajectory.points.back().time_from_start.sec = 10;
+  plan.solution.joint_trajectory.points.back().time_from_start.nanosec = 0;
+  another_plan.solution.joint_trajectory.points.back().time_from_start.sec = 10;
+  another_plan.solution.joint_trajectory.points.back().time_from_start.nanosec = 0;
 
   // Insert messages and check if policy-specific additional metadata are added.
   size_t count = 0;
