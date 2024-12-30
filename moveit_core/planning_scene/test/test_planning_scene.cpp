@@ -590,6 +590,46 @@ TEST(PlanningScene, RobotStateDiffBug)
   }
 }
 
+TEST(PlanningScene, ACMBug)
+{
+  auto robot_model = moveit::core::loadTestingRobotModel("panda");
+  auto ps = std::make_shared<planning_scene::PlanningScene>(robot_model);
+
+  const auto object_name = "object";
+
+  // Helper function to add an object to the planning scene
+  auto add_object = [&] {
+    const auto ps1 = createPlanningSceneDiff(*ps, object_name, moveit_msgs::msg::CollisionObject::ADD);
+    ps->usePlanningSceneMsg(ps1);
+    EXPECT_EQ(getCollisionObjectsNames(*ps), (std::set<std::string>{ object_name }));
+  };
+
+  // Modify the allowed collision matrix and make sure it is updated
+  auto modify_acm = [&] {
+    collision_detection::AllowedCollisionMatrix& acm = ps->getAllowedCollisionMatrixNonConst();
+    acm.setEntry(object_name, ps->getRobotModel()->getJointModelGroup("hand")->getLinkModelNamesWithCollisionGeometry(),
+                 true);
+    EXPECT_TRUE(ps->getAllowedCollisionMatrix().hasEntry(object_name));
+  };
+
+  // Test removing a collision object using a diff
+  add_object();
+  modify_acm();
+  {
+    const auto ps1 = createPlanningSceneDiff(*ps, object_name, moveit_msgs::msg::CollisionObject::REMOVE);
+    ps->usePlanningSceneMsg(ps1);
+    EXPECT_EQ(getCollisionObjectsNames(*ps), (std::set<std::string>{}));
+    EXPECT_FALSE(ps->getAllowedCollisionMatrix().hasEntry(object_name));
+  }
+
+  // Test removing all objects
+  add_object();
+  modify_acm();
+  ps->removeAllCollisionObjects();
+  EXPECT_EQ(getCollisionObjectsNames(*ps), (std::set<std::string>{}));
+  EXPECT_FALSE(ps->getAllowedCollisionMatrix().hasEntry(object_name));
+}
+
 #ifndef INSTANTIATE_TEST_SUITE_P  // prior to gtest 1.10
 #define INSTANTIATE_TEST_SUITE_P(...) INSTANTIATE_TEST_CASE_P(__VA_ARGS__)
 #endif
