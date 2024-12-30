@@ -596,6 +596,9 @@ TEST(PlanningScene, ACMBug)
   auto ps = std::make_shared<planning_scene::PlanningScene>(robot_model);
 
   const auto object_name = "object";
+  collision_detection::CollisionRequest collision_request;
+  collision_request.group_name = "hand";
+  collision_request.verbose = true;
 
   // Helper function to add an object to the planning scene
   auto add_object = [&] {
@@ -612,9 +615,18 @@ TEST(PlanningScene, ACMBug)
     EXPECT_TRUE(ps->getAllowedCollisionMatrix().hasEntry(object_name));
   };
 
+  // Check collision
+  auto check_collision = [&] {
+    collision_detection::CollisionResult res;
+    ps->checkCollision(collision_request, res);
+    return res.collision;
+  };
+
   // Test removing a collision object using a diff
   add_object();
+  EXPECT_TRUE(check_collision());
   modify_acm();
+  EXPECT_FALSE(check_collision());
   {
     const auto ps1 = createPlanningSceneDiff(*ps, object_name, moveit_msgs::msg::CollisionObject::REMOVE);
     ps->usePlanningSceneMsg(ps1);
@@ -624,7 +636,10 @@ TEST(PlanningScene, ACMBug)
 
   // Test removing all objects
   add_object();
+  // This should report a collision since it's a completely new object
+  EXPECT_TRUE(check_collision());
   modify_acm();
+  EXPECT_FALSE(check_collision());
   ps->removeAllCollisionObjects();
   EXPECT_EQ(getCollisionObjectsNames(*ps), (std::set<std::string>{}));
   EXPECT_FALSE(ps->getAllowedCollisionMatrix().hasEntry(object_name));
