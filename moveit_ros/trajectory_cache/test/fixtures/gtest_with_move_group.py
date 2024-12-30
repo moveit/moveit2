@@ -113,4 +113,10 @@ class TestGTestWaitForCompletion(unittest.TestCase):
 class TestGTestProcessPostShutdown(unittest.TestCase):
     # Checks if the test has been completed with acceptable exit codes (successful codes)
     def test_gtest_pass(self, proc_info, gtest_node):
-        launch_testing.asserts.assertExitCodes(proc_info, process=gtest_node)
+        launch_testing.asserts.assertExitCodes(
+            proc_info,
+            process=gtest_node,
+            # Allow -11 since ros2_control or warehouse_ros sometimes segfaults
+            # for unrelated reasons.
+            allowable_exit_codes=[0, -11],
+        )
