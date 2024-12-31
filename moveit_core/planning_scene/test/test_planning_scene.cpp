@@ -547,9 +547,9 @@ TEST(PlanningScene, UpdateACMAfterObjectRemoval)
 
   // Helper function to add an object to the planning scene
   auto add_object = [&] {
-    const auto ps1 = createPlanningSceneDiff(*ps, object_name, moveit_msgs::msg::CollisionObject::ADD);
+    const auto ps1 = create_planning_scene_diff(*ps, object_name, moveit_msgs::msg::CollisionObject::ADD);
     ps->usePlanningSceneMsg(ps1);
-    EXPECT_EQ(getCollisionObjectsNames(*ps), (std::set<std::string>{ object_name }));
+    EXPECT_EQ(get_collision_objects_names(*ps), (std::set<std::string>{ object_name }));
   };
 
   // Modify the allowed collision matrix and make sure it is updated
@@ -573,9 +573,9 @@ TEST(PlanningScene, UpdateACMAfterObjectRemoval)
   modify_acm();
   EXPECT_FALSE(check_collision());
   {
-    const auto ps1 = createPlanningSceneDiff(*ps, object_name, moveit_msgs::msg::CollisionObject::REMOVE);
+    const auto ps1 = create_planning_scene_diff(*ps, object_name, moveit_msgs::msg::CollisionObject::REMOVE);
     ps->usePlanningSceneMsg(ps1);
-    EXPECT_EQ(getCollisionObjectsNames(*ps), (std::set<std::string>{}));
+    EXPECT_EQ(get_collision_objects_names(*ps), (std::set<std::string>{}));
     EXPECT_FALSE(ps->getAllowedCollisionMatrix().hasEntry(object_name));
   }
 
@@ -586,7 +586,7 @@ TEST(PlanningScene, UpdateACMAfterObjectRemoval)
   modify_acm();
   EXPECT_FALSE(check_collision());
   ps->removeAllCollisionObjects();
-  EXPECT_EQ(getCollisionObjectsNames(*ps), (std::set<std::string>{}));
+  EXPECT_EQ(get_collision_objects_names(*ps), (std::set<std::string>{}));
   EXPECT_FALSE(ps->getAllowedCollisionMatrix().hasEntry(object_name));
 }
 
