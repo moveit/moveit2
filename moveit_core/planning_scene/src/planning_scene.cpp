@@ -1466,7 +1466,6 @@ void PlanningScene::removeAllCollisionObjects()
       world_->removeObject(object_id);
       removeObjectColor(object_id);
       removeObjectType(object_id);
-      // TODO: How about octomap?
       getAllowedCollisionMatrixNonConst().removeEntry(object_id);
     }
   }

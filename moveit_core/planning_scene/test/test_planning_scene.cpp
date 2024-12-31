@@ -590,7 +590,7 @@ TEST(PlanningScene, RobotStateDiffBug)
   }
 }
 
-TEST(PlanningScene, ACMBug)
+TEST(PlanningScene, UpdateACMAfterObjectRemoval)
 {
   auto robot_model = moveit::core::loadTestingRobotModel("panda");
   auto ps = std::make_shared<planning_scene::PlanningScene>(robot_model);
