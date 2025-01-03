@@ -731,11 +731,20 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
 
     if (!scene.is_diff && parent_scene_)
     {
-      // if the scene does not contain a robot state then use the latest value from the current_state_monitor_
-      // so that we are not updating the scene with stale values for the robot's state.
-      if (scene.robot_state.joint_state.name.empty() && current_state_monitor_->haveCompleteState())
+      // if the scene does not contain a robot state then use the latest known values for the robot state
+      // so that we are not updating the scene with stale values.
+      if (scene.robot_state.joint_state.name.empty())
       {
-        parent_scene_->setCurrentState(*current_state_monitor_->getCurrentState());
+        // if we have a valid current_state_monitor_ with complete state use the latest data otherwise try
+        // to use the maintained (diff) scene_ which may fall back to the parent_scene_ data and not update.
+        if (current_state_monitor_ && current_state_monitor_->haveCompleteState())
+        {
+          parent_scene_->setCurrentState(*current_state_monitor_->getCurrentState());
+        }
+        else
+        {
+          parent_scene_->setCurrentState(scene_->getCurrentState());
+        }
       }
       // clear maintained (diff) scene_ and set the full new scene in parent_scene_ instead
       scene_->clearDiffs();
