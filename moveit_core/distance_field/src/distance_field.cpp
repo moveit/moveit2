@@ -206,7 +206,7 @@ void DistanceField::getGradientMarkers(double min_distance, double max_distance,
 }
 
 bool DistanceField::getShapePoints(const shapes::Shape* shape, const Eigen::Isometry3d& pose,
-                                   EigenSTL::vector_Vector3d* points)
+                                   EigenSTL::vector_Vector3d* points) const
 {
   if (shape->type == shapes::OCTREE)
   {
@@ -237,7 +237,7 @@ void DistanceField::addShapeToField(const shapes::Shape* shape, const Eigen::Iso
   addPointsToField(point_vec);
 }
 
-void DistanceField::getOcTreePoints(const octomap::OcTree* octree, EigenSTL::vector_Vector3d* points)
+void DistanceField::getOcTreePoints(const octomap::OcTree* octree, EigenSTL::vector_Vector3d* points) const
 {
   // lower extent
   double min_x, min_y, min_z;
