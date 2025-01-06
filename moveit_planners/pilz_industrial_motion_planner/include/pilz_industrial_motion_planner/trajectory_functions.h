@@ -39,7 +39,12 @@
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/transform_datatypes.hpp>)
+#include <tf2/transform_datatypes.hpp>
+#else
 #include <tf2/transform_datatypes.h>
+#endif
 #include <trajectory_msgs/msg/multi_dof_joint_trajectory.hpp>
 #include <moveit/planning_scene/planning_scene.h>
 

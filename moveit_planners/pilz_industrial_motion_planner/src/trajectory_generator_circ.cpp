@@ -42,12 +42,7 @@
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
 #include <kdl/utilities/utility.h>
-<<<<<<< HEAD
 #include <moveit/robot_state/conversions.h>
-#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
-=======
-#include <moveit/robot_state/conversions.hpp>
->>>>>>> 7390ebc98 (Update deprecated tf2 imports from .h to .hpp (#3197))
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>

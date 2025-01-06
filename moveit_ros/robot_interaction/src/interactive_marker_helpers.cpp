@@ -35,15 +35,11 @@
 /* Author: Ioan Sucan, Acorn Pooley, Adam Leeper */
 
 #include <math.h>
-<<<<<<< HEAD
 #include <moveit/robot_interaction/interactive_marker_helpers.h>
-=======
-#include <moveit/robot_interaction/interactive_marker_helpers.hpp>
 // TODO: Remove conditional include when released to all active distros.
 #if __has_include(<tf2/LinearMath/Quaternion.hpp>)
 #include <tf2/LinearMath/Quaternion.hpp>
 #else
->>>>>>> 7390ebc98 (Update deprecated tf2 imports from .h to .hpp (#3197))
 #include <tf2/LinearMath/Quaternion.h>
 #endif
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>

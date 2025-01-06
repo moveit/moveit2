@@ -47,12 +47,8 @@
 #include <tf2/LinearMath/Vector3.hpp>
 #else
 #include <tf2/LinearMath/Vector3.h>
-<<<<<<< HEAD
-#include <moveit/utils/robot_model_test_utils.h>
-=======
 #endif
-#include <moveit/utils/robot_model_test_utils.hpp>
->>>>>>> 7390ebc98 (Update deprecated tf2 imports from .h to .hpp (#3197))
+#include <moveit/utils/robot_model_test_utils.h>
 
 // To visualize bbox of the PR2, set this to 1.
 #ifndef VISUALIZE_PR2_RVIZ

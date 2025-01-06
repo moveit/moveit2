@@ -49,11 +49,7 @@
 #include <tf2/LinearMath/Transform.hpp>
 #else
 #include <tf2/LinearMath/Transform.h>
-<<<<<<< HEAD
-=======
 #endif
-#include <moveit/utils/logger.hpp>
->>>>>>> 7390ebc98 (Update deprecated tf2 imports from .h to .hpp (#3197))
 
 #include <algorithm>
 #include <limits>
