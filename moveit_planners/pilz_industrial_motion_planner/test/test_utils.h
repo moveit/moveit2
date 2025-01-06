@@ -56,8 +56,17 @@
 #include <moveit_msgs/action/move_group.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <string>
+// TODO: Remove conditional include swhen released to all active distros.
+#if __has_include(<tf2/LinearMath/Quaternion.hpp>)
+#include <tf2/LinearMath/Quaternion.hpp>
+#else
 #include <tf2/LinearMath/Quaternion.h>
+#endif
+#if __has_include(<tf2/convert.hpp>)
+#include <tf2/convert.hpp>
+#else
 #include <tf2/convert.h>
+#endif
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <utility>
 
