@@ -38,7 +38,12 @@
 #include <chomp_motion_planner/chomp_planner.hpp>
 #include <chomp_motion_planner/chomp_trajectory.hpp>
 #include <moveit/robot_state/conversions.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Quaternion.hpp>)
+#include <tf2/LinearMath/Quaternion.hpp>
+#else
 #include <tf2/LinearMath/Quaternion.h>
+#endif
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/utils/logger.hpp>
