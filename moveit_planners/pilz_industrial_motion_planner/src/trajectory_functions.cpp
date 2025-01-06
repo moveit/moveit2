@@ -34,8 +34,17 @@
 
 #include <pilz_industrial_motion_planner/trajectory_functions.h>
 
+<<<<<<< HEAD
 #include <moveit/planning_scene/planning_scene.h>
+=======
+#include <moveit/planning_scene/planning_scene.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Quaternion.hpp>)
+#include <tf2/LinearMath/Quaternion.hpp>
+#else
+>>>>>>> 7390ebc98 (Update deprecated tf2 imports from .h to .hpp (#3197))
 #include <tf2/LinearMath/Quaternion.h>
+#endif
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>

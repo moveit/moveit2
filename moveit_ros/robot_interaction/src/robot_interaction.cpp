@@ -44,7 +44,16 @@
 #include <interactive_markers/menu_handler.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Transform.hpp>)
+#include <tf2/LinearMath/Transform.hpp>
+#else
 #include <tf2/LinearMath/Transform.h>
+<<<<<<< HEAD
+=======
+#endif
+#include <moveit/utils/logger.hpp>
+>>>>>>> 7390ebc98 (Update deprecated tf2 imports from .h to .hpp (#3197))
 
 #include <algorithm>
 #include <limits>

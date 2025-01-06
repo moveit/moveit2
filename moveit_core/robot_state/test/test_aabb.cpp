@@ -42,8 +42,17 @@
 #include <string>
 #include <gtest/gtest.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Vector3.hpp>)
+#include <tf2/LinearMath/Vector3.hpp>
+#else
 #include <tf2/LinearMath/Vector3.h>
+<<<<<<< HEAD
 #include <moveit/utils/robot_model_test_utils.h>
+=======
+#endif
+#include <moveit/utils/robot_model_test_utils.hpp>
+>>>>>>> 7390ebc98 (Update deprecated tf2 imports from .h to .hpp (#3197))
 
 // To visualize bbox of the PR2, set this to 1.
 #ifndef VISUALIZE_PR2_RVIZ
