@@ -40,8 +40,17 @@
 #include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.hpp>
 #include <moveit/kinematics_base/kinematics_base.hpp>
 #include <moveit/robot_model/robot_model.hpp>
+// TODO: Remove conditional includes when released to all active distros.
+#if __has_include(<tf2/LinearMath/Quaternion.hpp>)
+#include <tf2/LinearMath/Quaternion.hpp>
+#else
 #include <tf2/LinearMath/Quaternion.h>
+#endif
+#if __has_include(<tf2/LinearMath/Vector3.hpp>)
+#include <tf2/LinearMath/Vector3.hpp>
+#else
 #include <tf2/LinearMath/Vector3.h>
+#endif
 #include <mutex>
 #include <unordered_map>
 #include <utility>
