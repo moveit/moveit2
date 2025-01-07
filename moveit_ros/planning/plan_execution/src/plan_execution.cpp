@@ -519,7 +519,6 @@ void plan_execution::PlanExecution::planningSceneUpdatedCallback(
   if (update_type & (planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY |
                      planning_scene_monitor::PlanningSceneMonitor::UPDATE_TRANSFORMS))
   {
-    RCLCPP_WARN(logger_, "planningSceneUpdatedCallback update_type: %d", update_type);
     new_scene_update_ = true;
   }
 }
@@ -527,7 +526,6 @@ void plan_execution::PlanExecution::planningSceneUpdatedCallback(
 void plan_execution::PlanExecution::doneWithTrajectoryExecution(
     const moveit_controller_manager::ExecutionStatus& /*status*/)
 {
-  RCLCPP_WARN(logger_, "doneWithTrajectoryExecution");
   execution_complete_ = true;
 }
 
@@ -541,7 +539,7 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
   }
 
   // if any side-effects are associated to the trajectory part that just completed, execute them
-  RCLCPP_WARN(logger_, "Completed '%s'", plan.plan_components[index].description.c_str());
+  RCLCPP_DEBUG(logger_, "Completed '%s'", plan.plan_components[index].description.c_str());
   if (plan.plan_components[index].effect_on_success)
   {
     if (!plan.plan_components[index].effect_on_success(&plan))
