@@ -371,10 +371,16 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
     {
       if (it.second == collision_detection::World::DESTROY)
       {
-        scene->world_->removeObject(it.first);
-        scene->removeObjectColor(it.first);
-        scene->removeObjectType(it.first);
-        scene->getAllowedCollisionMatrixNonConst().removeEntry(it.first);
+        moveit_msgs::msg::AttachedCollisionObject aco;
+        scene->getAttachedCollisionObjectMsg(aco, it.first);
+        // if object became attached, it should not be recorded as DESTROY here
+        if (aco.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)
+        {
+          scene->world_->removeObject(it.first);
+          scene->removeObjectColor(it.first);
+          scene->removeObjectType(it.first);
+          scene->getAllowedCollisionMatrixNonConst().removeEntry(it.first);
+        }
       }
       else
       {

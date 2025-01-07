@@ -83,7 +83,7 @@ plan_execution::PlanExecution::PlanExecution(
   : node_(node)
   , planning_scene_monitor_(planning_scene_monitor)
   , trajectory_execution_manager_(trajectory_execution)
-  , logger_(moveit::getLogger("moveit.ros.add_time_optimal_parameterization"))
+  , logger_(moveit::getLogger("moveit.ros.plan_execution"))
 {
   if (!trajectory_execution_manager_)
   {
@@ -297,9 +297,8 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
 
       if (res.collision || !plan.planning_scene->isStateFeasible(t.getWayPoint(i), false))
       {
-        // Dave's debacle
-        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid",
-                    plan.plan_components[path_segment.first].description.c_str());
+        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid for waypoint %ld out of %ld",
+                    plan.plan_components[path_segment.first].description.c_str(), i, wpc);
 
         // call the same functions again, in verbose mode, to show what issues have been detected
         plan.planning_scene->isStateFeasible(t.getWayPoint(i), true);
@@ -519,12 +518,16 @@ void plan_execution::PlanExecution::planningSceneUpdatedCallback(
 {
   if (update_type & (planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY |
                      planning_scene_monitor::PlanningSceneMonitor::UPDATE_TRANSFORMS))
+  {
+    RCLCPP_WARN(logger_, "planningSceneUpdatedCallback update_type: %d", update_type);
     new_scene_update_ = true;
+  }
 }
 
 void plan_execution::PlanExecution::doneWithTrajectoryExecution(
     const moveit_controller_manager::ExecutionStatus& /*status*/)
 {
+  RCLCPP_WARN(logger_, "doneWithTrajectoryExecution");
   execution_complete_ = true;
 }
 
@@ -538,7 +541,7 @@ void plan_execution::PlanExecution::successfulTrajectorySegmentExecution(const E
   }
 
   // if any side-effects are associated to the trajectory part that just completed, execute them
-  RCLCPP_DEBUG(logger_, "Completed '%s'", plan.plan_components[index].description.c_str());
+  RCLCPP_WARN(logger_, "Completed '%s'", plan.plan_components[index].description.c_str());
   if (plan.plan_components[index].effect_on_success)
   {
     if (!plan.plan_components[index].effect_on_success(&plan))
