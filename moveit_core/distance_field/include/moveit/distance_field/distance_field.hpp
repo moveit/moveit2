@@ -166,7 +166,8 @@ public:
    * @param [in] pose The pose of the shape.
    * @param [out] points The points determined for this shape.
    */
-  bool getShapePoints(const shapes::Shape* shape, const Eigen::Isometry3d& pose, EigenSTL::vector_Vector3d* points) const;
+  bool getShapePoints(const shapes::Shape* shape, const Eigen::Isometry3d& pose,
+                      EigenSTL::vector_Vector3d* points) const;
 
   /**
    * \brief Adds the set of points corresponding to the shape at the
