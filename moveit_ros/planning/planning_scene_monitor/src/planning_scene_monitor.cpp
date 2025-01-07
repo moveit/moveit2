@@ -741,7 +741,7 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
     if (!scene.is_diff && parent_scene_)
     {
       // If there is no new robot_state, transfer RobotState from current scene to parent scene
-      if (scene.robot_state.joint_state.name.empty() && scene.robot_state.multi_dof_joint_state.joint_names.empty())
+      if (scene.robot_state.is_diff)
         parent_scene_->setCurrentState(scene_->getCurrentState());
       // clear maintained (diff) scene_ and set the full new scene in parent_scene_ instead
       scene_->clearDiffs();
