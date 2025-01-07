@@ -45,16 +45,16 @@
 
 namespace move_group
 {
-namespace
+MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction()
+  : MoveGroupCapability("ExecuteTrajectoryAction"), callback_queue_(), spinner_(1, &callback_queue_)
 {
-rclcpp::Logger getLogger()
-{
-  return moveit::getLogger("moveit.ros.move_group.clear_octomap_service");
+  root_node_handle_.setCallbackQueue(&callback_queue_);
+  spinner_.start();
 }
-}  // namespace
 
-MoveGroupExecuteTrajectoryAction::MoveGroupExecuteTrajectoryAction() : MoveGroupCapability("execute_trajectory_action")
+MoveGroupExecuteTrajectoryAction::~MoveGroupExecuteTrajectoryAction()
 {
+  spinner_.stop();
 }
 
 void MoveGroupExecuteTrajectoryAction::initialize()

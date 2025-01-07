@@ -1418,7 +1418,7 @@ void PlanningSceneMonitor::onStateUpdate(const sensor_msgs::msg::JointState::Con
   }
   // run the state update with state_pending_mutex_ unlocked
   if (update)
-    updateSceneWithCurrentState();
+    updateSceneWithCurrentState(true);
 }
 
 void PlanningSceneMonitor::stateUpdateTimerCallback()
@@ -1505,7 +1505,7 @@ void PlanningSceneMonitor::setStateUpdateFrequency(double hz)
     updateSceneWithCurrentState();
 }
 
-void PlanningSceneMonitor::updateSceneWithCurrentState()
+void PlanningSceneMonitor::updateSceneWithCurrentState(bool skip_update_if_locked)
 {
   rclcpp::Time time = node_->now();
   rclcpp::Clock steady_clock = rclcpp::Clock(RCL_STEADY_TIME);
@@ -1524,7 +1524,13 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
     }
 
     {
-      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
+      boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_, boost::defer_lock);
+      if (!skip_update_if_locked)
+        ulock.lock();
+      else if (!ulock.try_lock_for(boost::chrono::duration<double>(std::min(0.1, 0.1 * dt_state_update_.toSec()))))
+        // Return if we can't lock scene_update_mutex, thus not blocking CurrentStateMonitor
+        return;
+
       last_update_time_ = last_robot_motion_time_ = current_state_monitor_->getCurrentStateTime();
       RCLCPP_DEBUG(logger_, "robot state update %f", fmod(last_robot_motion_time_.seconds(), 10.));
       current_state_monitor_->setToCurrentState(scene_->getCurrentStateNonConst());
