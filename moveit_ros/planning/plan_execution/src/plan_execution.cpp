@@ -518,9 +518,7 @@ void plan_execution::PlanExecution::planningSceneUpdatedCallback(
 {
   if (update_type & (planning_scene_monitor::PlanningSceneMonitor::UPDATE_GEOMETRY |
                      planning_scene_monitor::PlanningSceneMonitor::UPDATE_TRANSFORMS))
-  {
     new_scene_update_ = true;
-  }
 }
 
 void plan_execution::PlanExecution::doneWithTrajectoryExecution(
