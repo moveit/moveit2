@@ -166,7 +166,8 @@ public:
    * @param [in] pose The pose of the shape.
    * @param [out] points The points determined for this shape.
    */
-  bool getShapePoints(const shapes::Shape* shape, const Eigen::Isometry3d& pose, EigenSTL::vector_Vector3d* points);
+  bool getShapePoints(const shapes::Shape* shape, const Eigen::Isometry3d& pose,
+                      EigenSTL::vector_Vector3d* points) const;
 
   /**
    * \brief Adds the set of points corresponding to the shape at the
@@ -583,7 +584,7 @@ protected:
    * @param [in] octree The octree to find points for.
    * @param [out] points The points determined for this octree.
    */
-  void getOcTreePoints(const octomap::OcTree* octree, EigenSTL::vector_Vector3d* points);
+  void getOcTreePoints(const octomap::OcTree* octree, EigenSTL::vector_Vector3d* points) const;
 
   /**
    * \brief Helper function that sets the point value and color given
