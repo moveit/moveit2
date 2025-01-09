@@ -554,14 +554,14 @@ TEST(PlanningScene, UpdateACMAfterObjectRemoval)
 
   // Helper function to attach the object to the robot
   auto attach_object = [&] {
-    const auto ps1 = createPlanningSceneDiff(*ps, object_name, moveit_msgs::msg::CollisionObject::ADD, true);
+    const auto ps1 = create_planning_scene_diff(*ps, object_name, moveit_msgs::msg::CollisionObject::ADD, true);
     ps->usePlanningSceneMsg(ps1);
     EXPECT_EQ(getAttachedCollisionObjectsNames(*ps), (std::set<std::string>{ object_name }));
   };
 
   // Helper function to detach the object from the robot
   auto detach_object = [&] {
-    const auto ps1 = createPlanningSceneDiff(*ps, object_name, moveit_msgs::msg::CollisionObject::REMOVE, true);
+    const auto ps1 = create_planning_scene_diff(*ps, object_name, moveit_msgs::msg::CollisionObject::REMOVE, true);
     ps->usePlanningSceneMsg(ps1);
     EXPECT_EQ(getAttachedCollisionObjectsNames(*ps), (std::set<std::string>{}));
   };
