@@ -83,7 +83,7 @@ plan_execution::PlanExecution::PlanExecution(
   : node_(node)
   , planning_scene_monitor_(planning_scene_monitor)
   , trajectory_execution_manager_(trajectory_execution)
-  , logger_(moveit::getLogger("moveit.ros.add_time_optimal_parameterization"))
+  , logger_(moveit::getLogger("moveit.ros.plan_execution"))
 {
   if (!trajectory_execution_manager_)
   {
@@ -297,9 +297,8 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
 
       if (res.collision || !plan.planning_scene->isStateFeasible(t.getWayPoint(i), false))
       {
-        // Dave's debacle
-        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid",
-                    plan.plan_components[path_segment.first].description.c_str());
+        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid for waypoint %ld out of %ld",
+                    plan.plan_components[path_segment.first].description.c_str(), i, wpc);
 
         // call the same functions again, in verbose mode, to show what issues have been detected
         plan.planning_scene->isStateFeasible(t.getWayPoint(i), true);
