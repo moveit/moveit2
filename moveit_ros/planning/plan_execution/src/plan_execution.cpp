@@ -79,14 +79,7 @@ static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros.plan_executi
 plan_execution::PlanExecution::PlanExecution(
     const rclcpp::Node::SharedPtr& node, const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
     const trajectory_execution_manager::TrajectoryExecutionManagerPtr& trajectory_execution)
-<<<<<<< HEAD
   : node_(node), planning_scene_monitor_(planning_scene_monitor), trajectory_execution_manager_(trajectory_execution)
-=======
-  : node_(node)
-  , planning_scene_monitor_(planning_scene_monitor)
-  , trajectory_execution_manager_(trajectory_execution)
-  , logger_(moveit::getLogger("moveit.ros.plan_execution"))
->>>>>>> 639e214ae (Don't destroy objects on attach (#3205))
 {
   if (!trajectory_execution_manager_)
     trajectory_execution_manager_ = std::make_shared<trajectory_execution_manager::TrajectoryExecutionManager>(
@@ -314,14 +307,8 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
 
       if (res.collision || !plan.planning_scene_->isStateFeasible(t.getWayPoint(i), false))
       {
-<<<<<<< HEAD
-        // Dave's debacle
-        RCLCPP_INFO(LOGGER, "Trajectory component '%s' is invalid",
-                    plan.plan_components_[path_segment.first].description_.c_str());
-=======
-        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid for waypoint %ld out of %ld",
+        RCLCPP_INFO(LOGGER, "Trajectory component '%s' is invalid for waypoint %ld out of %ld",
                     plan.plan_components[path_segment.first].description.c_str(), i, wpc);
->>>>>>> 639e214ae (Don't destroy objects on attach (#3205))
 
         // call the same functions again, in verbose mode, to show what issues have been detected
         plan.planning_scene_->isStateFeasible(t.getWayPoint(i), true);
