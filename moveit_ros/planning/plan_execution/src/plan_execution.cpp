@@ -307,9 +307,8 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
 
       if (res.collision || !plan.planning_scene_->isStateFeasible(t.getWayPoint(i), false))
       {
-        // Dave's debacle
-        RCLCPP_INFO(LOGGER, "Trajectory component '%s' is invalid",
-                    plan.plan_components_[path_segment.first].description_.c_str());
+        RCLCPP_INFO(LOGGER, "Trajectory component '%s' is invalid for waypoint %ld out of %ld",
+                    plan.plan_components_[path_segment.first].description_.c_str(), i, wpc);
 
         // call the same functions again, in verbose mode, to show what issues have been detected
         plan.planning_scene_->isStateFeasible(t.getWayPoint(i), true);
