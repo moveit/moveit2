@@ -119,14 +119,8 @@ void PointCloudOctomapUpdater::start()
   rclcpp::SubscriptionOptions options;
   options.callback_group = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   /* subscribe to point cloud topic using tf filter*/
-  auto qos_profile =
-#if RCLCPP_VERSION_GTE(28, 3, 0)
-      rclcpp::SensorDataQoS();
-#else
-      rmw_qos_profile_sensor_data;
-#endif
-  point_cloud_subscriber_ =
-      new message_filters::Subscriber<sensor_msgs::msg::PointCloud2>(node_, point_cloud_topic_, qos_profile, options);
+  point_cloud_subscriber_ = new message_filters::Subscriber<sensor_msgs::msg::PointCloud2>(
+      node_, point_cloud_topic_, rmw_qos_profile_sensor_data, options);
   if (tf_listener_ && tf_buffer_ && !monitor_->getMapFrame().empty())
   {
     point_cloud_filter_ = new tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>(
