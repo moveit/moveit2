@@ -260,7 +260,7 @@ bool ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   res.processing_time_[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
 
   // report planning failure if path has collisions
-  if (not optimizer->isCollisionFree())
+  if (!optimizer->isCollisionFree())
   {
     RCLCPP_ERROR(LOGGER, "Motion plan is invalid.");
     res.error_code_.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
