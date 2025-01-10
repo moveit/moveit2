@@ -264,7 +264,7 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    if (!ns_.empty())
+    if (ns_.empty())
     {
       if (!node_->has_parameter("ros_control_namespace"))
       {
@@ -274,11 +274,6 @@ public:
       {
         node_->get_parameter<std::string>("ros_control_namespace", ns_);
       }
-    }
-    else if (node->has_parameter("ros_control_namespace"))
-    {
-      node_->get_parameter<std::string>("ros_control_namespace", ns_);
-      RCLCPP_INFO_STREAM(getLogger(), "Namespace for controller manager was specified, namespace: " << ns_);
     }
 
     list_controllers_service_ = node_->create_client<controller_manager_msgs::srv::ListControllers>(
