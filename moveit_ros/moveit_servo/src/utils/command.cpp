@@ -169,25 +169,6 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
       cartesian_position_delta.head<3>() *= servo_params.scale.linear;
       cartesian_position_delta.tail<3>() *= servo_params.scale.rotational;
     }
-    else if (servo_params.command_in_type == "speed_units")
-    {
-      if (servo_params.scale.linear > 0.0)
-      {
-        const auto linear_speed_scale = command.velocities.head<3>().norm() / servo_params.scale.linear;
-        if (linear_speed_scale > 1.0)
-        {
-          cartesian_position_delta.head<3>() /= linear_speed_scale;
-        }
-      }
-      if (servo_params.scale.rotational > 0.0)
-      {
-        const auto angular_speed_scale = command.velocities.tail<3>().norm() / servo_params.scale.rotational;
-        if (angular_speed_scale > 1.0)
-        {
-          cartesian_position_delta.tail<3>() /= angular_speed_scale;
-        }
-      }
-    }
 
     // Compute the required change in joint angles.
     const auto delta_result =
