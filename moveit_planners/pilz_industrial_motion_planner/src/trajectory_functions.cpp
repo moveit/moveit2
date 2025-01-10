@@ -113,7 +113,7 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
                                                    const double timeout)
 {
   Eigen::Isometry3d pose_eigen;
-  tf2::convert<geometry_msgs::msg::Pose, Eigen::Isometry3d>(pose, pose_eigen);
+  tf2::fromMsg(pose, pose_eigen);
   return computePoseIK(scene, group_name, link_name, pose_eigen, frame_id, seed, solution, check_self_collision,
                        timeout);
 }
@@ -589,7 +589,7 @@ bool pilz_industrial_motion_planner::isStateColliding(const planning_scene::Plan
 void normalizeQuaternion(geometry_msgs::msg::Quaternion& quat)
 {
   tf2::Quaternion q;
-  tf2::convert<geometry_msgs::msg::Quaternion, tf2::Quaternion>(quat, q);
+  tf2::fromMsg(quat, q);
   quat = tf2::toMsg(q.normalized());
 }
 
