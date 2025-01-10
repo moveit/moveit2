@@ -111,13 +111,10 @@ void PointCloudOctomapUpdater::start()
 
   rclcpp::QoS qos(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data));
   if (!filtered_cloud_topic_.empty())
+  {
     filtered_cloud_publisher_ =
-<<<<<<< HEAD
-        node_->create_publisher<sensor_msgs::msg::PointCloud2>(prefix + filtered_cloud_topic_, 10);
-=======
         node_->create_publisher<sensor_msgs::msg::PointCloud2>(prefix + filtered_cloud_topic_, rclcpp::SensorDataQoS());
   }
->>>>>>> 50b03a167 (Use sensor data QOS profile for sensor_msgs::Image and sensor_msgs::PointCloud (#664))
 
   if (point_cloud_subscriber_)
     return;
