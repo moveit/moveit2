@@ -38,6 +38,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/callback_group.hpp>
+#include <rclcpp/version.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/message_filter.h>
 #include <message_filters/subscriber.h>
