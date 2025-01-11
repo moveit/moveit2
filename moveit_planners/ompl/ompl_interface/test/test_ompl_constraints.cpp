@@ -41,7 +41,7 @@
  *  NOTE q = joint positions
  **/
 
-#include "load_test_robot.h"
+#include "load_test_robot.hpp"
 
 #include <memory>
 #include <string>
@@ -50,11 +50,11 @@
 #include <gtest/gtest.h>
 #include <Eigen/Dense>
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/robot_model_test_utils.h>
-#include <moveit/ompl_interface/detail/ompl_constraints.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/robot_model_test_utils.hpp>
+#include <moveit/ompl_interface/detail/ompl_constraints.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit/utils/logger.hpp>
 

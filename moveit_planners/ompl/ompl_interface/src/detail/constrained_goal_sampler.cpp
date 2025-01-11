@@ -34,9 +34,9 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/ompl_interface/detail/constrained_goal_sampler.h>
-#include <moveit/ompl_interface/model_based_planning_context.h>
-#include <moveit/ompl_interface/detail/state_validity_checker.h>
+#include <moveit/ompl_interface/detail/constrained_goal_sampler.hpp>
+#include <moveit/ompl_interface/model_based_planning_context.hpp>
+#include <moveit/ompl_interface/detail/state_validity_checker.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <utility>

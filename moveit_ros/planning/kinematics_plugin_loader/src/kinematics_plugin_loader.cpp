@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
-#include <moveit/kinematics_plugin_loader/kinematics_plugin_loader.h>
-#include <moveit/rdf_loader/rdf_loader.h>
+#include <moveit/kinematics_plugin_loader/kinematics_plugin_loader.hpp>
+#include <moveit/rdf_loader/rdf_loader.hpp>
 #include <pluginlib/class_loader.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

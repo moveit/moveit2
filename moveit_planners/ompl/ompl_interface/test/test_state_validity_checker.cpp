@@ -48,17 +48,17 @@
  *    The test do show what is minimally required to create a working StateValidityChecker.
  **/
 
-#include "load_test_robot.h"
+#include "load_test_robot.hpp"
 
 #include <limits>
 #include <ostream>
 
 #include <gtest/gtest.h>
 
-#include <moveit/ompl_interface/detail/state_validity_checker.h>
-#include <moveit/ompl_interface/model_based_planning_context.h>
-#include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.h>
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/ompl_interface/detail/state_validity_checker.hpp>
+#include <moveit/ompl_interface/model_based_planning_context.hpp>
+#include <moveit/ompl_interface/parameterization/joint_space/joint_model_state_space.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <ompl/geometric/SimpleSetup.h>

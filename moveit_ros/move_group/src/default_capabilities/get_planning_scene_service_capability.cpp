@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan */
 
-#include "get_planning_scene_service_capability.h"
-#include <moveit/move_group/capability_names.h>
+#include "get_planning_scene_service_capability.hpp"
+#include <moveit/move_group/capability_names.hpp>
 
 namespace move_group
 {

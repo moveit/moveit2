@@ -34,12 +34,17 @@
 
 /* Author: Sachin Chitta, David Lu!!, Ugo Cupcic */
 
-#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.h>
+#include <moveit/kdl_kinematics_plugin/kdl_kinematics_plugin.hpp>
 #include <moveit/kdl_kinematics_plugin/chainiksolver_vel_mimic_svd.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <tf2_kdl/tf2_kdl.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/transform_datatypes.hpp>)
+#include <tf2/transform_datatypes.hpp>
+#else
 #include <tf2/transform_datatypes.h>
+#endif
 
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>

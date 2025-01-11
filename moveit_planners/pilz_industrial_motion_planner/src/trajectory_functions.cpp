@@ -32,10 +32,15 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_functions.h>
+#include <pilz_industrial_motion_planner/trajectory_functions.hpp>
 
-#include <moveit/planning_scene/planning_scene.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Quaternion.hpp>)
+#include <tf2/LinearMath/Quaternion.hpp>
+#else
 #include <tf2/LinearMath/Quaternion.h>
+#endif
 #include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -112,7 +117,7 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
                                                    const double timeout)
 {
   Eigen::Isometry3d pose_eigen;
-  tf2::convert<geometry_msgs::msg::Pose, Eigen::Isometry3d>(pose, pose_eigen);
+  tf2::fromMsg(pose, pose_eigen);
   return computePoseIK(scene, group_name, link_name, pose_eigen, frame_id, seed, solution, check_self_collision,
                        timeout);
 }
@@ -586,7 +591,7 @@ bool pilz_industrial_motion_planner::isStateColliding(const planning_scene::Plan
 void normalizeQuaternion(geometry_msgs::msg::Quaternion& quat)
 {
   tf2::Quaternion q;
-  tf2::convert<geometry_msgs::msg::Quaternion, tf2::Quaternion>(quat, q);
+  tf2::fromMsg(quat, q);
   quat = tf2::toMsg(q.normalized());
 }
 

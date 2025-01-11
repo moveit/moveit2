@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_interface/planning_response.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_interface/planning_response.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
 void planning_interface::MotionPlanResponse::getMessage(moveit_msgs::msg::MotionPlanResponse& msg) const
 {

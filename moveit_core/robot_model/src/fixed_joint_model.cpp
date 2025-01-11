@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/robot_model/fixed_joint_model.h>
+#include <moveit/robot_model/fixed_joint_model.hpp>
 
 namespace moveit
 {

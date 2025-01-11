@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "collision_matrix.h"
+#include "collision_matrix.hpp"
 
 namespace moveit_py
 {

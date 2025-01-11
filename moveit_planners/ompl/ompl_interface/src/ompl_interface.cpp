@@ -34,10 +34,10 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/ompl_interface/ompl_interface.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/utils/lexical_casts.h>
+#include <moveit/ompl_interface/ompl_interface.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/utils/lexical_casts.hpp>
 #include <fstream>
 #include <moveit/utils/logger.hpp>
 

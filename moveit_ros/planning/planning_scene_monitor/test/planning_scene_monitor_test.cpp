@@ -43,8 +43,8 @@
 #include <gtest/gtest.h>
 
 // Main class
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_state/conversions.hpp>
 
 class PlanningSceneMonitorTest : public ::testing::Test
 {
@@ -59,6 +59,9 @@ public:
     scene_ = planning_scene_monitor_->getPlanningScene();
     executor_->add_node(test_node_);
     executor_thread_ = std::thread([this]() { executor_->spin(); });
+
+    // Needed to avoid race conditions on high-load CPUs.
+    std::this_thread::sleep_for(std::chrono::seconds{ 1 });
   }
 
   void TearDown() override

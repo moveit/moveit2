@@ -35,10 +35,10 @@
 
 /* Author: Ioan Sucan, Dave Coleman */
 
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model/joint_model_group.h>
-#include <moveit/robot_model/revolute_joint_model.h>
-#include <moveit/exceptions/exceptions.h>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model/joint_model_group.hpp>
+#include <moveit/robot_model/revolute_joint_model.hpp>
+#include <moveit/exceptions/exceptions.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <algorithm>
@@ -842,8 +842,10 @@ std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getLowerAndUpperLim
   {
     for (const moveit::core::VariableBounds& variable_bounds : *joint_bounds)
     {
-      lower_limits[variable_index] = variable_bounds.min_position_;
-      upper_limits[variable_index] = variable_bounds.max_position_;
+      lower_limits[variable_index] =
+          variable_bounds.position_bounded_ ? variable_bounds.min_position_ : -std::numeric_limits<double>::infinity();
+      upper_limits[variable_index] =
+          variable_bounds.position_bounded_ ? variable_bounds.max_position_ : std::numeric_limits<double>::infinity();
       variable_index++;
     }
   }

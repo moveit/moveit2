@@ -46,18 +46,18 @@
 #include <kdl/trajectory.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/velocityprofile_trap.hpp>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model/joint_model_group.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_model/joint_model_group.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include <pilz_industrial_motion_planner/cartesian_trajectory.h>
-#include <pilz_industrial_motion_planner/cartesian_trajectory_point.h>
-#include <pilz_industrial_motion_planner/limits_container.h>
-#include <pilz_industrial_motion_planner/trajectory_functions.h>
-#include "test_utils.h"
+#include <pilz_industrial_motion_planner/cartesian_trajectory.hpp>
+#include <pilz_industrial_motion_planner/cartesian_trajectory_point.hpp>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
+#include <pilz_industrial_motion_planner/trajectory_functions.hpp>
+#include "test_utils.hpp"
 
 #define _USE_MATH_DEFINES
 

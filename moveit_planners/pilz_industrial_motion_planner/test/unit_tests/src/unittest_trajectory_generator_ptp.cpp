@@ -36,13 +36,13 @@
 
 #include <gtest/gtest.h>
 
-#include <pilz_industrial_motion_planner/joint_limits_aggregator.h>
-#include <pilz_industrial_motion_planner/trajectory_generator_ptp.h>
-#include "test_utils.h"
+#include <pilz_industrial_motion_planner/joint_limits_aggregator.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_ptp.hpp>
+#include "test_utils.hpp"
 
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
 #include <pluginlib/class_loader.hpp>
 
 #include <rclcpp/rclcpp.hpp>

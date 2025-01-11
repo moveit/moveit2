@@ -34,7 +34,7 @@
 
 /* Author: Acorn Pooley */
 
-#include <moveit/distance_field/find_internal_points.h>
+#include <moveit/distance_field/find_internal_points.hpp>
 
 void distance_field::findInternalPointsConvex(const bodies::Body& body, double resolution,
                                               EigenSTL::vector_Vector3d& points)

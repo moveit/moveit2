@@ -35,7 +35,7 @@
 /* Author: Peter David Fagan */
 
 #include <list>
-#include <moveit_py/moveit_py_utils/copy_ros_msg.h>
+#include <moveit_py/moveit_py_utils/copy_ros_msg.hpp>
 
 namespace moveit_py
 {

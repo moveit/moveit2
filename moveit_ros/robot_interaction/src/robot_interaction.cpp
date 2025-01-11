@@ -35,16 +35,21 @@
 
 /* Author: Ioan Sucan, Adam Leeper */
 
-#include <moveit/robot_interaction/robot_interaction.h>
-#include <moveit/robot_interaction/interaction_handler.h>
-#include <moveit/robot_interaction/interactive_marker_helpers.h>
-#include <moveit/robot_interaction/kinematic_options_map.h>
-#include <moveit/transforms/transforms.h>
+#include <moveit/robot_interaction/robot_interaction.hpp>
+#include <moveit/robot_interaction/interaction_handler.hpp>
+#include <moveit/robot_interaction/interactive_marker_helpers.hpp>
+#include <moveit/robot_interaction/kinematic_options_map.hpp>
+#include <moveit/transforms/transforms.hpp>
 #include <interactive_markers/interactive_marker_server.hpp>
 #include <interactive_markers/menu_handler.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Transform.hpp>)
+#include <tf2/LinearMath/Transform.hpp>
+#else
 #include <tf2/LinearMath/Transform.h>
+#endif
 #include <moveit/utils/logger.hpp>
 
 #include <algorithm>

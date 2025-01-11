@@ -34,16 +34,21 @@
 
 /* Author: Martin Pecka */
 
-#include <moveit/robot_model/aabb.h>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_model/aabb.hpp>
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
 #include <string>
 #include <gtest/gtest.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Vector3.hpp>)
+#include <tf2/LinearMath/Vector3.hpp>
+#else
 #include <tf2/LinearMath/Vector3.h>
-#include <moveit/utils/robot_model_test_utils.h>
+#endif
+#include <moveit/utils/robot_model_test_utils.hpp>
 
 // To visualize bbox of the PR2, set this to 1.
 #ifndef VISUALIZE_PR2_RVIZ

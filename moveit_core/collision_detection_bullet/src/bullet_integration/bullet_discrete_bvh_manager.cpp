@@ -31,11 +31,11 @@
 
 /* Author: Levi Armstrong, Jens Petit */
 
-#include <moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.h>
+#include <moveit/collision_detection_bullet/bullet_integration/bullet_discrete_bvh_manager.hpp>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
-#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.h>
+#include <moveit/collision_detection_bullet/bullet_integration/ros_bullet_utils.hpp>
 
 namespace collision_detection_bullet
 {

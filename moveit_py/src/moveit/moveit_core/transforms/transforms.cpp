@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "transforms.h"
+#include "transforms.hpp"
 
 namespace moveit_py
 {

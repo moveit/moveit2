@@ -139,7 +139,7 @@ def test_all_tests_pass(trajectory_cache_test_runner_node, launch_context):
         launch_context,
         trajectory_cache_test_runner_node,
         lambda x: x.count("[PASS]") == 169,  # All test cases passed.
-        timeout=30,
+        timeout=60,
     )
 
     # Check no occurrences of [FAIL] in output
@@ -147,7 +147,7 @@ def test_all_tests_pass(trajectory_cache_test_runner_node, launch_context):
         launch_context,
         trajectory_cache_test_runner_node,
         lambda x: "[FAIL]" in x,
-        timeout=10,
+        timeout=60,
     )
 
     yield

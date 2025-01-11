@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <moveit/online_signal_smoothing/acceleration_filter.h>
+#include <moveit/online_signal_smoothing/acceleration_filter.hpp>
 #include <rclcpp/logging.hpp>
 
 // Disable -Wold-style-cast because all _THROTTLE macros trigger this

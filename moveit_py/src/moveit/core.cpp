@@ -34,18 +34,18 @@
 
 /* Author: Peter David Fagan */
 
-#include "moveit_core/collision_detection/collision_common.h"
-#include "moveit_core/collision_detection/collision_matrix.h"
-#include "moveit_core/collision_detection/world.h"
-#include "moveit_core/controller_manager/controller_manager.h"
-#include "moveit_core/kinematic_constraints/utils.h"
-#include "moveit_core/planning_interface/planning_response.h"
-#include "moveit_core/planning_scene/planning_scene.h"
-#include "moveit_core/robot_model/joint_model.h"
-#include "moveit_core/robot_model/joint_model_group.h"
-#include "moveit_core/robot_model/robot_model.h"
-#include "moveit_core/robot_state/robot_state.h"
-#include "moveit_core/robot_trajectory/robot_trajectory.h"
+#include "moveit_core/collision_detection/collision_common.hpp"
+#include "moveit_core/collision_detection/collision_matrix.hpp"
+#include "moveit_core/collision_detection/world.hpp"
+#include "moveit_core/controller_manager/controller_manager.hpp"
+#include "moveit_core/kinematic_constraints/utils.hpp"
+#include "moveit_core/planning_interface/planning_response.hpp"
+#include "moveit_core/planning_scene/planning_scene.hpp"
+#include "moveit_core/robot_model/joint_model.hpp"
+#include "moveit_core/robot_model/joint_model_group.hpp"
+#include "moveit_core/robot_model/robot_model.hpp"
+#include "moveit_core/robot_state/robot_state.hpp"
+#include "moveit_core/robot_trajectory/robot_trajectory.hpp"
 
 PYBIND11_MODULE(core, m)
 {

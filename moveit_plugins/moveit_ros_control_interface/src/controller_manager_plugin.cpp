@@ -34,10 +34,10 @@
 
 /* Author: Mathias Lüdtke */
 
-#include <moveit/macros/class_forward.h>
-#include <moveit/utils/rclcpp_utils.h>
-#include <moveit_ros_control_interface/ControllerHandle.h>
-#include <moveit/controller_manager/controller_manager.h>
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/utils/rclcpp_utils.hpp>
+#include <moveit_ros_control_interface/ControllerHandle.hpp>
+#include <moveit/controller_manager/controller_manager.hpp>
 #include <controller_manager_msgs/srv/list_controllers.hpp>
 #include <controller_manager_msgs/srv/switch_controller.hpp>
 #include <pluginlib/class_list_macros.hpp>
@@ -264,7 +264,7 @@ public:
   void initialize(const rclcpp::Node::SharedPtr& node) override
   {
     node_ = node;
-    if (!ns_.empty())
+    if (ns_.empty())
     {
       if (!node_->has_parameter("ros_control_namespace"))
       {
@@ -274,11 +274,6 @@ public:
       {
         node_->get_parameter<std::string>("ros_control_namespace", ns_);
       }
-    }
-    else if (node->has_parameter("ros_control_namespace"))
-    {
-      node_->get_parameter<std::string>("ros_control_namespace", ns_);
-      RCLCPP_INFO_STREAM(getLogger(), "Namespace for controller manager was specified, namespace: " << ns_);
     }
 
     list_controllers_service_ = node_->create_client<controller_manager_msgs::srv::ListControllers>(

@@ -18,14 +18,16 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <moveit/robot_state/conversions.h>
-#include <moveit/robot_state/robot_state.h>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/robot_state/robot_state.hpp>
 #include <moveit/trajectory_cache/trajectory_cache.hpp>
+#include <moveit/trajectory_cache/utils/utils.hpp>
 
 #include <atomic>
 #include <thread>
 
 using moveit::planning_interface::MoveGroupInterface;
+using moveit_ros::trajectory_cache::constructGetCartesianPathRequest;
 using moveit_ros::trajectory_cache::TrajectoryCache;
 
 const std::string ROBOT_NAME = "panda";
@@ -103,11 +105,11 @@ void testGettersAndSetters(const std::shared_ptr<TrajectoryCache>& cache)
   cache->setExactMatchPrecision(1);
   checkAndEmit(cache->getExactMatchPrecision() == 1, test_case, "getExactMatchPrecisionAfterSet");
 
-  checkAndEmit(cache->getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse() == 10, test_case,
-               "getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse");
-  cache->setNumAdditionalTrajectoriesToPreserveWhenDeletingWorse(1);
-  checkAndEmit(cache->getNumAdditionalTrajectoriesToPreserveWhenDeletingWorse() == 1, test_case,
-               "getNumAdditionalTrajectoriesToPreserveWhenDeletingWorseAfterSet");
+  checkAndEmit(cache->getNumAdditionalTrajectoriesToPreserveWhenPruningWorse() == 10, test_case,
+               "getNumAdditionalTrajectoriesToPreserveWhenPruningWorse");
+  cache->setNumAdditionalTrajectoriesToPreserveWhenPruningWorse(1);
+  checkAndEmit(cache->getNumAdditionalTrajectoriesToPreserveWhenPruningWorse() == 1, test_case,
+               "getNumAdditionalTrajectoriesToPreserveWhenPruningWorseAfterSet");
 }
 
 void testMotionTrajectories(const std::shared_ptr<MoveGroupInterface>& move_group,
@@ -585,7 +587,7 @@ void testCartesianTrajectories(const std::shared_ptr<MoveGroupInterface>& move_g
   int test_jump = 2;
   auto test_waypoints = getDummyWaypoints();
   auto cartesian_plan_req_under_test =
-      cache->constructGetCartesianPathRequest(*move_group, test_waypoints, test_step, test_jump, false);
+      constructGetCartesianPathRequest(*move_group, test_waypoints, test_step, test_jump, false);
 
   checkAndEmit(cartesian_plan_req_under_test.waypoints == test_waypoints &&
                    static_cast<int>(cartesian_plan_req_under_test.max_step) == test_step &&
@@ -600,7 +602,7 @@ void testCartesianTrajectories(const std::shared_ptr<MoveGroupInterface>& move_g
 
   // Plain start
   auto waypoints = getDummyWaypoints();
-  auto cartesian_plan_req = cache->constructGetCartesianPathRequest(*move_group, waypoints, 1, 1, false);
+  auto cartesian_plan_req = constructGetCartesianPathRequest(*move_group, waypoints, 1, 1, false);
   cartesian_plan_req.start_state.multi_dof_joint_state.joint_names.clear();
   cartesian_plan_req.start_state.multi_dof_joint_state.transforms.clear();
   cartesian_plan_req.start_state.multi_dof_joint_state.twist.clear();
@@ -1065,7 +1067,7 @@ int main(int argc, char** argv)
     options.db_path = ":memory:";
     options.db_port = 0;
     options.exact_match_precision = 10;
-    options.num_additional_trajectories_to_preserve_when_deleting_worse = 10;
+    options.num_additional_trajectories_to_preserve_when_pruning_worse = 10;
 
     // Tests.
 
@@ -1074,7 +1076,7 @@ int main(int argc, char** argv)
     testGettersAndSetters(cache);
 
     cache->setExactMatchPrecision(1e-4);
-    cache->setNumAdditionalTrajectoriesToPreserveWhenDeletingWorse(0);
+    cache->setNumAdditionalTrajectoriesToPreserveWhenPruningWorse(0);
 
     testMotionTrajectories(move_group, cache);
     testCartesianTrajectories(move_group, cache);

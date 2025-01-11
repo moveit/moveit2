@@ -34,9 +34,9 @@
 
 /* Author: David Hershberger */
 
-#include "clear_octomap_service_capability.h"
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/move_group/capability_names.h>
+#include "clear_octomap_service_capability.hpp"
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace

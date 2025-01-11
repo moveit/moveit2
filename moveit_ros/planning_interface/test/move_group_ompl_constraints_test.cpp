@@ -41,13 +41,18 @@
 
 // ROS
 #include <rclcpp/rclcpp.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Quaternion.hpp>)
+#include <tf2/LinearMath/Quaternion.hpp>
+#else
 #include <tf2/LinearMath/Quaternion.h>
+#endif
 #include <tf2_eigen/tf2_eigen.hpp>
 
 // MoveIt
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/macros/console_colors.h>
+#include <moveit/move_group_interface/move_group_interface.hpp>
+#include <moveit/planning_scene_interface/planning_scene_interface.hpp>
+#include <moveit/macros/console_colors.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 
 // accuracy tested for position and orientation
