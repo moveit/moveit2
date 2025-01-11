@@ -86,11 +86,11 @@ install(
   RUNTIME DESTINATION bin)
 
 install(
-        TARGETS moveit_move_group_default_capabilities
-        EXPORT moveit_move_group_default_capabilitiesTargets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin)
+  TARGETS moveit_move_group_default_capabilities
+  EXPORT moveit_move_group_default_capabilitiesTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_move_group)
 
