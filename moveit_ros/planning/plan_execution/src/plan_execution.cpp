@@ -34,12 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/plan_execution/plan_execution.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/collision_detection/collision_tools.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/utils/moveit_error_code.h>
+#include <moveit/plan_execution/plan_execution.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
+#include <moveit/collision_detection/collision_tools.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -50,7 +50,7 @@
 #include <moveit/utils/logger.hpp>
 
 // #include <dynamic_reconfigure/server.h>
-// #include <moveit_ros_planning/PlanExecutionDynamicReconfigureConfig.h>
+// #include <moveit_ros_planning/PlanExecutionDynamicReconfigureConfig.hpp>
 
 namespace plan_execution
 {
@@ -83,7 +83,7 @@ plan_execution::PlanExecution::PlanExecution(
   : node_(node)
   , planning_scene_monitor_(planning_scene_monitor)
   , trajectory_execution_manager_(trajectory_execution)
-  , logger_(moveit::getLogger("moveit.ros.add_time_optimal_parameterization"))
+  , logger_(moveit::getLogger("moveit.ros.plan_execution"))
 {
   if (!trajectory_execution_manager_)
   {
@@ -297,9 +297,8 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
 
       if (res.collision || !plan.planning_scene->isStateFeasible(t.getWayPoint(i), false))
       {
-        // Dave's debacle
-        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid",
-                    plan.plan_components[path_segment.first].description.c_str());
+        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid for waypoint %ld out of %ld",
+                    plan.plan_components[path_segment.first].description.c_str(), i, wpc);
 
         // call the same functions again, in verbose mode, to show what issues have been detected
         plan.planning_scene->isStateFeasible(t.getWayPoint(i), true);

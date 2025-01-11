@@ -2,6 +2,22 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Removes unused deprecation.h file (`#3128 <https://github.com/ros-planning/moveit2/issues/3128>`_)
+* Add use_padding flag + deprecate checkCollisionUnpadded() functions (`#3088 <https://github.com/ros-planning/moveit2/issues/3088>`_)
+* Fixes flaky RobotState test (`#3105 <https://github.com/ros-planning/moveit2/issues/3105>`_)
+* Allow RobotState::setFromIK to work with subframes (`#3077 <https://github.com/ros-planning/moveit2/issues/3077>`_)
+* Fix jacobian calculation (`#3069 <https://github.com/ros-planning/moveit2/issues/3069>`_)
+* Port fixes for handling orientation constraints (`#3052 <https://github.com/ros-planning/moveit2/issues/3052>`_)
+* Fix createTrajectoryMessage (`#3064 <https://github.com/ros-planning/moveit2/issues/3064>`_)
+* Fix flipped comments in `joint_model.h` (`#3047 <https://github.com/ros-planning/moveit2/issues/3047>`_)
+* add helper function to load robot from package name + urdf + srdf (`#3039 <https://github.com/ros-planning/moveit2/issues/3039>`_)
+* Fix Cartesian interpolation (`#3020 <https://github.com/ros-planning/moveit2/issues/3020>`_)
+* Update urdf/model.h -> urdf/model.hpp (`#3003 <https://github.com/ros-planning/moveit2/issues/3003>`_)
+* Contributors: Mario Prats, Paul Gesel, Robert Haschke, Sebastian Castro, Sebastian Jahr, Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 * Fix RobotState::getRigidlyConnectedParentLinkModel() (`#2985 <https://github.com/moveit/moveit2/issues/2985>`_)

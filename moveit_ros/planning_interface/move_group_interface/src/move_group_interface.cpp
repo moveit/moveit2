@@ -40,28 +40,33 @@
 #include <sstream>
 #include <memory>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-#include <moveit/warehouse/constraints_storage.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/move_group/capability_names.h>
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/planning_scene_monitor/current_state_monitor.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
-#include <moveit/trajectory_execution_manager/trajectory_execution_manager.h>
-#include <moveit/common_planning_interface_objects/common_objects.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/warehouse/constraints_storage.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/move_group/capability_names.hpp>
+#include <moveit/move_group_interface/move_group_interface.hpp>
+#include <moveit/planning_scene_monitor/current_state_monitor.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/planning_scene_interface/planning_scene_interface.hpp>
+#include <moveit/trajectory_execution_manager/trajectory_execution_manager.hpp>
+#include <moveit/common_planning_interface_objects/common_objects.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <moveit_msgs/action/execute_trajectory.hpp>
 #include <moveit_msgs/srv/query_planner_interfaces.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 #include <moveit_msgs/srv/grasp_planning.hpp>
 #include <moveit_msgs/srv/get_planner_params.hpp>
 #include <moveit_msgs/srv/set_planner_params.hpp>
-#include <moveit/utils/rclcpp_utils.h>
+#include <moveit/utils/rclcpp_utils.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/utils.hpp>)
+#include <tf2/utils.hpp>
+#else
 #include <tf2/utils.h>
+#endif
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_ros/transform_listener.h>
 #include <rclcpp/rclcpp.hpp>

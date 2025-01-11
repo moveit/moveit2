@@ -34,8 +34,8 @@
 
 /* Author: Adam Leeper */
 
-#include <moveit/collision_detection/collision_common.h>
-#include <moveit/collision_detection/collision_octomap_filter.h>
+#include <moveit/collision_detection/collision_common.hpp>
+#include <moveit/collision_detection/collision_octomap_filter.hpp>
 #include <octomap/math/Vector3.h>
 #include <octomap/math/Utils.h>
 #include <octomap/octomap.h>

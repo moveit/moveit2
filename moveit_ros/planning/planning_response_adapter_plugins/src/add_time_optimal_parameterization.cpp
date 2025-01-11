@@ -34,8 +34,8 @@
 
 /* Author: Ioan Sucan, Michael Ferguson */
 
-#include <moveit/planning_interface/planning_response_adapter.h>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/planning_interface/planning_response_adapter.hpp>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 #include <class_loader/class_loader.hpp>
 #include <moveit/utils/logger.hpp>
 

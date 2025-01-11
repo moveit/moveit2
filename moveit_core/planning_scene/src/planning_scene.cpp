@@ -35,16 +35,16 @@
 /* Author: Ioan Sucan */
 
 #include <boost/algorithm/string.hpp>
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/collision_detection/occupancy_map.h>
-#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/collision_detection/occupancy_map.hpp>
+#include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.hpp>
 #include <geometric_shapes/shape_operations.h>
-#include <moveit/collision_detection/collision_tools.h>
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/exceptions/exceptions.h>
-#include <moveit/robot_state/attached_body.h>
-#include <moveit/utils/message_checks.h>
+#include <moveit/collision_detection/collision_tools.hpp>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/exceptions/exceptions.hpp>
+#include <moveit/robot_state/attached_body.hpp>
+#include <moveit/utils/message_checks.hpp>
 #include <octomap_msgs/conversions.h>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
@@ -374,6 +374,11 @@ void PlanningScene::pushDiffs(const PlanningScenePtr& scene)
         scene->world_->removeObject(it.first);
         scene->removeObjectColor(it.first);
         scene->removeObjectType(it.first);
+        // if object is attached, it should not be removed from the ACM
+        if (!scene->getCurrentState().hasAttachedBody(it.first))
+        {
+          scene->getAllowedCollisionMatrixNonConst().removeEntry(it.first);
+        }
       }
       else
       {
@@ -1465,6 +1470,7 @@ void PlanningScene::removeAllCollisionObjects()
       world_->removeObject(object_id);
       removeObjectColor(object_id);
       removeObjectType(object_id);
+      getAllowedCollisionMatrixNonConst().removeEntry(object_id);
     }
   }
 }
@@ -1939,6 +1945,7 @@ bool PlanningScene::processCollisionObjectRemove(const moveit_msgs::msg::Collisi
 
     removeObjectColor(object.id);
     removeObjectType(object.id);
+    getAllowedCollisionMatrixNonConst().removeEntry(object.id);
   }
   return true;
 }

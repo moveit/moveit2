@@ -34,7 +34,7 @@
 
 /* Author: Peter David Fagan */
 
-#include "planning_component.h"
+#include "planning_component.hpp"
 #include <memory>
 
 namespace moveit_py

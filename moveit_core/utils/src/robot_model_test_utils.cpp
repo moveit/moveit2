@@ -38,7 +38,7 @@
 #include <boost/algorithm/string_regex.hpp>
 #include <filesystem>
 #include <geometry_msgs/msg/pose.hpp>
-#include <moveit/utils/robot_model_test_utils.h>
+#include <moveit/utils/robot_model_test_utils.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <urdf_parser/urdf_parser.h>
@@ -46,7 +46,7 @@
 
 #include <pluginlib/class_loader.hpp>
 
-#include <moveit/kinematics_base/kinematics_base.h>
+#include <moveit/kinematics_base/kinematics_base.hpp>
 
 namespace moveit
 {

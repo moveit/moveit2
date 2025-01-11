@@ -38,9 +38,9 @@
 #include <moveit_setup_framework/config.hpp>
 #include <moveit_setup_framework/templates.hpp>
 #include <moveit_setup_framework/data/urdf_config.hpp>
-#include <moveit/robot_model/robot_model.h>
-#include <moveit/planning_scene/planning_scene.h>  // for getting kinematic model
-#include <srdfdom/srdf_writer.h>                   // for writing srdf data
+#include <moveit/robot_model/robot_model.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>  // for getting kinematic model
+#include <srdfdom/srdf_writer.h>                     // for writing srdf data
 
 namespace moveit_setup
 {

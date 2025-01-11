@@ -35,7 +35,7 @@
 /* Author: Paul Gesel */
 
 #include <pluginlib/class_list_macros.hpp>
-#include <moveit_simple_controller_manager/empty_controller_handle.h>
+#include <moveit_simple_controller_manager/empty_controller_handle.hpp>
 #include <rclcpp/node.hpp>
 
 namespace moveit_ros_control_interface

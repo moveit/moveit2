@@ -37,8 +37,8 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <filesystem>
 #include <fstream>
-#include <moveit/ompl_interface/detail/constrained_sampler.h>
-#include <moveit/ompl_interface/detail/constraints_library.h>
+#include <moveit/ompl_interface/detail/constrained_sampler.hpp>
+#include <moveit/ompl_interface/detail/constraints_library.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <ompl/tools/config/SelfConfig.h>

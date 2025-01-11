@@ -2,6 +2,11 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.0 (2024-11-29)
+-------------------
+* Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
+* Contributors: Tom Noble
+
 2.11.0 (2024-09-16)
 -------------------
 * Fix key duplication in moveit_setup_assistant for FollowJointTrajectory (`#2959 <https://github.com/moveit/moveit2/issues/2959>`_)

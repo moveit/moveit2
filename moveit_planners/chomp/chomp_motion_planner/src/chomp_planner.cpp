@@ -34,11 +34,16 @@
 
 /* Author: E. Gil Jones */
 
-#include <chomp_motion_planner/chomp_optimizer.h>
-#include <chomp_motion_planner/chomp_planner.h>
-#include <chomp_motion_planner/chomp_trajectory.h>
-#include <moveit/robot_state/conversions.h>
+#include <chomp_motion_planner/chomp_optimizer.hpp>
+#include <chomp_motion_planner/chomp_planner.hpp>
+#include <chomp_motion_planner/chomp_trajectory.hpp>
+#include <moveit/robot_state/conversions.hpp>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/LinearMath/Quaternion.hpp>)
+#include <tf2/LinearMath/Quaternion.hpp>
+#else
 #include <tf2/LinearMath/Quaternion.h>
+#endif
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/utils/logger.hpp>
@@ -276,7 +281,7 @@ void ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
   res.processing_time[0] = std::chrono::duration<double>(std::chrono::system_clock::now() - start_time).count();
 
   // report planning failure if path has collisions
-  if (not optimizer->isCollisionFree())
+  if (!optimizer->isCollisionFree())
   {
     RCLCPP_ERROR(getLogger(), "Motion plan is invalid.");
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;

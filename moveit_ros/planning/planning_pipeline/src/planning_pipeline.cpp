@@ -34,7 +34,7 @@
 
 /* Author: Ioan Sucan, Sebastian Jahr */
 
-#include <moveit/planning_pipeline/planning_pipeline.h>
+#include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <fmt/format.h>
 #include <moveit/utils/logger.hpp>
 

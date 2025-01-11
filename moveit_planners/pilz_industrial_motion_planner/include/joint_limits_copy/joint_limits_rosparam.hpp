@@ -32,7 +32,7 @@ namespace
 template <typename T>
 void declareParameterTemplate(const rclcpp::Node::SharedPtr& node, const std::string& name, T default_value)
 {
-  if (not node->has_parameter(name))
+  if (!node->has_parameter(name))
   {
     node->declare_parameter<T>(name, default_value);
   }

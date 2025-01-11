@@ -32,8 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_circ.h>
-#include <pilz_industrial_motion_planner/path_circle_generator.h>
+#include <pilz_industrial_motion_planner/trajectory_generator_circ.hpp>
+#include <pilz_industrial_motion_planner/path_circle_generator.hpp>
 
 #include <cassert>
 #include <sstream>
@@ -42,11 +42,11 @@
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
 #include <kdl/utilities/utility.h>
-#include <moveit/robot_state/conversions.h>
-#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/utils/logger.hpp>
 

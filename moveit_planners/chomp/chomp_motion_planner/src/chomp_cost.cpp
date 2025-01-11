@@ -34,8 +34,8 @@
 
 /* Author: Mrinal Kalakrishnan */
 
-#include <chomp_motion_planner/chomp_cost.h>
-#include <chomp_motion_planner/chomp_utils.h>
+#include <chomp_motion_planner/chomp_cost.hpp>
+#include <chomp_motion_planner/chomp_utils.hpp>
 
 #include <eigen3/Eigen/LU>
 

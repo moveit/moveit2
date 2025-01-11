@@ -42,7 +42,7 @@
 #include <Eigen/Geometry>
 #include <algorithm>
 #include <cmath>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 #include <vector>
 #include <moveit/utils/logger.hpp>
 
@@ -419,7 +419,7 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
 
 // Returns true if end of path is reached.
 bool Trajectory::getNextSwitchingPoint(double path_pos, TrajectoryStep& next_switching_point,
-                                       double& before_acceleration, double& after_acceleration)
+                                       double& before_acceleration, double& after_acceleration) const
 {
   TrajectoryStep acceleration_switching_point(path_pos, 0.0);
   double acceleration_before_acceleration, acceleration_after_acceleration;
@@ -466,7 +466,7 @@ bool Trajectory::getNextSwitchingPoint(double path_pos, TrajectoryStep& next_swi
 }
 
 bool Trajectory::getNextAccelerationSwitchingPoint(double path_pos, TrajectoryStep& next_switching_point,
-                                                   double& before_acceleration, double& after_acceleration)
+                                                   double& before_acceleration, double& after_acceleration) const
 {
   double switching_path_pos = path_pos;
   double switching_path_vel;
@@ -516,7 +516,7 @@ bool Trajectory::getNextAccelerationSwitchingPoint(double path_pos, TrajectorySt
 }
 
 bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& next_switching_point,
-                                               double& before_acceleration, double& after_acceleration)
+                                               double& before_acceleration, double& after_acceleration) const
 {
   bool start = false;
   path_pos -= DEFAULT_TIMESTEP;
@@ -744,7 +744,7 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
   end_trajectory_ = trajectory;
 }
 
-double Trajectory::getMinMaxPathAcceleration(double path_pos, double path_vel, bool max)
+double Trajectory::getMinMaxPathAcceleration(double path_pos, double path_vel, bool max) const
 {
   Eigen::VectorXd config_deriv = path_.getTangent(path_pos);
   Eigen::VectorXd config_deriv2 = path_.getCurvature(path_pos);
@@ -762,7 +762,7 @@ double Trajectory::getMinMaxPathAcceleration(double path_pos, double path_vel, b
   return factor * max_path_acceleration;
 }
 
-double Trajectory::getMinMaxPhaseSlope(double path_pos, double path_vel, bool max)
+double Trajectory::getMinMaxPhaseSlope(double path_pos, double path_vel, bool max) const
 {
   return getMinMaxPathAcceleration(path_pos, path_vel, max) / path_vel;
 }
@@ -809,13 +809,13 @@ double Trajectory::getVelocityMaxPathVelocity(double path_pos) const
   return max_path_velocity;
 }
 
-double Trajectory::getAccelerationMaxPathVelocityDeriv(double path_pos)
+double Trajectory::getAccelerationMaxPathVelocityDeriv(double path_pos) const
 {
   return (getAccelerationMaxPathVelocity(path_pos + EPS) - getAccelerationMaxPathVelocity(path_pos - EPS)) /
          (2.0 * EPS);
 }
 
-double Trajectory::getVelocityMaxPathVelocityDeriv(double path_pos)
+double Trajectory::getVelocityMaxPathVelocityDeriv(double path_pos) const
 {
   const Eigen::VectorXd tangent = path_.getTangent(path_pos);
   double max_path_velocity = std::numeric_limits<double>::max();

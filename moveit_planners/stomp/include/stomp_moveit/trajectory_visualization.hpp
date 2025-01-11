@@ -42,8 +42,8 @@
 #include <stomp_moveit/stomp_moveit_task.hpp>
 #include <stomp_moveit/conversion_functions.hpp>
 
-#include <moveit/planning_scene/planning_scene.h>
-#include <moveit/robot_model/robot_model.h>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <moveit/robot_model/robot_model.hpp>
 #include <std_msgs/msg/color_rgba.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <visualization_msgs/msg/marker.hpp>

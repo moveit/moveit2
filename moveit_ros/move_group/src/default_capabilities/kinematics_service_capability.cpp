@@ -34,12 +34,12 @@
 
 /* Author: Ioan Sucan */
 
-#include "kinematics_service_capability.h"
-#include <moveit/moveit_cpp/moveit_cpp.h>
-#include <moveit/robot_state/conversions.h>
-#include <moveit/utils/message_checks.h>
+#include "kinematics_service_capability.hpp"
+#include <moveit/moveit_cpp/moveit_cpp.hpp>
+#include <moveit/robot_state/conversions.hpp>
+#include <moveit/utils/message_checks.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#include <moveit/move_group/capability_names.h>
+#include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
 
 namespace move_group

@@ -37,12 +37,12 @@
 */
 
 #include <gtest/gtest.h>
-#include <moveit/kinematic_constraints/utils.h>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_state/conversions.h>
+#include <moveit/kinematic_constraints/utils.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_state/conversions.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 
 #include <moveit_msgs/action/hybrid_planner.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>

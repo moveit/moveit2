@@ -36,7 +36,7 @@
 
 /* Author: Ioan Sucan, Acorn Pooley */
 
-#include <moveit/robot_interaction/locked_robot_state.h>
+#include <moveit/robot_interaction/locked_robot_state.hpp>
 
 robot_interaction::LockedRobotState::LockedRobotState(const moveit::core::RobotState& state)
   : state_(std::make_shared<moveit::core::RobotState>(state))

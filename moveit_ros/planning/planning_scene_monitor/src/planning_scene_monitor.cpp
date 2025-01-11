@@ -34,15 +34,24 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/planning_scene_monitor/planning_scene_monitor.h>
-#include <moveit/robot_model_loader/robot_model_loader.h>
-#include <moveit/utils/message_checks.h>
-#include <moveit/exceptions/exceptions.h>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/robot_model_loader/robot_model_loader.hpp>
+#include <moveit/utils/message_checks.hpp>
+#include <moveit/exceptions/exceptions.hpp>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 #include <moveit/utils/logger.hpp>
 
+// TODO: Remove conditional includes when released to all active distros.
+#if __has_include(<tf2/exceptions.hpp>)
+#include <tf2/exceptions.hpp>
+#else
 #include <tf2/exceptions.h>
+#endif
+#if __has_include(<tf2/LinearMath/Transform.hpp>)
+#include <tf2/LinearMath/Transform.hpp>
+#else
 #include <tf2/LinearMath/Transform.h>
+#endif
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
@@ -731,6 +740,9 @@ bool PlanningSceneMonitor::newPlanningSceneMessage(const moveit_msgs::msg::Plann
 
     if (!scene.is_diff && parent_scene_)
     {
+      // If there is no new robot_state, transfer RobotState from current scene to parent scene
+      if (scene.robot_state.is_diff)
+        parent_scene_->setCurrentState(scene_->getCurrentState());
       // clear maintained (diff) scene_ and set the full new scene in parent_scene_ instead
       scene_->clearDiffs();
       result = parent_scene_->setPlanningSceneMsg(scene);

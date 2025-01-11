@@ -34,9 +34,9 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/trajectory_processing/trajectory_tools.h>
-#include <moveit/trajectory_processing/ruckig_traj_smoothing.h>
-#include <moveit/trajectory_processing/time_optimal_trajectory_generation.h>
+#include <moveit/trajectory_processing/trajectory_tools.hpp>
+#include <moveit/trajectory_processing/ruckig_traj_smoothing.hpp>
+#include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

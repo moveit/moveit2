@@ -35,11 +35,20 @@
 /* Author: Jon Binney, Ioan Sucan */
 
 #include <cmath>
-#include <moveit/pointcloud_octomap_updater/pointcloud_octomap_updater.h>
-#include <moveit/occupancy_map_monitor/occupancy_map_monitor.h>
+#include <moveit/pointcloud_octomap_updater/pointcloud_octomap_updater.hpp>
+#include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+// TODO: Remove conditional includes when released to all active distros.
+#if __has_include(<tf2/LinearMath/Vector3.hpp>)
+#include <tf2/LinearMath/Vector3.hpp>
+#else
 #include <tf2/LinearMath/Vector3.h>
+#endif
+#if __has_include(<tf2/LinearMath/Transform.hpp>)
+#include <tf2/LinearMath/Transform.hpp>
+#else
 #include <tf2/LinearMath/Transform.h>
+#endif
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2_ros/create_timer_interface.h>
 #include <tf2_ros/create_timer_ros.h>
@@ -105,13 +114,18 @@ void PointCloudOctomapUpdater::start()
 
   if (point_cloud_subscriber_)
     return;
+
+  rclcpp::SubscriptionOptions options;
+  options.callback_group = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
   /* subscribe to point cloud topic using tf filter*/
-  point_cloud_subscriber_ = new message_filters::Subscriber<sensor_msgs::msg::PointCloud2>(node_, point_cloud_topic_,
+  auto qos_profile =
 #if RCLCPP_VERSION_GTE(28, 3, 0)
-                                                                                           rclcpp::SensorDataQoS());
+      rclcpp::SensorDataQoS();
 #else
-                                                                                           rmw_qos_profile_sensor_data);
+      rmw_qos_profile_sensor_data;
 #endif
+  point_cloud_subscriber_ =
+      new message_filters::Subscriber<sensor_msgs::msg::PointCloud2>(node_, point_cloud_topic_, qos_profile, options);
   if (tf_listener_ && tf_buffer_ && !monitor_->getMapFrame().empty())
   {
     point_cloud_filter_ = new tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>(
