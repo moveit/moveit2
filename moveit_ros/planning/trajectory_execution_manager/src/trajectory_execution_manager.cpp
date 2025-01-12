@@ -1271,12 +1271,13 @@ void TrajectoryExecutionManager::clear()
 {
   if (execution_complete_)
   {
+    std::scoped_lock slock(execution_state_mutex_);
     for (TrajectoryExecutionContext* trajectory : trajectories_)
       delete trajectory;
     trajectories_.clear();
   }
   else
-    RCLCPP_ERROR(logger_, "Cannot push a new trajectory while another is being executed");
+    RCLCPP_FATAL(logger_, "Expecting execution_complete_ to be true!");
 }
 
 void TrajectoryExecutionManager::executeThread(const ExecutionCompleteCallback& callback,
@@ -1312,7 +1313,13 @@ void TrajectoryExecutionManager::executeThread(const ExecutionCompleteCallback& 
 
   // only report that execution finished successfully when the robot actually stopped moving
   if (last_execution_status_ == moveit_controller_manager::ExecutionStatus::SUCCEEDED)
-    waitForRobotToStop(*trajectories_[i - 1]);
+  {
+    std::scoped_lock slock(execution_state_mutex_);
+    if (!execution_complete_)
+    {
+      waitForRobotToStop(*trajectories_[i - 1]);
+    }
+  }
 
   RCLCPP_INFO(logger_, "Completed trajectory execution with status %s ...", last_execution_status_.asString().c_str());
 
