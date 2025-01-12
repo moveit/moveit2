@@ -397,12 +397,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     plan.plan_components_[i].trajectory_->getRobotTrajectoryMsg(msg);
     if (!trajectory_execution_manager_->push(msg, plan.plan_components_[i].controller_names_))
     {
-<<<<<<< HEAD
-      trajectory_execution_manager_->clear();
       RCLCPP_ERROR(LOGGER, "Apparently trajectory initialization failed");
-=======
-      RCLCPP_ERROR(logger_, "Apparently trajectory initialization failed");
->>>>>>> 3ec75aba1 (move TrajectoryExecutionManager::clear() to private (#3226))
       execution_complete_ = true;
       result.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;
       return result;
