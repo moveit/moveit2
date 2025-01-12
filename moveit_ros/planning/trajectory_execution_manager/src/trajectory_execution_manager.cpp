@@ -1330,11 +1330,7 @@ void TrajectoryExecutionManager::clear()
     }
   }
   else
-<<<<<<< HEAD
-    RCLCPP_ERROR(LOGGER, "Cannot push a new trajectory while another is being executed");
-=======
-    RCLCPP_FATAL(logger_, "Expecting execution_complete_ to be true!");
->>>>>>> 6595deea4 ([moveit_ros] fix race condition when stopping trajectory execution (#3198))
+    RCLCPP_FATAL(LOGGER, "Expecting execution_complete_ to be true!");
 }
 
 void TrajectoryExecutionManager::executeThread(const ExecutionCompleteCallback& callback,
