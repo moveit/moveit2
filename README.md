@@ -9,13 +9,8 @@ For the commercially supported version see [MoveIt Pro](http://picknik.ai/pro).
 ## Continuous Integration Status
 
 [![Formatting (pre-commit)](https://github.com/moveit/moveit2/actions/workflows/format.yaml/badge.svg?branch=main)](https://github.com/moveit/moveit2/actions/workflows/format.yaml?query=branch%3Amain)
-<<<<<<< HEAD
-[![CI (Rolling and Humble)](https://github.com/moveit/moveit2/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/moveit/moveit2/actions/workflows/ci.yaml?query=branch%3Amain)
-[![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/main/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
-=======
-[![CI (Rolling, Jazzy, and Humble)](https://github.com/moveit/moveit2/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/moveit/moveit2/actions/workflows/ci.yaml?query=branch%3Amain)
-[![Code Coverage](https://codecov.io/gh/moveit/moveit2/branch/main/graph/badge.svg?token=QC1O0VzGpm)](https://codecov.io/gh/moveit/moveit2)
->>>>>>> 9f1a53d53 (Update packages table in README (#3232))
+[![CI (Jazzy)](https://github.com/moveit/moveit2/actions/workflows/ci.yaml/badge.svg?branch=jazzy)](https://github.com/moveit/moveit2/actions/workflows/ci.yaml?query=branch%3Ajazzy)
+[![Code Coverage](https://codecov.io/gh/ros-planning/moveit2/branch/jazzy/graph/badge.svg?token=W7uHKcY0ly)](https://codecov.io/gh/ros-planning/moveit2)
 
 ## Getting Started
 
