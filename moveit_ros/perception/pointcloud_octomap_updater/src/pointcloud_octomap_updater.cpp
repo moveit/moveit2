@@ -109,9 +109,12 @@ void PointCloudOctomapUpdater::start()
   if (!ns_.empty())
     prefix = ns_ + "/";
 
+  rclcpp::QoS qos(rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_sensor_data));
   if (!filtered_cloud_topic_.empty())
+  {
     filtered_cloud_publisher_ =
-        node_->create_publisher<sensor_msgs::msg::PointCloud2>(prefix + filtered_cloud_topic_, 10);
+        node_->create_publisher<sensor_msgs::msg::PointCloud2>(prefix + filtered_cloud_topic_, rclcpp::SensorDataQoS());
+  }
 
   if (point_cloud_subscriber_)
     return;
