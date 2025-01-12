@@ -102,7 +102,6 @@ private:
 
   /** \brief required to avoid listener registration before we are all set*/
   std::mutex connect_mutex_;
-  int queue_size_;
   TransformProvider transform_provider_;
 
   std::shared_ptr<cv_bridge::CvImage> filtered_depth_ptr_;
