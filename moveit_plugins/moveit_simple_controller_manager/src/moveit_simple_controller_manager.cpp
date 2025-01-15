@@ -36,7 +36,8 @@
 /* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
 
 #include <moveit_simple_controller_manager/action_based_controller_handle.hpp>
-#include <moveit_simple_controller_manager/gripper_controller_handle.hpp>
+#include <moveit_simple_controller_manager/gripper_command_controller_handle.hpp>
+#include <moveit_simple_controller_manager/parallel_gripper_command_controller_handle.hpp>
 #include <moveit_simple_controller_manager/follow_joint_trajectory_controller_handle.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <pluginlib/class_list_macros.hpp>
@@ -154,7 +155,7 @@ public:
             max_effort = 0.0;
           }
 
-          new_handle = std::make_shared<GripperControllerHandle>(node_, controller_name, action_ns, max_effort);
+          new_handle = std::make_shared<GripperCommandControllerHandle>(node_, controller_name, action_ns, max_effort);
           bool parallel_gripper = false;
           if (node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "parallel"), parallel_gripper) &&
               parallel_gripper)
@@ -165,7 +166,7 @@ public:
                                                    << controller_joints.size() << " are specified");
               continue;
             }
-            static_cast<GripperControllerHandle*>(new_handle.get())
+            static_cast<GripperCommandControllerHandle*>(new_handle.get())
                 ->setParallelJawGripper(controller_joints[0], controller_joints[1]);
           }
           else
@@ -175,13 +176,45 @@ public:
                                       command_joint))
               command_joint = controller_joints[0];
 
-            static_cast<GripperControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
+            static_cast<GripperCommandControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
           }
 
           bool allow_failure;
           node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "allow_failure"), allow_failure,
                                   false);
-          static_cast<GripperControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
+          static_cast<GripperCommandControllerHandle*>(new_handle.get())->allowFailure(allow_failure);
+
+          RCLCPP_INFO_STREAM(getLogger(), "Added GripperCommand controller for " << controller_name);
+          controllers_[controller_name] = new_handle;
+        }
+        if (type == "ParallelGripperCommand")
+        {
+          double max_effort;
+          const std::string& max_effort_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort");
+          if (!node->get_parameter(max_effort_param, max_effort))
+          {
+            RCLCPP_INFO_STREAM(getLogger(), controller_name << " max effort set to 0.0");
+            max_effort = 0.0;
+          }
+          double max_velocity;
+          const std::string& max_velocity_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_velocity");
+          if (!node->get_parameter(max_velocity_param, max_velocity))
+          {
+            RCLCPP_INFO_STREAM(getLogger(), controller_name << " max velocity set to 0.0");
+            max_velocity = 0.0;
+          }
+
+          new_handle = std::make_shared<ParallelGripperCommandControllerHandle>(node_, controller_name, action_ns,
+                                                                                max_effort, max_velocity);
+          for (const auto& name : controller_joints)
+          {
+            static_cast<ParallelGripperCommandControllerHandle*>(new_handle.get())->addCommandJoint(name);
+          }
+
+          bool allow_stalling;
+          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "allow_stalling"), allow_stalling,
+                                  false);
+          static_cast<GripperCommandControllerHandle*>(new_handle.get())->allowFailure(allow_stalling);
 
           RCLCPP_INFO_STREAM(getLogger(), "Added GripperCommand controller for " << controller_name);
           controllers_[controller_name] = new_handle;

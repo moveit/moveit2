@@ -32,32 +32,31 @@
  *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
-
-/* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
+/* Design inspired by gripper_command_controller_handle.hpp */
+/* Author: Marq Rasmussen */
 
 #pragma once
 
 #include <moveit_simple_controller_manager/action_based_controller_handle.hpp>
-#include <control_msgs/action/gripper_command.hpp>
+#include <control_msgs/action/parallel_gripper_command.hpp>
 #include <set>
 
 namespace moveit_simple_controller_manager
 {
 /*
- * This is an interface for a gripper using control_msgs/GripperCommandAction
- * action interface (single DOF).
+ * This is an interface for a gripper using the control_msgs/ParallelGripperCommand action interface.
  */
-class GripperControllerHandle : public ActionBasedControllerHandle<control_msgs::action::GripperCommand>
+class ParallelGripperCommandControllerHandle : public ActionBasedControllerHandle<control_msgs::action::ParallelGripperCommand>
 {
 public:
   /* Topics will map to name/ns/goal, name/ns/result, etc */
-  GripperControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
-                          const double max_effort = 0.0)
-    : ActionBasedControllerHandle<control_msgs::action::GripperCommand>(
-          node, name, ns, "moveit.simple_controller_manager.gripper_controller_handle")
-    , allow_failure_(false)
-    , parallel_jaw_gripper_(false)
+  ParallelGripperCommandControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
+                          const double max_effort = 0.0, const double max_velocity = 0.0)
+    : ActionBasedControllerHandle<control_msgs::action::ParallelGripperCommand>(
+          node, name, ns, "moveit.simple_controller_manager.parallel_gripper_controller_handle")
+    , allow_stalling_(false)
     , max_effort_(max_effort)
+    , max_velocity_(max_velocity)
   {
   }
 
@@ -76,27 +75,25 @@ public:
 
     if (!trajectory.multi_dof_joint_trajectory.points.empty())
     {
-      RCLCPP_ERROR(logger_, "Gripper cannot execute multi-dof trajectories.");
+      RCLCPP_ERROR(logger_, "%s cannot execute multi-dof trajectories.", name_.c_str());
       return false;
     }
 
     if (trajectory.joint_trajectory.points.empty())
     {
-      RCLCPP_ERROR(logger_, "GripperController requires at least one joint trajectory point.");
+      RCLCPP_ERROR(logger_, "%s requires at least one joint trajectory point, but none received.", name_.c_str());
       return false;
     }
-
-    // TODO(JafarAbdi): Enable when msg streaming operator is available
-    // if (trajectory.joint_trajectory.points.size() > 1)
-    // {
-    //   RCLCPP_DEBUG_STREAM(logger_, "Trajectory: " << trajectory.joint_trajectory);
-    // }
 
     if (trajectory.joint_trajectory.joint_names.empty())
     {
-      RCLCPP_ERROR(logger_, "No joint names specified");
+      RCLCPP_ERROR(logger_, "%s received a trajectory with no joint names specified.", name_.c_str());
       return false;
     }
+
+    // goal to be sent
+    control_msgs::action::ParallelGripperCommand::Goal goal;
+    auto &cmd_state = goal.command;
 
     std::vector<std::size_t> gripper_joint_indexes;
     for (std::size_t i = 0; i < trajectory.joint_trajectory.joint_names.size(); ++i)
@@ -104,60 +101,46 @@ public:
       if (command_joints_.find(trajectory.joint_trajectory.joint_names[i]) != command_joints_.end())
       {
         gripper_joint_indexes.push_back(i);
-        if (!parallel_jaw_gripper_)
-          break;
+        cmd_state.name.push_back(trajectory.joint_trajectory.joint_names[i]);
       }
     }
 
     if (gripper_joint_indexes.empty())
     {
-      RCLCPP_WARN(logger_, "No command_joint was specified for the MoveIt controller gripper handle. \
-                      Please see GripperControllerHandle::addCommandJoint() and \
-                      GripperControllerHandle::setCommandJoint(). Assuming index 0.");
-      gripper_joint_indexes.push_back(0);
+      RCLCPP_ERROR(logger_, "Received trajectory does not include joint names that %s can command.", name_.c_str());
+      return false;
     }
-
-    // goal to be sent
-    control_msgs::action::GripperCommand::Goal goal;
-    goal.command.position = 0.0;
 
     // send last point
     int tpoint = trajectory.joint_trajectory.points.size() - 1;
-    RCLCPP_DEBUG(logger_, "Sending command from trajectory point %d", tpoint);
+    RCLCPP_DEBUG(logger_, "Sending command from trajectory point %d.", tpoint);
 
     // fill in goal from last point
     for (std::size_t idx : gripper_joint_indexes)
     {
       if (trajectory.joint_trajectory.points[tpoint].positions.size() <= idx)
       {
-        RCLCPP_ERROR(logger_, "GripperController expects a joint trajectory with one \
-                         point that specifies at least the position of joint \
-                         '%s', but insufficient positions provided",
-                     trajectory.joint_trajectory.joint_names[idx].c_str());
+        RCLCPP_ERROR(logger_, "ParallelGripperCommand expects a joint trajectory with one \
+                               point that specifies at least the position of joint \
+                               '%s', but insufficient positions provided.",
+                              trajectory.joint_trajectory.joint_names[idx].c_str());
         return false;
       }
-      goal.command.position += trajectory.joint_trajectory.points[tpoint].positions[idx];
-
-      if (trajectory.joint_trajectory.points[tpoint].effort.size() > idx)
-      {
-        goal.command.max_effort = trajectory.joint_trajectory.points[tpoint].effort[idx];
-      }
-      else
-      {
-        goal.command.max_effort = max_effort_;
-      }
+      cmd_state.position.push_back(trajectory.joint_trajectory.points[tpoint].positions[idx]);
+      cmd_state.velocity.push_back(max_velocity_); // TODO: Search received trajectory for max velocity.
+      cmd_state.effort.push_back(max_effort_);
     }
-    rclcpp_action::Client<control_msgs::action::GripperCommand>::SendGoalOptions send_goal_options;
+    rclcpp_action::Client<control_msgs::action::ParallelGripperCommand>::SendGoalOptions send_goal_options;
     // Active callback
     send_goal_options.goal_response_callback =
-        [this](const rclcpp_action::Client<control_msgs::action::GripperCommand>::GoalHandle::SharedPtr&
-               /* unused-arg */) { RCLCPP_DEBUG_STREAM(logger_, name_ << " started execution"); };
+        [this](const rclcpp_action::Client<control_msgs::action::ParallelGripperCommand>::GoalHandle::SharedPtr&
+               /* unused-arg */) { RCLCPP_DEBUG_STREAM(logger_, name_ << " started execution."); };
     // Send goal
     auto current_goal_future = controller_action_client_->async_send_goal(goal, send_goal_options);
     current_goal_ = current_goal_future.get();
     if (!current_goal_)
     {
-      RCLCPP_ERROR(logger_, "Goal was rejected by server");
+      RCLCPP_ERROR(logger_, "%s goal was rejected by server.", name_.c_str());
       return false;
     }
 
@@ -179,21 +162,14 @@ public:
 
   void allowFailure(bool allow)
   {
-    allow_failure_ = allow;
-  }
-
-  void setParallelJawGripper(const std::string& left, const std::string& right)
-  {
-    addCommandJoint(left);
-    addCommandJoint(right);
-    parallel_jaw_gripper_ = true;
+    allow_stalling_ = allow;
   }
 
 private:
   void controllerDoneCallback(
-      const rclcpp_action::ClientGoalHandle<control_msgs::action::GripperCommand>::WrappedResult& wrapped_result) override
+      const rclcpp_action::ClientGoalHandle<control_msgs::action::ParallelGripperCommand>::WrappedResult& wrapped_result) override
   {
-    if (wrapped_result.code == rclcpp_action::ResultCode::ABORTED && allow_failure_)
+    if (wrapped_result.code == rclcpp_action::ResultCode::ABORTED && wrapped_result.result->stalled && allow_stalling_)
     {
       finishControllerExecution(rclcpp_action::ResultCode::SUCCEEDED);
     }
@@ -206,34 +182,22 @@ private:
   /*
    * Some gripper drivers may indicate a failure if they do not close all the way when
    * an object is in the gripper.
+   * If true this assumes success if the gripper stalls and does not reach the target position goal.
    */
-  bool allow_failure_;
+  bool allow_stalling_;
 
   /*
-   * A common setup is where there are two joints that each move
-   * half the overall distance. Thus, the command to the gripper
-   * should be the sum of the two joint distances.
-   *
-   * When this is set, command_joints_ should be of size 2,
-   * and the command will be the sum of the two joints.
+   * The ``max_effort`` used in the ParallelGripperCommand message.
    */
-  bool parallel_jaw_gripper_;
+  double max_effort_ = 0.0;
 
   /*
-   * The ``max_effort`` used in the GripperCommand message when no ``max_effort`` was
-   * specified in the requested trajectory. Defaults to ``0.0``.
+   * The ``max_velocity_`` used in the ParallelGripperCommand message.
    */
-  double max_effort_;
+  double max_velocity_ = 0.0;
 
   /*
-   * A GripperCommand message has only a single float64 for the
-   * "command", thus only a single joint angle can be sent -- however,
-   * due to the complexity of making grippers look correct in a URDF,
-   * they typically have >1 joints. The "command_joint" is the joint
-   * whose position value will be sent in the GripperCommand action. A
-   * set of names is provided for acceptable joint names. If any of
-   * the joints specified is found, the value corresponding to that
-   * joint is considered the command.
+   * The joints to command in the ParallelGripperCommand message
    */
   std::set<std::string> command_joints_;
 };  // namespace moveit_simple_controller_manager

@@ -36,27 +36,27 @@
 
 #include <moveit_ros_control_interface/ControllerHandle.hpp>
 #include <pluginlib/class_list_macros.hpp>
-#include <moveit_simple_controller_manager/gripper_controller_handle.hpp>
+#include <moveit_simple_controller_manager/parallel_gripper_command_controller_handle.hpp>
 #include <rclcpp/node.hpp>
 #include <memory>
 
 namespace moveit_ros_control_interface
 {
 /**
- * \brief Simple allocator for moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle instances.
+ * \brief Simple allocator for moveit_simple_controller_manager::ParallelGripperCommandControllerHandle instances.
  */
-class GripperControllerAllocator : public ControllerHandleAllocator
+class ParallelGripperCommandControllerAllocator : public ControllerHandleAllocator
 {
 public:
   moveit_controller_manager::MoveItControllerHandlePtr alloc(const rclcpp::Node::SharedPtr& node,
                                                              const std::string& name,
                                                              const std::vector<std::string>& /* resources */) override
   {
-    return std::make_shared<moveit_simple_controller_manager::GripperControllerHandle>(node, name, "gripper_cmd");
+    return std::make_shared<moveit_simple_controller_manager::ParallelGripperCommandControllerHandle>(node, name, "gripper_cmd");
   }
 };
 
 }  // namespace moveit_ros_control_interface
 
-PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::GripperControllerAllocator,
+PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::ParallelGripperCommandControllerAllocator,
                        moveit_ros_control_interface::ControllerHandleAllocator);
