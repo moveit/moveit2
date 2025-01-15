@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Inc.
+ *  Copyright (c) 2025, Marq Rasmussen
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Joseph Schornak */
+/* Author: Marq Rasmussen */
 
 #include <moveit_ros_control_interface/ControllerHandle.hpp>
 #include <pluginlib/class_list_macros.hpp>
