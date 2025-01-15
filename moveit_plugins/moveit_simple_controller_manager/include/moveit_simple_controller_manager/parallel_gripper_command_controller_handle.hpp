@@ -46,12 +46,14 @@ namespace moveit_simple_controller_manager
 /*
  * This is an interface for a gripper using the control_msgs/ParallelGripperCommand action interface.
  */
-class ParallelGripperCommandControllerHandle : public ActionBasedControllerHandle<control_msgs::action::ParallelGripperCommand>
+class ParallelGripperCommandControllerHandle
+  : public ActionBasedControllerHandle<control_msgs::action::ParallelGripperCommand>
 {
 public:
   /* Topics will map to name/ns/goal, name/ns/result, etc */
-  ParallelGripperCommandControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
-                          const double max_effort = 0.0, const double max_velocity = 0.0)
+  ParallelGripperCommandControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name,
+                                         const std::string& ns, const double max_effort = 0.0,
+                                         const double max_velocity = 0.0)
     : ActionBasedControllerHandle<control_msgs::action::ParallelGripperCommand>(
           node, name, ns, "moveit.simple_controller_manager.parallel_gripper_controller_handle")
     , allow_stalling_(false)
@@ -93,7 +95,7 @@ public:
 
     // goal to be sent
     control_msgs::action::ParallelGripperCommand::Goal goal;
-    auto &cmd_state = goal.command;
+    auto& cmd_state = goal.command;
 
     std::vector<std::size_t> gripper_joint_indexes;
     for (std::size_t i = 0; i < trajectory.joint_trajectory.joint_names.size(); ++i)
@@ -123,12 +125,19 @@ public:
         RCLCPP_ERROR(logger_, "ParallelGripperCommand expects a joint trajectory with one \
                                point that specifies at least the position of joint \
                                '%s', but insufficient positions provided.",
-                              trajectory.joint_trajectory.joint_names[idx].c_str());
+                     trajectory.joint_trajectory.joint_names[idx].c_str());
         return false;
       }
       cmd_state.position.push_back(trajectory.joint_trajectory.points[tpoint].positions[idx]);
-      cmd_state.velocity.push_back(max_velocity_); // TODO: Search received trajectory for max velocity.
-      cmd_state.effort.push_back(max_effort_);
+      // only set the velocity or effort if the user has specified a positive non-zero max value
+      if (max_velocity_ > 0.0)
+      {
+        cmd_state.velocity.push_back(max_velocity_);
+      }
+      if (max_effort_ > 0.0)
+      {
+        cmd_state.effort.push_back(max_effort_);
+      }
     }
     rclcpp_action::Client<control_msgs::action::ParallelGripperCommand>::SendGoalOptions send_goal_options;
     // Active callback
@@ -167,7 +176,8 @@ public:
 
 private:
   void controllerDoneCallback(
-      const rclcpp_action::ClientGoalHandle<control_msgs::action::ParallelGripperCommand>::WrappedResult& wrapped_result) override
+      const rclcpp_action::ClientGoalHandle<control_msgs::action::ParallelGripperCommand>::WrappedResult& wrapped_result)
+      override
   {
     if (wrapped_result.code == rclcpp_action::ResultCode::ABORTED && wrapped_result.result->stalled && allow_stalling_)
     {

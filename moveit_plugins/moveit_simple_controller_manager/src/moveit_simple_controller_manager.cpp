@@ -193,15 +193,23 @@ public:
           const std::string& max_effort_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort");
           if (!node->get_parameter(max_effort_param, max_effort))
           {
-            RCLCPP_INFO_STREAM(getLogger(), controller_name << " max effort set to 0.0");
+            RCLCPP_DEBUG_STREAM(getLogger(), controller_name << " max effort is not specified and will not be used.");
             max_effort = 0.0;
+          }
+          else
+          {
+            RCLCPP_INFO_STREAM(getLogger(), controller_name << " max effort set to: " << max_effort);
           }
           double max_velocity;
           const std::string& max_velocity_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_velocity");
           if (!node->get_parameter(max_velocity_param, max_velocity))
           {
-            RCLCPP_INFO_STREAM(getLogger(), controller_name << " max velocity set to 0.0");
+            RCLCPP_DEBUG_STREAM(getLogger(), controller_name << " max velocity is not specified and will not be used.");
             max_velocity = 0.0;
+          }
+          else
+          {
+            RCLCPP_INFO_STREAM(getLogger(), controller_name << " max velocity set to: " << max_velocity);
           }
 
           new_handle = std::make_shared<ParallelGripperCommandControllerHandle>(node_, controller_name, action_ns,
@@ -216,7 +224,7 @@ public:
                                   false);
           static_cast<GripperCommandControllerHandle*>(new_handle.get())->allowFailure(allow_stalling);
 
-          RCLCPP_INFO_STREAM(getLogger(), "Added GripperCommand controller for " << controller_name);
+          RCLCPP_INFO_STREAM(getLogger(), "Added ParallelGripperCommand controller for " << controller_name);
           controllers_[controller_name] = new_handle;
         }
         else if (type == "FollowJointTrajectory")

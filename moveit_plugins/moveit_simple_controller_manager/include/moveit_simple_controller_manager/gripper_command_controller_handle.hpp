@@ -52,7 +52,7 @@ class GripperCommandControllerHandle : public ActionBasedControllerHandle<contro
 public:
   /* Topics will map to name/ns/goal, name/ns/result, etc */
   GripperCommandControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
-                          const double max_effort = 0.0)
+                                 const double max_effort = 0.0)
     : ActionBasedControllerHandle<control_msgs::action::GripperCommand>(
           node, name, ns, "moveit.simple_controller_manager.gripper_controller_handle")
     , allow_failure_(false)
