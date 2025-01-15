@@ -187,7 +187,7 @@ public:
           RCLCPP_INFO_STREAM(getLogger(), "Added GripperCommand controller for " << controller_name);
           controllers_[controller_name] = new_handle;
         }
-        if (type == "ParallelGripperCommand")
+        else if (type == "ParallelGripperCommand")
         {
           double max_effort;
           const std::string& max_effort_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort");
