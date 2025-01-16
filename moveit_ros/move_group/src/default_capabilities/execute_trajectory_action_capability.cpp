@@ -68,8 +68,8 @@ MoveGroupExecuteTrajectoryAction::~MoveGroupExecuteTrajectoryAction()
 void MoveGroupExecuteTrajectoryAction::initialize()
 {
   auto node = context_->moveit_cpp_->getNode();
-  callback_group_ = node_->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive,
-                                                 false /* don't spin with node executor */);
+  callback_group_ = node->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive,
+                                                false /* don't spin with node executor */);
   callback_executor_.add_callback_group(callback_group_, node->get_node_base_interface());
   callback_thread_ = std::thread([this]() { callback_executor_.spin(); });
   // start the move action server
