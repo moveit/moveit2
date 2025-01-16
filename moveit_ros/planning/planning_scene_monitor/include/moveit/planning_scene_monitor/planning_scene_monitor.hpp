@@ -562,7 +562,7 @@ private:
   std::atomic<bool> state_update_pending_;
 
   // Lock for writing last_robot_state_update_wall_time_ and dt_state_update_
-  boost::mutex state_update_mutex_;
+  std::shared_mutex state_update_mutex_;
 
   /// Last time the state was updated from current_state_monitor_
   // Only access this from callback functions (and constructor)

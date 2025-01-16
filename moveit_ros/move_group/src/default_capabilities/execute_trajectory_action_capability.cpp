@@ -80,7 +80,8 @@ void MoveGroupExecuteTrajectoryAction::initialize()
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
       [](const std::shared_ptr<ExecTrajectoryGoal>& /* unused */) { return rclcpp_action::CancelResponse::ACCEPT; },
-      [this](const auto& goal) { executePathCallback(goal); });
+      [this](const auto& goal) { executePathCallback(goal); },
+      rcl_action_server_get_default_options(), callback_group_);
 }
 
 void MoveGroupExecuteTrajectoryAction::executePathCallback(const std::shared_ptr<ExecTrajectoryGoal>& goal)
