@@ -98,23 +98,23 @@ public:
       return false;
     }
 
-    std::vector<std::size_t> gripper_joint_indexes;
+    std::vector<std::size_t> gripper_joint_indices;
     for (std::size_t i = 0; i < trajectory.joint_trajectory.joint_names.size(); ++i)
     {
       if (command_joints_.find(trajectory.joint_trajectory.joint_names[i]) != command_joints_.end())
       {
-        gripper_joint_indexes.push_back(i);
+        gripper_joint_indices.push_back(i);
         if (!parallel_jaw_gripper_)
           break;
       }
     }
 
-    if (gripper_joint_indexes.empty())
+    if (gripper_joint_indices.empty())
     {
       RCLCPP_WARN(logger_, "No command_joint was specified for the MoveIt controller gripper handle. \
                       Please see GripperCommandControllerHandle::addCommandJoint() and \
                       GripperCommandControllerHandle::setCommandJoint(). Assuming index 0.");
-      gripper_joint_indexes.push_back(0);
+      gripper_joint_indices.push_back(0);
     }
 
     // goal to be sent
@@ -126,7 +126,7 @@ public:
     RCLCPP_DEBUG(logger_, "Sending command from trajectory point %d", tpoint);
 
     // fill in goal from last point
-    for (std::size_t idx : gripper_joint_indexes)
+    for (std::size_t idx : gripper_joint_indices)
     {
       if (trajectory.joint_trajectory.points[tpoint].positions.size() <= idx)
       {

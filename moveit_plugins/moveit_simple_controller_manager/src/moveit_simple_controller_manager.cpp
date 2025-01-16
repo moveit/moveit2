@@ -148,12 +148,8 @@ public:
         if (type == "GripperCommand")
         {
           double max_effort;
-          const std::string& max_effort_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort");
-          if (!node->get_parameter(max_effort_param, max_effort))
-          {
-            RCLCPP_INFO_STREAM(getLogger(), "Max effort set to 0.0");
-            max_effort = 0.0;
-          }
+          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort"), max_effort, 0.0);
+          RCLCPP_INFO_STREAM(getLogger(), controller_name << " will command a max effort of: " << max_effort);
 
           new_handle = std::make_shared<GripperCommandControllerHandle>(node_, controller_name, action_ns, max_effort);
           bool parallel_gripper = false;
@@ -172,9 +168,8 @@ public:
           else
           {
             std::string command_joint;
-            if (!node_->get_parameter(makeParameterName(PARAM_BASE_NAME, controller_name, "command_joint"),
-                                      command_joint))
-              command_joint = controller_joints[0];
+            node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "command_joint"), command_joint,
+                                    controller_joints[0]);
 
             static_cast<GripperCommandControllerHandle*>(new_handle.get())->setCommandJoint(command_joint);
           }
@@ -190,26 +185,18 @@ public:
         else if (type == "ParallelGripperCommand")
         {
           double max_effort;
-          const std::string& max_effort_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort");
-          if (!node->get_parameter(max_effort_param, max_effort))
+          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "max_effort"), max_effort, 0.0);
+          if (max_effort > 0.0)
           {
-            RCLCPP_DEBUG_STREAM(getLogger(), controller_name << " max effort is not specified and will not be used.");
-            max_effort = 0.0;
+            RCLCPP_INFO_STREAM(getLogger(), controller_name << " will command a max effort of: " << max_effort);
           }
-          else
-          {
-            RCLCPP_INFO_STREAM(getLogger(), controller_name << " max effort set to: " << max_effort);
-          }
+
           double max_velocity;
-          const std::string& max_velocity_param = makeParameterName(PARAM_BASE_NAME, controller_name, "max_velocity");
-          if (!node->get_parameter(max_velocity_param, max_velocity))
+          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "max_velocity"), max_velocity,
+                                  0.0);
+          if (max_effort > 0.0)
           {
-            RCLCPP_DEBUG_STREAM(getLogger(), controller_name << " max velocity is not specified and will not be used.");
-            max_velocity = 0.0;
-          }
-          else
-          {
-            RCLCPP_INFO_STREAM(getLogger(), controller_name << " max velocity set to: " << max_velocity);
+            RCLCPP_INFO_STREAM(getLogger(), controller_name << " will command a max velocity of: " << max_velocity);
           }
 
           new_handle = std::make_shared<ParallelGripperCommandControllerHandle>(node_, controller_name, action_ns,

@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of the Willow Garage nor the names of its
+ *   * Neither the name of the Marq Rasmussen nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -96,17 +96,17 @@ public:
     control_msgs::action::ParallelGripperCommand::Goal goal;
     auto& cmd_state = goal.command;
 
-    std::vector<std::size_t> gripper_joint_indexes;
+    std::vector<std::size_t> gripper_joint_indices;
     for (std::size_t i = 0; i < trajectory.joint_trajectory.joint_names.size(); ++i)
     {
       if (command_joints_.find(trajectory.joint_trajectory.joint_names[i]) != command_joints_.end())
       {
-        gripper_joint_indexes.push_back(i);
+        gripper_joint_indices.push_back(i);
         cmd_state.name.push_back(trajectory.joint_trajectory.joint_names[i]);
       }
     }
 
-    if (gripper_joint_indexes.empty())
+    if (gripper_joint_indices.empty())
     {
       RCLCPP_ERROR(logger_, "Received trajectory does not include joint names that %s can command.", name_.c_str());
       return false;
@@ -117,7 +117,7 @@ public:
     RCLCPP_DEBUG(logger_, "Sending command from trajectory point %d.", tpoint);
 
     // fill in goal from last point
-    for (std::size_t idx : gripper_joint_indexes)
+    for (std::size_t idx : gripper_joint_indices)
     {
       if (trajectory.joint_trajectory.points[tpoint].positions.size() <= idx)
       {
@@ -191,7 +191,7 @@ private:
   /*
    * Some gripper drivers may indicate a failure if they do not close all the way when
    * an object is in the gripper.
-   * If true this assumes success if the gripper stalls and does not reach the target position goal.
+   * If true, this assumes success if the gripper stalls and does not reach the target position goal.
    */
   bool allow_stalling_;
 
