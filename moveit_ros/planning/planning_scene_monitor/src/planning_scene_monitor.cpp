@@ -1494,7 +1494,7 @@ void PlanningSceneMonitor::updateSceneWithCurrentState(bool skip_update_if_locke
 
     // Update state_update_mutex_ and last_robot_state_update_wall_time_
     {
-      std::unique_lock<std::shared_mutex> lock(state_update_mutex_);
+      std::unique_lock<std::mutex> lock(state_update_mutex_);
       last_robot_state_update_wall_time_ = std::chrono::system_clock::now();
       state_update_pending_.store(false);
     }
