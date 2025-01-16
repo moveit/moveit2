@@ -1393,7 +1393,7 @@ void PlanningSceneMonitor::onStateUpdate(const sensor_msgs::msg::JointState::Con
   // Read access to last_robot_state_update_wall_time_ and dt_state_update_ is unprotected here
   // as reading invalid values is not critical (just postpones the next state update)
   // only update every dt_state_update_ seconds
-  if (ros::WallTime::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
+  if (std::chrono::system_clock::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
     updateSceneWithCurrentState(true);
 }
 
@@ -1401,7 +1401,8 @@ void PlanningSceneMonitor::stateUpdateTimerCallback()
 {
   // Read access to last_robot_state_update_wall_time_ and dt_state_update_ is unprotected here
   // as reading invalid values is not critical (just postpones the next state update)
-  if (state_update_pending_.load() && ros::WallTime::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
+  if (state_update_pending_.load() &&
+      std::chrono::system_clock::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
     updateSceneWithCurrentState(true);
 }
 
