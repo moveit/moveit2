@@ -1482,10 +1482,14 @@ void PlanningSceneMonitor::updateSceneWithCurrentState(bool skip_update_if_locke
     {
       std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_, std::defer_lock);
       if (!skip_update_if_locked)
+      {
         ulock.lock();
+      }
       else if (!ulock.try_lock())
+      {
         // Return if we can't lock scene_update_mutex, thus not blocking CurrentStateMonitor
         return;
+      }
       last_update_time_ = last_robot_motion_time_ = current_state_monitor_->getCurrentStateTime();
       RCLCPP_DEBUG(logger_, "robot state update %f", fmod(last_robot_motion_time_.seconds(), 10.));
       current_state_monitor_->setToCurrentState(scene_->getCurrentStateNonConst());
