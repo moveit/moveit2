@@ -55,7 +55,7 @@ class MoveGroupExecuteTrajectoryAction : public MoveGroupCapability
 {
 public:
   MoveGroupExecuteTrajectoryAction();
-  ~MoveGroupExecuteTrajectoryAction();
+  ~MoveGroupExecuteTrajectoryAction() override;
 
   void initialize() override;
 
