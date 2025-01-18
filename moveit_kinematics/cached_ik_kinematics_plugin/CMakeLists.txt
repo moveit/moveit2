@@ -21,7 +21,7 @@ generate_parameter_library(
 
 target_link_libraries(
   moveit_cached_ik_kinematics_base PUBLIC cached_ik_kinematics_parameters
-                                          moveit_kdl_kinematics_plugin)
+                                          kdl_kinematics_parameters)
 
 add_library(moveit_cached_ik_kinematics_plugin SHARED
             src/cached_ik_kinematics_plugin.cpp)
