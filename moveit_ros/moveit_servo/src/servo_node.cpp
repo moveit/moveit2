@@ -308,6 +308,7 @@ void ServoNode::servoLoop()
   }
   KinematicState current_state = servo_->getCurrentRobotState(true /* block for current robot state */);
   last_commanded_state_ = current_state;
+  last_commanded_state_.time_stamp = node_->now();
   // Ensure the filter is up to date
   servo_->resetSmoothing(current_state);
 
@@ -318,6 +319,10 @@ void ServoNode::servoLoop()
 
   while (rclcpp::ok() && !stop_servo_)
   {
+    if(node_->now().get_clock_type() == last_commanded_state_.time_stamp.get_clock_type() && node_->now() - last_commanded_state_.time_stamp > rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout)){
+      current_state = servo_->getCurrentRobotState(true /* block for current robot state */);
+    }
+    
     // Skip processing if servoing is disabled.
     if (servo_paused_)
     {
@@ -385,6 +390,7 @@ void ServoNode::servoLoop()
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
       }
       last_commanded_state_ = next_joint_state.value();
+      last_commanded_state_.time_stamp = node_->now();
     }
     else
     {
