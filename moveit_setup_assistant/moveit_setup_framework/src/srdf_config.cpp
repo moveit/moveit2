@@ -88,7 +88,7 @@ void SRDFConfig::loadSRDFFile(const std::filesystem::path& srdf_file_path, const
   loadURDFModel();
 
   std::string srdf_string;
-  if (!rdf_loader::RDFLoader::loadXmlFileToString(srdf_string, srdf_path_, xacro_args))
+  if (!rdf_loader::RDFLoader::loadXmlFileToString(srdf_string, srdf_path_.string(), xacro_args))
   {
     throw std::runtime_error("SRDF file not found: " + srdf_path_.string());
   }
