@@ -294,7 +294,7 @@ void ConfigurationFilesWidget::changeCheckedState(QListWidgetItem* item)
   }
 
   // Enable/disable file
-  setup_step_.setShouldGenerate(gen_file->getRelativePath(), generate);
+  setup_step_.setShouldGenerate(gen_file->getRelativePath().string(), generate);
 }
 
 // ******************************************************************************************
@@ -303,7 +303,7 @@ void ConfigurationFilesWidget::changeCheckedState(QListWidgetItem* item)
 void ConfigurationFilesWidget::focusGiven()
 {
   // Pass the package path from start screen to configuration files screen
-  stack_path_->setPath(setup_step_.getPackagePath());
+  stack_path_->setPath(setup_step_.getPackagePath().string());
 
   setup_step_.loadFiles();
 
@@ -352,7 +352,7 @@ void ConfigurationFilesWidget::showGenFiles()
     auto gen_file = gen_files[i];
 
     // Create a formatted row
-    QListWidgetItem* item = new QListWidgetItem(QString(gen_file->getRelativePath().c_str()), action_list_, 0);
+    QListWidgetItem* item = new QListWidgetItem(QString(gen_file->getRelativePath().string().c_str()), action_list_, 0);
 
     // Checkbox
     item->setCheckState(setup_step_.shouldGenerate(gen_file) ? Qt::Checked : Qt::Unchecked);
@@ -480,7 +480,7 @@ bool ConfigurationFilesWidget::generatePackage()
       // Error occurred
       QMessageBox::critical(this, "Error Generating File",
                             QString("Failed to generate folder or file: '")
-                                .append(gen_file->getRelativePath().c_str())
+                                .append(gen_file->getRelativePath().string().c_str())
                                 .append("' at location:\n")
                                 .append(absolute_path.c_str()));
       return false;
