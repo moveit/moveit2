@@ -147,6 +147,7 @@ add_subdirectory(collision_detection_fcl)
 
 
 install(
+<<<<<<< HEAD
   TARGETS
     collision_detector_bullet_plugin
     moveit_butterworth_filter
@@ -176,13 +177,56 @@ install(
     moveit_transforms
     moveit_utils
   EXPORT export_${PROJECT_NAME}
+=======
+  TARGETS moveit_collision_detection
+          moveit_collision_detection_bullet
+          moveit_collision_detection_fcl
+          moveit_collision_distance_field
+          moveit_constraint_samplers
+          moveit_distance_field
+          moveit_dynamics_solver
+          moveit_exceptions
+          moveit_kinematic_constraints
+          moveit_kinematics_base
+          moveit_kinematics_metrics
+          moveit_macros
+          moveit_planning_interface
+          moveit_planning_scene
+          moveit_robot_model
+          moveit_robot_state
+          moveit_robot_trajectory
+          moveit_smoothing_base
+          moveit_test_utils
+          moveit_trajectory_processing
+          moveit_transforms
+          moveit_utils
+  EXPORT moveit_coreTargets
+>>>>>>> b5eb4deb3 (Remove plugins from export set (#3227))
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
+<<<<<<< HEAD
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+=======
+install(
+  TARGETS collision_detector_bullet_plugin
+          collision_detector_fcl_plugin
+          moveit_acceleration_filter
+          moveit_acceleration_filter_parameters
+          moveit_butterworth_filter
+          moveit_butterworth_filter_parameters
+          moveit_ruckig_filter
+          moveit_ruckig_filter_parameters
+  EXPORT moveit_core_pluginTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+ament_export_targets(moveit_coreTargets HAS_LIBRARY_TARGET)
+>>>>>>> b5eb4deb3 (Remove plugins from export set (#3227))
 ament_export_dependencies(
   angles
   Bullet
