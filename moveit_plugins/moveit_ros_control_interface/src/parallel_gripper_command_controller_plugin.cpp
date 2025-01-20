@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik Inc.
+ *  Copyright (c) 2025, Marq Rasmussen
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Fraunhofer IPA nor the names of its
+ *   * Neither the name of Marq Rasmussen nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,31 +32,32 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Joseph Schornak */
+/* Author: Marq Rasmussen */
 
 #include <moveit_ros_control_interface/ControllerHandle.hpp>
 #include <pluginlib/class_list_macros.hpp>
-#include <moveit_simple_controller_manager/gripper_controller_handle.hpp>
+#include <moveit_simple_controller_manager/parallel_gripper_command_controller_handle.hpp>
 #include <rclcpp/node.hpp>
 #include <memory>
 
 namespace moveit_ros_control_interface
 {
 /**
- * \brief Simple allocator for moveit_simple_controller_manager::FollowJointTrajectoryControllerHandle instances.
+ * \brief Simple allocator for moveit_simple_controller_manager::ParallelGripperCommandControllerHandle instances.
  */
-class GripperControllerAllocator : public ControllerHandleAllocator
+class ParallelGripperCommandControllerAllocator : public ControllerHandleAllocator
 {
 public:
   moveit_controller_manager::MoveItControllerHandlePtr alloc(const rclcpp::Node::SharedPtr& node,
                                                              const std::string& name,
                                                              const std::vector<std::string>& /* resources */) override
   {
-    return std::make_shared<moveit_simple_controller_manager::GripperControllerHandle>(node, name, "gripper_cmd");
+    return std::make_shared<moveit_simple_controller_manager::ParallelGripperCommandControllerHandle>(node, name,
+                                                                                                      "gripper_cmd");
   }
 };
 
 }  // namespace moveit_ros_control_interface
 
-PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::GripperControllerAllocator,
+PLUGINLIB_EXPORT_CLASS(moveit_ros_control_interface::ParallelGripperCommandControllerAllocator,
                        moveit_ros_control_interface::ControllerHandleAllocator);

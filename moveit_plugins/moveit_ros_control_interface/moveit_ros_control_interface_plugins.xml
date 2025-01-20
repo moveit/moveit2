@@ -10,10 +10,15 @@
     </class>
   </library>
   <library path="moveit_ros_control_interface_gripper_plugin">
-    <class name="position_controllers/GripperActionController" type="moveit_ros_control_interface::GripperControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
+    <class name="position_controllers/GripperActionController" type="moveit_ros_control_interface::GripperCommandControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
         <description></description>
     </class>
-    <class name="effort_controllers/GripperActionController" type="moveit_ros_control_interface::GripperControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
+    <class name="effort_controllers/GripperActionController" type="moveit_ros_control_interface::GripperCommandControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
+        <description></description>
+    </class>
+  </library>
+  <library path="moveit_ros_control_interface_parallel_gripper_plugin">
+    <class name="parallel_gripper_action_controller/GripperActionController" type="moveit_ros_control_interface::ParallelGripperCommandControllerAllocator" base_class_type="moveit_ros_control_interface::ControllerHandleAllocator">
         <description></description>
     </class>
   </library>
