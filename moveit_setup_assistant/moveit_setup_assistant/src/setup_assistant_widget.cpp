@@ -71,11 +71,7 @@ SetupAssistantWidget::SetupAssistantWidget(const rviz_common::ros_integration::R
 
   // Setting the window icon
   auto icon_path = getSharePath("moveit_ros_visualization") / "icons/classes/MotionPlanning.png";
-<<<<<<< HEAD
-  this->setWindowIcon(QIcon(icon_path.c_str()));
-=======
   setWindowIcon(QIcon(icon_path.string().c_str()));
->>>>>>> 2b9173b37 (Explicit convert from std::filesystem::path to std::string for Windows compatibility (#3249))
 
   // Basic widget container -----------------------------------------
   QHBoxLayout* layout = new QHBoxLayout();
