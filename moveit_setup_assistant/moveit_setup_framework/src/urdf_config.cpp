@@ -116,9 +116,6 @@ void URDFConfig::setPackageName()
 void URDFConfig::loadFromPackage(const std::filesystem::path& package_name, const std::filesystem::path& relative_path,
                                  const std::string& xacro_args)
 {
-<<<<<<< HEAD
-  urdf_pkg_name_ = package_name;
-=======
   const std::filesystem::path package_path = getSharePath(package_name.string());
   if (package_path.empty())
   {
@@ -126,7 +123,6 @@ void URDFConfig::loadFromPackage(const std::filesystem::path& package_name, cons
   }
 
   urdf_pkg_name_ = package_name.string();
->>>>>>> 2b9173b37 (Explicit convert from std::filesystem::path to std::string for Windows compatibility (#3249))
   urdf_pkg_relative_path_ = relative_path;
   xacro_args_ = xacro_args;
 
