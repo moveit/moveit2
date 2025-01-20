@@ -262,7 +262,7 @@ public:
 
   bool write(const std::filesystem::path& path)
   {
-    return srdf_.writeSRDF(path);
+    return srdf_.writeSRDF(path.string());
   }
 
   std::filesystem::path getPath() const
