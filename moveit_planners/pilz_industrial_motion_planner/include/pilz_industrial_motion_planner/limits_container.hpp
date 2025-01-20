@@ -37,7 +37,7 @@
 #include <pilz_industrial_motion_planner/joint_limits_container.hpp>
 #include <math.h>
 
-#include "cartesian_limits_parameters.hpp"
+#include <pilz_industrial_motion_planner/cartesian_limits_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {

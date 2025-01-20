@@ -47,7 +47,7 @@
 #include <stomp_moveit/noise_generators.hpp>
 #include <stomp_moveit/cost_functions.hpp>
 #include <stomp_moveit/stomp_moveit_task.hpp>
-#include <stomp_moveit_parameters.hpp>
+#include <moveit_planners_stomp/stomp_moveit_parameters.hpp>
 
 #include <moveit/constraint_samplers/constraint_sampler_manager.hpp>
 #include <moveit/robot_state/conversions.hpp>

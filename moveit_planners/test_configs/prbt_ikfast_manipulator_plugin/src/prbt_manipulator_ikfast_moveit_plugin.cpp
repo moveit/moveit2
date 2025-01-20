@@ -52,7 +52,7 @@
 #include <tf2_kdl/tf2_kdl.hpp>
 #include <moveit/kinematics_base/kinematics_base.hpp>
 #include <moveit/robot_state/robot_state.hpp>
-#include <prbt_ikfast_kinematics_parameters.hpp>
+#include <moveit_resources_prbt_ikfast_manipulator_plugin/prbt_ikfast_kinematics_parameters.hpp>
 
 using namespace moveit::core;
 

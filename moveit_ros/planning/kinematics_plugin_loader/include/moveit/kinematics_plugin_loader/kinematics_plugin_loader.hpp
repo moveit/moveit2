@@ -39,8 +39,8 @@
 #include <moveit/macros/class_forward.hpp>
 #include <moveit/robot_model/robot_model.hpp>
 #include <moveit/kinematics_base/kinematics_base.hpp>
-#include <kinematics_parameters.hpp>
 #include <moveit/utils/logger.hpp>
+#include <moveit_ros_planning/kinematics_parameters.hpp>
 
 namespace kinematics_plugin_loader
 {

@@ -33,7 +33,7 @@
  *********************************************************************/
 
 #include <moveit/local_planner/local_planner_component.hpp>
-#include <local_planner_parameters.hpp>
+#include <moveit_hybrid_planning/local_planner_parameters.hpp>
 
 #include <moveit/planning_scene/planning_scene.hpp>
 #include <moveit/robot_state/robot_state.hpp>

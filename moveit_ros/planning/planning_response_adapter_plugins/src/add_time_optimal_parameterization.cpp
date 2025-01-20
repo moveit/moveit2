@@ -39,7 +39,7 @@
 #include <class_loader/class_loader.hpp>
 #include <moveit/utils/logger.hpp>
 
-#include <default_response_adapter_parameters.hpp>
+#include <moveit_ros_planning/default_response_adapter_parameters.hpp>
 
 namespace default_planning_response_adapters
 {
