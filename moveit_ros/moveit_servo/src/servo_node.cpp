@@ -330,6 +330,11 @@ void ServoNode::servoLoop()
     const bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
     const auto cur_time = node_->now();
 
+    if(cur_time.get_clock_type() == last_commanded_time_.get_clock_type() &&
+       cur_time - last_commanded_time_ > rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout)){
+      current_state = servo_->getCurrentRobotState(true /* block for current robot state */);
+    }
+
     if (use_trajectory && !joint_cmd_rolling_window_.empty() && joint_cmd_rolling_window_.back().time_stamp > cur_time)
     {
       current_state = joint_cmd_rolling_window_.back();
@@ -385,6 +390,7 @@ void ServoNode::servoLoop()
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
       }
       last_commanded_state_ = next_joint_state.value();
+      last_commanded_time_ = node_->now();
     }
     else
     {
