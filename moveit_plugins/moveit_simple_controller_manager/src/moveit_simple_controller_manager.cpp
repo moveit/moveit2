@@ -201,15 +201,14 @@ public:
 
           new_handle = std::make_shared<ParallelGripperCommandControllerHandle>(node_, controller_name, action_ns,
                                                                                 max_effort, max_velocity);
-          for (const auto& name : controller_joints)
-          {
-            static_cast<ParallelGripperCommandControllerHandle*>(new_handle.get())->addCommandJoint(name);
-          }
 
-          bool allow_stalling;
-          node_->get_parameter_or(makeParameterName(PARAM_BASE_NAME, controller_name, "allow_stalling"), allow_stalling,
-                                  false);
-          static_cast<GripperCommandControllerHandle*>(new_handle.get())->allowFailure(allow_stalling);
+          if (controller_joints.size() > 1)
+          {
+            RCLCPP_WARN_STREAM(getLogger(), "ParallelGripperCommand controller only supports commanding a single joint "
+                                            "and multiple joint names were specified. Assuming control of joint: "
+                                                << controller_joints[0]);
+          }
+          static_cast<ParallelGripperCommandControllerHandle*>(new_handle.get())->setCommandJoint(controller_joints[0]);
 
           RCLCPP_INFO_STREAM(getLogger(), "Added ParallelGripperCommand controller for " << controller_name);
           controllers_[controller_name] = new_handle;
