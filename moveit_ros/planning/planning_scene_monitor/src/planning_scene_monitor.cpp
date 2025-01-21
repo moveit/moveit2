@@ -34,6 +34,8 @@
 
 /* Author: Ioan Sucan */
 
+#include <rclcpp/qos.hpp>
+
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/robot_model_loader/robot_model_loader.hpp>
 #include <moveit/utils/message_checks.hpp>
@@ -1176,8 +1178,12 @@ void PlanningSceneMonitor::startSceneMonitor(const std::string& scene_topic)
   // listen for planning scene updates; these messages include transforms, so no need for filters
   if (!scene_topic.empty())
   {
+    // Missing even a single message may result in wrong state of attached objects, need to have reliable QoS
+    // with a sufficient queue length
+    rclcpp::QoS qos(10);
+    qos.reliable();
     planning_scene_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningScene>(
-        scene_topic, rclcpp::SystemDefaultsQoS(), [this](const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene) {
+        scene_topic, qos, [this](const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene) {
           return newPlanningSceneCallback(scene);
         });
     RCLCPP_INFO(logger_, "Listening to '%s'", planning_scene_subscriber_->get_topic_name());
