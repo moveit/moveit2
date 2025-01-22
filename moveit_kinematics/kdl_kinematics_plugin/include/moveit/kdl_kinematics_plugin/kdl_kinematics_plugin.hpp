@@ -39,7 +39,6 @@
 // ROS
 #include <rclcpp/rclcpp.hpp>
 #include <random_numbers/random_numbers.h>
-#include <kdl_kinematics_parameters.hpp>
 
 // ROS msgs
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -58,6 +57,7 @@
 #include <moveit/kdl_kinematics_plugin/joint_mimic.hpp>
 #include <moveit/robot_model/robot_model.hpp>
 #include <moveit/robot_state/robot_state.hpp>
+#include <moveit_kinematics/kdl_kinematics_parameters.hpp>
 
 #include <cfloat>
 

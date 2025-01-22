@@ -41,7 +41,7 @@
 
 #pragma once
 
-#include <moveit_servo_lib_parameters.hpp>
+#include <moveit_servo/moveit_servo_lib_parameters.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/robot_model/joint_model_group.hpp>
