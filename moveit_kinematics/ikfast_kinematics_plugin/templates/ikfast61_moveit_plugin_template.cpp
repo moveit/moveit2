@@ -47,8 +47,8 @@
 #include <Eigen/Geometry>
 #include <tf2_kdl/tf2_kdl.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-#include <ikfast_kinematics_parameters.hpp>
 #include <moveit/utils/logger.hpp>
+#include <_PACKAGE_NAME_/ikfast_kinematics_parameters.hpp>
 
 using namespace moveit::core;
 
