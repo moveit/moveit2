@@ -47,12 +47,12 @@ namespace moveit_simple_controller_manager
  * This is an interface for a gripper using control_msgs/GripperCommandAction
  * action interface (single DOF).
  */
-class GripperControllerHandle : public ActionBasedControllerHandle<control_msgs::action::GripperCommand>
+class GripperCommandControllerHandle : public ActionBasedControllerHandle<control_msgs::action::GripperCommand>
 {
 public:
   /* Topics will map to name/ns/goal, name/ns/result, etc */
-  GripperControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
-                          const double max_effort = 0.0)
+  GripperCommandControllerHandle(const rclcpp::Node::SharedPtr& node, const std::string& name, const std::string& ns,
+                                 const double max_effort = 0.0)
     : ActionBasedControllerHandle<control_msgs::action::GripperCommand>(
           node, name, ns, "moveit.simple_controller_manager.gripper_controller_handle")
     , allow_failure_(false)
@@ -98,23 +98,23 @@ public:
       return false;
     }
 
-    std::vector<std::size_t> gripper_joint_indexes;
+    std::vector<std::size_t> gripper_joint_indices;
     for (std::size_t i = 0; i < trajectory.joint_trajectory.joint_names.size(); ++i)
     {
       if (command_joints_.find(trajectory.joint_trajectory.joint_names[i]) != command_joints_.end())
       {
-        gripper_joint_indexes.push_back(i);
+        gripper_joint_indices.push_back(i);
         if (!parallel_jaw_gripper_)
           break;
       }
     }
 
-    if (gripper_joint_indexes.empty())
+    if (gripper_joint_indices.empty())
     {
       RCLCPP_WARN(logger_, "No command_joint was specified for the MoveIt controller gripper handle. \
-                      Please see GripperControllerHandle::addCommandJoint() and \
-                      GripperControllerHandle::setCommandJoint(). Assuming index 0.");
-      gripper_joint_indexes.push_back(0);
+                      Please see GripperCommandControllerHandle::addCommandJoint() and \
+                      GripperCommandControllerHandle::setCommandJoint(). Assuming index 0.");
+      gripper_joint_indices.push_back(0);
     }
 
     // goal to be sent
@@ -126,7 +126,7 @@ public:
     RCLCPP_DEBUG(logger_, "Sending command from trajectory point %d", tpoint);
 
     // fill in goal from last point
-    for (std::size_t idx : gripper_joint_indexes)
+    for (std::size_t idx : gripper_joint_indices)
     {
       if (trajectory.joint_trajectory.points[tpoint].positions.size() <= idx)
       {
