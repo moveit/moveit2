@@ -147,6 +147,13 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
 void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request>& request,
                            const std::shared_ptr<std_srvs::srv::SetBool::Response>& response)
 {
+  if (servo_paused_ == request->data)
+  {
+    RCLCPP_INFO(node_->get_logger(), "Requested pause state is already active.");
+    response->success = true;
+    response->message = "Nothing changed since requested pause state was already active.";
+    return;
+  }
   servo_paused_ = request->data;
   response->success = (servo_paused_ == request->data);
   if (servo_paused_)
