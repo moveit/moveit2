@@ -1828,8 +1828,13 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   {
     if (consistency_limits[i].size() != sub_groups[i]->getVariableCount())
     {
+<<<<<<< HEAD
       RCLCPP_ERROR(LOGGER, "Number of joints in consistency_limits is %zu but it should be should be %u", i,
                    sub_groups[i]->getVariableCount());
+=======
+      RCLCPP_ERROR(getLogger(), "Number of joints in consistency_limits[%zu] is %lu but it should be should be %u", i,
+                   consistency_limits[i].size(), sub_groups[i]->getVariableCount());
+>>>>>>> 524ca4f15 (Fix: misleading error logs in RobotState::setFromIKSubgroups() (#3263))
       return false;
     }
   }
