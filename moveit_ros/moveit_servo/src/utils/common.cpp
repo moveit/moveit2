@@ -261,7 +261,7 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
  * This function converts the given joint state into a Float64MultiArray message.
  * 
  * @param servo_params Configuration parameters for the servo, including message type selection.
- * @param joint_state The current joint state to be converted into the message.
+ * @param joint_state The joint state to be converted into the message.
  * @return A Float64MultiArray message containing the joint state data.
  * 
  * Example:
