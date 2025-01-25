@@ -255,6 +255,22 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
   joint_cmd_rolling_window.push_back(next_joint_state);
 }
 
+/**
+ * @brief Composes a Float64MultiArray message for controllers requiring Float64MultiArray input.
+ * 
+ * This function converts the given joint state into a Float64MultiArray message.
+ * 
+ * @param servo_params Configuration parameters for the servo, including message type selection.
+ * @param joint_state The current joint state to be converted into the message.
+ * @return A Float64MultiArray message containing the joint state data.
+ * 
+ * Example:
+ * @code
+ * auto message = composeMultiArrayMessage(servo_params, joint_state);
+ * controller.publish(message);
+ * @endcode
+ */
+
 std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& servo_params,
                                                           const KinematicState& joint_state)
 {
