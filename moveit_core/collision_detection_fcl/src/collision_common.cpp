@@ -155,11 +155,15 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
       }
     }
   }
+
   // bodies attached to the same link should not collide
+  // If one of the attached objects lists the other in touch links set, then collisions are also allowed
   if (cd1->type == BodyTypes::ROBOT_ATTACHED && cd2->type == BodyTypes::ROBOT_ATTACHED)
   {
     if (cd1->ptr.ab->getAttachedLink() == cd2->ptr.ab->getAttachedLink())
+    {
       always_allow_collision = true;
+    }
     else
     {
       const std::set<std::string>& tl1 = cd1->ptr.ab->getTouchLinks();
