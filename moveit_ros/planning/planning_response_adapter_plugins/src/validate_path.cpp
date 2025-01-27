@@ -42,7 +42,8 @@
 #include <visualization_msgs/msg/marker_array.hpp>
 #include <moveit/collision_detection/collision_tools.hpp>
 
-#include <default_response_adapter_parameters.hpp>
+#include <moveit_ros_planning/default_response_adapter_parameters.hpp>
+
 namespace default_planning_response_adapters
 {
 /**

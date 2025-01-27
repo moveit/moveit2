@@ -115,15 +115,15 @@ public:
       if (value < 0.0 || value > 1.0)
         throw std::runtime_error("Percentage values must be between 0 and 1, inclusive");
     }
-    operator double()
+    operator double() const
     {
       return value;
     }
-    double operator*()
+    double operator*() const
     {
       return value;
     }
-    Percentage operator*(const Percentage& p)
+    Percentage operator*(const Percentage& p) const
     {
       Percentage res(value * p.value);
       return res;
@@ -136,15 +136,15 @@ public:
     Distance(double meters) : meters(meters)
     {
     }
-    operator double()
+    operator double() const
     {
       return meters;
     }
-    double operator*()
+    double operator*() const
     {
       return meters;
     }
-    Distance operator*(const Percentage& p)
+    Distance operator*(const Percentage& p) const
     {
       Distance res(meters * p.value);
       return res;

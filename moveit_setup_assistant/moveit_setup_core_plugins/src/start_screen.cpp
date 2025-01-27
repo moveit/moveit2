@@ -70,7 +70,7 @@ std::filesystem::path StartScreen::getPackagePath()
 
 void StartScreen::loadExisting(const std::filesystem::path& package_path)
 {
-  package_settings_->loadExisting(package_path);
+  package_settings_->loadExisting(package_path.string());
 }
 
 bool StartScreen::isXacroFile()
