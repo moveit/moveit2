@@ -63,7 +63,7 @@ bool extractPackageNameFromPath(const std::filesystem::path& path, std::string& 
       // Default package name to folder name
       package_name = sub_path.filename().string();
       tinyxml2::XMLDocument package_xml_file;
-      auto is_open = package_xml_file.LoadFile((sub_path / "package.xml").c_str());
+      auto is_open = package_xml_file.LoadFile((sub_path / "package.xml").string().c_str());
       if (is_open == tinyxml2::XML_SUCCESS)
       {
         auto name_potential =

@@ -48,5 +48,5 @@
 /* Author: Michael Ferguson, Ioan Sucan, E. Gil Jones */
 
 #pragma once
-#pragma message(".h header is obsolete. Please use the .hpp header instead.")
-#include <moveit_simple_controller_manager/gripper_controller_handle.hpp>
+#pragma message(".h header is obsolete. Please use the gripper_command_controller_handle.hpp header instead.")
+#include <moveit_simple_controller_manager/gripper_command_controller_handle.hpp>

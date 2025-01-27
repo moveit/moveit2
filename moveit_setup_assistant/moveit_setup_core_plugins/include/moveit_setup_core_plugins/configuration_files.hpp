@@ -80,7 +80,7 @@ public:
 
   bool shouldGenerate(const GeneratedFilePtr& file) const
   {
-    std::string rel_path = file->getRelativePath();
+    std::string rel_path = file->getRelativePath().string();
     auto it = should_generate_.find(rel_path);
     if (it == should_generate_.end())
     {
