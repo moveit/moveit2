@@ -907,29 +907,49 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
   }
 }
 
-const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
+const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame, Eigen::Isometry3d* transform,
+                                                                JointModelGroup* jmg) const
 {
   const LinkModel* link{ nullptr };
 
-  size_t idx = 0;
-  if ((idx = frame.find('/')) != std::string::npos)
-  {  // resolve sub frame
-    std::string object{ frame.substr(0, idx) };
-    if (!hasAttachedBody(object))
-      return nullptr;
-    auto body{ getAttachedBody(object) };
-    if (!body->hasSubframeTransform(frame))
-      return nullptr;
-    link = body->getAttachedLink();
-  }
-  else if (hasAttachedBody(frame))
+  if (getRobotModel()->hasLinkModel(frame))
   {
-    link = getAttachedBody(frame)->getAttachedLink();
-  }
-  else if (getRobotModel()->hasLinkModel(frame))
     link = getLinkModel(frame);
-
-  return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
+    if (transform)
+      transform->setIdentity();
+  }
+  else if (const auto it = attached_body_map_.find(frame); it != attached_body_map_.end())
+  {
+    const auto& body{ it->second };
+    link = body->getAttachedLink();
+    if (transform)
+      *transform = body->getPose();
+  }
+  else
+  {
+    bool found = false;
+    for (const auto& it : attached_body_map_)
+    {
+      const auto& body{ it.second };
+      const Eigen::Isometry3d& subframe = body->getSubframeTransform(frame, &found);
+      if (found)
+      {
+        if (transform)  // prepend the body transform
+          *transform = body->getPose() * subframe;
+        link = body->getAttachedLink();
+        break;
+      }
+    }
+    if (!found)
+      return nullptr;
+  }
+  // link is valid and transform describes pose of frame w.r.t. global frame
+  Eigen::Isometry3d link_transform;
+  auto* parent = getRobotModel()->getRigidlyConnectedParentLinkModel(link, link_transform, jmg);
+  if (parent && transform)
+    // prepend link_transform to get transform from parent link to frame
+    *transform = link_transform * *transform;
+  return parent;
 }
 
 const Eigen::Isometry3d& RobotState::getJointTransform(const JointModel* joint)
@@ -1919,7 +1939,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
         found_valid_frame = true;
         break;
       }  // end if pose_frame
-    }    // end for solver_tip_frames
+    }  // end for solver_tip_frames
 
     // Make sure one of the tip frames worked
     if (!found_valid_frame)
