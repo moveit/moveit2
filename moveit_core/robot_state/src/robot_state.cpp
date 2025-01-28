@@ -947,8 +947,10 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
   Eigen::Isometry3d link_transform;
   auto* parent = getRobotModel()->getRigidlyConnectedParentLinkModel(link, link_transform, jmg);
   if (parent && transform)
+  {
     // prepend link_transform to get transform from parent link to frame
     *transform = link_transform * *transform;
+  }
   return parent;
 }
 
