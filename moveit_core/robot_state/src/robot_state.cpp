@@ -908,7 +908,7 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
 }
 
 const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame, Eigen::Isometry3d* transform,
-                                                                JointModelGroup* jmg) const
+                                                                const JointModelGroup* jmg) const
 {
   const LinkModel* link{ nullptr };
 
