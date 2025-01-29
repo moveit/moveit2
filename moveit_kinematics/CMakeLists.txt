@@ -28,12 +28,11 @@ set(THIS_PACKAGE_INCLUDE_DIRS
     cached_ik_kinematics_plugin/include)
 
 set(THIS_PACKAGE_LIBRARIES
-    cached_ik_kinematics_parameters
-    moveit_cached_ik_kinematics_base
-    moveit_cached_ik_kinematics_plugin
-    kdl_kinematics_parameters
-    moveit_kdl_kinematics_plugin
-    srv_kinematics_parameters
+    cached_ik_kinematics_parameters moveit_cached_ik_kinematics_base
+    kdl_kinematics_parameters srv_kinematics_parameters)
+
+set(THIS_PACKAGE_PLUGINS
+    moveit_cached_ik_kinematics_plugin moveit_kdl_kinematics_plugin
     moveit_srv_kinematics_plugin)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -68,6 +67,15 @@ add_subdirectory(test)
 install(
   TARGETS ${THIS_PACKAGE_LIBRARIES}
   EXPORT ${PROJECT_NAME}Targets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES
+  DESTINATION include/moveit_kinematics)
+
+install(
+  TARGETS ${THIS_PACKAGE_PLUGINS}
+  EXPORT ${PROJECT_NAME}PluginTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin

@@ -43,11 +43,16 @@
 #include <kdl/path_line.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
+// TODO: Remove conditional include when released to all active distros.
+#if __has_include(<tf2/convert.hpp>)
+#include <tf2/convert.hpp>
+#else
 #include <tf2/convert.h>
-#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
+#endif
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/utils/logger.hpp>
 
