@@ -762,7 +762,7 @@ TEST_F(OneRobot, rigidlyConnectedParent)
   // attach "object" with "subframe" to link_b
   state.attachBody(std::make_unique<moveit::core::AttachedBody>(
       link_b, "object", Eigen::Isometry3d(Eigen::Translation3d(1, 0, 0)), std::vector<shapes::ShapeConstPtr>{},
-      EigenSTL::vector_Isometry3d{}, std::set<std::string>{}, trajectory_msgs::JointTrajectory{},
+      EigenSTL::vector_Isometry3d{}, std::set<std::string>{}, trajectory_msgs::msg::JointTrajectory{},
       moveit::core::FixedTransformsMap{ { "subframe", Eigen::Isometry3d(Eigen::Translation3d(0, 0, 1)) } }));
 
   // RobotState's version should resolve these too
@@ -791,7 +791,7 @@ TEST_F(OneRobot, rigidlyConnectedParent)
   state.attachBody(std::make_unique<moveit::core::AttachedBody>(
       link_with_slash, "object/with/slash", Eigen::Isometry3d(Eigen::Translation3d(1, 0, 0)),
       std::vector<shapes::ShapeConstPtr>{}, EigenSTL::vector_Isometry3d{}, std::set<std::string>{},
-      trajectory_msgs::JointTrajectory{},
+      trajectory_msgs::msg::JointTrajectory{},
       moveit::core::FixedTransformsMap{ { "sub/frame", Eigen::Isometry3d(Eigen::Translation3d(0, 0, 1)) } }));
   const moveit::core::LinkModel* rigid_parent_of_object =
       state.getRigidlyConnectedParentLinkModel("object/with/slash/sub/frame");
