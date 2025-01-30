@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
     auto package_settings = config_data->get<moveit_setup::PackageSettingsConfig>("package_settings");
     try
     {
-      package_settings->loadExisting(config_pkg_path);
+      package_settings->loadExisting(config_pkg_path.string());
     }
     catch (const std::runtime_error& e)
     {
@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
     RCLCPP_ERROR_STREAM(node->get_logger(), "Please provide config package or URDF and SRDF path");
     return 1;
   }
-  else if (rdf_loader::RDFLoader::isXacroFile(srdf_path) && output_path.empty())
+  else if (rdf_loader::RDFLoader::isXacroFile(srdf_path.string()) && output_path.empty())
   {
     RCLCPP_ERROR_STREAM(node->get_logger(), "Please provide a different output file for SRDF xacro input file");
     return 1;

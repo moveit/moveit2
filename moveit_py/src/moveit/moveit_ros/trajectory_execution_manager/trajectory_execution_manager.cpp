@@ -200,11 +200,6 @@ void initTrajectoryExecutionManager(py::module& m)
            Stop whatever executions are active, if any.
            )")
 
-      .def("clear", &trajectory_execution_manager::TrajectoryExecutionManager::clear,
-           R"(
-           Clear the trajectories to execute.
-           )")
-
       .def("enable_execution_duration_monitoring",
            &trajectory_execution_manager::TrajectoryExecutionManager::enableExecutionDurationMonitoring,
            py::arg("flag"),
