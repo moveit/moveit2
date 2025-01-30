@@ -562,16 +562,16 @@ private:
   std::atomic<bool> state_update_pending_;
 
   // Lock for writing last_robot_state_update_wall_time_ and dt_state_update_
-  boost::mutex state_update_mutex_;
+  std::mutex state_update_mutex_;
 
   /// Last time the state was updated from current_state_monitor_
   // Only access this from callback functions (and constructor)
   // This field is protected by state_update_mutex_
-  ros::WallTime last_robot_state_update_wall_time_;
+  std::chrono::system_clock::time_point last_robot_state_update_wall_time_;
 
   /// the amount of time to wait in between updates to the robot state
   // This field is protected by state_update_mutex_
-  ros::WallDuration dt_state_update_;
+  std::chrono::duration<double> dt_state_update_;  // 1hz
 
   /// the amount of time to wait when looking up transforms
   // Setting this to a non-zero value resolves issues when the sensor data is
@@ -581,7 +581,6 @@ private:
   /// timer for state updates.
   // If state_update_pending_ is true, call updateSceneWithCurrentState()
   // Not safe to access from callback functions.
-
   rclcpp::TimerBase::SharedPtr state_update_timer_;
 
   robot_model_loader::RobotModelLoaderPtr rm_loader_;

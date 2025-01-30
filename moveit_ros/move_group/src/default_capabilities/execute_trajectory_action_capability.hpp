@@ -55,7 +55,7 @@ class MoveGroupExecuteTrajectoryAction : public MoveGroupCapability
 {
 public:
   MoveGroupExecuteTrajectoryAction();
-  ~MoveGroupExecuteTrajectoryAction();
+  ~MoveGroupExecuteTrajectoryAction() override;
 
   void initialize() override;
 
@@ -63,10 +63,15 @@ private:
   void executePathCallback(const std::shared_ptr<ExecTrajectoryGoal>& goal);
   void executePath(const std::shared_ptr<ExecTrajectoryGoal>& goal, std::shared_ptr<ExecTrajectory::Result>& action_res);
 
-  // Use our own callback queue and spinner to allow execution parallel to other capabilities
-  ros::CallbackQueue callback_queue_;
-  ros::AsyncSpinner spinner_;
-  std::unique_ptr<actionlib::SimpleActionServer<moveit_msgs::ExecuteTrajectoryAction> > execute_action_server_;
+  void preemptExecuteTrajectoryCallback();
+  void setExecuteTrajectoryState(MoveGroupState state, const std::shared_ptr<ExecTrajectoryGoal>& goal);
+
+  // Use our own callback group and executor to allow execution parallel to other capabilities
+  rclcpp::CallbackGroup::SharedPtr callback_group_;
+  rclcpp::executors::SingleThreadedExecutor callback_executor_;
+  std::thread callback_thread_;
+
+  std::shared_ptr<rclcpp_action::Server<ExecTrajectory>> execute_action_server_;
 };
 
 }  // namespace move_group

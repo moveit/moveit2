@@ -224,9 +224,10 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   shape_transform_cache_lookup_wait_time_ = rclcpp::Duration::from_seconds(temp_wait_time);
 
   state_update_pending_.store(false);
-  state_update_timer_ = nh_.createWallTimer(dt_state_update_, &PlanningSceneMonitor::stateUpdateTimerCallback, this,
-                                            false,   // not a oneshot timer
-                                            false);  // do not start the timer yet
+  // Period for 0.1 sec
+  using std::chrono::nanoseconds;
+  state_update_timer_ = pnode_->create_wall_timer(dt_state_update_, [this]() { return stateUpdateTimerCallback(); });
+  private_executor_->add_node(pnode_);
 
   // start executor on a different thread now
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
@@ -1110,7 +1111,9 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
     if (success)
     {
       if (state_update_pending_.load())  // perform state update
+      {
         updateSceneWithCurrentState();
+      }
       return true;
     }
 
@@ -1347,9 +1350,14 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     current_state_monitor_->startStateMonitor(joint_states_topic);
 
     {
-      boost::mutex::scoped_lock lock(state_update_mutex_);
-      if (!dt_state_update_.isZero())
-        state_update_timer_.start();
+      std::unique_lock<std::mutex> lock(state_update_mutex_);
+      if (dt_state_update_.count() > 0)
+      {
+        // ROS original: state_update_timer_.start();
+        // TODO: re-enable WallTimer start()
+        state_update_timer_ =
+            pnode_->create_wall_timer(dt_state_update_, [this]() { return stateUpdateTimerCallback(); });
+      }
     }
 
     if (!attached_objects_topic.empty())
@@ -1375,7 +1383,8 @@ void PlanningSceneMonitor::stopStateMonitor()
   if (attached_collision_object_subscriber_)
     attached_collision_object_subscriber_.reset();
 
-  state_update_timer_.stop();
+  if (state_update_timer_)
+    state_update_timer_->cancel();
   state_update_pending_.store(false);
 }
 
@@ -1386,7 +1395,7 @@ void PlanningSceneMonitor::onStateUpdate(const sensor_msgs::msg::JointState::Con
   // Read access to last_robot_state_update_wall_time_ and dt_state_update_ is unprotected here
   // as reading invalid values is not critical (just postpones the next state update)
   // only update every dt_state_update_ seconds
-  if (ros::WallTime::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
+  if (std::chrono::system_clock::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
     updateSceneWithCurrentState(true);
 }
 
@@ -1394,7 +1403,8 @@ void PlanningSceneMonitor::stateUpdateTimerCallback()
 {
   // Read access to last_robot_state_update_wall_time_ and dt_state_update_ is unprotected here
   // as reading invalid values is not critical (just postpones the next state update)
-  if (state_update_pending_.load() && ros::WallTime::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
+  if (state_update_pending_.load() &&
+      std::chrono::system_clock::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
     updateSceneWithCurrentState(true);
 }
 
@@ -1427,17 +1437,21 @@ void PlanningSceneMonitor::setStateUpdateFrequency(double hz)
   bool update = false;
   if (hz > std::numeric_limits<double>::epsilon())
   {
-    boost::mutex::scoped_lock lock(state_update_mutex_);
-    dt_state_update_.fromSec(1.0 / hz);
-    state_update_timer_.setPeriod(dt_state_update_);
-    state_update_timer_.start();
+    std::unique_lock<std::mutex> lock(state_update_mutex_);
+    dt_state_update_ = std::chrono::duration<double>(1.0 / hz);
+    // ROS original: state_update_timer_.start();
+    // TODO: re-enable WallTimer start()
+    state_update_timer_ = pnode_->create_wall_timer(dt_state_update_, [this]() { return stateUpdateTimerCallback(); });
   }
   else
   {
     // stop must be called with state_update_mutex_ unlocked to avoid deadlock
-    state_update_timer_.stop();
-    boost::mutex::scoped_lock lock(state_update_mutex_);
-    dt_state_update_ = ros::WallDuration(0, 0);
+    // ROS original: state_update_timer_.stop();
+    // TODO: re-enable WallTimer stop()
+    if (state_update_timer_)
+      state_update_timer_->cancel();
+    std::unique_lock<std::mutex> lock(state_update_mutex_);
+    dt_state_update_ = std::chrono::duration<double>(0.0);
     if (state_update_pending_.load())
       update = true;
   }
@@ -1466,13 +1480,16 @@ void PlanningSceneMonitor::updateSceneWithCurrentState(bool skip_update_if_locke
     }
 
     {
-      boost::unique_lock<boost::shared_mutex> ulock(scene_update_mutex_, boost::defer_lock);
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_, std::defer_lock);
       if (!skip_update_if_locked)
+      {
         ulock.lock();
+      }
       else if (!ulock.try_lock())
-        // Return if we can't lock scene_update_mutex within 100ms, thus not blocking CurrentStateMonitor too long
+      {
+        // Return if we can't lock scene_update_mutex, thus not blocking CurrentStateMonitor
         return;
-
+      }
       last_update_time_ = last_robot_motion_time_ = current_state_monitor_->getCurrentStateTime();
       RCLCPP_DEBUG(logger_, "robot state update %f", fmod(last_robot_motion_time_.seconds(), 10.));
       current_state_monitor_->setToCurrentState(scene_->getCurrentStateNonConst());
@@ -1481,8 +1498,8 @@ void PlanningSceneMonitor::updateSceneWithCurrentState(bool skip_update_if_locke
 
     // Update state_update_mutex_ and last_robot_state_update_wall_time_
     {
-      boost::mutex::scoped_lock lock(state_update_mutex_);
-      last_robot_state_update_wall_time_ = ros::WallTime::now();
+      std::unique_lock<std::mutex> lock(state_update_mutex_);
+      last_robot_state_update_wall_time_ = std::chrono::system_clock::now();
       state_update_pending_.store(false);
     }
 
