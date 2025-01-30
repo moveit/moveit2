@@ -1870,9 +1870,6 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
   else if (consistency_limit_sets.size() == 1)
     consistency_limits = consistency_limit_sets[0];
 
-  // ensure RobotState is up-to-date before employing it in the IK solver
-  update(false);
-
   const std::vector<std::string>& solver_tip_frames = solver->getTipFrames();
 
   // Track which possible tips frames we have filled in so far
@@ -1896,7 +1893,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     if (!setToIKSolverFrame(pose, solver))
       return false;
 
-    // try all of the solver's possible tip frames to see if they match with any of the passed-in pose tip frames
+    // try all of the solver's possible tip frames to see if they uniquely align with any of our passed in pose tip
+    // frames
     bool found_valid_frame = false;
     std::size_t solver_tip_id;  // our current index
     for (solver_tip_id = 0; solver_tip_id < solver_tip_frames.size(); ++solver_tip_id)
@@ -1915,20 +1913,20 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
 
       if (pose_frame != solver_tip_frame)
       {
-        Eigen::Isometry3d pose_parent_to_frame;
-        auto* pose_parent = getRigidlyConnectedParentLinkModel(pose_frame, &pose_parent_to_frame, jmg);
+        auto* pose_parent = getRigidlyConnectedParentLinkModel(pose_frame);
         if (!pose_parent)
         {
-          ROS_ERROR_STREAM_NAMED(LOGNAME, "Pose frame '" << pose_frame << "' does not exist.");
+          RCLCPP_ERROR_STREAM(getLogger(), "The following Pose Frame does not exist: " << pose_frame);
           return false;
         }
-        Eigen::Isometry3d tip_parent_to_tip;
-        auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame, &tip_parent_to_tip, jmg);
+        Eigen::Isometry3d pose_parent_to_frame = getFrameTransform(pose_frame);
+        auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame);
         if (!tip_parent)
         {
-          ROS_ERROR_STREAM_NAMED(LOGNAME, "Solver tip frame '" << solver_tip_frame << "' does not exist.");
+          RCLCPP_ERROR_STREAM(getLogger(), "The following Solver Tip Frame does not exist: " << solver_tip_frame);
           return false;
         }
+        Eigen::Isometry3d tip_parent_to_tip = getFrameTransform(solver_tip_frame);
         if (pose_parent == tip_parent)
         {
           // transform goal pose as target for solver_tip_frame (instead of pose_frame)
@@ -1941,8 +1939,8 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
       {
         found_valid_frame = true;
         break;
-      }
-    }  // end for solver_tip_frames
+      }  // end if pose_frame
+    }    // end for solver_tip_frames
 
     // Make sure one of the tip frames worked
     if (!found_valid_frame)

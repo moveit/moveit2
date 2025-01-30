@@ -21,8 +21,8 @@ if(BUILD_TESTING)
   find_package(benchmark REQUIRED)
   find_package(kdl_parser REQUIRED)
 
-  catkin_add_gtest(test_robot_state test/robot_state_test.cpp)
-  target_link_libraries(test_robot_state ${MOVEIT_LIB_NAME} moveit_test_utils gmock_main)
+  find_package(tf2_geometry_msgs REQUIRED)
+  find_package(resource_retriever REQUIRED)
 
   if(WIN32)
     # TODO add windows paths

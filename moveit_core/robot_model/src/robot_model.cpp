@@ -1380,8 +1380,8 @@ const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel*
     end = jmg->getJointModels().cend();
   }
 
-  auto is_fixed_or_not_in_jmg = [begin, end](const moveit::core::JointModel* joint) {
-    if (joint->getType() == moveit::core::JointModel::FIXED)
+  auto is_fixed_or_not_in_jmg = [begin, end](const JointModel* joint) {
+    if (joint->getType() == JointModel::FIXED)
       return true;
     if (begin != end &&                       // we do have a non-empty jmg
         std::find(begin, end, joint) == end)  // joint does not belong to jmg

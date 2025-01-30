@@ -268,11 +268,11 @@ public:
    * what you went for. Instead, updateStateWithLinkAt(getRigidlyConnectedParentLinkModel(grasp_frame), ...)
    * will actually warp wrist (and all its descendants).
    */
-  static const moveit::core::LinkModel* getRigidlyConnectedParentLinkModel(const LinkModel* link,
-                                                                           Eigen::Isometry3d& transform,
-                                                                           const JointModelGroup* jmg = nullptr);
-  static const moveit::core::LinkModel* getRigidlyConnectedParentLinkModel(const LinkModel* link,
-                                                                           const JointModelGroup* jmg = nullptr)
+  static const LinkModel* getRigidlyConnectedParentLinkModel(const LinkModel* link,
+                                                             Eigen::Isometry3d& transform,
+                                                             const JointModelGroup* jmg = nullptr);
+  static const LinkModel* getRigidlyConnectedParentLinkModel(const LinkModel* link,
+                                                             const JointModelGroup* jmg = nullptr)
   {
     Eigen::Isometry3d unused;
     return getRigidlyConnectedParentLinkModel(link, unused, jmg);
