@@ -755,9 +755,7 @@ TEST_F(OneRobot, rigidlyConnectedParent)
   state.setToDefaultValues();
 
   Eigen::Isometry3d a_to_b;
-  EXPECT_EQ(state.getRigidlyConnectedParentLinkModel("link_b", &a_to_b), link_a);
-  // translation from link_a to link_b is (0 0.5 0)
-  EXPECT_NEAR_TRACED(a_to_b.translation(), Eigen::Translation3d(0, 0.5, 0).translation());
+  EXPECT_EQ(state.getRigidlyConnectedParentLinkModel("link_b"), link_a);
 
   // attach "object" with "subframe" to link_b
   state.attachBody(std::make_unique<moveit::core::AttachedBody>(
@@ -768,9 +766,7 @@ TEST_F(OneRobot, rigidlyConnectedParent)
   // RobotState's version should resolve these too
   Eigen::Isometry3d transform;
   EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object"));
-  EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object/subframe", &transform));
-  // transform from link_b to object/subframe is (1 0 1)
-  EXPECT_NEAR_TRACED((a_to_b.inverse() * transform).matrix(), Eigen::Isometry3d(Eigen::Translation3d(1, 0, 1)).matrix());
+  EXPECT_EQ(link_a, state.getRigidlyConnectedParentLinkModel("object/subframe"));
 
   // test failure cases
   EXPECT_EQ(nullptr, state.getRigidlyConnectedParentLinkModel("no_object"));

@@ -1230,11 +1230,9 @@ public:
    *
    * This behaves the same as RobotModel::getRigidlyConnectedParentLinkModel,
    * but can additionally resolve parents for attached objects / subframes.
-   *
-   * If transform is specified, return the (fixed) relative transform from the returned parent link to frame.
    */
   const moveit::core::LinkModel*
-  getRigidlyConnectedParentLinkModel(const std::string& frame, Eigen::Isometry3d* transform = nullptr,
+  getRigidlyConnectedParentLinkModel(const std::string& frame,
                                      const moveit::core::JointModelGroup* jmg = nullptr) const;
 
   /** \brief Get the link transform w.r.t. the root link (model frame) of the RobotModel.
@@ -1715,6 +1713,14 @@ private:
 
   /** \brief This function is only called in debug mode */
   bool checkCollisionTransforms() const;
+
+  /** \brief Get the closest link in the kinematic tree to `frame`.
+   *
+   * Helper function for getRigidlyConnectedParentLinkModel,
+   * which resolves attached objects / subframes.
+   */
+  const moveit::core::LinkModel*
+  getLinkModelIncludingAttachedBodies(const std::string& frame) const;
 
   RobotModelConstPtr robot_model_;
 

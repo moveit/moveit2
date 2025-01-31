@@ -1364,13 +1364,12 @@ LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
   return nullptr;
 }
 
-const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link, Eigen::Isometry3d& transform,
+const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link,
                                                                 const JointModelGroup* jmg)
 {
   if (!link)
     return link;
 
-  transform.setIdentity();
   const moveit::core::LinkModel* parent_link = link->getParentLinkModel();
   const moveit::core::JointModel* joint = link->getParentJointModel();
   decltype(jmg->getJointModels().cbegin()) begin{}, end{};
@@ -1380,6 +1379,8 @@ const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel*
     end = jmg->getJointModels().cend();
   }
 
+  // Returns whether `joint` is part of the rigidly connected chain.
+  // This is only false if the joint is both in `jmg` and not fixed.
   auto is_fixed_or_not_in_jmg = [begin, end](const JointModel* joint) {
     if (joint->getType() == JointModel::FIXED)
       return true;
@@ -1391,7 +1392,6 @@ const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel*
 
   while (parent_link && is_fixed_or_not_in_jmg(joint))
   {
-    transform = link->getJointOriginTransform() * transform;
     link = parent_link;
     joint = link->getParentJointModel();
     parent_link = joint->getParentLinkModel();

@@ -268,13 +268,7 @@ public:
    * what you went for. Instead, updateStateWithLinkAt(getRigidlyConnectedParentLinkModel(grasp_frame), ...)
    * will actually warp wrist (and all its descendants).
    */
-  static const LinkModel* getRigidlyConnectedParentLinkModel(const LinkModel* link, Eigen::Isometry3d& transform,
-                                                             const JointModelGroup* jmg = nullptr);
-  static const LinkModel* getRigidlyConnectedParentLinkModel(const LinkModel* link, const JointModelGroup* jmg = nullptr)
-  {
-    Eigen::Isometry3d unused;
-    return getRigidlyConnectedParentLinkModel(link, unused, jmg);
-  }
+  static const LinkModel* getRigidlyConnectedParentLinkModel(const LinkModel* link, const JointModelGroup* jmg = nullptr);
 
   /** \brief Get the array of links  */
   const std::vector<const LinkModel*>& getLinkModels() const

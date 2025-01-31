@@ -907,52 +907,42 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
   }
 }
 
-const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame, Eigen::Isometry3d* transform,
-                                                                const moveit::core::JointModelGroup* jmg) const
+const LinkModel*
+getLinkModelIncludingAttachedBodies(const std::string& frame) const
 {
-  const LinkModel* link{ nullptr };
-
+  // If the frame is a link, return that link.
   if (getRobotModel()->hasLinkModel(frame))
   {
-    link = getLinkModel(frame);
-    if (transform)
-      transform->setIdentity();
-  }
-  else if (const auto it = attached_body_map_.find(frame); it != attached_body_map_.end())
-  {
-    const auto& body{ it->second };
-    link = body->getAttachedLink();
-    if (transform)
-      *transform = body->getPose();
-  }
-  else
-  {
-    bool found = false;
-    for (const auto& it : attached_body_map_)
-    {
-      const auto& body{ it.second };
-      const Eigen::Isometry3d& subframe = body->getSubframeTransform(frame, &found);
-      if (found)
-      {
-        if (transform)  // prepend the body transform
-          *transform = body->getPose() * subframe;
-        link = body->getAttachedLink();
-        break;
-      }
-    }
-    if (!found)
-      return nullptr;
+    return getLinkModel(frame);
   }
 
-  // link is valid and transform describes pose of frame w.r.t. global frame
-  Eigen::Isometry3d link_transform;
-  auto* parent = getRobotModel()->getRigidlyConnectedParentLinkModel(link, link_transform, jmg);
-  if (parent && transform)
+  // If the frame is an attached body, return the link the body is attached to.
+  if (const auto it = attached_body_map_.find(frame); it != attached_body_map_.end())
   {
-    // prepend link_transform to get transform from parent link to frame
-    *transform = link_transform * *transform;
+    const auto& body{ it->second };
+    return body->getAttachedLink();
   }
-  return parent;
+
+  // If the frame is a subframe of an attached body, return the link the body is attached to.
+  for (const auto& it : attached_body_map_)
+  {
+    const auto& body{ it.second };
+    if (body->hasSubframeTransform(frame))
+    {
+      return body->getAttachedLink();
+    }
+  }
+
+  // If the frame is none of the above, return nullptr.
+  return nullptr;
+}
+
+const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame,
+                                                                const moveit::core::JointModelGroup* jmg) const
+{
+  const LinkModel* link = getLinkModelIncludingAttachedBodies(frame);
+
+  return getRobotModel()->getRigidlyConnectedParentLinkModel(link, jmg);
 }
 
 const Eigen::Isometry3d& RobotState::getJointTransform(const JointModel* joint)
