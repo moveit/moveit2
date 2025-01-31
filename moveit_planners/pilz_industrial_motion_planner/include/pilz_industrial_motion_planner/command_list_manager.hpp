@@ -48,7 +48,7 @@
 #include <pilz_industrial_motion_planner/trajectory_blender.hpp>
 #include <pilz_industrial_motion_planner/trajectory_generation_exceptions.hpp>
 
-#include <cartesian_limits_parameters.hpp>
+#include <pilz_industrial_motion_planner/cartesian_limits_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {

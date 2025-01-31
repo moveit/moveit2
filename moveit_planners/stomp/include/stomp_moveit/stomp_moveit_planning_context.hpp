@@ -41,7 +41,7 @@
 
 #include <moveit/planning_interface/planning_interface.hpp>
 
-#include <stomp_moveit_parameters.hpp>
+#include <moveit_planners_stomp/stomp_moveit_parameters.hpp>
 
 // Forward declaration
 namespace stomp
