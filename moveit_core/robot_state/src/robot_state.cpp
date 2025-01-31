@@ -907,8 +907,7 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
   }
 }
 
-const LinkModel*
-getLinkModelIncludingAttachedBodies(const std::string& frame) const
+const LinkModel* getLinkModelIncludingAttachedBodies(const std::string& frame) const
 {
   // If the frame is a link, return that link.
   if (getRobotModel()->hasLinkModel(frame))
