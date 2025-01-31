@@ -1364,8 +1364,7 @@ LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
   return nullptr;
 }
 
-const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link,
-                                                                const JointModelGroup* jmg)
+const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link, const JointModelGroup* jmg)
 {
   if (!link)
     return link;
