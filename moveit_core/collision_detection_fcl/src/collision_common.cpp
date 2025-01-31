@@ -161,8 +161,7 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
     }
     if (always_allow_collision && cdata->req_->verbose)
     {
-      RCLCPP_DEBUG(LOGGER,
-                   "Attached object '%s' is allowed to touch attached object '%s'. No contacts are computed.",
+      RCLCPP_DEBUG(LOGGER, "Attached object '%s' is allowed to touch attached object '%s'. No contacts are computed.",
                    cd2->getID().c_str(), cd1->getID().c_str());
     }
   }
