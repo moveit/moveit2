@@ -226,6 +226,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(node_->get_logger(), "Joint jog command timed out. Halting to a stop.");
     }
+    last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
   }
 
   return next_joint_state;
@@ -258,6 +259,7 @@ std::optional<KinematicState> ServoNode::processTwistCommand(const moveit::core:
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(node_->get_logger(), "Twist command timed out. Halting to a stop.");
     }
+    last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
   }
 
   return next_joint_state;
@@ -287,6 +289,7 @@ std::optional<KinematicState> ServoNode::processPoseCommand(const moveit::core::
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(node_->get_logger(), "Pose command timed out. Halting to a stop.");
     }
+    last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
   }
 
   return next_joint_state;
@@ -329,11 +332,6 @@ void ServoNode::servoLoop()
     std::lock_guard<std::mutex> lock_guard(lock_);
     const bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
     const auto cur_time = node_->now();
-
-    if(cur_time.get_clock_type() == last_commanded_time_.get_clock_type() &&
-       cur_time - last_commanded_time_ > rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout)){
-      current_state = servo_->getCurrentRobotState(true /* block for current robot state */);
-    }
 
     if (use_trajectory && !joint_cmd_rolling_window_.empty() && joint_cmd_rolling_window_.back().time_stamp > cur_time)
     {
@@ -390,7 +388,6 @@ void ServoNode::servoLoop()
         multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
       }
       last_commanded_state_ = next_joint_state.value();
-      last_commanded_time_ = node_->now();
     }
     else
     {

@@ -111,7 +111,6 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
 
   KinematicState last_commanded_state_;  // Used when commands go stale;
-  rclcpp::Time last_commanded_time_;
   control_msgs::msg::JointJog latest_joint_jog_;
   geometry_msgs::msg::TwistStamped latest_twist_;
   geometry_msgs::msg::PoseStamped latest_pose_;
