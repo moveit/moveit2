@@ -141,11 +141,30 @@ bool collisionCallback(fcl::CollisionObjectd* o1, fcl::CollisionObjectd* o2, voi
                      cd2->getID().c_str(), cd1->getID().c_str());
     }
   }
+
   // bodies attached to the same link should not collide
+  // If one of the attached objects lists the other in touch links set, then collisions are also allowed
   if (cd1->type == BodyTypes::ROBOT_ATTACHED && cd2->type == BodyTypes::ROBOT_ATTACHED)
   {
     if (cd1->ptr.ab->getAttachedLink() == cd2->ptr.ab->getAttachedLink())
+    {
       always_allow_collision = true;
+    }
+    else
+    {
+      const std::set<std::string>& tl1 = cd1->ptr.ab->getTouchLinks();
+      const std::set<std::string>& tl2 = cd2->ptr.ab->getTouchLinks();
+      if (tl1.find(cd2->getID()) != tl1.end() || tl2.find(cd1->getID()) != tl2.end())
+      {
+        always_allow_collision = true;
+      }
+    }
+    if (always_allow_collision && cdata->req_->verbose)
+    {
+      RCLCPP_DEBUG(getLogger(),
+                   "Attached object '%s' is allowed to touch attached object '%s'. No contacts are computed.",
+                   cd2->getID().c_str(), cd1->getID().c_str());
+    }
   }
 
   // if collisions are always allowed, we are done
