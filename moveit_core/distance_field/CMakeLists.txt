@@ -12,6 +12,7 @@ set_target_properties(moveit_distance_field
 ament_target_dependencies(
   moveit_distance_field
   Boost
+  eigen_stl_containers
   urdfdom
   urdfdom_headers
   visualization_msgs
