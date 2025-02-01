@@ -12,10 +12,19 @@ add_library(${MOVEIT_LIB_NAME} SHARED
   src/collision_plugin_cache.cpp
 )
 include(GenerateExportHeader)
+<<<<<<< HEAD
 generate_export_header(${MOVEIT_LIB_NAME})
 target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<TARGET_PROPERTY:moveit_planning_scene,INCLUDE_DIRECTORIES>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 ament_target_dependencies(${MOVEIT_LIB_NAME}
+=======
+generate_export_header(moveit_collision_detection)
+
+ament_target_dependencies(
+  moveit_collision_detection
+  eigen_stl_containers
+  pluginlib
+>>>>>>> d88d19fb2 (Add missing target dependencies to eigen_stl_containers (#3295))
   rclcpp
   rmw_implementation
   urdf
