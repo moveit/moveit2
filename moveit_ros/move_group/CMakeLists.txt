@@ -73,7 +73,6 @@ ament_target_dependencies(moveit_move_group_default_capabilities ${THIS_PACKAGE_
 target_link_libraries(moveit_move_group_default_capabilities moveit_move_group_capabilities_base)
 
 install(
-<<<<<<< HEAD
   TARGETS
     move_group
     list_move_group_capabilities
@@ -82,31 +81,25 @@ install(
 
 install(
   TARGETS
-    moveit_move_group_default_capabilities
     moveit_move_group_capabilities_base
   EXPORT export_${PROJECT_NAME}
-=======
-  TARGETS moveit_move_group_capabilities_base
-  EXPORT moveit_ros_move_groupTargets
->>>>>>> b5eb4deb3 (Remove plugins from export set (#3227))
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
 
-<<<<<<< HEAD
-install(DIRECTORY include/ DESTINATION include)
-=======
 install(
-  TARGETS moveit_move_group_default_capabilities
+  TARGETS
+    moveit_move_group_default_capabilities
   EXPORT moveit_move_group_default_capabilitiesTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin)
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_move_group)
->>>>>>> b5eb4deb3 (Remove plugins from export set (#3227))
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})

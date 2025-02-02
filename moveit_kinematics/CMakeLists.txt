@@ -29,21 +29,15 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
-<<<<<<< HEAD
   moveit_cached_ik_kinematics_base
+)
+
+set(THIS_PACKAGE_PLUGINS
   moveit_cached_ik_kinematics_plugin
   moveit_kdl_kinematics_plugin
   moveit_lma_kinematics_plugin
   moveit_srv_kinematics_plugin
 )
-=======
-    cached_ik_kinematics_parameters moveit_cached_ik_kinematics_base
-    kdl_kinematics_parameters srv_kinematics_parameters)
-
-set(THIS_PACKAGE_PLUGINS
-    moveit_cached_ik_kinematics_plugin moveit_kdl_kinematics_plugin
-    moveit_srv_kinematics_plugin)
->>>>>>> b5eb4deb3 (Remove plugins from export set (#3227))
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   pluginlib
@@ -75,7 +69,15 @@ install(
   INCLUDES DESTINATION include
 )
 
-<<<<<<< HEAD
+install(
+  TARGETS ${THIS_PACKAGE_PLUGINS}
+  EXPORT export_${PROJECT_NAME}PluginTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  DESTINATION include/moveit_kinematics
+)
+
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
@@ -93,18 +95,5 @@ if(BUILD_TESTING)
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
 endif()
-=======
-install(
-  TARGETS ${THIS_PACKAGE_PLUGINS}
-  EXPORT ${PROJECT_NAME}PluginTargets
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES
-  DESTINATION include/moveit_kinematics)
-
-ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
->>>>>>> b5eb4deb3 (Remove plugins from export set (#3227))
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

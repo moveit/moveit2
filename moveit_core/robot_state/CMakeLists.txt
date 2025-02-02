@@ -9,6 +9,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
+  eigen_stl_containers
   tf2_geometry_msgs
   geometric_shapes
   urdfdom_headers
