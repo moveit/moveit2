@@ -39,6 +39,10 @@ add_library(moveit_move_group_capabilities_base SHARED
   src/move_group_context.cpp
   src/move_group_capability.cpp
 )
+target_include_directories(
+  moveit_move_group_capabilities_base
+  PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+         $<INSTALL_INTERFACE:include/moveit_ros_move_group>)
 
 add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/move_action_capability.cpp
@@ -68,6 +72,7 @@ target_link_libraries(move_group moveit_move_group_capabilities_base)
 
 add_executable(list_move_group_capabilities src/list_capabilities.cpp)
 ament_target_dependencies(list_move_group_capabilities  ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+target_link_libraries(list_move_group_capabilities moveit_move_group_capabilities_base)
 
 ament_target_dependencies(moveit_move_group_default_capabilities ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_move_group_default_capabilities moveit_move_group_capabilities_base)
