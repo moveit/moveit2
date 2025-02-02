@@ -29,10 +29,7 @@ set(THIS_PACKAGE_INCLUDE_DIRS
 )
 
 set(THIS_PACKAGE_LIBRARIES
-  cached_ik_kinematics_parameters
   moveit_cached_ik_kinematics_base
-  kdl_kinematics_parameters
-  srv_kinematics_parameters
 )
 
 set(THIS_PACKAGE_PLUGINS

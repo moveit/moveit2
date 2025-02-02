@@ -9,9 +9,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_core
   moveit_msgs
 )
-target_link_libraries(${MOVEIT_LIB_NAME}
-        cached_ik_kinematics_parameters
-        kdl_kinematics_parameters)
 
 if(trac_ik_kinematics_plugin_FOUND)
     include_directories(${trac_ik_kinematics_plugin_INCLUDE_DIRS})
@@ -26,7 +23,6 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   moveit_msgs
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
-    cached_ik_kinematics_parameters
     moveit_cached_ik_kinematics_base
 )
 
