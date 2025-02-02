@@ -160,6 +160,7 @@ install(
     moveit_kinematics_base
     moveit_kinematics_metrics
     moveit_planning_interface
+    moveit_planning_request_adapter
     moveit_planning_scene
     moveit_robot_model
     moveit_robot_state
