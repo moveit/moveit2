@@ -42,7 +42,7 @@ add_library(moveit_move_group_capabilities_base SHARED
 target_include_directories(
   moveit_move_group_capabilities_base
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-         $<INSTALL_INTERFACE:include/moveit_ros_move_group>)
+    $<INSTALL_INTERFACE:include/moveit_ros_move_group>)
 
 add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/move_action_capability.cpp
