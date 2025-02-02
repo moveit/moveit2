@@ -116,7 +116,13 @@ void URDFConfig::setPackageName()
 void URDFConfig::loadFromPackage(const std::filesystem::path& package_name, const std::filesystem::path& relative_path,
                                  const std::string& xacro_args)
 {
-  urdf_pkg_name_ = package_name;
+  const std::filesystem::path package_path = getSharePath(package_name.string());
+  if (package_path.empty())
+  {
+    throw std::runtime_error("URDF/COLLADA package not found: ''" + package_name.string());
+  }
+
+  urdf_pkg_name_ = package_name.string();
   urdf_pkg_relative_path_ = relative_path;
   xacro_args_ = xacro_args;
 
@@ -129,12 +135,12 @@ void URDFConfig::load()
   RCLCPP_DEBUG_STREAM(*logger_, "URDF Package Name: " << urdf_pkg_name_);
   RCLCPP_DEBUG_STREAM(*logger_, "URDF Package Path: " << urdf_pkg_relative_path_);
 
-  if (!rdf_loader::RDFLoader::loadXmlFileToString(urdf_string_, urdf_path_, xacro_args_vec_))
+  if (!rdf_loader::RDFLoader::loadXmlFileToString(urdf_string_, urdf_path_.string(), xacro_args_vec_))
   {
     throw std::runtime_error("URDF/COLLADA file not found: " + urdf_path_.string());
   }
 
-  if (urdf_string_.empty() && rdf_loader::RDFLoader::isXacroFile(urdf_path_))
+  if (urdf_string_.empty() && rdf_loader::RDFLoader::isXacroFile(urdf_path_.string()))
   {
     throw std::runtime_error("Running xacro failed.\nPlease check console for errors.");
   }
@@ -144,7 +150,7 @@ void URDFConfig::load()
   {
     throw std::runtime_error("URDF/COLLADA file is not a valid robot model.");
   }
-  urdf_from_xacro_ = rdf_loader::RDFLoader::isXacroFile(urdf_path_);
+  urdf_from_xacro_ = rdf_loader::RDFLoader::isXacroFile(urdf_path_.string());
 
   // Set parameter
   parent_node_->set_parameter(rclcpp::Parameter("robot_description", urdf_string_));
@@ -154,7 +160,7 @@ void URDFConfig::load()
 
 bool URDFConfig::isXacroFile() const
 {
-  return rdf_loader::RDFLoader::isXacroFile(urdf_path_);
+  return rdf_loader::RDFLoader::isXacroFile(urdf_path_.string());
 }
 
 bool URDFConfig::isConfigured() const
@@ -172,7 +178,7 @@ void URDFConfig::collectVariables(std::vector<TemplateVariable>& variables)
   std::string urdf_location;
   if (urdf_pkg_name_.empty())
   {
-    urdf_location = urdf_path_;
+    urdf_location = urdf_path_.string();
   }
   else
   {
