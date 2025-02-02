@@ -1,26 +1,4 @@
-<<<<<<< HEAD
 set(MOVEIT_LIB_NAME moveit_robot_state)
-=======
-add_library(
-  moveit_robot_state SHARED src/attached_body.cpp src/conversions.cpp
-                            src/robot_state.cpp src/cartesian_interpolator.cpp)
-target_include_directories(
-  moveit_robot_state
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-         $<INSTALL_INTERFACE:include/moveit_core>)
-set_target_properties(moveit_robot_state PROPERTIES VERSION
-                                                    ${${PROJECT_NAME}_VERSION})
-ament_target_dependencies(
-  moveit_robot_state
-  eigen_stl_containers
-  urdf
-  tf2_geometry_msgs
-  geometric_shapes
-  urdfdom_headers
-  Boost)
-target_link_libraries(moveit_robot_state moveit_robot_model
-                      moveit_kinematics_base moveit_transforms)
->>>>>>> d88d19fb2 (Add missing target dependencies to eigen_stl_containers (#3295))
 
 add_library(${MOVEIT_LIB_NAME} SHARED
   src/attached_body.cpp
@@ -31,6 +9,7 @@ add_library(${MOVEIT_LIB_NAME} SHARED
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdf
+  eigen_stl_containers
   tf2_geometry_msgs
   geometric_shapes
   urdfdom_headers
