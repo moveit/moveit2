@@ -22,6 +22,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   urdfdom
   urdfdom_headers
   visualization_msgs
+  eigen_stl_containers
   tf2_eigen
   geometric_shapes
   OCTOMAP
