@@ -18,6 +18,7 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
   angles
   moveit_msgs
   Eigen3
+  eigen_stl_containers
   geometric_shapes
   urdf
   urdfdom_headers

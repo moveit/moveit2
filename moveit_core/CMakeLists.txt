@@ -159,7 +159,6 @@ install(
     moveit_kinematic_constraints
     moveit_kinematics_base
     moveit_kinematics_metrics
-    moveit_macros
     moveit_planning_interface
     moveit_planning_scene
     moveit_robot_model
@@ -183,12 +182,7 @@ install(
   TARGETS
     collision_detector_bullet_plugin
     collision_detector_fcl_plugin
-    moveit_acceleration_filter
-    moveit_acceleration_filter_parameters
     moveit_butterworth_filter
-    moveit_butterworth_filter_parameters
-    moveit_ruckig_filter
-    moveit_ruckig_filter_parameters
   EXPORT moveit_core_pluginTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

@@ -16,12 +16,14 @@ generate_export_header(${MOVEIT_LIB_NAME})
 target_include_directories(${MOVEIT_LIB_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<TARGET_PROPERTY:moveit_planning_scene,INCLUDE_DIRECTORIES>)
 set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 ament_target_dependencies(${MOVEIT_LIB_NAME}
+  pluginlib
   rclcpp
   rmw_implementation
   urdf
   urdfdom
   urdfdom_headers
   visualization_msgs
+  eigen_stl_containers
   tf2_eigen
   geometric_shapes
   OCTOMAP
