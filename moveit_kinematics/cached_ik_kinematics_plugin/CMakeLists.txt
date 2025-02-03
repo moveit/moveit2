@@ -24,8 +24,8 @@ ament_target_dependencies(${MOVEIT_LIB_NAME}
 )
 target_link_libraries(${MOVEIT_LIB_NAME}
     moveit_cached_ik_kinematics_base
-)
-
+    moveit_kdl_kinematics_plugin
+    moveit_srv_kinematics_plugin)
 if(trac_ik_kinematics_plugin_FOUND)
     target_link_libraries(${MOVEIT_LIB_NAME} ${trac_ik_kinematics_plugin_LIBRARIES})
     set_target_properties(${MOVEIT_LIB_NAME} PROPERTIES COMPILE_DEFINITIONS "CACHED_IK_KINEMATICS_TRAC_IK")
