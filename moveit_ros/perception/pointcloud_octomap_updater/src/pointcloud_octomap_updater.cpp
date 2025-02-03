@@ -330,6 +330,11 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
 
     /* compute the free cells along each ray that ends at a clipped cell */
     for (const octomap::OcTreeKey& clip_cell : clip_cells)
+<<<<<<< HEAD
+=======
+    {
+      free_cells.insert(clip_cell);
+>>>>>>> bb7463acc (fix: pointcloud_octomap_updater not cleaning objects at max_range (#3294))
       if (tree_->computeRayKeys(sensor_origin, tree_->keyToCoord(clip_cell), key_ray_))
         free_cells.insert(key_ray_.begin(), key_ray_.end());
   }
