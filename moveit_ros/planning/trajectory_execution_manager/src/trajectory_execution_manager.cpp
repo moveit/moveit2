@@ -963,7 +963,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
 
       for (const auto joint : joints)
       {
-        double joint_start_tolerance = getJointAllowedStartTolerance(joint_names[i]);
+        const double joint_start_tolerance = getJointAllowedStartTolerance(joint->getName());
         reference_state.enforcePositionBounds(joint);
         current_state->enforcePositionBounds(joint);
         if (joint_start_tolerance != 0 && reference_state.distance(*current_state, joint) > joint_start_tolerance)
@@ -1016,7 +1016,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
         Eigen::Vector3d offset = cur_transform.translation() - start_transform.translation();
         Eigen::AngleAxisd rotation;
         rotation.fromRotationMatrix(cur_transform.linear().transpose() * start_transform.linear());
-        double joint_start_tolerance = getJointAllowedStartTolerance(joint_names[i]);
+        const double joint_start_tolerance = getJointAllowedStartTolerance(joint_names[i]);
         if (joint_start_tolerance != 0 &&
             ((offset.array() > joint_start_tolerance).any() || rotation.angle() > joint_start_tolerance))
         {
@@ -1615,7 +1615,7 @@ bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionCon
         if (!jm)
           continue;  // joint vanished from robot state (shouldn't happen), but we don't care
 
-        double joint_tolerance = getJointAllowedStartTolerance(joint_names[i]);
+        const double joint_tolerance = getJointAllowedStartTolerance(joint_names[i]);
         if (fabs(jm->distance(cur_state->getJointPositions(jm), prev_state->getJointPositions(jm))) > joint_tolerance)
         {
           moved = true;
@@ -1843,9 +1843,9 @@ void TrajectoryExecutionManager::loadControllerParams()
   // }
 }
 
-double TrajectoryExecutionManager::getJointAllowedStartTolerance(std::string const& jointName) const
+double TrajectoryExecutionManager::getJointAllowedStartTolerance(std::string const& joint_name) const
 {
-  auto start_tolerance_it = joints_allowed_start_tolerance_.find(jointName);
+  auto start_tolerance_it = joints_allowed_start_tolerance_.find(joint_name);
   return start_tolerance_it != joints_allowed_start_tolerance_.end() ? start_tolerance_it->second :
                                                                        allowed_start_tolerance_;
 }
@@ -1853,7 +1853,12 @@ double TrajectoryExecutionManager::getJointAllowedStartTolerance(std::string con
 void TrajectoryExecutionManager::updateJointsAllowedStartTolerance()
 {
   joints_allowed_start_tolerance_.clear();
-  node_handle_.getParam("trajectory_execution/joints_allowed_start_tolerance", joints_allowed_start_tolerance_);
+
+  for (const auto& joint_name : robot_model_->getJointModelNames()) {
+    double joint_start_tolerance;
+    if (node_->get_parameter("trajectory_execution.joints_allowed_start_tolerance." + joint_name, joint_start_tolerance))
+      joints_allowed_start_tolerance_.insert_or_assign(joint_name, joint_start_tolerance);  
+  }
 
   // remove negative values
   for (auto it = joints_allowed_start_tolerance_.begin(); it != joints_allowed_start_tolerance_.end();)
