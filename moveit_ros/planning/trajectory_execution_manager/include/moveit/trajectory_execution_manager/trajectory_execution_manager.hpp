@@ -292,8 +292,8 @@ private:
 
   void loadControllerParams();
 
-  double getJointAllowedStartTolerance(std::string const& joint_name) const;
-  void setJointAllowedStartTolerance(std::string const& joint_name, double joint_start_tolerance);
+  double getJointAllowedStartTolerance(const std::string& joint_name) const;
+  void setJointAllowedStartTolerance(const std::string& joint_name, double joint_start_tolerance);
   void initializeJointsAllowedStartTolerance();
 
   // Name of this class for logging

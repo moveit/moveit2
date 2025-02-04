@@ -924,16 +924,22 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
   if (allowed_start_tolerance_ == 0 && joints_allowed_start_tolerance_.empty())  // skip validation on this magic number
     return true;
 
-  if (joints_allowed_start_tolerance_.empty()) {
+  if (joints_allowed_start_tolerance_.empty())
+  {
     RCLCPP_INFO_STREAM(logger_, "Validating trajectory with allowed_start_tolerance " << allowed_start_tolerance_);
-  } else {
+  }
+  else
+  {
     std::ostringstream ss;
-    for (const auto& [joint_name, joints_start_tolerance] : joints_allowed_start_tolerance_) {
-        if (ss.tellp() > 1) ss << ", "; // skip the comma at the end
-        ss << joint_name << ": " << joints_start_tolerance;
+    for (const auto& [joint_name, joints_start_tolerance] : joints_allowed_start_tolerance_)
+    {
+      if (ss.tellp() > 1)
+        ss << ", ";  // skip the comma at the end
+      ss << joint_name << ": " << joints_start_tolerance;
     }
-    RCLCPP_INFO_STREAM(logger_, "Validating trajectory with allowed_start_tolerance " << allowed_start_tolerance_<<
-                                " and joints_allowed_start_tolerance {" << ss.str() << "}");
+    RCLCPP_INFO_STREAM(logger_, "Validating trajectory with allowed_start_tolerance "
+                                    << allowed_start_tolerance_ << " and joints_allowed_start_tolerance {" << ss.str()
+                                    << "}");
   }
 
   moveit::core::RobotStatePtr current_state;
@@ -1855,19 +1861,20 @@ void TrajectoryExecutionManager::loadControllerParams()
   // }
 }
 
-double TrajectoryExecutionManager::getJointAllowedStartTolerance(std::string const& joint_name) const
+double TrajectoryExecutionManager::getJointAllowedStartTolerance(const std::string& joint_name) const
 {
   auto start_tolerance_it = joints_allowed_start_tolerance_.find(joint_name);
   return start_tolerance_it != joints_allowed_start_tolerance_.end() ? start_tolerance_it->second :
                                                                        allowed_start_tolerance_;
 }
 
-void TrajectoryExecutionManager::setJointAllowedStartTolerance(std::string const& parameter_name,
+void TrajectoryExecutionManager::setJointAllowedStartTolerance(const std::string& parameter_name,
                                                                double joint_start_tolerance)
 {
-  if (joint_start_tolerance < 0) {
-    RCLCPP_WARN(logger_, "%s has a negative value. "
-                         "The start tolerance value for that joint was not updated.", parameter_name.c_str());
+  if (joint_start_tolerance < 0)
+  {
+    RCLCPP_WARN(logger_, "%s has a negative value. The start tolerance value for that joint was not updated.",
+                parameter_name.c_str());
     return;
   }
 
@@ -1875,11 +1882,14 @@ void TrajectoryExecutionManager::setJointAllowedStartTolerance(std::string const
   std::string joint_name = parameter_name;
   const std::string parameter_prefix = "trajectory_execution.joints_allowed_start_tolerance.";
   if (parameter_name.find(parameter_prefix) == 0)
-    joint_name = joint_name.substr(parameter_prefix.length()); // remove prefix
+    joint_name = joint_name.substr(parameter_prefix.length());  // remove prefix
 
-  if (!robot_model_->hasJointModel(joint_name)) {
-    RCLCPP_WARN(logger_, "Joint '%s' was not found in the robot model. "
-                         "The start tolerance value for that joint was not updated.", joint_name.c_str());
+  if (!robot_model_->hasJointModel(joint_name))
+  {
+    RCLCPP_WARN(logger_,
+                "Joint '%s' was not found in the robot model. "
+                "The start tolerance value for that joint was not updated.",
+                joint_name.c_str());
     return;
   }
 
@@ -1892,16 +1902,21 @@ void TrajectoryExecutionManager::initializeJointsAllowedStartTolerance()
 
   // retrieve all parameters under "trajectory_execution.joints_allowed_start_tolerance"
   // that correspond to existing joints in the robot model
-  for (const auto& joint_name : robot_model_->getJointModelNames()) {
+  for (const auto& joint_name : robot_model_->getJointModelNames())
+  {
     double start_joint_tolerance;
     const std::string parameter_name = "trajectory_execution.joints_allowed_start_tolerance." + joint_name;
-    if (node_->get_parameter(parameter_name, start_joint_tolerance)) {
-      if (start_joint_tolerance < 0) {
-        RCLCPP_WARN(logger_, "%s has a negative value. The start tolerance value for that joint "
-                             "will default to allowed_start_tolerance.", parameter_name.c_str());
+    if (node_->get_parameter(parameter_name, start_joint_tolerance))
+    {
+      if (start_joint_tolerance < 0)
+      {
+        RCLCPP_WARN(logger_,
+                    "%s has a negative value. The start tolerance value for that joint "
+                    "will default to allowed_start_tolerance.",
+                    parameter_name.c_str());
         continue;
       }
-      joints_allowed_start_tolerance_.insert({joint_name, start_joint_tolerance});
+      joints_allowed_start_tolerance_.insert({ joint_name, start_joint_tolerance });
     }
   }
 }
