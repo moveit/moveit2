@@ -293,7 +293,8 @@ private:
   void loadControllerParams();
 
   double getJointAllowedStartTolerance(std::string const& joint_name) const;
-  void updateJointsAllowedStartTolerance();
+  void setJointAllowedStartTolerance(std::string const& joint_name, double joint_start_tolerance);
+  void initializeJointsAllowedStartTolerance();
 
   // Name of this class for logging
   const std::string name_ = "trajectory_execution_manager";
