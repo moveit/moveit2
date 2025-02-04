@@ -148,6 +148,7 @@ add_subdirectory(collision_detection_fcl)
 
 install(
   TARGETS
+    moveit_butterworth_parameters
     moveit_collision_detection
     moveit_collision_detection_bullet
     moveit_collision_detection_fcl
