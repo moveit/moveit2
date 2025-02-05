@@ -7,8 +7,14 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_robot_state PROPERTIES VERSION
                                                     ${${PROJECT_NAME}_VERSION})
-ament_target_dependencies(moveit_robot_state urdf tf2_geometry_msgs
-                          geometric_shapes urdfdom_headers Boost)
+ament_target_dependencies(
+  moveit_robot_state
+  eigen_stl_containers
+  urdf
+  tf2_geometry_msgs
+  geometric_shapes
+  urdfdom_headers
+  Boost)
 target_link_libraries(moveit_robot_state moveit_robot_model
                       moveit_kinematics_base moveit_transforms)
 

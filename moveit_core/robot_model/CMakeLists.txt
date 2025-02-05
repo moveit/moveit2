@@ -33,6 +33,7 @@ ament_target_dependencies(
   angles
   moveit_msgs
   Eigen3
+  eigen_stl_containers
   geometric_shapes
   urdf
   urdfdom_headers
