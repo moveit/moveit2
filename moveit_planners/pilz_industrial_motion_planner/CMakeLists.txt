@@ -63,8 +63,14 @@ generate_parameter_library(
   src/cartesian_limits_parameters.yaml # path to input yaml file
 )
 
+generate_parameter_library(
+  interpolation_parameters # cmake target name for the parameter library
+  src/interpolation_parameters.yaml # path to input yaml file
+)
+
 add_library(planning_context_loader_base SHARED src/planning_context_loader.cpp)
-target_link_libraries(planning_context_loader_base cartesian_limits_parameters)
+target_link_libraries(planning_context_loader_base cartesian_limits_parameters
+                      interpolation_parameters)
 ament_target_dependencies(planning_context_loader_base
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
@@ -148,6 +154,7 @@ pluginlib_export_plugin_description_file(
 install(
   TARGETS pilz_industrial_motion_planner
           cartesian_limits_parameters
+          interpolation_parameters
           joint_limits_common
           planning_context_loader_base
           planning_context_loader_ptp

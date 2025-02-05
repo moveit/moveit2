@@ -48,6 +48,7 @@
 #include <pilz_industrial_motion_planner/limits_container.hpp>
 #include <pilz_industrial_motion_planner/trajectory_functions.hpp>
 #include <pilz_industrial_motion_planner/trajectory_generation_exceptions.hpp>
+#include <pilz_industrial_motion_planner/interpolation_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {
@@ -107,7 +108,8 @@ public:
    * @param sampling_time: sampling time of the generate trajectory
    */
   void generate(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
-                planning_interface::MotionPlanResponse& res, double sampling_time = 0.1);
+                planning_interface::MotionPlanResponse& res,
+                const interpolation::Params& interpolation_params = interpolation::Params());
 
 protected:
   /**
@@ -157,7 +159,8 @@ private:
 
   virtual void plan(const planning_scene::PlanningSceneConstPtr& scene,
                     const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                    double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory) = 0;
+                    const interpolation::Params& interpolation_params,
+                    trajectory_msgs::msg::JointTrajectory& joint_trajectory) = 0;
 
 private:
   /**

@@ -83,7 +83,7 @@ private:
                double acceleration_scaling_factor, double sampling_time);
 
   void plan(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
-            const MotionPlanInfo& plan_info, double sampling_time,
+            const MotionPlanInfo& plan_info, const interpolation::Params& interpolation_params,
             trajectory_msgs::msg::JointTrajectory& joint_trajectory) override;
 
 private:

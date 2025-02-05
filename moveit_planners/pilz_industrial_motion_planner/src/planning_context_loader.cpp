@@ -57,6 +57,13 @@ bool pilz_industrial_motion_planner::PlanningContextLoader::setLimits(
   return true;
 }
 
+bool pilz_industrial_motion_planner::PlanningContextLoader::setInterpolationParamListener(
+    const std::shared_ptr<interpolation::ParamListener>& param_listener)
+{
+  interpolation_param_listener_ = param_listener;
+  return true;
+}
+
 std::string pilz_industrial_motion_planner::PlanningContextLoader::getAlgorithm() const
 {
   return alg_;

@@ -292,7 +292,9 @@ TEST_F(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
   /// + plan LIN trajectory +
   /// +++++++++++++++++++++++
   planning_interface::MotionPlanResponse res;
-  lin_->generate(planning_scene_, lin_joint_req, res, 0.01);
+  interpolation::Params interpolation_params;
+  interpolation_params.max_sample_time = 0.01;
+  lin_->generate(planning_scene_, lin_joint_req, res, interpolation_params);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
   ASSERT_TRUE(testutils::checkCartesianTranslationalPath(res.trajectory, target_link_hcd_));

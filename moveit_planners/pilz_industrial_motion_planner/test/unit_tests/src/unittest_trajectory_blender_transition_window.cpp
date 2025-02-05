@@ -145,9 +145,11 @@ protected:
       {
         moveit::core::robotStateToRobotStateMsg(responses[index - 1].trajectory->getLastWayPoint(), req.start_state);
       }
+      interpolation::Params interpolation_params;
+      interpolation_params.max_sample_time = sampling_time_;
       // generate trajectory
       planning_interface::MotionPlanResponse resp;
-      lin_generator_->generate(planning_scene_, req, resp, sampling_time_);
+      lin_generator_->generate(planning_scene_, req, resp, interpolation_params);
       if (resp.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
       {
         std::runtime_error("Failed to generate trajectory.");
@@ -325,8 +327,10 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
       sampling_time_ *= 2;
     }
     // generate trajectory
+    interpolation::Params interpolation_params;
+    interpolation_params.max_sample_time = sampling_time_;
     planning_interface::MotionPlanResponse resp;
-    lin_generator_->generate(planning_scene_, req, resp, sampling_time_);
+    lin_generator_->generate(planning_scene_, req, resp, interpolation_params);
     if (resp.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     {
       std::runtime_error("Failed to generate trajectory.");
