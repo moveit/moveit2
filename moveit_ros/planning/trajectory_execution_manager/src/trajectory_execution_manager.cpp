@@ -99,7 +99,7 @@ void TrajectoryExecutionManager::initialize()
   execution_duration_monitoring_ = true;
   execution_velocity_scaling_ = 1.0;
   allowed_start_tolerance_ = 0.01;
-  joints_allowed_start_tolerance_.clear();
+  allowed_start_tolerance_joints_.clear();
   wait_for_trajectory_completion_ = true;
   control_multi_dof_joint_variables_ = DEFAULT_CONTROL_MULTI_DOF_JOINT_VARIABLES;
 
@@ -211,7 +211,7 @@ void TrajectoryExecutionManager::initialize()
   controller_mgr_node_->get_parameter("trajectory_execution.control_multi_dof_joint_variables",
                                       control_multi_dof_joint_variables_);
 
-  initializeJointsAllowedStartTolerance();
+  initializeAllowedStartToleranceJoints();
 
   if (manage_controllers_)
   {
@@ -248,9 +248,9 @@ void TrajectoryExecutionManager::initialize()
       {
         setAllowedStartTolerance(parameter.as_double());
       }
-      else if (name.find("trajectory_execution.joints_allowed_start_tolerance.") == 0)
+      else if (name.find("trajectory_execution.allowed_start_tolerance_joints.") == 0)
       {
-        setJointAllowedStartTolerance(name, parameter.as_double());
+        setAllowedStartToleranceJoint(name, parameter.as_double());
       }
       else if (name == "trajectory_execution.wait_for_trajectory_completion")
       {
@@ -921,24 +921,24 @@ bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::Ro
 
 bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& context) const
 {
-  if (allowed_start_tolerance_ == 0 && joints_allowed_start_tolerance_.empty())  // skip validation on this magic number
+  if (allowed_start_tolerance_ == 0 && allowed_start_tolerance_joints_.empty())  // skip validation on this magic number
     return true;
 
-  if (joints_allowed_start_tolerance_.empty())
+  if (allowed_start_tolerance_joints_.empty())
   {
     RCLCPP_INFO_STREAM(logger_, "Validating trajectory with allowed_start_tolerance " << allowed_start_tolerance_);
   }
   else
   {
     std::ostringstream ss;
-    for (const auto& [joint_name, joints_start_tolerance] : joints_allowed_start_tolerance_)
+    for (const auto& [joint_name, joint_start_tolerance] : allowed_start_tolerance_joints_)
     {
       if (ss.tellp() > 1)
         ss << ", ";  // skip the comma at the end
-      ss << joint_name << ": " << joints_start_tolerance;
+      ss << joint_name << ": " << joint_start_tolerance;
     }
     RCLCPP_INFO_STREAM(logger_, "Validating trajectory with allowed_start_tolerance "
-                                    << allowed_start_tolerance_ << " and joints_allowed_start_tolerance {" << ss.str()
+                                    << allowed_start_tolerance_ << " and allowed_start_tolerance_joints {" << ss.str()
                                     << "}");
   }
 
@@ -983,7 +983,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
 
       for (const auto joint : joints)
       {
-        const double joint_start_tolerance = getJointAllowedStartTolerance(joint->getName());
+        const double joint_start_tolerance = getAllowedStartToleranceJoint(joint->getName());
         reference_state.enforcePositionBounds(joint);
         current_state->enforcePositionBounds(joint);
         if (joint_start_tolerance != 0 && reference_state.distance(*current_state, joint) > joint_start_tolerance)
@@ -1036,7 +1036,7 @@ bool TrajectoryExecutionManager::validate(const TrajectoryExecutionContext& cont
         Eigen::Vector3d offset = cur_transform.translation() - start_transform.translation();
         Eigen::AngleAxisd rotation;
         rotation.fromRotationMatrix(cur_transform.linear().transpose() * start_transform.linear());
-        const double joint_start_tolerance = getJointAllowedStartTolerance(joint_names[i]);
+        const double joint_start_tolerance = getAllowedStartToleranceJoint(joint_names[i]);
         if (joint_start_tolerance != 0 &&
             ((offset.array() > joint_start_tolerance).any() || rotation.angle() > joint_start_tolerance))
         {
@@ -1594,7 +1594,7 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
 bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionContext& context, double wait_time)
 {
   // skip waiting for convergence?
-  if ((allowed_start_tolerance_ == 0 && joints_allowed_start_tolerance_.empty()) || !wait_for_trajectory_completion_)
+  if ((allowed_start_tolerance_ == 0 && allowed_start_tolerance_joints_.empty()) || !wait_for_trajectory_completion_)
   {
     RCLCPP_INFO(logger_, "Not waiting for trajectory completion");
     return true;
@@ -1633,8 +1633,9 @@ bool TrajectoryExecutionManager::waitForRobotToStop(const TrajectoryExecutionCon
         if (!jm)
           continue;  // joint vanished from robot state (shouldn't happen), but we don't care
 
-        const double joint_tolerance = getJointAllowedStartTolerance(joint_names[i]);
-        if (fabs(jm->distance(cur_state->getJointPositions(jm), prev_state->getJointPositions(jm))) > joint_tolerance)
+        const double joint_start_tolerance = getAllowedStartToleranceJoint(joint_names[i]);
+        if (fabs(jm->distance(cur_state->getJointPositions(jm), prev_state->getJointPositions(jm))) >
+            joint_start_tolerance)
         {
           moved = true;
           no_motion_count = 0;
@@ -1861,14 +1862,14 @@ void TrajectoryExecutionManager::loadControllerParams()
   // }
 }
 
-double TrajectoryExecutionManager::getJointAllowedStartTolerance(const std::string& joint_name) const
+double TrajectoryExecutionManager::getAllowedStartToleranceJoint(const std::string& joint_name) const
 {
-  auto start_tolerance_it = joints_allowed_start_tolerance_.find(joint_name);
-  return start_tolerance_it != joints_allowed_start_tolerance_.end() ? start_tolerance_it->second :
+  auto start_tolerance_it = allowed_start_tolerance_joints_.find(joint_name);
+  return start_tolerance_it != allowed_start_tolerance_joints_.end() ? start_tolerance_it->second :
                                                                        allowed_start_tolerance_;
 }
 
-void TrajectoryExecutionManager::setJointAllowedStartTolerance(const std::string& parameter_name,
+void TrajectoryExecutionManager::setAllowedStartToleranceJoint(const std::string& parameter_name,
                                                                double joint_start_tolerance)
 {
   if (joint_start_tolerance < 0)
@@ -1880,7 +1881,7 @@ void TrajectoryExecutionManager::setJointAllowedStartTolerance(const std::string
 
   // get the joint name by removing the parameter prefix if necessary
   std::string joint_name = parameter_name;
-  const std::string parameter_prefix = "trajectory_execution.joints_allowed_start_tolerance.";
+  const std::string parameter_prefix = "trajectory_execution.allowed_start_tolerance_joints.";
   if (parameter_name.find(parameter_prefix) == 0)
     joint_name = joint_name.substr(parameter_prefix.length());  // remove prefix
 
@@ -1893,22 +1894,22 @@ void TrajectoryExecutionManager::setJointAllowedStartTolerance(const std::string
     return;
   }
 
-  joints_allowed_start_tolerance_.insert_or_assign(joint_name, joint_start_tolerance);
+  allowed_start_tolerance_joints_.insert_or_assign(joint_name, joint_start_tolerance);
 }
 
-void TrajectoryExecutionManager::initializeJointsAllowedStartTolerance()
+void TrajectoryExecutionManager::initializeAllowedStartToleranceJoints()
 {
-  joints_allowed_start_tolerance_.clear();
+  allowed_start_tolerance_joints_.clear();
 
-  // retrieve all parameters under "trajectory_execution.joints_allowed_start_tolerance"
+  // retrieve all parameters under "trajectory_execution.allowed_start_tolerance_joints"
   // that correspond to existing joints in the robot model
   for (const auto& joint_name : robot_model_->getJointModelNames())
   {
-    double start_joint_tolerance;
-    const std::string parameter_name = "trajectory_execution.joints_allowed_start_tolerance." + joint_name;
-    if (node_->get_parameter(parameter_name, start_joint_tolerance))
+    double joint_start_tolerance;
+    const std::string parameter_name = "trajectory_execution.allowed_start_tolerance_joints." + joint_name;
+    if (node_->get_parameter(parameter_name, joint_start_tolerance))
     {
-      if (start_joint_tolerance < 0)
+      if (joint_start_tolerance < 0)
       {
         RCLCPP_WARN(logger_,
                     "%s has a negative value. The start tolerance value for that joint "
@@ -1916,7 +1917,7 @@ void TrajectoryExecutionManager::initializeJointsAllowedStartTolerance()
                     parameter_name.c_str());
         continue;
       }
-      joints_allowed_start_tolerance_.insert({ joint_name, start_joint_tolerance });
+      allowed_start_tolerance_joints_.insert({ joint_name, joint_start_tolerance });
     }
   }
 }
