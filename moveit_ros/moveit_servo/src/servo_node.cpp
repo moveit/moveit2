@@ -234,7 +234,6 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(node_->get_logger(), "Joint jog command timed out. Halting to a stop.");
     }
-    last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
   }
 
   return next_joint_state;
@@ -267,7 +266,6 @@ std::optional<KinematicState> ServoNode::processTwistCommand(const moveit::core:
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(node_->get_logger(), "Twist command timed out. Halting to a stop.");
     }
-    last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
   }
 
   return next_joint_state;
@@ -297,7 +295,6 @@ std::optional<KinematicState> ServoNode::processPoseCommand(const moveit::core::
       next_joint_state = result.second;
       RCLCPP_DEBUG_STREAM(node_->get_logger(), "Pose command timed out. Halting to a stop.");
     }
-    last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
   }
 
   return next_joint_state;
@@ -400,6 +397,10 @@ void ServoNode::servoLoop()
       }
       else
       {
+        // The next command does not exist = Because the robot is in a stopped state and there is no next target pose, a blocking process is used to fully update the robot's state.
+        if (!next_joint_state) {
+          last_commanded_state_ = servo_->getCurrentRobotState(true);
+        }
         // if no new command was created, use current robot state
         updateSlidingWindow(current_state, joint_cmd_rolling_window_, servo_params_.max_expected_latency, cur_time);
         servo_->resetSmoothing(current_state);
