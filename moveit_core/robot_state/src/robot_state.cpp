@@ -801,14 +801,6 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
 
 const LinkModel* RobotState::getLinkModelIncludingAttachedBodies(const std::string& frame) const
 {
-<<<<<<< HEAD
-  bool found;
-  const LinkModel* link{ nullptr };
-  getFrameInfo(frame, link, found);
-  if (!found)
-    RCLCPP_ERROR(LOGGER, "Unable to find link for frame '%s'", frame.c_str());
-  return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
-=======
   // If the frame is a link, return that link.
   if (getRobotModel()->hasLinkModel(frame))
   {
@@ -842,7 +834,6 @@ const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::strin
   const LinkModel* link = getLinkModelIncludingAttachedBodies(frame);
 
   return getRobotModel()->getRigidlyConnectedParentLinkModel(link, jmg);
->>>>>>> 1794b8efa (Reverts #2985, Ports moveit #3388 #3470 #3539 (#3284))
 }
 
 bool RobotState::satisfiesBounds(double margin) const
@@ -1731,7 +1722,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
         found_valid_frame = true;
         break;
       }  // end if pose_frame
-    }    // end for solver_tip_frames
+    }  // end for solver_tip_frames
 
     // Make sure one of the tip frames worked
     if (!found_valid_frame)
