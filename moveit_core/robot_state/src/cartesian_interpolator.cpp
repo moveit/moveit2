@@ -163,7 +163,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
                                cost_function))
     {
       start_state->update();
-      path.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
+      traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
     }
     else
       break;
