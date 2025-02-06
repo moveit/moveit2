@@ -217,11 +217,12 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
   rclcpp::Time generation_begin = clock.now();
 
   // generate the time samples
-  const double epsilon = 10e-06;  // avoid adding the last time sample twice
   std::vector<double> time_samples;
-  for (double t_sample = 0.0; t_sample < trajectory.Duration() - epsilon; t_sample += sampling_time)
+  int num_samples = std::floor(trajectory.Duration() / sampling_time);
+  sampling_time = trajectory.Duration() / num_samples;
+  for (int i = 0; i < num_samples; ++i)
   {
-    time_samples.push_back(t_sample);
+    time_samples.push_back(i * sampling_time);
   }
   time_samples.push_back(trajectory.Duration());
 
