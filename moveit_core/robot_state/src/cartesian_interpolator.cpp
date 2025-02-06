@@ -455,6 +455,7 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     if (start_state->setFromIK(group, pose * offset, link->getName(), consistency_limits, 0.0, validCallback, options,
                                cost_function))
     {
+      start_state->update();
       path.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
     }
     else
