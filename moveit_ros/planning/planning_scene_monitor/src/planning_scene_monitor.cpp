@@ -231,7 +231,8 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
 
   auto declare_parameter = [this](const std::string& param_name, auto default_val,
-                                  const std::string& description) -> auto {
+                                  const std::string& description) -> auto
+  {
     rcl_interfaces::msg::ParameterDescriptor desc;
     desc.set__description(description);
     return pnode_->declare_parameter(param_name, default_val, desc);
