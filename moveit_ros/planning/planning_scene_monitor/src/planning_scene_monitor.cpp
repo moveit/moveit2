@@ -261,7 +261,8 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     return;
   }
 
-  auto psm_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) -> auto {
+  auto psm_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) -> auto
+  {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
 
