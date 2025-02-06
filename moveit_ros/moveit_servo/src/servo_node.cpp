@@ -398,6 +398,7 @@ void ServoNode::servoLoop()
       else
       {
         // if no new command was created, use current robot state
+        last_commanded_state_ = current_state = servo_->getCurrentRobotState(false);
         updateSlidingWindow(current_state, joint_cmd_rolling_window_, servo_params_.max_expected_latency, cur_time);
         servo_->resetSmoothing(current_state);
       }
