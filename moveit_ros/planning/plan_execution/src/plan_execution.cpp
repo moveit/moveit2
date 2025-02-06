@@ -283,24 +283,14 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
     collision_detection::CollisionRequest req;
     req.group_name = t.getGroupName();
     req.pad_environment_collisions = false;
-    auto getAttachedObjects = [](const moveit::core::RobotState& state) {
-      std::vector<const moveit::core::AttachedBody*> attached_bodies;
-      state.getAttachedBodies(attached_bodies);
-      std::map<std::string, const moveit::core::AttachedBody*> attached_objects;
-      for (const auto& ab : attached_bodies)
-      {
-        attached_objects[ab->getName()] = ab;
-      }
-      return attached_objects;
-    };
-
     moveit::core::RobotState state = plan.planning_scene->getCurrentState();
-    std::map<std::string, const moveit::core::AttachedBody*> current_attached_objects = getAttachedObjects(state);
+    std::map<std::string, const moveit::core::AttachedBody*> current_attached_objects, sample_attached_object;
+    state.getAttachedBodies(current_attached_objects);
     for (std::size_t i = std::max(path_segment.second - 1, 0); i < wpc; ++i)
     {
       state = t.getWayPoint(i);
       collision_detection::CollisionResult res;
-      std::map<std::string, const moveit::core::AttachedBody*> sample_attached_object = getAttachedObjects(state);
+      state.getAttachedBodies(sample_attached_object);
 
       // If sample state has attached objects that are not in the current state, remove them from the sample state
       for (const auto& [name, object] : sample_attached_object)
