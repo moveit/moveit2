@@ -38,6 +38,7 @@
  *
  */
 
+#include <cstddef>
 #if __has_include(<realtime_tools/realtime_helpers.hpp>)
 #include <realtime_tools/realtime_helpers.hpp>
 #else
@@ -397,11 +398,8 @@ void ServoNode::servoLoop()
       }
       else
       {
-        // The next command does not exist = Because the robot is in a stopped state and there is no next target pose, a blocking process is used to fully update the robot's state.
-        if (!next_joint_state) {
-          last_commanded_state_ = servo_->getCurrentRobotState(true);
-        }
         // if no new command was created, use current robot state
+        last_commanded_state_ = current_state = servo_->getCurrentRobotState(false);
         updateSlidingWindow(current_state, joint_cmd_rolling_window_, servo_params_.max_expected_latency, cur_time);
         servo_->resetSmoothing(current_state);
       }
