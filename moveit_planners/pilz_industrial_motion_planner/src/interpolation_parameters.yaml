@@ -12,7 +12,7 @@ interpolation:
     default_value: 0,
     description: "Minimum number of samples for the generated trajectory",
     validation: {
-      gt_eq: [ 0.0 ]
+      gt_eq: [ 0 ]
     }
   }
   max_translation_interpolation_distance: {
