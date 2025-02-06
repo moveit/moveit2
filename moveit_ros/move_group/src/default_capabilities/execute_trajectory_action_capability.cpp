@@ -77,17 +77,12 @@ void MoveGroupExecuteTrajectoryAction::initialize()
         RCLCPP_INFO(LOGGER, "Received goal request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-<<<<<<< HEAD
       [](const std::shared_ptr<ExecTrajectoryGoal>& /* unused */) {
         RCLCPP_INFO(LOGGER, "Received request to cancel goal");
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](const auto& goal) { executePathCallback(goal); });
-=======
-      [](const std::shared_ptr<ExecTrajectoryGoal>& /* unused */) { return rclcpp_action::CancelResponse::ACCEPT; },
       [this](const auto& goal) { executePathCallback(goal); }, rcl_action_server_get_default_options(),
       callback_group_);
->>>>>>> ba35aaa58 (Ports moveit #3676 and #3682 (#3283))
 }
 
 void MoveGroupExecuteTrajectoryAction::executePathCallback(const std::shared_ptr<ExecTrajectoryGoal>& goal)

@@ -231,8 +231,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
   private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
 
   auto declare_parameter = [this](const std::string& param_name, auto default_val,
-                                  const std::string& description) -> auto
-  {
+                                  const std::string& description) -> auto {
     rcl_interfaces::msg::ParameterDescriptor desc;
     desc.set__description(description);
     return pnode_->declare_parameter(param_name, default_val, desc);
@@ -261,8 +260,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
     return;
   }
 
-  auto psm_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) -> auto
-  {
+  auto psm_parameter_set_callback = [this](const std::vector<rclcpp::Parameter>& parameters) -> auto {
     auto result = rcl_interfaces::msg::SetParametersResult();
     result.successful = true;
 
@@ -1300,41 +1298,11 @@ void PlanningSceneMonitor::onStateUpdate(const sensor_msgs::msg::JointState::Con
 
 void PlanningSceneMonitor::stateUpdateTimerCallback()
 {
-<<<<<<< HEAD
-  if (state_update_pending_)
-  {
-    bool update = false;
-
-    std::chrono::system_clock::time_point n = std::chrono::system_clock::now();
-    std::chrono::duration<double> dt = n - last_robot_state_update_wall_time_;
-
-    {
-      // lock for access to dt_state_update_ and state_update_pending_
-      std::unique_lock<std::mutex> lock(state_pending_mutex_);
-      if (state_update_pending_ && dt.count() >= dt_state_update_.count())
-      {
-        state_update_pending_ = false;
-        last_robot_state_update_wall_time_ = std::chrono::system_clock::now();
-        auto sec = std::chrono::duration<double>(last_robot_state_update_wall_time_.time_since_epoch()).count();
-        update = true;
-        RCLCPP_DEBUG(LOGGER, "performPendingStateUpdate: %f", fmod(sec, 10));
-      }
-    }
-
-    // run the state update with state_pending_mutex_ unlocked
-    if (update)
-    {
-      updateSceneWithCurrentState();
-      RCLCPP_DEBUG(LOGGER, "performPendingStateUpdate done");
-    }
-  }
-=======
   // Read access to last_robot_state_update_wall_time_ and dt_state_update_ is unprotected here
   // as reading invalid values is not critical (just postpones the next state update)
   if (state_update_pending_.load() &&
       std::chrono::system_clock::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
     updateSceneWithCurrentState(true);
->>>>>>> ba35aaa58 (Ports moveit #3676 and #3682 (#3283))
 }
 
 void PlanningSceneMonitor::octomapUpdateCallback()
