@@ -161,7 +161,14 @@ CartesianInterpolator::Percentage CartesianInterpolator::computeCartesianPath(
     // Random seeding (of additional attempts) would probably create IK jumps.
     if (start_state->setFromIK(group, pose * offset, link->getName(), consistency_limits, 0.0, validCallback, options,
                                cost_function))
+<<<<<<< HEAD
       traj.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
+=======
+    {
+      start_state->update();
+      path.push_back(std::make_shared<moveit::core::RobotState>(*start_state));
+    }
+>>>>>>> 1794b8efa (Reverts #2985, Ports moveit #3388 #3470 #3539 (#3284))
     else
       break;
 

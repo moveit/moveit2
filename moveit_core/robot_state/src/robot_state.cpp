@@ -799,14 +799,50 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
         global_link_transforms_[attached_body.second->getAttachedLink()->getLinkIndex()]);
 }
 
-const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
+const LinkModel* RobotState::getLinkModelIncludingAttachedBodies(const std::string& frame) const
 {
+<<<<<<< HEAD
   bool found;
   const LinkModel* link{ nullptr };
   getFrameInfo(frame, link, found);
   if (!found)
     RCLCPP_ERROR(LOGGER, "Unable to find link for frame '%s'", frame.c_str());
   return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
+=======
+  // If the frame is a link, return that link.
+  if (getRobotModel()->hasLinkModel(frame))
+  {
+    return getLinkModel(frame);
+  }
+
+  // If the frame is an attached body, return the link the body is attached to.
+  if (const auto it = attached_body_map_.find(frame); it != attached_body_map_.end())
+  {
+    const auto& body{ it->second };
+    return body->getAttachedLink();
+  }
+
+  // If the frame is a subframe of an attached body, return the link the body is attached to.
+  for (const auto& it : attached_body_map_)
+  {
+    const auto& body{ it.second };
+    if (body->hasSubframeTransform(frame))
+    {
+      return body->getAttachedLink();
+    }
+  }
+
+  // If the frame is none of the above, return nullptr.
+  return nullptr;
+}
+
+const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame,
+                                                                const moveit::core::JointModelGroup* jmg) const
+{
+  const LinkModel* link = getLinkModelIncludingAttachedBodies(frame);
+
+  return getRobotModel()->getRigidlyConnectedParentLinkModel(link, jmg);
+>>>>>>> 1794b8efa (Reverts #2985, Ports moveit #3388 #3470 #3539 (#3284))
 }
 
 bool RobotState::satisfiesBounds(double margin) const
