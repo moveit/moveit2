@@ -284,16 +284,16 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
     req.group_name = t.getGroupName();
     req.pad_environment_collisions = false;
     moveit::core::RobotState state = plan.planning_scene->getCurrentState();
-    std::map<std::string, const moveit::core::AttachedBody*> current_attached_objects, sample_attached_object;
+    std::map<std::string, const moveit::core::AttachedBody*> current_attached_objects, sample_attached_objects;
     state.getAttachedBodies(current_attached_objects);
     for (std::size_t i = std::max(path_segment.second - 1, 0); i < wpc; ++i)
     {
       state = t.getWayPoint(i);
       collision_detection::CollisionResult res;
-      state.getAttachedBodies(sample_attached_object);
+      state.getAttachedBodies(sample_attached_objects);
 
       // If sample state has attached objects that are not in the current state, remove them from the sample state
-      for (const auto& [name, object] : sample_attached_object)
+      for (const auto& [name, object] : sample_attached_objects)
       {
         if (current_attached_objects.find(name) == current_attached_objects.end())
         {
@@ -305,7 +305,7 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
       // If current state has attached objects that are not in the sample state, add them to the sample state
       for (const auto& [name, object] : current_attached_objects)
       {
-        if (sample_attached_object.find(name) == sample_attached_object.end())
+        if (sample_attached_objects.find(name) == sample_attached_objects.end())
         {
           RCLCPP_DEBUG(logger_, "Attached object '%s' is not in the robot state. Adding it.", name.c_str());
           state.attachBody(std::make_unique<moveit::core::AttachedBody>(*object));
