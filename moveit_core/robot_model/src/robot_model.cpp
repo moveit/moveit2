@@ -1364,14 +1364,32 @@ LinkModel* RobotModel::getLinkModel(const std::string& name, bool* has_link)
   return nullptr;
 }
 
-const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link)
+const LinkModel* RobotModel::getRigidlyConnectedParentLinkModel(const LinkModel* link, const JointModelGroup* jmg)
 {
   if (!link)
     return link;
+
   const moveit::core::LinkModel* parent_link = link->getParentLinkModel();
   const moveit::core::JointModel* joint = link->getParentJointModel();
+  decltype(jmg->getJointModels().cbegin()) begin{}, end{};
+  if (jmg)
+  {
+    begin = jmg->getJointModels().cbegin();
+    end = jmg->getJointModels().cend();
+  }
 
-  while (parent_link && joint->getType() == moveit::core::JointModel::FIXED)
+  // Returns whether `joint` is part of the rigidly connected chain.
+  // This is only false if the joint is both in `jmg` and not fixed.
+  auto is_fixed_or_not_in_jmg = [begin, end](const JointModel* joint) {
+    if (joint->getType() == JointModel::FIXED)
+      return true;
+    if (begin != end &&                       // we do have a non-empty jmg
+        std::find(begin, end, joint) == end)  // joint does not belong to jmg
+      return true;
+    return false;
+  };
+
+  while (parent_link && is_fixed_or_not_in_jmg(joint))
   {
     link = parent_link;
     joint = link->getParentJointModel();

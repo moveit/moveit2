@@ -69,13 +69,7 @@ add_subdirectory(utils)
 add_subdirectory(version)
 
 install(
-  TARGETS collision_detector_bullet_plugin
-          collision_detector_fcl_plugin
-          moveit_acceleration_filter
-          moveit_acceleration_filter_parameters
-          moveit_butterworth_filter
-          moveit_butterworth_filter_parameters
-          moveit_collision_detection
+  TARGETS moveit_collision_detection
           moveit_collision_detection_bullet
           moveit_collision_detection_fcl
           moveit_collision_distance_field
@@ -92,14 +86,26 @@ install(
           moveit_robot_model
           moveit_robot_state
           moveit_robot_trajectory
-          moveit_ruckig_filter
-          moveit_ruckig_filter_parameters
           moveit_smoothing_base
           moveit_test_utils
           moveit_trajectory_processing
           moveit_transforms
           moveit_utils
   EXPORT moveit_coreTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+install(
+  TARGETS collision_detector_bullet_plugin
+          collision_detector_fcl_plugin
+          moveit_acceleration_filter
+          moveit_acceleration_filter_parameters
+          moveit_butterworth_filter
+          moveit_butterworth_filter_parameters
+          moveit_ruckig_filter
+          moveit_ruckig_filter_parameters
+  EXPORT moveit_core_pluginTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin)

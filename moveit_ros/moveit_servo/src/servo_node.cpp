@@ -147,6 +147,14 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
 void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request>& request,
                            const std::shared_ptr<std_srvs::srv::SetBool::Response>& response)
 {
+  if (servo_paused_ == request->data)
+  {
+    std::string message = "Requested pause state is already active.";
+    RCLCPP_INFO(node_->get_logger(), "%s", message.c_str());
+    response->success = true;
+    response->message = message;
+    return;
+  }
   servo_paused_ = request->data;
   response->success = (servo_paused_ == request->data);
   if (servo_paused_)
@@ -326,76 +334,78 @@ void ServoNode::servoLoop()
       continue;
     }
 
-    std::lock_guard<std::mutex> lock_guard(lock_);
-    const bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
-    const auto cur_time = node_->now();
+    {  // scope for mutex-protected operations
+      std::lock_guard<std::mutex> lock_guard(lock_);
+      const bool use_trajectory = servo_params_.command_out_type == "trajectory_msgs/JointTrajectory";
+      const auto cur_time = node_->now();
 
-    if (use_trajectory && !joint_cmd_rolling_window_.empty() && joint_cmd_rolling_window_.back().time_stamp > cur_time)
-    {
-      current_state = joint_cmd_rolling_window_.back();
-    }
-    else
-    {
-      // if all joint_cmd_rolling_window_ is empty or all commands in it are outdated, use current robot state
-      joint_cmd_rolling_window_.clear();
-      current_state = servo_->getCurrentRobotState(false /* block for current robot state */);
-      current_state.velocities *= 0.0;
-    }
-
-    // update robot state values
-    robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
-    robot_state->setJointGroupVelocities(joint_model_group, current_state.velocities);
-
-    next_joint_state = std::nullopt;
-    const CommandType expected_type = servo_->getCommandType();
-
-    if (expected_type == CommandType::JOINT_JOG && new_joint_jog_msg_)
-    {
-      next_joint_state = processJointJogCommand(robot_state);
-    }
-    else if (expected_type == CommandType::TWIST && new_twist_msg_)
-    {
-      next_joint_state = processTwistCommand(robot_state);
-    }
-    else if (expected_type == CommandType::POSE && new_pose_msg_)
-    {
-      next_joint_state = processPoseCommand(robot_state);
-    }
-    else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
-    {
-      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-      RCLCPP_WARN_STREAM(node_->get_logger(), "Command type has not been set, cannot accept input");
-    }
-
-    if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&
-        (servo_->getStatus() != StatusCode::HALT_FOR_COLLISION))
-    {
-      if (use_trajectory)
+      if (use_trajectory && !joint_cmd_rolling_window_.empty() && joint_cmd_rolling_window_.back().time_stamp > cur_time)
       {
-        auto& next_joint_state_value = next_joint_state.value();
-        updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency,
-                            cur_time);
-        if (const auto msg = composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_))
-        {
-          trajectory_publisher_->publish(msg.value());
-        }
+        current_state = joint_cmd_rolling_window_.back();
       }
       else
       {
-        multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
+        // if all joint_cmd_rolling_window_ is empty or all commands in it are outdated, use current robot state
+        joint_cmd_rolling_window_.clear();
+        current_state = servo_->getCurrentRobotState(false /* block for current robot state */);
+        current_state.velocities *= 0.0;
       }
-      last_commanded_state_ = next_joint_state.value();
-    }
-    else
-    {
-      // if no new command was created, use current robot state
-      updateSlidingWindow(current_state, joint_cmd_rolling_window_, servo_params_.max_expected_latency, cur_time);
-      servo_->resetSmoothing(current_state);
-    }
 
-    status_msg.code = static_cast<int8_t>(servo_->getStatus());
-    status_msg.message = servo_->getStatusMessage();
-    status_publisher_->publish(status_msg);
+      // update robot state values
+      robot_state->setJointGroupPositions(joint_model_group, current_state.positions);
+      robot_state->setJointGroupVelocities(joint_model_group, current_state.velocities);
+
+      next_joint_state = std::nullopt;
+      const CommandType expected_type = servo_->getCommandType();
+
+      if (expected_type == CommandType::JOINT_JOG && new_joint_jog_msg_)
+      {
+        next_joint_state = processJointJogCommand(robot_state);
+      }
+      else if (expected_type == CommandType::TWIST && new_twist_msg_)
+      {
+        next_joint_state = processTwistCommand(robot_state);
+      }
+      else if (expected_type == CommandType::POSE && new_pose_msg_)
+      {
+        next_joint_state = processPoseCommand(robot_state);
+      }
+      else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
+      {
+        new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+        RCLCPP_WARN_STREAM(node_->get_logger(), "Command type has not been set, cannot accept input");
+      }
+
+      if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&
+          (servo_->getStatus() != StatusCode::HALT_FOR_COLLISION))
+      {
+        if (use_trajectory)
+        {
+          auto& next_joint_state_value = next_joint_state.value();
+          updateSlidingWindow(next_joint_state_value, joint_cmd_rolling_window_, servo_params_.max_expected_latency,
+                              cur_time);
+          if (const auto msg = composeTrajectoryMessage(servo_params_, joint_cmd_rolling_window_))
+          {
+            trajectory_publisher_->publish(msg.value());
+          }
+        }
+        else
+        {
+          multi_array_publisher_->publish(composeMultiArrayMessage(servo_->getParams(), next_joint_state.value()));
+        }
+        last_commanded_state_ = next_joint_state.value();
+      }
+      else
+      {
+        // if no new command was created, use current robot state
+        updateSlidingWindow(current_state, joint_cmd_rolling_window_, servo_params_.max_expected_latency, cur_time);
+        servo_->resetSmoothing(current_state);
+      }
+
+      status_msg.code = static_cast<int8_t>(servo_->getStatus());
+      status_msg.message = servo_->getStatusMessage();
+      status_publisher_->publish(status_msg);
+    }
 
     servo_frequency.sleep();
   }

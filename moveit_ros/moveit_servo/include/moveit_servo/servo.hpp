@@ -41,8 +41,8 @@
 
 #pragma once
 
-#include <moveit_servo_lib_parameters.hpp>
 #include <moveit_servo/collision_monitor.hpp>
+#include <moveit_servo/moveit_servo_lib_parameters.hpp>
 #include <moveit_servo/utils/command.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
 #include <moveit/kinematics_base/kinematics_base.hpp>
@@ -113,6 +113,7 @@ public:
 
   /**
    * \brief Returns the most recent servo parameters.
+   * @return The servo parameters.
    */
   servo::Params& getParams();
 
@@ -126,8 +127,9 @@ public:
 
   /**
    * \brief Smoothly halt at a commanded state when command goes stale.
-   * @param halt_state The desired stop state.
-   * @return The next state stepping towards the required halting state.
+   * @param halt_state The desired halting state.
+   * @return A pair where the first element is a Boolean indicating whether the robot has stopped, and the second is a
+   * state stepping towards the desired halting state.
    */
   std::pair<bool, KinematicState> smoothHalt(const KinematicState& halt_state);
 

@@ -907,14 +907,41 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
   }
 }
 
-const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
+const LinkModel* RobotState::getLinkModelIncludingAttachedBodies(const std::string& frame) const
 {
-  bool found;
-  const LinkModel* link{ nullptr };
-  getFrameInfo(frame, link, found);
-  if (!found)
-    RCLCPP_ERROR(getLogger(), "Unable to find link for frame '%s'", frame.c_str());
-  return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
+  // If the frame is a link, return that link.
+  if (getRobotModel()->hasLinkModel(frame))
+  {
+    return getLinkModel(frame);
+  }
+
+  // If the frame is an attached body, return the link the body is attached to.
+  if (const auto it = attached_body_map_.find(frame); it != attached_body_map_.end())
+  {
+    const auto& body{ it->second };
+    return body->getAttachedLink();
+  }
+
+  // If the frame is a subframe of an attached body, return the link the body is attached to.
+  for (const auto& it : attached_body_map_)
+  {
+    const auto& body{ it.second };
+    if (body->hasSubframeTransform(frame))
+    {
+      return body->getAttachedLink();
+    }
+  }
+
+  // If the frame is none of the above, return nullptr.
+  return nullptr;
+}
+
+const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame,
+                                                                const moveit::core::JointModelGroup* jmg) const
+{
+  const LinkModel* link = getLinkModelIncludingAttachedBodies(frame);
+
+  return getRobotModel()->getRigidlyConnectedParentLinkModel(link, jmg);
 }
 
 const Eigen::Isometry3d& RobotState::getJointTransform(const JointModel* joint)
@@ -2039,8 +2066,8 @@ bool RobotState::setFromIKSubgroups(const JointModelGroup* jmg, const EigenSTL::
   {
     if (consistency_limits[i].size() != sub_groups[i]->getVariableCount())
     {
-      RCLCPP_ERROR(getLogger(), "Number of joints in consistency_limits is %zu but it should be should be %u", i,
-                   sub_groups[i]->getVariableCount());
+      RCLCPP_ERROR(getLogger(), "Number of joints in consistency_limits[%zu] is %lu but it should be should be %u", i,
+                   consistency_limits[i].size(), sub_groups[i]->getVariableCount());
       return false;
     }
   }

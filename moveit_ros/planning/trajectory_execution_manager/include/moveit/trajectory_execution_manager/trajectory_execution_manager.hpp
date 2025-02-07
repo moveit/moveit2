@@ -186,9 +186,6 @@ public:
   /// Stop whatever executions are active, if any
   void stopExecution(bool auto_clear = true);
 
-  /// Clear the trajectories to execute
-  void clear();
-
   /// Enable or disable the monitoring of trajectory execution duration. If a controller takes
   /// longer than expected, the trajectory is canceled
   void enableExecutionDurationMonitoring(bool flag);
@@ -286,11 +283,18 @@ private:
   bool executePart(std::size_t part_index);
   bool waitForRobotToStop(const TrajectoryExecutionContext& context, double wait_time = 1.0);
 
+  /// Clear the trajectories to execute
+  void clear();
+
   void stopExecutionInternal();
 
   void receiveEvent(const std_msgs::msg::String::ConstSharedPtr& event);
 
   void loadControllerParams();
+
+  double getAllowedStartToleranceJoint(const std::string& joint_name) const;
+  void setAllowedStartToleranceJoint(const std::string& joint_name, double joint_start_tolerance);
+  void initializeAllowedStartToleranceJoints();
 
   // Name of this class for logging
   const std::string name_ = "trajectory_execution_manager";
@@ -340,6 +344,8 @@ private:
   std::map<std::string, double> controller_allowed_goal_duration_margin_;
 
   double allowed_start_tolerance_;  // joint tolerance for validate(): radians for revolute joints
+  // tolerance per joint, overrides global allowed_start_tolerance_.
+  std::map<std::string, double> allowed_start_tolerance_joints_;
   double execution_velocity_scaling_;
   bool wait_for_trajectory_completion_;
 
