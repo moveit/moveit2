@@ -156,6 +156,7 @@ private:
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   trajectory_execution_manager::TrajectoryExecutionManagerPtr trajectory_execution_manager_;
   planning_scene_monitor::TrajectoryMonitorPtr trajectory_monitor_;
+  std::map<std::string, const moveit::core::AttachedBody*> trajectory_attached_objects_;
 
   unsigned int default_max_replan_attempts_;
 
