@@ -56,8 +56,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
 {
   RCLCPP_INFO(getLogger(), "Start trajectory blending using transition window.");
 
-  double sampling_time = 0.;
-  if (!validateRequest(req, sampling_time, res.error_code))
+  if (!validateRequest(req, res.error_code))
   {
     RCLCPP_ERROR(getLogger(), "Trajectory blend request is not valid.");
     return false;
@@ -82,7 +81,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
 
   // blend the trajectories in Cartesian space
   pilz_industrial_motion_planner::CartesianTrajectory blend_trajectory_cartesian;
-  blendTrajectoryCartesian(req, first_intersection_index, second_intersection_index, blend_align_index, sampling_time,
+  blendTrajectoryCartesian(req, first_intersection_index, second_intersection_index, blend_align_index,
                            blend_trajectory_cartesian);
 
   // generate the blending trajectory in joint space
@@ -135,15 +134,35 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
                                           req.second_trajectory->getWayPointDurationFromPrevious(i));
   }
 
-  // adjust the time from start
-  res.second_trajectory->setWayPointDurationFromPrevious(0, sampling_time);
+  // adjust the time from start of the first second trajectory point to ensure continuity of velocities (this implicitly
+  // ensures continuity of accelerations)
+  std::vector<double> time_offsets;
+  auto second_start = res.second_trajectory->getFirstWayPointPtr();
+  auto blend_end = res.blend_trajectory->getLastWayPointPtr();
 
+  std::vector<double> blend_end_positions, second_start_positions;
+  blend_end->copyJointGroupPositions(req.first_trajectory->getGroup()->getName(), blend_end_positions);
+  second_start->copyJointGroupPositions(req.first_trajectory->getGroup()->getName(), second_start_positions);
+  std::vector<double> second_start_velocities;
+  second_start->copyJointGroupVelocities(req.first_trajectory->getGroup()->getName(), second_start_velocities);
+  double time_from_start = 0.0;
+  for (std::size_t i = 0; i < second_start_velocities.size(); ++i)
+  {
+    if (second_start_velocities[i] == 0)
+    {
+      continue;
+    }
+    time_from_start = (second_start_positions[i] - blend_end_positions[i]) / second_start_velocities[i];
+    time_offsets.push_back(time_from_start);
+  }
+  time_from_start = *std::max_element(time_offsets.begin(), time_offsets.end());
+  res.second_trajectory->setWayPointDurationFromPrevious(0, time_from_start);
   res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   return true;
 }
 
 bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validateRequest(
-    const pilz_industrial_motion_planner::TrajectoryBlendRequest& req, double& sampling_time,
+    const pilz_industrial_motion_planner::TrajectoryBlendRequest& req,
     moveit_msgs::msg::MoveItErrorCodes& error_code) const
 {
   RCLCPP_DEBUG(getLogger(), "Validate the trajectory blend request.");
@@ -183,14 +202,6 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
     return false;
   }
 
-  // same uniform sampling time
-  if (!pilz_industrial_motion_planner::determineAndCheckSamplingTime(req.first_trajectory, req.second_trajectory,
-                                                                     EPSILON, sampling_time))
-  {
-    error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
-  }
-
   // end position of the first trajectory and start position of second
   // trajectory must have zero
   // velocities/accelerations
@@ -207,14 +218,73 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
   return true;
 }
 
+// TODO: improve this method
+Eigen::Isometry3d interpolatePose(const robot_trajectory::RobotTrajectoryPtr& trajectory, const std::string& link_name,
+                                  double time)
+{
+  // Find the closest two waypoints surrounding the requested time
+  std::size_t idx_before = 0, idx_after = 0;
+  for (std::size_t i = 0; i < trajectory->getWayPointCount() - 1; ++i)
+  {
+    double t1 = trajectory->getWayPointDurationFromStart(i);
+    double t2 = trajectory->getWayPointDurationFromStart(i + 1);
+
+    if (t1 <= time && t2 >= time)
+    {
+      idx_before = i;
+      idx_after = i + 1;
+      break;
+    }
+  }
+
+  // If time is outside known waypoints, return the closest available pose
+  if (idx_after == 0)
+  {
+    return trajectory->getWayPoint(0).getFrameTransform(link_name);
+  }
+  if (idx_before == trajectory->getWayPointCount() - 1)
+  {
+    return trajectory->getWayPoint(idx_before).getFrameTransform(link_name);
+  }
+
+  // Get timestamps and transformations
+  double t1 = trajectory->getWayPointDurationFromStart(idx_before);
+  double t2 = trajectory->getWayPointDurationFromStart(idx_after);
+  Eigen::Isometry3d pose1 = trajectory->getWayPoint(idx_before).getFrameTransform(link_name);
+  Eigen::Isometry3d pose2 = trajectory->getWayPoint(idx_after).getFrameTransform(link_name);
+
+  // Compute interpolation factor
+  double lambda = (time - t1) / (t2 - t1);
+
+  // Linear interpolation for position
+  Eigen::Isometry3d interpolated_pose;
+  interpolated_pose.translation() = pose1.translation() + lambda * (pose2.translation() - pose1.translation());
+
+  // SLERP interpolation for rotation
+  Eigen::Quaterniond quat1(pose1.rotation());
+  Eigen::Quaterniond quat2(pose2.rotation());
+  interpolated_pose.linear() = quat1.slerp(lambda, quat2).toRotationMatrix();
+
+  return interpolated_pose;
+}
+
 void pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blendTrajectoryCartesian(
     const pilz_industrial_motion_planner::TrajectoryBlendRequest& req, const std::size_t first_interse_index,
-    const std::size_t second_interse_index, const std::size_t blend_align_index, double sampling_time,
+    const std::size_t second_interse_index, const std::size_t /* blend_align_index */,
     pilz_industrial_motion_planner::CartesianTrajectory& trajectory) const
 {
   // other fields of the trajectory
   trajectory.group_name = req.group_name;
   trajectory.link_name = req.link_name;
+
+  // Start time of the blending phase
+  double t_start = req.first_trajectory->getWayPointDurationFromStart(first_interse_index);
+  // Duration of the blending phase on the first trajectory
+  double d1 = req.first_trajectory->getDuration() - t_start;
+  // Duration of the blending phase on the second trajectory
+  double d2 = req.second_trajectory->getWayPointDurationFromStart(second_interse_index);
+  // Time to align the two trajectories
+  double align_time = (d1 > d2) ? req.first_trajectory->getDuration() - d2 : t_start;
 
   // Pose on first trajectory
   Eigen::Isometry3d blend_sample_pose1 =
@@ -225,28 +295,36 @@ void pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blendTra
       req.second_trajectory->getWayPoint(second_interse_index).getFrameTransform(req.link_name);
 
   // blend the trajectory
-  double blend_sample_num = second_interse_index + blend_align_index - first_interse_index + 1;
+  double blend_duration = d2 + align_time - t_start;
   pilz_industrial_motion_planner::CartesianTrajectoryPoint waypoint;
   blend_sample_pose2 = req.second_trajectory->getFirstWayPoint().getFrameTransform(req.link_name);
 
   // Pose on blending trajectory
   Eigen::Isometry3d blend_sample_pose;
-  for (std::size_t i = 0; i < blend_sample_num; ++i)
+
+  // Define an arbitrary small sample time to sample the blending trajectory
+  double sampling_time = 0.01;
+
+  int num_samples = std::floor(blend_duration / sampling_time);
+  sampling_time = blend_duration / num_samples;
+
+  double blend_time = 0.0;
+  Eigen::Isometry3d last_blend_sample_pose = blend_sample_pose1;
+  while (blend_time <= blend_duration)
   {
     // if the first trajectory does not reach the last sample, update
-    if ((first_interse_index + i) < req.first_trajectory->getWayPointCount())
+    if ((t_start + blend_time) < req.first_trajectory->getDuration())
     {
-      blend_sample_pose1 = req.first_trajectory->getWayPoint(first_interse_index + i).getFrameTransform(req.link_name);
+      blend_sample_pose1 = interpolatePose(req.first_trajectory, req.link_name, t_start + blend_time);
     }
 
     // if after the alignment, the second trajectory starts, update
-    if ((first_interse_index + i) > blend_align_index)
+    if ((t_start + blend_time) >= align_time)
     {
-      blend_sample_pose2 = req.second_trajectory->getWayPoint(first_interse_index + i - blend_align_index)
-                               .getFrameTransform(req.link_name);
+      blend_sample_pose2 = interpolatePose(req.second_trajectory, req.link_name, (t_start + blend_time) - align_time);
     }
 
-    double s = (i + 1) / blend_sample_num;
+    double s = (blend_time + sampling_time) / blend_duration;
     double alpha = 6 * std::pow(s, 5) - 15 * std::pow(s, 4) + 10 * std::pow(s, 3);
 
     // blend the translation
@@ -258,9 +336,22 @@ void pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blendTra
     Eigen::Quaterniond end_quat(blend_sample_pose2.rotation());
     blend_sample_pose.linear() = start_quat.slerp(alpha, end_quat).toRotationMatrix();
 
+    blend_time += sampling_time;
+    // Ensures samples are far enough apart to avoid numerical issues in numerical inverse kinematics
+    if (((blend_sample_pose.translation() - last_blend_sample_pose.translation()).norm() < EPSILON) &&
+        (blend_sample_pose.rotation().isApprox(last_blend_sample_pose.rotation(), 1e-3)))
+    {
+      continue;
+    }
+
+    // std::cout << "blend_time: " << blend_time << std::endl;
+
+    // Store the last insert pose
+    last_blend_sample_pose = blend_sample_pose;
+
     // push to the trajectory
     waypoint.pose = tf2::toMsg(blend_sample_pose);
-    waypoint.time_from_start = rclcpp::Duration::from_seconds((i + 1.0) * sampling_time);
+    waypoint.time_from_start = rclcpp::Duration::from_seconds(blend_time);
     trajectory.points.push_back(waypoint);
   }
 }
