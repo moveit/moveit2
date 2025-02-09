@@ -2,6 +2,11 @@
 Changelog for package moveit_hybrid_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.8 (2025-02-09)
+------------------
+* Fix clang-tidy warnings in hybrid planning package (`#3305 <https://github.com/ros-planning/moveit2/issues/3305>`_)
+* Contributors: Sebastian Castro
+
 2.5.7 (2024-12-29)
 ------------------
 

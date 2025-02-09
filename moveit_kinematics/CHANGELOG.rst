@@ -2,6 +2,11 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.8 (2025-02-09)
+------------------
+* Update deprecated tf2 imports from .h to .hpp (backport `#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_) (`#3199 <https://github.com/ros-planning/moveit2/issues/3199>`_)
+* Contributors: Sebastian Castro, mergify[bot]
+
 2.5.7 (2024-12-29)
 ------------------
 

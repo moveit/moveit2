@@ -2,6 +2,11 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.8 (2025-02-09)
+------------------
+* Switch to get for Dict lookup to prevent KeyError (`#3043 <https://github.com/ros-planning/moveit2/issues/3043>`_) (`#3193 <https://github.com/ros-planning/moveit2/issues/3193>`_)
+* Contributors: Brendan Burns, mergify[bot]
+
 2.5.7 (2024-12-29)
 ------------------
 * Added joint limits to rviz launch file. (`#3091 <https://github.com/ros-planning/moveit2/issues/3091>`_) (`#3136 <https://github.com/ros-planning/moveit2/issues/3136>`_)
