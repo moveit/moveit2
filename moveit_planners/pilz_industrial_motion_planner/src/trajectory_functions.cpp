@@ -220,6 +220,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
   std::vector<double> time_samples;
   int num_samples = std::floor(trajectory.Duration() / sampling_time);
   sampling_time = trajectory.Duration() / num_samples;
+  time_samples.reserve(num_samples);
   for (int i = 0; i < num_samples; ++i)
   {
     time_samples.push_back(i * sampling_time);

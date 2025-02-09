@@ -134,33 +134,6 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
                                           req.second_trajectory->getWayPointDurationFromPrevious(i));
   }
 
-  // adjust the time from start of the first second trajectory point to ensure continuity of velocities (this implicitly
-  // ensures continuity of accelerations)
-  auto second_start = res.second_trajectory->getFirstWayPointPtr();
-  auto blend_end = res.blend_trajectory->getLastWayPointPtr();
-
-  std::vector<double> blend_end_positions, second_start_positions;
-  blend_end->copyJointGroupPositions(req.first_trajectory->getGroup()->getName(), blend_end_positions);
-  second_start->copyJointGroupPositions(req.first_trajectory->getGroup()->getName(), second_start_positions);
-  std::vector<double> second_start_velocities;
-  second_start->copyJointGroupVelocities(req.first_trajectory->getGroup()->getName(), second_start_velocities);
-  double time_from_start = 0.0;
-  std::size_t non_zero_velocity_count = 0;
-  for (std::size_t i = 0; i < second_start_velocities.size(); ++i)
-  {
-    if (second_start_velocities[i] != 0)
-    {
-      time_from_start += (second_start_positions[i] - blend_end_positions[i]) / second_start_velocities[i];
-      ++non_zero_velocity_count;
-    }
-  }
-  if (non_zero_velocity_count > 0)
-  {
-    RCLCPP_INFO_STREAM(getLogger(),
-                       "Adjusting time from start of second trajectory to ensure velocity continuity. delta_time: "
-                           << time_from_start / non_zero_velocity_count);
-    res.second_trajectory->setWayPointDurationFromPrevious(0, time_from_start / non_zero_velocity_count);
-  }
   res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   return true;
 }
