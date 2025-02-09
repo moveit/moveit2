@@ -2,6 +2,18 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* load robot_description from other namespace (backport `#3269 <https://github.com/ros-planning/moveit2/issues/3269>`_) (`#3324 <https://github.com/ros-planning/moveit2/issues/3324>`_)
+* Ports moveit `#3676 <https://github.com/ros-planning/moveit2/issues/3676>`_ and `#3682 <https://github.com/ros-planning/moveit2/issues/3682>`_ (backport `#3283 <https://github.com/ros-planning/moveit2/issues/3283>`_) (`#3317 <https://github.com/ros-planning/moveit2/issues/3317>`_)
+* [moveit_ros] fix race condition when stopping trajectory execution (backport `#3198 <https://github.com/ros-planning/moveit2/issues/3198>`_) (`#3239 <https://github.com/ros-planning/moveit2/issues/3239>`_)
+* move TrajectoryExecutionManager::clear() to private (backport `#3226 <https://github.com/ros-planning/moveit2/issues/3226>`_) (`#3237 <https://github.com/ros-planning/moveit2/issues/3237>`_)
+* Don't destroy objects on attach (backport `#3205 <https://github.com/ros-planning/moveit2/issues/3205>`_) (`#3213 <https://github.com/ros-planning/moveit2/issues/3213>`_)
+* Simplify scene update that does not include new robot_state (`#3206 <https://github.com/ros-planning/moveit2/issues/3206>`_) (`#3207 <https://github.com/ros-planning/moveit2/issues/3207>`_)
+* Fix planning_scene_monitor sync when passed empty robot state (`#3187 <https://github.com/ros-planning/moveit2/issues/3187>`_) (`#3203 <https://github.com/ros-planning/moveit2/issues/3203>`_)
+* Update deprecated tf2 imports from .h to .hpp (backport `#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_) (`#3199 <https://github.com/ros-planning/moveit2/issues/3199>`_)
+* Contributors: Sebastian Castro, Michael Görner, Robert Haschke, Dongya Jiang, Mark Johnson, Marq Rasmussen, RLi43, mergify[bot]
+
 2.5.7 (2024-12-29)
 ------------------
 * Add sleep in setup of flaky PSM test fixture (`#3126 <https://github.com/ros-planning/moveit2/issues/3126>`_)

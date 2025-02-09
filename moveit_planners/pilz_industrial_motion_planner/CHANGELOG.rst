@@ -2,6 +2,13 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use ! in place of not keyword for Pilz and CHOMP planners (`#3217 <https://github.com/ros-planning/moveit2/issues/3217>`_) (`#3221 <https://github.com/ros-planning/moveit2/issues/3221>`_)
+* pilz_industrial_motion_planner: Use tf2::fromMsg instead of tf2::convert (`#3219 <https://github.com/ros-planning/moveit2/issues/3219>`_) (`#3223 <https://github.com/ros-planning/moveit2/issues/3223>`_)
+* Update deprecated tf2 imports from .h to .hpp (backport `#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_) (`#3199 <https://github.com/ros-planning/moveit2/issues/3199>`_)
+* Contributors: Sebastian Castro, Silvio Traversaro, mergify[bot]
+
 2.5.7 (2024-12-29)
 ------------------
 * Fix: Resolve race condition in MoveGroupSequenceAction (backport `#3125 <https://github.com/ros-planning/moveit2/issues/3125>`_) (`#3127 <https://github.com/ros-planning/moveit2/issues/3127>`_)

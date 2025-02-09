@@ -2,6 +2,18 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Reverts `#2985 <https://github.com/ros-planning/moveit2/issues/2985>`_, Ports moveit `#3388 <https://github.com/ros-planning/moveit2/issues/3388>`_ `#3470 <https://github.com/ros-planning/moveit2/issues/3470>`_ `#3539 <https://github.com/ros-planning/moveit2/issues/3539>`_ (backport `#3284 <https://github.com/ros-planning/moveit2/issues/3284>`_) (`#3319 <https://github.com/ros-planning/moveit2/issues/3319>`_)
+* Add missing target dependencies to eigen_stl_containers (backport `#3295 <https://github.com/ros-planning/moveit2/issues/3295>`_) (`#3296 <https://github.com/ros-planning/moveit2/issues/3296>`_)
+* Support including the names of other attached objects in `touch_link` (backport `#3276 <https://github.com/ros-planning/moveit2/issues/3276>`_) (`#3287 <https://github.com/ros-planning/moveit2/issues/3287>`_)
+* Fix: misleading error logs in RobotState::setFromIKSubgroups() (backport `#3263 <https://github.com/ros-planning/moveit2/issues/3263>`_) (`#3267 <https://github.com/ros-planning/moveit2/issues/3267>`_)
+* Fixed include path for moveit_butterworth_parameters.hpp (`#3264 <https://github.com/ros-planning/moveit2/issues/3264>`_)
+* Don't destroy objects on attach (backport `#3205 <https://github.com/ros-planning/moveit2/issues/3205>`_) (`#3213 <https://github.com/ros-planning/moveit2/issues/3213>`_)
+* Update deprecated tf2 imports from .h to .hpp (backport `#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_) (`#3199 <https://github.com/ros-planning/moveit2/issues/3199>`_)
+* Remove ACM entries when removing collision objects (`#3183 <https://github.com/ros-planning/moveit2/issues/3183>`_) (`#3184 <https://github.com/ros-planning/moveit2/issues/3184>`_)
+* Contributors: Sebastian Castro, Michael Görner, Robert Haschke, Zhong Jin, Mark Johnson, Aleksey Nogin, Jacob Odle, Jafar Uruç, mergify[bot]
+
 2.5.7 (2024-12-29)
 ------------------
 * Bug fix: RobotTrajectory append() (`#1813 <https://github.com/ros-planning/moveit2/issues/1813>`_) (`#1821 <https://github.com/ros-planning/moveit2/issues/1821>`_)
