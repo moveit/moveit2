@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.8 (2025-02-09)
+------------------
 * Fix key duplication in moveit_setup_assistant for FollowJointTrajectory (`#2959 <https://github.com/ros-planning/moveit2/issues/2959>`_) (`#3316 <https://github.com/ros-planning/moveit2/issues/3316>`_)
 * Contributors: Chris Schindlbeck, mergify[bot]
 

@@ -2,8 +2,8 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.8 (2025-02-09)
+------------------
 * Reverts `#2985 <https://github.com/ros-planning/moveit2/issues/2985>`_, Ports moveit `#3388 <https://github.com/ros-planning/moveit2/issues/3388>`_ `#3470 <https://github.com/ros-planning/moveit2/issues/3470>`_ `#3539 <https://github.com/ros-planning/moveit2/issues/3539>`_ (backport `#3284 <https://github.com/ros-planning/moveit2/issues/3284>`_) (`#3319 <https://github.com/ros-planning/moveit2/issues/3319>`_)
 * Add missing target dependencies to eigen_stl_containers (backport `#3295 <https://github.com/ros-planning/moveit2/issues/3295>`_) (`#3296 <https://github.com/ros-planning/moveit2/issues/3296>`_)
 * Support including the names of other attached objects in `touch_link` (backport `#3276 <https://github.com/ros-planning/moveit2/issues/3276>`_) (`#3287 <https://github.com/ros-planning/moveit2/issues/3287>`_)

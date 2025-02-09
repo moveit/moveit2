@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.8 (2025-02-09)
+------------------
 * load robot_description from other namespace (backport `#3269 <https://github.com/ros-planning/moveit2/issues/3269>`_) (`#3324 <https://github.com/ros-planning/moveit2/issues/3324>`_)
 * Ports moveit `#3676 <https://github.com/ros-planning/moveit2/issues/3676>`_ and `#3682 <https://github.com/ros-planning/moveit2/issues/3682>`_ (backport `#3283 <https://github.com/ros-planning/moveit2/issues/3283>`_) (`#3317 <https://github.com/ros-planning/moveit2/issues/3317>`_)
 * [moveit_ros] fix race condition when stopping trajectory execution (backport `#3198 <https://github.com/ros-planning/moveit2/issues/3198>`_) (`#3239 <https://github.com/ros-planning/moveit2/issues/3239>`_)

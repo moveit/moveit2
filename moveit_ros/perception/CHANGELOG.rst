@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.8 (2025-02-09)
+------------------
 * fix: pointcloud_octomap_updater not cleaning objects at max_range (backport `#3294 <https://github.com/ros-planning/moveit2/issues/3294>`_) (`#3303 <https://github.com/ros-planning/moveit2/issues/3303>`_)
 * fix: OctoMap and Filtered_Cloud Not Updating During Movement Execution (backport `#3209 <https://github.com/ros-planning/moveit2/issues/3209>`_) (`#3211 <https://github.com/ros-planning/moveit2/issues/3211>`_)
 * Use sensor data QOS profile for sensor_msgs::Image and sensor_msgs::PointCloud (backport `#664 <https://github.com/ros-planning/moveit2/issues/664>`_) (`#3220 <https://github.com/ros-planning/moveit2/issues/3220>`_)

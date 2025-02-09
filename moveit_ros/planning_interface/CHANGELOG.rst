@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.8 (2025-02-09)
+------------------
 * Reverts `#2985 <https://github.com/ros-planning/moveit2/issues/2985>`_, Ports moveit `#3388 <https://github.com/ros-planning/moveit2/issues/3388>`_ `#3470 <https://github.com/ros-planning/moveit2/issues/3470>`_ `#3539 <https://github.com/ros-planning/moveit2/issues/3539>`_ (backport `#3284 <https://github.com/ros-planning/moveit2/issues/3284>`_) (`#3319 <https://github.com/ros-planning/moveit2/issues/3319>`_)
 * Update deprecated tf2 imports from .h to .hpp (backport `#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_) (`#3199 <https://github.com/ros-planning/moveit2/issues/3199>`_)
 * Contributors: Sebastian Castro, Michael Görner, Robert Haschke, Mark Johnson, mergify[bot]
