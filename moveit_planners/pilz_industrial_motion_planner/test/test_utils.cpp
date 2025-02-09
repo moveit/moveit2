@@ -560,7 +560,7 @@ bool testutils::toTCPPose(const moveit::core::RobotModelConstPtr& robot_model, c
 
 bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motion_planner::TrajectoryBlendRequest& req,
                                                      const pilz_industrial_motion_planner::TrajectoryBlendResponse& res,
-                                                     const double time_tolerance)
+                                                     const double /* time_tolerance */)
 {
   for (std::size_t i = 0; i < res.first_trajectory->getWayPointCount(); ++i)
   {
@@ -679,6 +679,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
 
   // check the continuity between first trajectory and blend trajectory
   trajectory_msgs::msg::JointTrajectoryPoint first_end, blend_start;
+  auto first_pend = first_traj.joint_trajectory.points[first_traj.joint_trajectory.points.size() - 2];
   first_end = first_traj.joint_trajectory.points.back();
   blend_start = blend_traj.joint_trajectory.points.front();
 
@@ -709,13 +710,16 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
       return false;
     }
 
-    double blend_start_acc =
-        (blend_start_velo - first_end.velocities.at(i)) / rclcpp::Duration(blend_start.time_from_start).seconds();
-    if (fabs(blend_start_acc - blend_start.accelerations.at(i)) > joint_velocity_tolerance)
+    double blend_start_acc = 2 * (blend_start_velo - first_end.velocities.at(i)) /
+                             (rclcpp::Duration(blend_start.time_from_start).seconds() +
+                              rclcpp::Duration(first_end.time_from_start).seconds() -
+                              rclcpp::Duration(first_pend.time_from_start).seconds());
+    if (fabs(blend_start_acc - blend_start.accelerations.at(i)) > joint_accleration_tolerance)
     {
       std::cout << "Acceleration computed from positions/velocities are "
                    "different from the value in trajectory."
                 << '\n'
+                << "position: " << blend_start.positions.at(i) << "; " << first_end.positions.at(i)
                 << "computed: " << blend_start_acc << "; "
                 << "in trajectory: " << blend_start.accelerations.at(i) << '\n';
       return false;
@@ -724,6 +728,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
 
   // check the continuity between blend trajectory and second trajectory
   trajectory_msgs::msg::JointTrajectoryPoint blend_end, second_start;
+  auto blend_pend = blend_traj.joint_trajectory.points[blend_traj.joint_trajectory.points.size() - 2];
   blend_end = blend_traj.joint_trajectory.points.back();
   second_start = second_traj.joint_trajectory.points.front();
 
@@ -746,7 +751,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
   {
     double second_start_velo = (second_start.positions.at(i) - blend_end.positions.at(i)) /
                                rclcpp::Duration(second_start.time_from_start).seconds();
-    if (fabs(second_start_velo - second_start.velocities.at(i)) > joint_accleration_tolerance)
+    if (fabs(second_start_velo - second_start.velocities.at(i)) > joint_velocity_tolerance)
     {
       std::cout << "Velocity computed from positions are different from the "
                    "value in trajectory."
@@ -756,8 +761,10 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
       return false;
     }
 
-    double second_start_acc =
-        (second_start_velo - blend_end.velocities.at(i)) / rclcpp::Duration(second_start.time_from_start).seconds();
+    double second_start_acc = 2 * (second_start_velo - blend_end.velocities.at(i)) /
+                              (rclcpp::Duration(second_start.time_from_start).seconds() +
+                               rclcpp::Duration(blend_end.time_from_start).seconds() -
+                               rclcpp::Duration(blend_pend.time_from_start).seconds());
     if (fabs(second_start_acc - second_start.accelerations.at(i)) > joint_accleration_tolerance)
     {
       std::cout << "Acceleration computed from positions/velocities are "
@@ -843,9 +850,13 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
 
   // check the connection points between first trajectory and blend trajectory
   Eigen::Vector3d v_1, w_1, v_2, w_2, v_3, w_3;
-  computeCartVelocity(pose_first_end_1, pose_first_end, duration, v_1, w_1);
-  computeCartVelocity(pose_first_end, pose_blend_start, duration, v_2, w_2);
-  computeCartVelocity(pose_blend_start, pose_blend_start_1, duration, v_3, w_3);
+  double duration_first_end =
+      res.first_trajectory->getWayPointDurationFromPrevious(res.first_trajectory->getWayPointCount() - 1);
+  double duration_blend_start = res.blend_trajectory->getWayPointDurationFromPrevious(0);
+  double duration_blend_start_1 = res.blend_trajectory->getWayPointDurationFromPrevious(1);
+  computeCartVelocity(pose_first_end_1, pose_first_end, duration_first_end, v_1, w_1);
+  computeCartVelocity(pose_first_end, pose_blend_start, duration_blend_start, v_2, w_2);
+  computeCartVelocity(pose_blend_start, pose_blend_start_1, duration_blend_start_1, v_3, w_3);
 
   // translational velocity
   if (v_2.norm() > max_trans_velo)
@@ -854,6 +865,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << v_2.norm() << "; "
               << "Limits: " << max_trans_velo << '\n';
+    return false;
   }
   // rotational velocity
   if (w_2.norm() > max_rot_velo)
@@ -862,32 +874,39 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << w_2.norm() << "; "
               << "Limits: " << max_rot_velo << '\n';
+    return false;
   }
   // translational acceleration
-  Eigen::Vector3d a_1 = (v_2 - v_1) / duration;
-  Eigen::Vector3d a_2 = (v_3 - v_2) / duration;
+  Eigen::Vector3d a_1 = (v_2 - v_1) / duration_blend_start;
+  Eigen::Vector3d a_2 = (v_3 - v_2) / duration_blend_start_1;
   if (a_1.norm() > max_trans_acc || a_2.norm() > max_trans_acc)
   {
     std::cout << "Translational acceleration between first trajectory and "
                  "blend trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_2.norm() << "; "
               << "Limits: " << max_trans_acc << '\n';
+    return false;
   }
 
   // rotational acceleration
-  a_1 = (w_2 - w_1) / duration;
-  a_2 = (w_3 - w_2) / duration;
+  a_1 = (w_2 - w_1) / duration_blend_start;
+  a_2 = (w_3 - w_2) / duration_blend_start_1;
   if (a_1.norm() > max_rot_acc || a_2.norm() > max_rot_acc)
   {
     std::cout << "Rotational acceleration between first trajectory and blend "
                  "trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_2.norm() << "; "
               << "Limits: " << max_rot_acc << '\n';
+    return false;
   }
 
-  computeCartVelocity(pose_blend_end_1, pose_blend_end, duration, v_1, w_1);
-  computeCartVelocity(pose_blend_end, pose_second_start, duration, v_2, w_2);
-  computeCartVelocity(pose_second_start, pose_second_start_1, duration, v_3, w_3);
+  double duration_blend_end =
+      res.blend_trajectory->getWayPointDurationFromPrevious(res.blend_trajectory->getWayPointCount() - 1);
+  double duration_second_start = res.second_trajectory->getWayPointDurationFromPrevious(0);
+  double duration_second_start_1 = res.second_trajectory->getWayPointDurationFromPrevious(1);
+  computeCartVelocity(pose_blend_end_1, pose_blend_end, duration_blend_end, v_1, w_1);
+  computeCartVelocity(pose_blend_end, pose_second_start, duration_second_start, v_2, w_2);
+  computeCartVelocity(pose_second_start, pose_second_start_1, duration_second_start_1, v_3, w_3);
 
   if (v_2.norm() > max_trans_velo)
   {
@@ -895,6 +914,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << v_2.norm() << "; "
               << "Limits: " << max_trans_velo << '\n';
+    return false;
   }
   if (w_2.norm() > max_rot_velo)
   {
@@ -902,25 +922,28 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << w_2.norm() << "; "
               << "Limits: " << max_rot_velo << '\n';
+    return false;
   }
-  a_1 = (v_2 - v_1) / duration;
-  a_2 = (v_3 - v_2) / duration;
+  a_1 = (v_2 - v_1) / duration_second_start;
+  a_2 = (v_3 - v_2) / duration_second_start_1;
   if (a_1.norm() > max_trans_acc || a_2.norm() > max_trans_acc)
   {
     std::cout << "Translational acceleration between blend trajectory and "
                  "second trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_2.norm() << "; "
               << "Limits: " << max_trans_acc << '\n';
+    return false;
   }
   // check rotational acceleration
-  a_1 = (w_2 - w_1) / duration;
-  a_2 = (w_3 - w_2) / duration;
+  a_1 = (w_2 - w_1) / duration_second_start;
+  a_2 = (w_3 - w_2) / duration_second_start_1;
   if (a_1.norm() > max_rot_acc || a_2.norm() > max_rot_acc)
   {
     std::cout << "Rotational acceleration between blend trajectory and second "
                  "trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_2.norm() << "; "
               << "Limits: " << max_rot_acc << '\n';
+    return false;
   }
 
   return true;

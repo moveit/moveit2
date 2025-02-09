@@ -362,6 +362,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
     if (i == 0)
     {
       duration_current = trajectory.points.front().time_from_start.seconds();
+      // This still assumes all the points in first_trajectory have the same duration
       duration_last = duration_current;
     }
     else

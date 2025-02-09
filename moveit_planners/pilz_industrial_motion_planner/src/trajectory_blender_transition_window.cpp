@@ -136,7 +136,6 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
 
   // adjust the time from start of the first second trajectory point to ensure continuity of velocities (this implicitly
   // ensures continuity of accelerations)
-  std::vector<double> time_offsets;
   auto second_start = res.second_trajectory->getFirstWayPointPtr();
   auto blend_end = res.blend_trajectory->getLastWayPointPtr();
 
@@ -146,17 +145,22 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
   std::vector<double> second_start_velocities;
   second_start->copyJointGroupVelocities(req.first_trajectory->getGroup()->getName(), second_start_velocities);
   double time_from_start = 0.0;
+  std::size_t non_zero_velocity_count = 0;
   for (std::size_t i = 0; i < second_start_velocities.size(); ++i)
   {
-    if (second_start_velocities[i] == 0)
+    if (second_start_velocities[i] != 0)
     {
-      continue;
+      time_from_start += (second_start_positions[i] - blend_end_positions[i]) / second_start_velocities[i];
+      ++non_zero_velocity_count;
     }
-    time_from_start = (second_start_positions[i] - blend_end_positions[i]) / second_start_velocities[i];
-    time_offsets.push_back(time_from_start);
   }
-  time_from_start = *std::max_element(time_offsets.begin(), time_offsets.end());
-  res.second_trajectory->setWayPointDurationFromPrevious(0, time_from_start);
+  if (non_zero_velocity_count > 0)
+  {
+    RCLCPP_INFO_STREAM(getLogger(),
+                       "Adjusting time from start of second trajectory to ensure velocity continuity. delta_time: "
+                           << time_from_start / non_zero_velocity_count);
+    res.second_trajectory->setWayPointDurationFromPrevious(0, time_from_start / non_zero_velocity_count);
+  }
   res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
   return true;
 }
@@ -303,17 +307,23 @@ void pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blendTra
   Eigen::Isometry3d blend_sample_pose;
 
   // Define an arbitrary small sample time to sample the blending trajectory
-  double sampling_time = 0.01;
+  double sampling_time = 0.001;
 
   int num_samples = std::floor(blend_duration / sampling_time);
   sampling_time = blend_duration / num_samples;
 
   double blend_time = 0.0;
   Eigen::Isometry3d last_blend_sample_pose = blend_sample_pose1;
-  while (blend_time <= blend_duration)
+
+  // Add the first point
+  double time_offset = req.first_trajectory->getWayPointDurationFromPrevious(first_interse_index);
+  waypoint.pose = tf2::toMsg(blend_sample_pose1);
+  waypoint.time_from_start = rclcpp::Duration::from_seconds(time_offset);
+  trajectory.points.push_back(waypoint);
+  while (blend_time <= blend_duration + EPSILON)
   {
     // if the first trajectory does not reach the last sample, update
-    if ((t_start + blend_time) < req.first_trajectory->getDuration())
+    if ((t_start + blend_time) <= req.first_trajectory->getDuration())
     {
       blend_sample_pose1 = interpolatePose(req.first_trajectory, req.link_name, t_start + blend_time);
     }
@@ -338,20 +348,19 @@ void pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blendTra
 
     blend_time += sampling_time;
     // Ensures samples are far enough apart to avoid numerical issues in numerical inverse kinematics
-    if (((blend_sample_pose.translation() - last_blend_sample_pose.translation()).norm() < EPSILON) &&
-        (blend_sample_pose.rotation().isApprox(last_blend_sample_pose.rotation(), 1e-3)))
+    if (((blend_sample_pose.translation() - last_blend_sample_pose.translation()).norm() < 1e-3) &&
+        (blend_sample_pose.rotation().isApprox(last_blend_sample_pose.rotation(), 1e-3)) &&
+        (blend_time < blend_duration))  // Force the addition of the last point
     {
       continue;
     }
-
-    // std::cout << "blend_time: " << blend_time << std::endl;
 
     // Store the last insert pose
     last_blend_sample_pose = blend_sample_pose;
 
     // push to the trajectory
     waypoint.pose = tf2::toMsg(blend_sample_pose);
-    waypoint.time_from_start = rclcpp::Duration::from_seconds(blend_time);
+    waypoint.time_from_start = rclcpp::Duration::from_seconds(time_offset + blend_time);
     trajectory.points.push_back(waypoint);
   }
 }
