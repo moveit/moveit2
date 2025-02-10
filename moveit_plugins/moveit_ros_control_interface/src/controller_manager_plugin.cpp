@@ -119,8 +119,11 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
   rclcpp::Client<controller_manager_msgs::srv::ListControllers>::SharedPtr list_controllers_service_;
   rclcpp::Client<controller_manager_msgs::srv::SwitchController>::SharedPtr switch_controller_service_;
 
-  // Chained controllers have dependencies (other controllers which must be running)
+  // Chained controllers have dependent controllers (other controllers which must be started if the chained controller is started)
   std::unordered_map<std::string /* controller name */, std::vector<std::string> /* dependencies */> dependency_map_;
+  // Controllers may have preceding chained controllers (other chained controllers which must be shutdown if the controller is shutdown)
+  std::unordered_map<std::string /* controller name */, std::vector<std::string> /* reverse dependencies */>
+      dependency_map_reverse_;
 
   /**
    * \brief Check if given controller is active
@@ -370,35 +373,91 @@ public:
     return c;
   }
 
+  static void simplifyControllerActivationDeactivation(std::vector<std::string>& activate_controllers,
+                                                       std::vector<std::string>& deactivate_controllers)
+  {
+    // Convert vectors to sets for uniqueness
+    std::unordered_set set1(activate_controllers.begin(), activate_controllers.end());
+    std::unordered_set set2(deactivate_controllers.begin(), deactivate_controllers.end());
+
+    // Find common elements
+    std::unordered_set<std::string> common;
+    for (const auto& str : set1)
+    {
+      if (set2.count(str))
+      {
+        common.insert(str);
+      }
+    }
+
+    // Remove common elements from both sets
+    for (const auto& str : common)
+    {
+      set1.erase(str);
+      set2.erase(str);
+    }
+
+    // Convert sets back to vectors
+    activate_controllers.assign(set1.begin(), set1.end());
+    deactivate_controllers.assign(set2.begin(), set2.end());
+  }
+
   /**
    * \brief Filter lists for managed controller and computes switching set.
    * Stopped list might be extended by unsupported controllers that claim needed resources
-   * @param activate vector of controllers to be activated
-   * @param deactivate vector of controllers to be deactivated
+   * @param activate_base vector of controllers to be activated
+   * @param deactivate_base vector of controllers to be deactivated
    * @return true if switching succeeded
    */
   bool switchControllers(const std::vector<std::string>& activate_base,
                          const std::vector<std::string>& deactivate_base) override
   {
-    // add controller dependencies
-    std::vector<std::string> activate = activate_base;
-    std::vector<std::string> deactivate = deactivate_base;
-    for (auto controllers : { &activate, &deactivate })
-    {
-      auto queue = *controllers;
+    // add_all_dependencies traverses the provided dependency map and appends the results to the controllers vector.
+    auto add_all_dependencies = [](const std::unordered_map<std::string, std::vector<std::string>>& dependencies,
+                                   const std::function<bool(const std::string&)>& should_include,
+                                   std::vector<std::string>& controllers) {
+      auto queue = controllers;
       while (!queue.empty())
       {
         auto controller = queue.back();
-        controller.erase(0, 1);
+        if (controller.size() > 1 && controller[0] == '/')
+        {
+          // Remove leading / from controller name
+          controller.erase(0, 1);
+        }
         queue.pop_back();
-        for (const auto& dependency : dependency_map_[controller])
+        if (dependencies.find(controller) == dependencies.end())
+        {
+          continue;
+        }
+        for (const auto& dependency : dependencies.at(controller))
         {
           queue.push_back(dependency);
-          controllers->push_back("/" + dependency);
+          if (should_include(dependency))
+          {
+            controllers.push_back("/" + dependency);
+          }
         }
       }
-    }
-    // activation dependencies must be started first, but they are processed last, so the order needs to be flipped
+    };
+
+    std::vector<std::string> activate = activate_base;
+    add_all_dependencies(
+        dependency_map_,
+        [this](const std::string& dependency) {
+          return active_controllers_.find(dependency) == active_controllers_.end();
+        },
+        activate);
+    std::vector<std::string> deactivate = deactivate_base;
+    add_all_dependencies(
+        dependency_map_reverse_,
+        [this](const std::string& dependency) {
+          return active_controllers_.find(dependency) != active_controllers_.end();
+        },
+        deactivate);
+
+    // The dependencies for chained controller activation must be started first, but they are processed last, so the
+    // order needs to be flipped
     std::reverse(activate.begin(), activate.end());
 
     std::scoped_lock<std::mutex> lock(controllers_mutex_);
@@ -471,6 +530,11 @@ public:
       }
     }
 
+    // ROS2 Control expects simplified controller activation/deactivation.
+    // E.g. a controller should not be stopped and started at the same time, rather it should be removed from both the
+    // activation and deactivation request.
+    simplifyControllerActivationDeactivation(request->activate_controllers, request->deactivate_controllers);
+
     // Setting level to STRICT means that the controller switch will only be committed if all controllers are
     // successfully activated or deactivated.
     request->strictness = controller_manager_msgs::srv::SwitchController::Request::STRICT;
@@ -502,6 +566,9 @@ public:
     {
       controller_name_map[result->controller[i].name] = i;
     }
+
+    dependency_map_.clear();
+    dependency_map_reverse_.clear();
     for (auto& controller : result->controller)
     {
       if (controller.chain_connections.size() > 1)
@@ -511,14 +578,11 @@ public:
                             "one controller is not supported.");
         return false;
       }
-      dependency_map_[controller.name].clear();
       for (const auto& chained_controller : controller.chain_connections)
       {
         auto ind = controller_name_map[chained_controller.name];
         dependency_map_[controller.name].push_back(chained_controller.name);
-        std::copy(result->controller[ind].required_command_interfaces.begin(),
-                  result->controller[ind].required_command_interfaces.end(),
-                  std::back_inserter(controller.required_command_interfaces));
+        dependency_map_reverse_[chained_controller.name].push_back(controller.name);
         std::copy(result->controller[ind].reference_interfaces.begin(),
                   result->controller[ind].reference_interfaces.end(),
                   std::back_inserter(controller.required_command_interfaces));
