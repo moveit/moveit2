@@ -83,6 +83,44 @@ std::string parseJointNameFromResource(const std::string& claimed_interface)
   return claimed_interface.substr(0, index);
 }
 
+/**
+ * \brief  Modified Activation/deactivation to conform to ROS 2 control expectations.
+ * \detail Activation/deactivation is expected to be disjoint. For example, if controller B is a dependency of A (A
+ * chains to B) but controller B is also a dependency of C (B chains to B), then the switch from A->B to C->B would
+ * cause B to be in both the activation and deactivate list. This causes ROS2 control to through an error and reject the
+ * switch. The simplifyControllerActivationDeactivation function adds the logic needed to avoid this from happening.
+ * @param[in] activate_controllers  controllers to activate
+ * @param[in] deactivate_controllers  controllers to deactivate
+ */
+void simplifyControllerActivationDeactivation(std::vector<std::string>& activate_controllers,
+                                              std::vector<std::string>& deactivate_controllers)
+{
+  // Convert vectors to sets for uniqueness
+  std::unordered_set set1(activate_controllers.begin(), activate_controllers.end());
+  std::unordered_set set2(deactivate_controllers.begin(), deactivate_controllers.end());
+
+  // Find common elements
+  std::unordered_set<std::string> common;
+  for (const auto& str : set1)
+  {
+    if (set2.count(str))
+    {
+      common.insert(str);
+    }
+  }
+
+  // Remove common elements from both sets
+  for (const auto& str : common)
+  {
+    set1.erase(str);
+    set2.erase(str);
+  }
+
+  // Convert sets back to vectors
+  activate_controllers.assign(set1.begin(), set1.end());
+  deactivate_controllers.assign(set2.begin(), set2.end());
+}
+
 MOVEIT_CLASS_FORWARD(Ros2ControlManager);  // Defines Ros2ControlManagerPtr, ConstPtr, WeakPtr... etc
 
 /**
@@ -371,40 +409,6 @@ public:
       c.active_ = isActive(it->second);
     }
     return c;
-  }
-
-  static void simplifyControllerActivationDeactivation(std::vector<std::string>& activate_controllers,
-                                                       std::vector<std::string>& deactivate_controllers)
-  {
-    // Activation/deactivation is expected to be disjoint. For example, if controller B is a dependency of A (A chains
-    // to B) but controller B is also a dependency of C (B chains to B), then the switch from A->B to C->B would cause B
-    // to be in both the activation and deactivate list. This causes ROS2 control to through an error and reject the
-    // switch. The simplifyControllerActivationDeactivation function adds the logic needed to avoid this from happening.
-
-    // Convert vectors to sets for uniqueness
-    std::unordered_set set1(activate_controllers.begin(), activate_controllers.end());
-    std::unordered_set set2(deactivate_controllers.begin(), deactivate_controllers.end());
-
-    // Find common elements
-    std::unordered_set<std::string> common;
-    for (const auto& str : set1)
-    {
-      if (set2.count(str))
-      {
-        common.insert(str);
-      }
-    }
-
-    // Remove common elements from both sets
-    for (const auto& str : common)
-    {
-      set1.erase(str);
-      set2.erase(str);
-    }
-
-    // Convert sets back to vectors
-    activate_controllers.assign(set1.begin(), set1.end());
-    deactivate_controllers.assign(set2.begin(), set2.end());
   }
 
   /**
