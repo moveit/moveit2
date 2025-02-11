@@ -376,6 +376,11 @@ public:
   static void simplifyControllerActivationDeactivation(std::vector<std::string>& activate_controllers,
                                                        std::vector<std::string>& deactivate_controllers)
   {
+    // Activation/deactivation is expected to be disjoint. For example, if controller B is a dependency of A (A chains
+    // to B) but controller B is also a dependency of C (B chains to B), then the switch from A->B to C->B would cause B
+    // to be in both the activation and deactivate list. This causes ROS2 control to through an error and reject the
+    // switch. The simplifyControllerActivationDeactivation function adds the logic needed to avoid this from happening.
+
     // Convert vectors to sets for uniqueness
     std::unordered_set set1(activate_controllers.begin(), activate_controllers.end());
     std::unordered_set set2(deactivate_controllers.begin(), deactivate_controllers.end());
