@@ -195,53 +195,41 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
   return true;
 }
 
-// TODO: improve this method
 Eigen::Isometry3d interpolatePose(const robot_trajectory::RobotTrajectoryPtr& trajectory, const std::string& link_name,
-                                  double time)
+                                  const double& time, size_t& found_index, const size_t& start_index = 0)
 {
-  // Find the closest two waypoints surrounding the requested time
-  std::size_t idx_before = 0, idx_after = 0;
-  for (std::size_t i = 0; i < trajectory->getWayPointCount() - 1; ++i)
+  found_index = 0;
+  for (std::size_t i = start_index; i < trajectory->getWayPointCount() - 1; ++i)
   {
-    double t1 = trajectory->getWayPointDurationFromStart(i);
-    double t2 = trajectory->getWayPointDurationFromStart(i + 1);
-
-    if (t1 <= time && t2 >= time)
+    if (trajectory->getWayPointDurationFromStart(i + 1) >= time)
     {
-      idx_before = i;
-      idx_after = i + 1;
+      found_index = i;
       break;
     }
   }
 
   // If time is outside known waypoints, return the closest available pose
-  if (idx_after == 0)
+  if (found_index == 0)
   {
     return trajectory->getWayPoint(0).getFrameTransform(link_name);
   }
-  if (idx_before == trajectory->getWayPointCount() - 1)
+  if (found_index == trajectory->getWayPointCount() - 1)
   {
-    return trajectory->getWayPoint(idx_before).getFrameTransform(link_name);
+    return trajectory->getWayPoint(found_index).getFrameTransform(link_name);
   }
 
   // Get timestamps and transformations
-  double t1 = trajectory->getWayPointDurationFromStart(idx_before);
-  double t2 = trajectory->getWayPointDurationFromStart(idx_after);
-  Eigen::Isometry3d pose1 = trajectory->getWayPoint(idx_before).getFrameTransform(link_name);
-  Eigen::Isometry3d pose2 = trajectory->getWayPoint(idx_after).getFrameTransform(link_name);
+  double t1 = trajectory->getWayPointDurationFromStart(found_index);
+  double t2 = trajectory->getWayPointDurationFromStart(found_index + 1);
+  Eigen::Isometry3d pose1 = trajectory->getWayPoint(found_index).getFrameTransform(link_name);
+  Eigen::Isometry3d pose2 = trajectory->getWayPoint(found_index + 1).getFrameTransform(link_name);
 
   // Compute interpolation factor
-  double lambda = (time - t1) / (t2 - t1);
+  double interpolation_factor = (time - t1) / (t2 - t1);
 
   // Linear interpolation for position
   Eigen::Isometry3d interpolated_pose;
-  interpolated_pose.translation() = pose1.translation() + lambda * (pose2.translation() - pose1.translation());
-
-  // SLERP interpolation for rotation
-  Eigen::Quaterniond quat1(pose1.rotation());
-  Eigen::Quaterniond quat2(pose2.rotation());
-  interpolated_pose.linear() = quat1.slerp(lambda, quat2).toRotationMatrix();
-
+  pilz_industrial_motion_planner::interpolate(pose1, pose2, interpolation_factor, interpolated_pose);
   return interpolated_pose;
 }
 
@@ -281,6 +269,7 @@ void pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blendTra
 
   // Define an arbitrary small sample time to sample the blending trajectory
   double sampling_time = 0.001;
+  size_t blend_sample_pose1_index, blend_sample_pose2_index = 0;
 
   int num_samples = std::floor(blend_duration / sampling_time);
   sampling_time = blend_duration / num_samples;
@@ -298,26 +287,21 @@ void pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blendTra
     // if the first trajectory does not reach the last sample, update
     if ((t_start + blend_time) <= req.first_trajectory->getDuration())
     {
-      blend_sample_pose1 = interpolatePose(req.first_trajectory, req.link_name, t_start + blend_time);
+      blend_sample_pose1 = interpolatePose(req.first_trajectory, req.link_name, t_start + blend_time,
+                                           blend_sample_pose1_index, blend_sample_pose1_index);
     }
 
     // if after the alignment, the second trajectory starts, update
     if ((t_start + blend_time) >= align_time)
     {
-      blend_sample_pose2 = interpolatePose(req.second_trajectory, req.link_name, (t_start + blend_time) - align_time);
+      blend_sample_pose2 = interpolatePose(req.second_trajectory, req.link_name, (t_start + blend_time) - align_time,
+                                           blend_sample_pose2_index, blend_sample_pose2_index);
     }
 
     double s = (blend_time + sampling_time) / blend_duration;
     double alpha = 6 * std::pow(s, 5) - 15 * std::pow(s, 4) + 10 * std::pow(s, 3);
 
-    // blend the translation
-    blend_sample_pose.translation() = blend_sample_pose1.translation() +
-                                      alpha * (blend_sample_pose2.translation() - blend_sample_pose1.translation());
-
-    // blend the orientation
-    Eigen::Quaterniond start_quat(blend_sample_pose1.rotation());
-    Eigen::Quaterniond end_quat(blend_sample_pose2.rotation());
-    blend_sample_pose.linear() = start_quat.slerp(alpha, end_quat).toRotationMatrix();
+    interpolate(blend_sample_pose1, blend_sample_pose2, alpha, blend_sample_pose);
 
     blend_time += sampling_time;
     // Ensures samples are far enough apart to avoid numerical issues in numerical inverse kinematics

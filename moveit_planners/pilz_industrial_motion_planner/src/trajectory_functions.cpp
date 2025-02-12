@@ -202,6 +202,18 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
   return true;
 }
 
+void pilz_industrial_motion_planner::interpolate(const Eigen::Isometry3d start_pose, const Eigen::Isometry3d end_pose,
+                                                 double interpolation_factor, Eigen::Isometry3d& interpolated_pose)
+{
+  interpolated_pose.translation() =
+      start_pose.translation() + interpolation_factor * (end_pose.translation() - start_pose.translation());
+
+  // SLERP interpolation for rotation
+  Eigen::Quaterniond quat1(start_pose.rotation());
+  Eigen::Quaterniond quat2(end_pose.rotation());
+  interpolated_pose.linear() = quat1.slerp(interpolation_factor, quat2).toRotationMatrix();
+}
+
 bool pilz_industrial_motion_planner::generateJointTrajectory(
     const planning_scene::PlanningSceneConstPtr& scene,
     const pilz_industrial_motion_planner::JointLimitsContainer& joint_limits, const KDL::Trajectory& trajectory,
