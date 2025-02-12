@@ -284,20 +284,20 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
     req.group_name = t.getGroupName();
     req.pad_environment_collisions = false;
     moveit::core::RobotState state = plan.planning_scene->getCurrentState();
-    std::map<std::string, const moveit::core::AttachedBody*> current_attached_objects, sample_attached_objects;
+    std::map<std::string, const moveit::core::AttachedBody*> current_attached_objects, waypoint_attached_objects;
     state.getAttachedBodies(current_attached_objects);
-    sample_attached_objects = trajectory_attached_objects_;
+    waypoint_attached_objects = trajectory_attached_objects_;
     for (std::size_t i = std::max(path_segment.second - 1, 0); i < wpc; ++i)
     {
       collision_detection::CollisionResult res;
       state = t.getWayPoint(i);
       if (trajectory_attached_objects_.empty())
       {
-        state.getAttachedBodies(sample_attached_objects);
+        state.getAttachedBodies(waypoint_attached_objects);
       }
 
       // If sample state has attached objects that are not in the current state, remove them from the sample state
-      for (const auto& [name, object] : sample_attached_objects)
+      for (const auto& [name, object] : waypoint_attached_objects)
       {
         if (current_attached_objects.find(name) == current_attached_objects.end())
         {
@@ -309,7 +309,7 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
       // If current state has attached objects that are not in the sample state, add them to the sample state
       for (const auto& [name, object] : current_attached_objects)
       {
-        if (sample_attached_objects.find(name) == sample_attached_objects.end())
+        if (waypoint_attached_objects.find(name) == waypoint_attached_objects.end())
         {
           RCLCPP_DEBUG(logger_, "Attached object '%s' is not in the robot state. Adding it.", name.c_str());
           state.attachBody(std::make_unique<moveit::core::AttachedBody>(*object));
@@ -463,12 +463,11 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
   // Check that attached objects remain consistent throughout the trajectory and store them.
   // This avoids querying the scene for attached objects at each waypoint whenever possible.
   // If a change in attached objects is detected, they will be queried at each waypoint.
-  trajectory_attached_objects_.clear();
   for (const auto& component : plan.plan_components)
   {
-    if (component.trajectory)
+    const auto& trajectory = component.trajectory;
+    if (trajectory)
     {
-      const auto& trajectory = component.trajectory;
       std::map<std::string, const moveit::core::AttachedBody*> attached_objects;
       trajectory->getWayPoint(0).getAttachedBodies(trajectory_attached_objects_);
       for (std::size_t i = 1; i < trajectory->getWayPointCount(); ++i)
