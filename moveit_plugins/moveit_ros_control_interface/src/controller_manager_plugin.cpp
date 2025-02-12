@@ -88,37 +88,37 @@ std::string parseJointNameFromResource(const std::string& claimed_interface)
  * \detail Activation/deactivation is expected to be disjoint. For example, if controller B is a dependency of A (A
  * chains to B) but controller B is also a dependency of C (B chains to B), then the switch from A->B to C->B would
  * cause B to be in both the activation and deactivate list. This causes ROS2 control to through an error and reject the
- * switch. The simplifyControllerActivationDeactivation function adds the logic needed to avoid this from happening.
+ * switch. The deconflictControllerActivationLists function adds the logic needed to avoid this from happening.
  * @param[in] activate_controllers  controllers to activate
  * @param[in] deactivate_controllers  controllers to deactivate
  */
-void simplifyControllerActivationDeactivation(std::vector<std::string>& activate_controllers,
-                                              std::vector<std::string>& deactivate_controllers)
+void deconflictControllerActivationLists(std::vector<std::string>& activate_controllers,
+                                         std::vector<std::string>& deactivate_controllers)
 {
   // Convert vectors to sets for uniqueness
-  std::unordered_set set1(activate_controllers.begin(), activate_controllers.end());
-  std::unordered_set set2(deactivate_controllers.begin(), deactivate_controllers.end());
+  std::unordered_set activate_set(activate_controllers.begin(), activate_controllers.end());
+  std::unordered_set deactivate_set(deactivate_controllers.begin(), deactivate_controllers.end());
 
   // Find common elements
-  std::unordered_set<std::string> common;
-  for (const auto& str : set1)
+  std::unordered_set<std::string> common_controllers;
+  for (const auto& str : activate_set)
   {
-    if (set2.count(str))
+    if (deactivate_set.count(str))
     {
-      common.insert(str);
+      common_controllers.insert(str);
     }
   }
 
   // Remove common elements from both sets
-  for (const auto& str : common)
+  for (const auto& controller_name : common_controllers)
   {
-    set1.erase(str);
-    set2.erase(str);
+    activate_set.erase(controller_name);
+    deactivate_set.erase(controller_name);
   }
 
   // Convert sets back to vectors
-  activate_controllers.assign(set1.begin(), set1.end());
-  deactivate_controllers.assign(set2.begin(), set2.end());
+  activate_controllers.assign(activate_set.begin(), activate_set.end());
+  deactivate_controllers.assign(deactivate_set.begin(), deactivate_set.end());
 }
 
 MOVEIT_CLASS_FORWARD(Ros2ControlManager);  // Defines Ros2ControlManagerPtr, ConstPtr, WeakPtr... etc
@@ -542,7 +542,7 @@ public:
     // ROS2 Control expects simplified controller activation/deactivation.
     // E.g. a controller should not be stopped and started at the same time, rather it should be removed from both the
     // activation and deactivation request.
-    simplifyControllerActivationDeactivation(request->activate_controllers, request->deactivate_controllers);
+    deconflictControllerActivationLists(request->activate_controllers, request->deactivate_controllers);
 
     // Setting level to STRICT means that the controller switch will only be committed if all controllers are
     // successfully activated or deactivated.
