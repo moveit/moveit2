@@ -429,12 +429,12 @@ public:
       while (!queue.empty())
       {
         auto controller = queue.back();
+        queue.pop_back();
         if (controller.size() > 1 && controller[0] == '/')
         {
           // Remove leading / from controller name
           controller.erase(0, 1);
         }
-        queue.pop_back();
         if (dependencies.find(controller) == dependencies.end())
         {
           continue;
