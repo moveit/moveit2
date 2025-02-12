@@ -48,20 +48,25 @@ public:
   MockControllersManagerService() : Node("list_controllers_service")
   {
     list_controller_service_ = create_service<controller_manager_msgs::srv::ListControllers>(
-        "controller_manager/list_controllers", std::bind(&MockControllersManagerService::handle_list_controllers_service,
-                                                         this, std::placeholders::_1, std::placeholders::_2));
+        "controller_manager/list_controllers",
+        [this](const std::shared_ptr<controller_manager_msgs::srv::ListControllers::Request>& request,
+               const std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& response) {
+          handleListControllersService(request, response);
+        });
     switch_controller_service_ = create_service<controller_manager_msgs::srv::SwitchController>(
         "controller_manager/switch_controller",
-        std::bind(&MockControllersManagerService::handle_switch_controller_service, this, std::placeholders::_1,
-                  std::placeholders::_2));
+        [this](const std::shared_ptr<controller_manager_msgs::srv::SwitchController::Request>& request,
+               const std::shared_ptr<controller_manager_msgs::srv::SwitchController::Response>& response) {
+          handleSwitchControllerService(request, response);
+        });
   }
 
   controller_manager_msgs::srv::SwitchController::Request last_request;
 
 private:
-  void handle_list_controllers_service(
-      const std::shared_ptr<controller_manager_msgs::srv::ListControllers::Request> /*request*/,
-      std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response> response)
+  void handleListControllersService(
+      const std::shared_ptr<controller_manager_msgs::srv::ListControllers::Request>& /*request*/,
+      const std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& response)
   {
     controller_manager_msgs::msg::ChainConnection chain_connection_a;
     chain_connection_a.name = "B";
@@ -84,9 +89,9 @@ private:
     response->controller = { controller_a, controller_b };
   }
 
-  void handle_switch_controller_service(
-      const std::shared_ptr<controller_manager_msgs::srv::SwitchController::Request> request,
-      std::shared_ptr<controller_manager_msgs::srv::SwitchController::Response> response)
+  void handleSwitchControllerService(
+      const std::shared_ptr<controller_manager_msgs::srv::SwitchController::Request>& request,
+      const std::shared_ptr<controller_manager_msgs::srv::SwitchController::Response>& response)
   {
     last_request = *request;
     for (const auto& deactivate : request->deactivate_controllers)
