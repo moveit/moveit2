@@ -1474,3 +1474,61 @@ testutils::checkCartesianRotationalPath(const robot_trajectory::RobotTrajectoryC
 
   return hasTrapezoidVelocity(accelerations, acc_tol);
 }
+
+::testing::AssertionResult
+testutils::checkInterpolationParameters(const robot_trajectory::RobotTrajectoryConstPtr& trajectory,
+                                        const std::string& link_name,
+                                        const interpolation::Params& interpolation_parameters, const double EPSILON)
+{
+  // Iterate over waypoints and check that interpolation parameters are met
+  for (size_t i = 1; i < trajectory->getWayPointCount(); ++i)
+
+  {
+    auto waypoint_pose_0 = trajectory->getWayPoint(i - 1).getFrameTransform(link_name);
+    auto waypoint_pose_1 = trajectory->getWayPoint(i).getFrameTransform(link_name);
+
+    auto translational_distance = (waypoint_pose_1.translation() - waypoint_pose_0.translation()).norm();
+    if (translational_distance > interpolation_parameters.max_translation_interpolation_distance + EPSILON)
+    {
+      return ::testing::AssertionFailure() << "Translational distance between waypoints " << i - 1 << " and " << i
+                                           << " exceeds the maximum allowed distance of "
+                                           << interpolation_parameters.max_translation_interpolation_distance
+                                           << ". Actual distance: " << translational_distance;
+    }
+
+    auto rotational_distance =
+        Eigen::AngleAxisd(waypoint_pose_0.rotation() * waypoint_pose_1.rotation().inverse()).angle();
+    if (rotational_distance > interpolation_parameters.max_rotation_interpolation_distance + EPSILON)
+    {
+      return ::testing::AssertionFailure() << "Rotational distance between waypoints " << i - 1 << " and " << i
+                                           << " exceeds the maximum allowed distance of "
+                                           << interpolation_parameters.max_rotation_interpolation_distance
+                                           << ". Actual distance: " << rotational_distance;
+    }
+
+    if (translational_distance < interpolation_parameters.min_translation_interpolation_distance - EPSILON &&
+        rotational_distance < interpolation_parameters.min_rotation_interpolation_distance - EPSILON && i > 1)
+    {
+      return ::testing::AssertionFailure() << "Translational distance between waypoints " << i - 1 << " and " << i
+                                           << " is less than the minimum allowed distance of "
+                                           << interpolation_parameters.min_translation_interpolation_distance
+                                           << ". Actual translational distance: " << translational_distance
+                                           << ". Rotational distance between waypoints " << i - 1 << " and " << i
+                                           << " is less than the minimum allowed distance of "
+                                           << interpolation_parameters.min_rotation_interpolation_distance
+                                           << ". Actual rotational distance: " << rotational_distance;
+    }
+
+    // This do not make sense as soon as the max_sample_time will be used as reference but increased
+    // if necessary to avoid inserting too close points
+    // auto time_between_waypoints = trajectory->getWayPointDurationFromPrevious(i);
+    // if (time_between_waypoints > interpolation_parameters.max_sample_time + EPSILON)
+    // {
+    //   return ::testing::AssertionFailure()
+    //          << "Time between waypoints " << i - 1 << " and " << i << " exceeds the maximum allowed time of "
+    //          << interpolation_parameters.max_sample_time << ". Actual time: " << time_between_waypoints;
+    // }
+  }
+
+  return ::testing::AssertionSuccess();
+}
