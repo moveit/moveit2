@@ -123,8 +123,8 @@ bool verifySampleJointLimits(const std::map<std::string, double>& position_last,
  *                             A value of 0 returns the start_pose, and a value of 1 returns the end_pose.
  * @param interpolated_pose The resulting interpolated pose as an Eigen::Isometry3d.
  */
-void interpolate(const Eigen::Isometry3d start_pose, const Eigen::Isometry3d end_pose, double interpolation_factor,
-                 Eigen::Isometry3d& interpolated_pose);
+void interpolate(const Eigen::Isometry3d& start_pose, const Eigen::Isometry3d& end_pose,
+                 const double& interpolation_factor, Eigen::Isometry3d& interpolated_pose);
 
 /**
  * @brief Generate joint trajectory from a KDL Cartesian trajectory

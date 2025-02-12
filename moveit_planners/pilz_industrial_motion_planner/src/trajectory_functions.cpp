@@ -202,8 +202,9 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
   return true;
 }
 
-void pilz_industrial_motion_planner::interpolate(const Eigen::Isometry3d start_pose, const Eigen::Isometry3d end_pose,
-                                                 double interpolation_factor, Eigen::Isometry3d& interpolated_pose)
+void pilz_industrial_motion_planner::interpolate(const Eigen::Isometry3d& start_pose, const Eigen::Isometry3d& end_pose,
+                                                 const double& interpolation_factor,
+                                                 Eigen::Isometry3d& interpolated_pose)
 {
   interpolated_pose.translation() =
       start_pose.translation() + interpolation_factor * (end_pose.translation() - start_pose.translation());
