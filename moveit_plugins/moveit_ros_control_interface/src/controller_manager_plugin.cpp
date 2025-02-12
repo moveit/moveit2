@@ -87,7 +87,7 @@ std::string parseJointNameFromResource(const std::string& claimed_interface)
  * \brief  Modifies controller activation/deactivation lists to conform to ROS 2 control expectations.
  * \detail Activation/deactivation is expected to be disjoint. For example, if controller B is a dependency of A (A
  * chains to B) but controller B is also a dependency of C (B chains to B), then the switch from A->B to C->B would
- * cause B to be in both the activation and deactivate list. This causes ROS2 control to through an error and reject the
+ * cause B to be in both the activation and deactivate list. This causes ROS 2 control to throw an error and reject the
  * switch. The simplifyControllerActivationDeactivation function adds the logic needed to avoid this from happening.
  * @param[in] activate_controllers  controllers to activate
  * @param[in] deactivate_controllers  controllers to deactivate
