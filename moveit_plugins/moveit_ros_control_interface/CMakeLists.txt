@@ -67,6 +67,10 @@ target_include_directories(moveit_ros_control_interface_empty_plugin
 ament_target_dependencies(moveit_ros_control_interface_empty_plugin
                           ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
+if(BUILD_TESTING)
+  add_subdirectory(test)
+endif()
+
 # ##############################################################################
 # Install ##
 # ##############################################################################
