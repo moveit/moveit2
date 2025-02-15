@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.2 (2025-02-15)
+-------------------
 * Enable allowed_execution_duration_scaling and allowed_goal_duration_margin for each controller (`#3335 <https://github.com/ros-planning/moveit2/issues/3335>`_) (`#3338 <https://github.com/ros-planning/moveit2/issues/3338>`_)
 * Add allowed_start_tolerance_joints parameter (Port moveit`#3287 <https://github.com/ros-planning/moveit2/issues/3287>`_) (`#3309 <https://github.com/ros-planning/moveit2/issues/3309>`_) (`#3328 <https://github.com/ros-planning/moveit2/issues/3328>`_)
 * load robot_description from other namespace (`#3269 <https://github.com/ros-planning/moveit2/issues/3269>`_) (`#3325 <https://github.com/ros-planning/moveit2/issues/3325>`_)

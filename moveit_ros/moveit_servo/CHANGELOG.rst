@@ -2,8 +2,8 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.2 (2025-02-15)
+-------------------
 * Update current state even if servo is paused (`#3341 <https://github.com/ros-planning/moveit2/issues/3341>`_) (`#3347 <https://github.com/ros-planning/moveit2/issues/3347>`_)
 * Servo Node - pause service: check if request is different than current state. (`#3265 <https://github.com/ros-planning/moveit2/issues/3265>`_) (`#3348 <https://github.com/ros-planning/moveit2/issues/3348>`_)
 * Update robot state if time since last command exceeds timeout (`#3251 <https://github.com/ros-planning/moveit2/issues/3251>`_) (`#3334 <https://github.com/ros-planning/moveit2/issues/3334>`_)

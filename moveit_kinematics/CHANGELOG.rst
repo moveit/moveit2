@@ -2,8 +2,8 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.2 (2025-02-15)
+-------------------
 * Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_) (`#3258 <https://github.com/ros-planning/moveit2/issues/3258>`_)
 * Remove plugins from export set (`#3227 <https://github.com/ros-planning/moveit2/issues/3227>`_) (`#3242 <https://github.com/ros-planning/moveit2/issues/3242>`_)
 * Update deprecated tf2 imports from .h to .hpp (`#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_) (`#3200 <https://github.com/ros-planning/moveit2/issues/3200>`_)

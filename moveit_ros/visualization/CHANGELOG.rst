@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.2 (2025-02-15)
+-------------------
 * Use attached object colors as is in Rviz plugin (`#3274 <https://github.com/ros-planning/moveit2/issues/3274>`_) (`#3278 <https://github.com/ros-planning/moveit2/issues/3278>`_)
 * Contributors: Aleksey Nogin, mergify[bot]
 
