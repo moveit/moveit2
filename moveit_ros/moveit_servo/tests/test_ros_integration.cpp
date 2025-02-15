@@ -103,6 +103,32 @@ TEST_F(ServoRosFixture, testJointJog)
 
   ASSERT_GE(traj_count_, NUM_COMMANDS);
 
+  // Ensure deprecation warning is reported for displacements command
+  jog_cmd.displacements.push_back(1.0);
+  jog_cmd.header.stamp = servo_test_node_->now();
+  joint_jog_publisher->publish(jog_cmd);
+  rclcpp::sleep_for(std::chrono::milliseconds(100));
+
+  // TODO how to test logged warnings?
+
+  // Ensure error is reported when number of commands doesn't match number of joints
+  int traj_count_before = traj_count_;
+  jog_cmd.displacements.pop_back();
+  jog_cmd.velocities.pop_back();
+  jog_cmd.header.stamp = servo_test_node_->now();
+  joint_jog_publisher->publish(jog_cmd);
+  rclcpp::sleep_for(std::chrono::milliseconds(100));
+  jog_cmd.velocities.push_back(1.0);
+  jog_cmd.velocities.push_back(1.0);
+  jog_cmd.header.stamp = servo_test_node_->now();
+  joint_jog_publisher->publish(jog_cmd);
+
+  // TODO how to test logged warnings?
+  // For now, assert that no additional trajectories were generated with the invalid commands
+  ASSERT_EQ(traj_count_, traj_count_before);
+
+
+  rclcpp::sleep_for(std::chrono::milliseconds(100));
   moveit_servo::StatusCode status = status_;
   RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after jointjog: " << static_cast<size_t>(status));
   ASSERT_EQ(status_, moveit_servo::StatusCode::NO_WARNING);
