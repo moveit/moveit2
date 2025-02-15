@@ -2,8 +2,8 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.0 (2025-02-15)
+-------------------
 * Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_)
 * pilz_industrial_motion_planner: Use tf2::fromMsg instead of tf2::convert (`#3219 <https://github.com/ros-planning/moveit2/issues/3219>`_)
 * Use ! in place of not keyword for Pilz and CHOMP planners (`#3217 <https://github.com/ros-planning/moveit2/issues/3217>`_)

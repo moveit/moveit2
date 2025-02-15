@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_warehouse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.0 (2025-02-15)
+-------------------
 * Address deprecations of StaticSingleThreadedExecutor and realtime_tools/thread_priority.hpp (`#3139 <https://github.com/ros-planning/moveit2/issues/3139>`_)
 * Contributors: Sebastian Castro
 

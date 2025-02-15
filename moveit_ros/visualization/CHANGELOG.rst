@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.0 (2025-02-15)
+-------------------
 * Use attached object colors as is in Rviz plugin (`#3274 <https://github.com/ros-planning/moveit2/issues/3274>`_)
 * Fix MeshShape::clear() for safer mesh removal (`#3164 <https://github.com/ros-planning/moveit2/issues/3164>`_)
 * Contributors: Aleksey Nogin, Matt Wang

@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.0 (2025-02-15)
+-------------------
 * Ports moveit `#3676 <https://github.com/ros-planning/moveit2/issues/3676>`_ and `#3682 <https://github.com/ros-planning/moveit2/issues/3682>`_ (`#3283 <https://github.com/ros-planning/moveit2/issues/3283>`_)
 * Remove plugins from export set (`#3227 <https://github.com/ros-planning/moveit2/issues/3227>`_)
 * move TrajectoryExecutionManager::clear() to private (`#3226 <https://github.com/ros-planning/moveit2/issues/3226>`_)

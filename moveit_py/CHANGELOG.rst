@@ -2,8 +2,8 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.0 (2025-02-15)
+-------------------
 * move TrajectoryExecutionManager::clear() to private (`#3226 <https://github.com/ros-planning/moveit2/issues/3226>`_)
 * Update CMakeLists.txt (`#3218 <https://github.com/ros-planning/moveit2/issues/3218>`_)
 * Contributors: Dongya Jiang, mosfet80

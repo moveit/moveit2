@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.0 (2025-02-15)
+-------------------
 * fix: pointcloud_octomap_updater not cleaning objects at max_range (`#3294 <https://github.com/ros-planning/moveit2/issues/3294>`_)
 * fix: OctoMap and Filtered_Cloud Not Updating During Movement Execution (`#3209 <https://github.com/ros-planning/moveit2/issues/3209>`_)
 * Update deprecated tf2 imports from .h to .hpp (`#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_)

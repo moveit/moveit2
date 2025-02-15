@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_core_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.0 (2025-02-15)
+-------------------
 * Explicit convert from std::filesystem::path to std::string for Windows compatibility (`#3249 <https://github.com/ros-planning/moveit2/issues/3249>`_)
 * Contributors: Silvio Traversaro
 
