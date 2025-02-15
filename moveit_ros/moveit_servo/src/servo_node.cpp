@@ -218,6 +218,18 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
   // Reject any other command types that had arrived simultaneously.
   new_twist_msg_ = new_pose_msg_ = false;
 
+  if (latest_joint_jog_.displacements.size() > 0)
+  {
+    RCLCPP_WARN(node_->get_logger(), "JointJog: Displacements field is not supported.");
+  }
+
+  if (latest_joint_jog_.velocities.size() != latest_joint_jog_.joint_names.size())
+  {
+    RCLCPP_ERROR_STREAM(node_->get_logger(), "JointJog: each joint name must have one corresponding velocity command."
+      " Received " << latest_joint_jog_.joint_names.size() << " joints with " << latest_joint_jog_.velocities.size() << " commands.");
+    return std::nullopt;
+  }
+
   const bool command_stale = (node_->now() - latest_joint_jog_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
   if (!command_stale)
