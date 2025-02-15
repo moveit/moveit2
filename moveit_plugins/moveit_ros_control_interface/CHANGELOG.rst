@@ -2,6 +2,14 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add logic to Ros2ControlManager to match ros2_control (`#3332 <https://github.com/ros-planning/moveit2/issues/3332>`_) (`#3343 <https://github.com/ros-planning/moveit2/issues/3343>`_)
+* Fix Ros2ControlManager chained controller logic (`#3301 <https://github.com/ros-planning/moveit2/issues/3301>`_) (`#3307 <https://github.com/ros-planning/moveit2/issues/3307>`_)
+* Parallel gripper controller (`#3246 <https://github.com/ros-planning/moveit2/issues/3246>`_) (`#3260 <https://github.com/ros-planning/moveit2/issues/3260>`_)
+* Update controller_manager_plugin.cpp (`#3179 <https://github.com/ros-planning/moveit2/issues/3179>`_) (`#3236 <https://github.com/ros-planning/moveit2/issues/3236>`_)
+* Contributors: Paul Gesel, Marq Rasmussen, Seohyeon Ryu, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 

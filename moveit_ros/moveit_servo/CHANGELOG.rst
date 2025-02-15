@@ -2,6 +2,17 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update current state even if servo is paused (`#3341 <https://github.com/ros-planning/moveit2/issues/3341>`_) (`#3347 <https://github.com/ros-planning/moveit2/issues/3347>`_)
+* Servo Node - pause service: check if request is different than current state. (`#3265 <https://github.com/ros-planning/moveit2/issues/3265>`_) (`#3348 <https://github.com/ros-planning/moveit2/issues/3348>`_)
+* Update robot state if time since last command exceeds timeout (`#3251 <https://github.com/ros-planning/moveit2/issues/3251>`_) (`#3334 <https://github.com/ros-planning/moveit2/issues/3334>`_)
+* Fix docstring for Servo smoothHalt function (`#3298 <https://github.com/ros-planning/moveit2/issues/3298>`_) (`#3308 <https://github.com/ros-planning/moveit2/issues/3308>`_)
+* servo_keyboard_input: Add Windows support (`#3290 <https://github.com/ros-planning/moveit2/issues/3290>`_) (`#3291 <https://github.com/ros-planning/moveit2/issues/3291>`_)
+* Reduce mutex scope in Servo thread (`#3259 <https://github.com/ros-planning/moveit2/issues/3259>`_) (`#3262 <https://github.com/ros-planning/moveit2/issues/3262>`_)
+* Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_) (`#3258 <https://github.com/ros-planning/moveit2/issues/3258>`_)
+* Contributors: Henning Kayser, Jelmer de Wolde, Kazuya Oguma, Paul Gesel, Sebastian Castro, Silvio Traversaro, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 * re-enable cmake warnings (`#3028 <https://github.com/ros-planning/moveit2/issues/3028>`_) (backport `#3172 <https://github.com/ros-planning/moveit2/issues/3172>`_) (`#3173 <https://github.com/ros-planning/moveit2/issues/3173>`_)

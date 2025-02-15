@@ -2,6 +2,9 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.12.1 (2024-12-18)
 -------------------
 

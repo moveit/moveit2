@@ -2,6 +2,19 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Reverts `#2985 <https://github.com/ros-planning/moveit2/issues/2985>`_, Ports moveit `#3388 <https://github.com/ros-planning/moveit2/issues/3388>`_ `#3470 <https://github.com/ros-planning/moveit2/issues/3470>`_ `#3539 <https://github.com/ros-planning/moveit2/issues/3539>`_ (`#3284 <https://github.com/ros-planning/moveit2/issues/3284>`_) (`#3320 <https://github.com/ros-planning/moveit2/issues/3320>`_)
+* Add missing target dependencies to eigen_stl_containers (`#3295 <https://github.com/ros-planning/moveit2/issues/3295>`_) (`#3297 <https://github.com/ros-planning/moveit2/issues/3297>`_)
+* Support including the names of other attached objects in `touch_link` (`#3276 <https://github.com/ros-planning/moveit2/issues/3276>`_) (`#3288 <https://github.com/ros-planning/moveit2/issues/3288>`_)
+* Fix: misleading error logs in RobotState::setFromIKSubgroups() (`#3263 <https://github.com/ros-planning/moveit2/issues/3263>`_) (`#3266 <https://github.com/ros-planning/moveit2/issues/3266>`_)
+* Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_) (`#3258 <https://github.com/ros-planning/moveit2/issues/3258>`_)
+* Remove plugins from export set (`#3227 <https://github.com/ros-planning/moveit2/issues/3227>`_) (`#3242 <https://github.com/ros-planning/moveit2/issues/3242>`_)
+* Don't destroy objects on attach (`#3205 <https://github.com/ros-planning/moveit2/issues/3205>`_) (`#3214 <https://github.com/ros-planning/moveit2/issues/3214>`_)
+* Update deprecated tf2 imports from .h to .hpp (`#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_) (`#3200 <https://github.com/ros-planning/moveit2/issues/3200>`_)
+* Remove ACM entries when removing collision objects (`#3183 <https://github.com/ros-planning/moveit2/issues/3183>`_) (`#3185 <https://github.com/ros-planning/moveit2/issues/3185>`_)
+* Contributors: Aleksey Nogin, Jafar Uruç, Mark Johnson, Marq Rasmussen, Michael Görner, Paul Gesel, Robert Haschke, Sebastian Castro, Zhong Jin, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 * handle continuous joints in getLowerAndUpperLimits (`#3153 <https://github.com/ros-planning/moveit2/issues/3153>`_) (`#3155 <https://github.com/ros-planning/moveit2/issues/3155>`_)

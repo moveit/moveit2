@@ -2,6 +2,11 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Parallel gripper controller (`#3246 <https://github.com/ros-planning/moveit2/issues/3246>`_) (`#3260 <https://github.com/ros-planning/moveit2/issues/3260>`_)
+* Contributors: Marq Rasmussen, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 

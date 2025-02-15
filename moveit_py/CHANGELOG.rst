@@ -2,6 +2,11 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* move TrajectoryExecutionManager::clear() to private (`#3226 <https://github.com/ros-planning/moveit2/issues/3226>`_) (`#3238 <https://github.com/ros-planning/moveit2/issues/3238>`_)
+* Contributors: Dongya Jiang, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 

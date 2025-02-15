@@ -2,6 +2,12 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Explicit convert from std::filesystem::path to std::string for Windows compatibility (`#3249 <https://github.com/ros-planning/moveit2/issues/3249>`_) (`#3254 <https://github.com/ros-planning/moveit2/issues/3254>`_)
+* Fix: Conditionally install launch directory if it exists (`#3191 <https://github.com/ros-planning/moveit2/issues/3191>`_) (`#3195 <https://github.com/ros-planning/moveit2/issues/3195>`_)
+* Contributors: Filippo Bosi, Silvio Traversaro, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 
