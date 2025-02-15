@@ -147,6 +147,18 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
 void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request>& request,
                            const std::shared_ptr<std_srvs::srv::SetBool::Response>& response)
 {
+<<<<<<< HEAD
+=======
+  if (servo_paused_ == request->data)
+  {
+    std::string message = "Requested pause state is already active.";
+    RCLCPP_INFO(node_->get_logger(), "%s", message.c_str());
+    response->success = true;
+    response->message = message;
+    return;
+  }
+  std::lock_guard<std::mutex> lock_guard(lock_);
+>>>>>>> 50b433768 (Update current state even if servo is paused (#3341))
   servo_paused_ = request->data;
   response->success = (servo_paused_ == request->data);
   if (servo_paused_)
@@ -156,7 +168,6 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   }
   else
   {
-    std::lock_guard<std::mutex> lock_guard(lock_);
     // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing and unpausing.
     last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
     servo_->resetSmoothing(last_commanded_state_);
