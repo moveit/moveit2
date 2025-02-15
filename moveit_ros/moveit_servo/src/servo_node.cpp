@@ -225,8 +225,10 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
 
   if (latest_joint_jog_.velocities.size() != latest_joint_jog_.joint_names.size())
   {
-    RCLCPP_ERROR_STREAM(node_->get_logger(), "JointJog: each joint name must have one corresponding velocity command."
-      " Received " << latest_joint_jog_.joint_names.size() << " joints with " << latest_joint_jog_.velocities.size() << " commands.");
+    RCLCPP_ERROR_STREAM(node_->get_logger(),
+                        "JointJog: each joint name must have one corresponding velocity command. Received "
+                            << latest_joint_jog_.joint_names.size() << " joints with "
+                            << latest_joint_jog_.velocities.size() << " commands.");
     return std::nullopt;
   }
 
