@@ -147,8 +147,6 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
 void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request>& request,
                            const std::shared_ptr<std_srvs::srv::SetBool::Response>& response)
 {
-<<<<<<< HEAD
-=======
   if (servo_paused_ == request->data)
   {
     std::string message = "Requested pause state is already active.";
@@ -158,7 +156,6 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
     return;
   }
   std::lock_guard<std::mutex> lock_guard(lock_);
->>>>>>> 50b433768 (Update current state even if servo is paused (#3341))
   servo_paused_ = request->data;
   response->success = (servo_paused_ == request->data);
   if (servo_paused_)
