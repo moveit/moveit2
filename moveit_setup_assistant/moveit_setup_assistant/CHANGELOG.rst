@@ -2,6 +2,11 @@
 Changelog for package moveit_setup_assistant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.2 (2025-02-15)
+-------------------
+* Explicit convert from std::filesystem::path to std::string for Windows compatibility (`#3249 <https://github.com/ros-planning/moveit2/issues/3249>`_) (`#3254 <https://github.com/ros-planning/moveit2/issues/3254>`_)
+* Contributors: Silvio Traversaro, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 

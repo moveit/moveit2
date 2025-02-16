@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_robot_interaction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.2 (2025-02-15)
+-------------------
+* Update deprecated tf2 imports from .h to .hpp (`#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_) (`#3200 <https://github.com/ros-planning/moveit2/issues/3200>`_)
+* Contributors: Sebastian Castro, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 

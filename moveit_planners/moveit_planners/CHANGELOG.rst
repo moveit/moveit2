@@ -2,6 +2,11 @@
 Changelog for package moveit_planners
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.2 (2025-02-15)
+-------------------
+* fix chomp inclued, closes `#3228 <https://github.com/ros-planning/moveit2/issues/3228>`_ (`#3229 <https://github.com/ros-planning/moveit2/issues/3229>`_) (`#3231 <https://github.com/ros-planning/moveit2/issues/3231>`_)
+* Contributors: Michael Ferguson, mergify[bot]
+
 2.12.1 (2024-12-18)
 -------------------
 

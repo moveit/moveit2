@@ -5,7 +5,7 @@ package_name = "moveit_configs_utils"
 
 setup(
     name=package_name,
-    version="2.12.1",
+    version="2.12.2",
     packages=find_packages(),
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
