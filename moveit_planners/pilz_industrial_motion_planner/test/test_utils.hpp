@@ -483,6 +483,18 @@ checkCartesianRotationalPath(const robot_trajectory::RobotTrajectoryConstPtr& tr
                              const double rot_axis_tol = DEFAULT_ROTATION_AXIS_EQUALITY_TOLERANCE,
                              const double acc_tol = DEFAULT_ACCELERATION_EQUALITY_TOLERANCE);
 
+/**
+ * @brief Check that the given interpolation parameters are fulfilled by the
+ * trajectory.
+ * @param trajectory: the trajectory to check
+ * @param link_name: the link for which to check the interpolation parameters
+ * @param interpolation_parameters: the parameters to check
+ */
+::testing::AssertionResult checkInterpolationParameters(const robot_trajectory::RobotTrajectoryConstPtr& trajectory,
+                                                        const std::string& link_name,
+                                                        const interpolation::Params& interpolation_parameters,
+                                                        const double EPSILON = 1e-05);
+
 inline bool isMonotonouslyDecreasing(const std::vector<double>& vec, double tol)
 {
   return std::is_sorted(vec.begin(), vec.end(), [tol](double a, double b) {

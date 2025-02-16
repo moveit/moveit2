@@ -202,6 +202,19 @@ bool pilz_industrial_motion_planner::verifySampleJointLimits(
   return true;
 }
 
+void pilz_industrial_motion_planner::interpolate(const Eigen::Isometry3d& start_pose, const Eigen::Isometry3d& end_pose,
+                                                 const double& interpolation_factor,
+                                                 Eigen::Isometry3d& interpolated_pose)
+{
+  interpolated_pose.translation() =
+      start_pose.translation() + interpolation_factor * (end_pose.translation() - start_pose.translation());
+
+  // SLERP interpolation for rotation
+  Eigen::Quaterniond quat1(start_pose.rotation());
+  Eigen::Quaterniond quat2(end_pose.rotation());
+  interpolated_pose.linear() = quat1.slerp(interpolation_factor, quat2).toRotationMatrix();
+}
+
 bool pilz_industrial_motion_planner::generateJointTrajectory(
     const planning_scene::PlanningSceneConstPtr& scene,
     const pilz_industrial_motion_planner::JointLimitsContainer& joint_limits, const KDL::Trajectory& trajectory,
@@ -217,11 +230,13 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
   rclcpp::Time generation_begin = clock.now();
 
   // generate the time samples
-  const double epsilon = 10e-06;  // avoid adding the last time sample twice
   std::vector<double> time_samples;
-  for (double t_sample = 0.0; t_sample < trajectory.Duration() - epsilon; t_sample += sampling_time)
+  int num_samples = std::floor(trajectory.Duration() / sampling_time);
+  sampling_time = trajectory.Duration() / num_samples;
+  time_samples.reserve(num_samples);
+  for (int i = 0; i < num_samples; ++i)
   {
-    time_samples.push_back(t_sample);
+    time_samples.push_back(i * sampling_time);
   }
   time_samples.push_back(trajectory.Duration());
 
@@ -361,6 +376,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
     if (i == 0)
     {
       duration_current = trajectory.points.front().time_from_start.seconds();
+      // This still assumes all the points in first_trajectory have the same duration
       duration_last = duration_current;
     }
     else
