@@ -2,6 +2,21 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.13.0 (2025-02-15)
+-------------------
+* Reverts `#2985 <https://github.com/ros-planning/moveit2/issues/2985>`_, Ports moveit `#3388 <https://github.com/ros-planning/moveit2/issues/3388>`_ `#3470 <https://github.com/ros-planning/moveit2/issues/3470>`_ `#3539 <https://github.com/ros-planning/moveit2/issues/3539>`_ (`#3284 <https://github.com/ros-planning/moveit2/issues/3284>`_)
+* Add missing target dependencies to eigen_stl_containers (`#3295 <https://github.com/ros-planning/moveit2/issues/3295>`_)
+* Support including the names of other attached objects in `touch_link` (`#3276 <https://github.com/ros-planning/moveit2/issues/3276>`_)
+* Fix: misleading error logs in RobotState::setFromIKSubgroups() (`#3263 <https://github.com/ros-planning/moveit2/issues/3263>`_)
+* Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_)
+* Remove plugins from export set (`#3227 <https://github.com/ros-planning/moveit2/issues/3227>`_)
+* [Issue-879] Add const specifier to moveit_core (`#3202 <https://github.com/ros-planning/moveit2/issues/3202>`_)
+* Don't destroy objects on attach (`#3205 <https://github.com/ros-planning/moveit2/issues/3205>`_)
+* Update deprecated tf2 imports from .h to .hpp (`#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_)
+* Remove ACM entries when removing collision objects (`#3183 <https://github.com/ros-planning/moveit2/issues/3183>`_)
+* handle continuous joints in getLowerAndUpperLimits (`#3153 <https://github.com/ros-planning/moveit2/issues/3153>`_)
+* Contributors: Aleksey Nogin, Jafar Uruç, Mario Prats, Mark Johnson, Marq Rasmussen, Michael Görner, Paul Gesel, Sebastian Castro, Robert Haschke, Zhong Jin, gayar
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
