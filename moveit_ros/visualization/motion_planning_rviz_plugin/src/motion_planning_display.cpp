@@ -280,7 +280,7 @@ void MotionPlanningDisplay::toggleSelectPlanningGroupSubscription(bool enable)
   if (enable)
   {
     planning_group_sub_ = node_->create_subscription<std_msgs::msg::String>(
-        "/rviz/moveit/select_planning_group", rclcpp::SystemDefaultsQoS(),
+        "/rviz/moveit/select_planning_group", rmw_qos_profile_default,
         [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return selectPlanningGroupCallback(msg); });
   }
   else

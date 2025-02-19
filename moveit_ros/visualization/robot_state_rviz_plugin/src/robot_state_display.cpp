@@ -304,7 +304,7 @@ void RobotStateDisplay::changedRobotStateTopic()
   setStatus(rviz_common::properties::StatusProperty::Warn, "RobotState", "No msg received");
 
   robot_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::DisplayRobotState>(
-      robot_state_topic_property_->getStdString(), rclcpp::SystemDefaultsQoS(),
+      robot_state_topic_property_->getStdString(), rmw_qos_profile_default,
       [this](const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr& state) { return newRobotStateCallback(state); });
 }
 
