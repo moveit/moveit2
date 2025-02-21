@@ -106,10 +106,11 @@ TEST_F(ServoRosFixture, testJointJog)
   // Ensure deprecation warning is reported for displacements command
   jog_cmd.displacements.push_back(1.0);
   jog_cmd.header.stamp = servo_test_node_->now();
+  log_.clear();
   joint_jog_publisher->publish(jog_cmd);
   rclcpp::sleep_for(std::chrono::milliseconds(100));
-
-  // TODO how to test logged warnings?
+  // The warning message was logged
+  ASSERT_TRUE(logContains("JointJog: Displacements field is not supported."));
 
   // Ensure error is reported when number of commands doesn't match number of joints
   int traj_count_before = traj_count_;
@@ -117,16 +118,20 @@ TEST_F(ServoRosFixture, testJointJog)
   jog_cmd.velocities.pop_back();
   jog_cmd.header.stamp = servo_test_node_->now();
   joint_jog_publisher->publish(jog_cmd);
+  log_.clear();
   rclcpp::sleep_for(std::chrono::milliseconds(100));
+  // The warning message was logged
+  ASSERT_TRUE(logContains("JointJog: each joint name must have one corresponding velocity command."));
   jog_cmd.velocities.push_back(1.0);
   jog_cmd.velocities.push_back(1.0);
   jog_cmd.header.stamp = servo_test_node_->now();
+  log_.clear();
   joint_jog_publisher->publish(jog_cmd);
-
-  // TODO how to test logged warnings?
-  // For now, assert that no additional trajectories were generated with the invalid commands
+  rclcpp::sleep_for(std::chrono::milliseconds(100));
+  // The warning message was logged
+  ASSERT_TRUE(logContains("JointJog: each joint name must have one corresponding velocity command."));
+  // No additional trajectories were generated with the invalid commands
   ASSERT_EQ(traj_count_, traj_count_before);
-
 
   rclcpp::sleep_for(std::chrono::milliseconds(100));
   moveit_servo::StatusCode status = status_;

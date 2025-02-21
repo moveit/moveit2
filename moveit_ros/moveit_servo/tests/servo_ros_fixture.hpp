@@ -49,6 +49,7 @@
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/qos.hpp>
+#include <rcl_interfaces/msg/log.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <trajectory_msgs/msg/joint_trajectory.hpp>
 
@@ -73,6 +74,11 @@ protected:
     traj_count_++;
   }
 
+  void logCallback(const rcl_interfaces::msg::Log::ConstSharedPtr& msg)
+  {
+    log_.push_back(*msg);
+  }
+
   void SetUp() override
   {
     // Create a node to be given to Servo.
@@ -91,6 +97,10 @@ protected:
     trajectory_subscriber_ = servo_test_node_->create_subscription<trajectory_msgs::msg::JointTrajectory>(
         "/panda_arm_controller/joint_trajectory", rclcpp::SystemDefaultsQoS(),
         [this](const trajectory_msgs::msg::JointTrajectory::ConstSharedPtr& msg) { return trajectoryCallback(msg); });
+
+    log_subscriber_ = servo_test_node_->create_subscription<rcl_interfaces::msg::Log>(
+        "/rosout", rclcpp::SystemDefaultsQoS(),
+        [this](const rcl_interfaces::msg::Log::ConstSharedPtr& msg) { return logCallback(msg); });
 
     switch_input_client_ =
         servo_test_node_->create_client<moveit_msgs::srv::ServoCommandType>("/servo_node/switch_command_type");
@@ -145,6 +155,20 @@ protected:
     }
   }
 
+  bool logContains(std::string msg)
+  {
+    bool found = false;
+    for (auto line : log_)
+    {
+      if (line.name == "servo_node" && line.msg.find(msg) != std::string::npos)
+      {
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+
   ServoRosFixture() : state_count_{ 0 }, traj_count_{ 0 }
   {
   }
@@ -158,6 +182,7 @@ protected:
   rclcpp::Subscription<moveit_msgs::msg::ServoStatus>::SharedPtr status_subscriber_;
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_subscriber_;
   rclcpp::Subscription<trajectory_msgs::msg::JointTrajectory>::SharedPtr trajectory_subscriber_;
+  rclcpp::Subscription<rcl_interfaces::msg::Log>::SharedPtr log_subscriber_;
   rclcpp::Client<moveit_msgs::srv::ServoCommandType>::SharedPtr switch_input_client_;
 
   sensor_msgs::msg::JointState joint_states_;
@@ -168,4 +193,5 @@ protected:
 
   std::atomic<int> state_count_;
   std::atomic<int> traj_count_;
+  std::vector<rcl_interfaces::msg::Log> log_;
 };
