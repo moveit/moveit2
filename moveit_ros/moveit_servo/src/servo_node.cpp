@@ -224,22 +224,15 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
     latest_joint_jog_.displacements.clear();  // Only warn once per message.
   }
 
-  if (latest_joint_jog_.velocities.size() != latest_joint_jog_.joint_names.size())
-  {
-    RCLCPP_ERROR_STREAM(node_->get_logger(),
-                        "JointJog: each joint name must have one corresponding velocity command. Received "
-                            << latest_joint_jog_.joint_names.size() << " joints with "
-                            << latest_joint_jog_.velocities.size() << " commands.");
-    new_joint_jog_msg_ = false;  // Stop trying to process this message
-    return std::nullopt;
-  }
-
   const bool command_stale = (node_->now() - latest_joint_jog_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
   if (!command_stale)
   {
     JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
     next_joint_state = servo_->getNextJointState(robot_state, command);
+    // If the command failed, stop trying to process this message
+    if (servo_->getStatus() == StatusCode::INVALID)
+      new_joint_jog_msg_ = false;
   }
   else
   {

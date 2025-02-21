@@ -155,12 +155,12 @@ protected:
     }
   }
 
-  bool logContains(std::string msg)
+  bool logContains(std::string logger_name, std::string msg)
   {
     bool found = false;
     for (auto line : log_)
     {
-      if (line.name == "servo_node" && line.msg.find(msg) != std::string::npos)
+      if (line.name == logger_name && line.msg.find(msg) != std::string::npos)
       {
         found = true;
         break;

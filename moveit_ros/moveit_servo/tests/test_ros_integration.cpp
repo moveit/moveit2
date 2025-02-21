@@ -103,6 +103,10 @@ TEST_F(ServoRosFixture, testJointJog)
 
   ASSERT_GE(traj_count_, NUM_COMMANDS);
 
+  moveit_servo::StatusCode status = status_;
+  RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after jointjog: " << static_cast<size_t>(status));
+  ASSERT_EQ(status_, moveit_servo::StatusCode::NO_WARNING);
+
   // Ensure deprecation warning is reported for displacements command
   jog_cmd.displacements.push_back(1.0);
   jog_cmd.header.stamp = servo_test_node_->now();
@@ -110,7 +114,7 @@ TEST_F(ServoRosFixture, testJointJog)
   joint_jog_publisher->publish(jog_cmd);
   rclcpp::sleep_for(std::chrono::milliseconds(100));
   // The warning message was logged
-  ASSERT_TRUE(logContains("JointJog: Displacements field is not supported."));
+  ASSERT_TRUE(logContains("servo_node", "JointJog: Displacements field is not supported."));
 
   // Ensure error is reported when number of commands doesn't match number of joints
   int traj_count_before = traj_count_;
@@ -121,7 +125,8 @@ TEST_F(ServoRosFixture, testJointJog)
   log_.clear();
   rclcpp::sleep_for(std::chrono::milliseconds(100));
   // The warning message was logged
-  ASSERT_TRUE(logContains("JointJog: each joint name must have one corresponding velocity command."));
+  ASSERT_TRUE(logContains("servo_node.servo_node.moveit.ros.servo",
+                          "Invalid joint jog command. Each joint name must have one corresponding velocity command."));
   jog_cmd.velocities.push_back(1.0);
   jog_cmd.velocities.push_back(1.0);
   jog_cmd.header.stamp = servo_test_node_->now();
@@ -129,14 +134,13 @@ TEST_F(ServoRosFixture, testJointJog)
   joint_jog_publisher->publish(jog_cmd);
   rclcpp::sleep_for(std::chrono::milliseconds(100));
   // The warning message was logged
-  ASSERT_TRUE(logContains("JointJog: each joint name must have one corresponding velocity command."));
+  ASSERT_TRUE(logContains("servo_node.servo_node.moveit.ros.servo",
+                          "Invalid joint jog command. Each joint name must have one corresponding velocity command."));
   // No additional trajectories were generated with the invalid commands
   ASSERT_EQ(traj_count_, traj_count_before);
-
-  rclcpp::sleep_for(std::chrono::milliseconds(100));
-  moveit_servo::StatusCode status = status_;
-  RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after jointjog: " << static_cast<size_t>(status));
-  ASSERT_EQ(status_, moveit_servo::StatusCode::NO_WARNING);
+  status = status_;
+  RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after invalid jointjog: " << static_cast<size_t>(status));
+  ASSERT_EQ(status_, moveit_servo::StatusCode::INVALID);
 }
 
 TEST_F(ServoRosFixture, testTwist)

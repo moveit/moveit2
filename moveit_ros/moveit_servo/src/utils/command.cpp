@@ -94,24 +94,31 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
 
   velocities.setZero();
   bool names_valid = true;
-
-  for (size_t i = 0; i < command.names.size(); ++i)
+  bool command_valid = true;
+  if (command.velocities.size() == command.names.size())
   {
-    auto it = std::find(joint_names.begin(), joint_names.end(), command.names[i]);
-    if (it != std::end(joint_names))
+    for (size_t i = 0; i < command.names.size(); ++i)
     {
-      velocities[std::distance(joint_names.begin(), it)] = command.velocities[i];
-    }
-    else
-    {
-      RCLCPP_WARN_STREAM(getLogger(), "Invalid joint name: " << command.names[i]);
+      auto it = std::find(joint_names.begin(), joint_names.end(), command.names[i]);
+      if (it != std::end(joint_names))
+      {
+        velocities[std::distance(joint_names.begin(), it)] = command.velocities[i];
+      }
+      else
+      {
+        RCLCPP_WARN_STREAM(getLogger(), "Invalid joint name: " << command.names[i]);
 
-      names_valid = false;
-      break;
+        names_valid = false;
+        break;
+      }
     }
   }
+  else
+  {
+    command_valid = false;
+  }
   const bool velocity_valid = isValidCommand(velocities);
-  if (names_valid && velocity_valid)
+  if (command_valid && names_valid && velocity_valid)
   {
     joint_position_delta = velocities * servo_params.publish_period;
     if (servo_params.command_in_type == "unitless")
@@ -122,6 +129,13 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
   else
   {
     status = StatusCode::INVALID;
+    if (!command_valid)
+    {
+      RCLCPP_WARN_STREAM(getLogger(), "Invalid joint jog command. Each joint name must have one corresponding "
+                                      "velocity command. Received "
+                                          << command.names.size() << " joints with " << command.velocities.size()
+                                          << " commands.");
+    }
     if (!names_valid)
     {
       RCLCPP_WARN_STREAM(getLogger(),
