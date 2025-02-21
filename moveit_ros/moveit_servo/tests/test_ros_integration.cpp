@@ -114,7 +114,7 @@ TEST_F(ServoRosFixture, testJointJog)
   joint_jog_publisher->publish(jog_cmd);
   rclcpp::sleep_for(std::chrono::milliseconds(100));
   // The warning message was logged
-  ASSERT_TRUE(logContains("servo_node", "JointJog: Displacements field is not supported."));
+  ASSERT_TRUE(logContains("servo_node", "Joint jog command displacements field is not supported, ignoring."));
 
   // Ensure error is reported when number of commands doesn't match number of joints
   int traj_count_before = traj_count_;
@@ -126,7 +126,8 @@ TEST_F(ServoRosFixture, testJointJog)
   rclcpp::sleep_for(std::chrono::milliseconds(100));
   // The warning message was logged
   ASSERT_TRUE(logContains("servo_node.servo_node.moveit.ros.servo",
-                          "Invalid joint jog command. Each joint name must have one corresponding velocity command."));
+                          "Invalid joint jog command. Each joint name must have one corresponding velocity command. "
+                          "Received 7 joints with 6 commands."));
   jog_cmd.velocities.push_back(1.0);
   jog_cmd.velocities.push_back(1.0);
   jog_cmd.header.stamp = servo_test_node_->now();
@@ -135,7 +136,8 @@ TEST_F(ServoRosFixture, testJointJog)
   rclcpp::sleep_for(std::chrono::milliseconds(100));
   // The warning message was logged
   ASSERT_TRUE(logContains("servo_node.servo_node.moveit.ros.servo",
-                          "Invalid joint jog command. Each joint name must have one corresponding velocity command."));
+                          "Invalid joint jog command. Each joint name must have one corresponding velocity command. "
+                          "Received 7 joints with 8 commands."));
   // No additional trajectories were generated with the invalid commands
   ASSERT_EQ(traj_count_, traj_count_before);
   status = status_;
