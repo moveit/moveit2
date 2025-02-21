@@ -38,13 +38,23 @@ ament_target_dependencies(moveit_ros_control_interface_trajectory_plugin
                           ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
 add_library(moveit_ros_control_interface_gripper_plugin SHARED
-            src/gripper_controller_plugin.cpp)
+            src/gripper_command_controller_plugin.cpp)
 set_target_properties(
   moveit_ros_control_interface_gripper_plugin
   PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_gripper_plugin
                            PRIVATE include)
 ament_target_dependencies(moveit_ros_control_interface_gripper_plugin
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+
+add_library(moveit_ros_control_interface_parallel_gripper_plugin SHARED
+            src/parallel_gripper_command_controller_plugin.cpp)
+set_target_properties(
+  moveit_ros_control_interface_parallel_gripper_plugin
+  PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
+target_include_directories(moveit_ros_control_interface_parallel_gripper_plugin
+                           PRIVATE include)
+ament_target_dependencies(moveit_ros_control_interface_parallel_gripper_plugin
                           ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
 add_library(moveit_ros_control_interface_empty_plugin SHARED
@@ -57,6 +67,10 @@ target_include_directories(moveit_ros_control_interface_empty_plugin
 ament_target_dependencies(moveit_ros_control_interface_empty_plugin
                           ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
+if(BUILD_TESTING)
+  add_subdirectory(test)
+endif()
+
 # ##############################################################################
 # Install ##
 # ##############################################################################
@@ -65,6 +79,7 @@ set(TARGET_LIBRARIES
     moveit_ros_control_interface_plugin
     moveit_ros_control_interface_trajectory_plugin
     moveit_ros_control_interface_gripper_plugin
+    moveit_ros_control_interface_parallel_gripper_plugin
     moveit_ros_control_interface_empty_plugin)
 
 # Mark executables and/or libraries for installation

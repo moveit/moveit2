@@ -842,8 +842,10 @@ std::pair<Eigen::VectorXd, Eigen::VectorXd> JointModelGroup::getLowerAndUpperLim
   {
     for (const moveit::core::VariableBounds& variable_bounds : *joint_bounds)
     {
-      lower_limits[variable_index] = variable_bounds.min_position_;
-      upper_limits[variable_index] = variable_bounds.max_position_;
+      lower_limits[variable_index] =
+          variable_bounds.position_bounded_ ? variable_bounds.min_position_ : -std::numeric_limits<double>::infinity();
+      upper_limits[variable_index] =
+          variable_bounds.position_bounded_ ? variable_bounds.max_position_ : std::numeric_limits<double>::infinity();
       variable_index++;
     }
   }

@@ -83,7 +83,7 @@ plan_execution::PlanExecution::PlanExecution(
   : node_(node)
   , planning_scene_monitor_(planning_scene_monitor)
   , trajectory_execution_manager_(trajectory_execution)
-  , logger_(moveit::getLogger("moveit.ros.add_time_optimal_parameterization"))
+  , logger_(moveit::getLogger("moveit.ros.plan_execution"))
 {
   if (!trajectory_execution_manager_)
   {
@@ -297,9 +297,8 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
 
       if (res.collision || !plan.planning_scene->isStateFeasible(t.getWayPoint(i), false))
       {
-        // Dave's debacle
-        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid",
-                    plan.plan_components[path_segment.first].description.c_str());
+        RCLCPP_INFO(logger_, "Trajectory component '%s' is invalid for waypoint %ld out of %ld",
+                    plan.plan_components[path_segment.first].description.c_str(), i, wpc);
 
         // call the same functions again, in verbose mode, to show what issues have been detected
         plan.planning_scene->isStateFeasible(t.getWayPoint(i), true);
@@ -402,7 +401,6 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
     plan.plan_components[component_idx].trajectory->getRobotTrajectoryMsg(msg);
     if (!trajectory_execution_manager_->push(msg, plan.plan_components[component_idx].controller_name))
     {
-      trajectory_execution_manager_->clear();
       RCLCPP_ERROR(logger_, "Apparently trajectory initialization failed");
       execution_complete_ = true;
       result.val = moveit_msgs::msg::MoveItErrorCodes::CONTROL_FAILED;

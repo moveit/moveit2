@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_planners</name>
-  <version>2.12.0</version>
+  <version>2.13.0</version>
   <description>Meta package that installs all available planners for MoveIt</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
@@ -19,7 +19,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>chomp_motion_planner</exec_depend>
+  <exec_depend>moveit_planners_chomp</exec_depend>
   <exec_depend>moveit_planners_ompl</exec_depend>
   <exec_depend>moveit_planners_stomp</exec_depend>
   <exec_depend>pilz_industrial_motion_planner</exec_depend>

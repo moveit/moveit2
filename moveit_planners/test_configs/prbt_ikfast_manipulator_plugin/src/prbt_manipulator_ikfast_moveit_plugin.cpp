@@ -43,16 +43,16 @@
 
 
 #include <Eigen/Geometry>
-#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/parameter_value.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
+#include <tf2_eigen_kdl/tf2_eigen_kdl.hpp>
 #include <tf2_kdl/tf2_kdl.hpp>
 #include <moveit/kinematics_base/kinematics_base.hpp>
 #include <moveit/robot_state/robot_state.hpp>
-#include <prbt_ikfast_kinematics_parameters.hpp>
+#include <moveit_resources_prbt_ikfast_manipulator_plugin/prbt_ikfast_kinematics_parameters.hpp>
 
 using namespace moveit::core;
 
