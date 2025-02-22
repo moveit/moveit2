@@ -271,6 +271,7 @@ void TrajectoryVisualization::changedShowTrail()
     if (enable_robot_color_property_->getBool())
       setRobotColor(&(r->getRobot()), robot_color_property_->getColor());
     r->setVisible(display_->isEnabled() && (!animating_path_ || waypoint_i <= current_state_));
+    r->updateAttachedObjectColors(default_attached_object_color_);
     trajectory_trail_[i] = std::move(r);
   }
 }
@@ -543,6 +544,7 @@ void TrajectoryVisualization::update(double wall_dt, double sim_dt)
   display_path_robot_->setVisible(display_->isEnabled() && displaying_trajectory_message_ &&
                                   (animating_path_ || trail_display_property_->getBool() ||
                                    (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible())));
+  display_path_robot_->updateAttachedObjectColors(default_attached_object_color_);
 }
 
 void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg)
