@@ -166,7 +166,7 @@ void TrajectoryExecutionManager::initialize()
         opt.allow_undeclared_parameters(true);
         opt.automatically_declare_parameters_from_overrides(true);
         controller_mgr_node_ =
-          std::make_shared<rclcpp::Node>("moveit_simple_controller_manager", node_->get_namespace(), opt);
+            std::make_shared<rclcpp::Node>("moveit_simple_controller_manager", node_->get_namespace(), opt);
 
         auto all_params = node_->get_node_parameters_interface()->get_parameter_overrides();
         for (const auto& param : all_params)
