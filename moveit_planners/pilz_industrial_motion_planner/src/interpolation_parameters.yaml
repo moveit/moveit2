@@ -1,0 +1,41 @@
+interpolation:
+  max_sample_time: {
+    type: double,
+    default_value: 0.1,
+    description: "Max time interval between two consecutive samples",
+    validation: {
+      gt: [ 0.0 ]
+    }
+  }
+  max_translation_interpolation_distance: {
+    type: double,
+    default_value: 10000000.0,
+    description: "Max translation distance between two consecutive samples",
+    validation: {
+      gt: [ 0.0 ]
+    }
+  }
+  max_rotation_interpolation_distance: {
+    type: double,
+    default_value: 10000000.0,
+    description: "Max rotation distance between two consecutive samples",
+    validation: {
+      gt: [ 0.0 ]
+    }
+  }
+  min_rotation_interpolation_distance: {
+    type: double,
+    default_value: 0.000001, # 1e-6
+    description: "Min rotation distance between two consecutive samples",
+    validation: {
+      gt_eq: [ 0.000001 ]
+    }
+  }
+  min_translation_interpolation_distance: {
+    type: double,
+    default_value: 0.000001, # 1e-6
+    description: "Min translation distance between two consecutive samples",
+    validation: {
+      gt_eq: [ 0.000001 ]
+    }
+  }
