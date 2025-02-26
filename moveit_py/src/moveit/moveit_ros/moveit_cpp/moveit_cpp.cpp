@@ -35,7 +35,9 @@
 /* Author: Peter David Fagan */
 
 #include "moveit_cpp.hpp"
+#include <pybind11/pytypes.h>
 #include <moveit/utils/logger.hpp>
+#include <string>
 
 namespace moveit_py
 {
@@ -62,7 +64,7 @@ void initMoveitPy(py::module& m)
 
       .def(py::init([](const std::string& node_name, const std::string& name_space,
                        const std::vector<std::string>& launch_params_filepaths, const py::object& config_dict,
-                       bool provide_planning_service) {
+                       bool provide_planning_service, const py::object& remappings) {
              // This section is used to load the appropriate node parameters before spinning a moveit_cpp instance
              // Priority is given to parameters supplied directly via a config_dict, followed by launch parameters
              // and finally no supplied parameters.
@@ -82,6 +84,20 @@ void initMoveitPy(py::module& m)
                {
                  launch_arguments.push_back("--params-file");
                  launch_arguments.push_back(launch_params_filepath);
+               }
+             }
+
+             if (py::isinstance<py::list>(remappings))
+             {
+               for (auto item : remappings)
+               {
+                py::tuple item_tuple = item.cast<py::tuple>();
+                 if (item_tuple.size() != 2)
+                 {
+                  throw std::runtime_error("Remapping must be a list of tuples with 2 elements");
+                 }
+                 launch_arguments.push_back("--remap");
+                 launch_arguments.push_back(item_tuple[0].cast<std::string>() + ":=" + item_tuple[1].cast<std::string>());
                }
              }
 
@@ -138,6 +154,7 @@ void initMoveitPy(py::module& m)
            py::arg("launch_params_filepaths") =
                utils.attr("get_launch_params_filepaths")().cast<std::vector<std::string>>(),
            py::arg("config_dict") = py::none(), py::arg("provide_planning_service") = true,
+           py::arg("remappings") = py::none(),
            py::return_value_policy::take_ownership,
            R"(
            Initialize moveit_cpp node and the planning scene service.
