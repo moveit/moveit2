@@ -91,13 +91,14 @@ void initMoveitPy(py::module& m)
              {
                for (auto item : remappings)
                {
-                py::tuple item_tuple = item.cast<py::tuple>();
+                 py::tuple item_tuple = item.cast<py::tuple>();
                  if (item_tuple.size() != 2)
                  {
-                  throw std::runtime_error("Remapping must be a list of tuples with 2 elements");
+                   throw std::runtime_error("Remapping must be a list of tuples with 2 elements");
                  }
                  launch_arguments.push_back("--remap");
-                 launch_arguments.push_back(item_tuple[0].cast<std::string>() + ":=" + item_tuple[1].cast<std::string>());
+                 launch_arguments.push_back(item_tuple[0].cast<std::string>() +
+                                            ":=" + item_tuple[1].cast<std::string>());
                }
              }
 
@@ -154,8 +155,7 @@ void initMoveitPy(py::module& m)
            py::arg("launch_params_filepaths") =
                utils.attr("get_launch_params_filepaths")().cast<std::vector<std::string>>(),
            py::arg("config_dict") = py::none(), py::arg("provide_planning_service") = true,
-           py::arg("remappings") = py::none(),
-           py::return_value_policy::take_ownership,
+           py::arg("remappings") = py::none(), py::return_value_policy::take_ownership,
            R"(
            Initialize moveit_cpp node and the planning scene service.
            )")
