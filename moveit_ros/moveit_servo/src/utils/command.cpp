@@ -94,9 +94,11 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
   velocities.setZero();
   if (command.velocities.size() != command.names.size())
   {
-    COMMAND_ERROR("Invalid joint jog command. Each joint name must have one corresponding "
-                  "velocity command. Received "
-                  << command.names.size() << " joints with " << command.velocities.size() << " commands.");
+    RCLCPP_WARN_STREAM(getLogger(), "Invalid joint jog command. Each joint name must have one corresponding "
+                                    "velocity command. Received "
+                                        << command.names.size() << " joints with " << command.velocities.size()
+                                        << " commands.");
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
   }
 
   for (size_t i = 0; i < command.names.size(); ++i)
@@ -108,17 +110,19 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
     }
     else
     {
-      COMMAND_ERROR("Invalid joint name: "
-                    << command.names[i]
-                    << "Either you're sending commands for a joint "
-                       "that is not part of the move group or certain joints cannot be moved because a "
-                       "subgroup is active and they are not part of it.");
+      RCLCPP_WARN_STREAM(getLogger(), "Invalid joint name: " << command.names[i]
+                                                             << "Either you're sending commands for a joint "
+                                                                "that is not part of the move group or certain joints "
+                                                                "cannot be moved because a "
+                                                                "subgroup is active and they are not part of it.");
+      return std::make_pair(StatusCode::INVALID, joint_position_delta);
     }
   }
 
   if (!isValidCommand(velocities))
   {
-    COMMAND_ERROR("Invalid velocity values in joint jog command");
+    RCLCPP_WARN_STREAM(getLogger(), "Invalid velocity values in joint jog command");
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
   }
 
   joint_position_delta = velocities * servo_params.publish_period;
@@ -148,12 +152,14 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
 
   if (command.frame_id != planning_frame)
   {
-    COMMAND_ERROR("Command frame is: " << command.frame_id << ", expected: " << planning_frame);
+    RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << ", expected: " << planning_frame);
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
   }
 
   if (!isValidCommand(command))
   {
-    COMMAND_ERROR("Invalid twist command.");
+    RCLCPP_WARN_STREAM(getLogger(), "Invalid twist command.");
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
   }
 
   if (command.velocities.isZero())
@@ -227,12 +233,14 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
 
   if (!isValidCommand(command))
   {
-    COMMAND_ERROR("Invalid pose command.");
+    RCLCPP_WARN_STREAM(getLogger(), "Invalid pose command.");
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
   }
 
   if (command.frame_id != planning_frame)
   {
-    COMMAND_ERROR("Command frame is: " << command.frame_id << " expected: " << planning_frame);
+    RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << " expected: " << planning_frame);
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
   }
 
   Eigen::Vector<double, 6> cartesian_position_delta;

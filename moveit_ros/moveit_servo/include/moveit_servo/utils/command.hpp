@@ -47,10 +47,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
-#define COMMAND_ERROR(msg_stream)                                                                                      \
-  RCLCPP_WARN_STREAM(getLogger(), msg_stream);                                                                         \
-  return std::make_pair(StatusCode::INVALID, joint_position_delta)
-
 namespace moveit_servo
 {
 
