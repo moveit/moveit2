@@ -158,7 +158,7 @@ protected:
   bool logContains(const std::string& logger_name, const std::string& msg)
   {
     bool found = false;
-    for (auto line : log_)
+    for (const auto& line : log_)
     {
       if (line.name == logger_name && line.msg.find(msg) != std::string::npos)
       {
