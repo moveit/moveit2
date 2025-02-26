@@ -107,14 +107,14 @@ TEST_F(ServoRosFixture, testJointJog)
   RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after jointjog: " << static_cast<size_t>(status));
   ASSERT_EQ(status_, moveit_servo::StatusCode::NO_WARNING);
 
-  // Ensure deprecation warning is reported for displacements command
+  // Ensure warning is reported for displacements command
   jog_cmd.displacements.push_back(1.0);
   jog_cmd.header.stamp = servo_test_node_->now();
   log_.clear();
   joint_jog_publisher->publish(jog_cmd);
   rclcpp::sleep_for(std::chrono::milliseconds(100));
   // The warning message was logged
-  ASSERT_TRUE(logContains("servo_node", "Joint jog command displacements field is not supported, ignoring."));
+  ASSERT_TRUE(logContains("servo_node", "Joint jog command displacements field is not yet supported, ignoring."));
 
   // Ensure error is reported when number of commands doesn't match number of joints
   int traj_count_before = traj_count_;

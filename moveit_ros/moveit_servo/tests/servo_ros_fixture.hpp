@@ -155,7 +155,7 @@ protected:
     }
   }
 
-  bool logContains(std::string logger_name, std::string msg)
+  bool logContains(const std::string& logger_name, const std::string& msg)
   {
     bool found = false;
     for (auto line : log_)

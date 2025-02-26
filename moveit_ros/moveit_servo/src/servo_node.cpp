@@ -220,7 +220,7 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
 
   if (!latest_joint_jog_.displacements.empty())
   {
-    RCLCPP_WARN(node_->get_logger(), "Joint jog command displacements field is not supported, ignoring.");
+    RCLCPP_WARN(node_->get_logger(), "Joint jog command displacements field is not yet supported, ignoring.");
     latest_joint_jog_.displacements.clear();  // Only warn once per message.
   }
 
