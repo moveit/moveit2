@@ -190,17 +190,9 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 
   try
   {
-<<<<<<< HEAD
-    planning_pipeline->generatePlan(the_scene, goal->get_goal()->request, res);
-=======
     auto scene =
         context_->planning_scene_monitor_->copyPlanningScene(goal->get_goal()->planning_options.planning_scene_diff);
-    if (!planning_pipeline->generatePlan(scene, goal->get_goal()->request, res, context_->debug_))
-    {
-      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed.");
-      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
-    }
->>>>>>> e2b24f5ac (Ports moveit1 #3689 (#3357))
+    planning_pipeline->generatePlan(scene, goal->get_goal()->request, res);
   }
   catch (std::exception& ex)
   {
@@ -229,16 +221,9 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
     return solved;
   }
 
-<<<<<<< HEAD
-  planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
   try
   {
-    solved = planning_pipeline->generatePlan(plan.planning_scene_, req, res);
-=======
-  try
-  {
-    solved = planning_pipeline->generatePlan(plan.copyPlanningScene(), req, res, context_->debug_);
->>>>>>> e2b24f5ac (Ports moveit1 #3689 (#3357))
+    solved = planning_pipeline->generatePlan(plan.copyPlanningScene(), req, res);
   }
   catch (std::exception& ex)
   {
