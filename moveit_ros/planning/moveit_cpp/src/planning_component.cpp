@@ -127,6 +127,15 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   }();
   planning_scene_monitor.reset();  // release this pointer
 
+<<<<<<< HEAD
+=======
+  if (!planning_scene)
+  {  // Clone current planning scene
+    auto planning_scene_monitor = moveit_cpp_->getPlanningSceneMonitorNonConst();
+    planning_scene_monitor->updateFrameTransforms();
+    planning_scene = planning_scene_monitor->copyPlanningScene();
+  }
+>>>>>>> e2b24f5ac (Ports moveit1 #3689 (#3357))
   // Init MotionPlanRequest
   ::planning_interface::MotionPlanRequest req;
   req.group_name = group_name_;

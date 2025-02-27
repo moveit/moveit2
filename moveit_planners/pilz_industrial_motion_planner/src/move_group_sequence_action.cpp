@@ -203,15 +203,6 @@ void MoveGroupSequenceAction::executeMoveCallbackPlanOnly(
 {
   RCLCPP_INFO(LOGGER, "Planning request received for MoveGroupSequenceAction action.");
 
-  // lock the scene so that it does not modify the world representation while
-  // diff() is called
-  planning_scene_monitor::LockedPlanningSceneRO lscene(context_->planning_scene_monitor_);
-
-  const planning_scene::PlanningSceneConstPtr& the_scene =
-      (moveit::core::isEmpty(goal->planning_options.planning_scene_diff)) ?
-          static_cast<const planning_scene::PlanningSceneConstPtr&>(lscene) :
-          lscene->diff(goal->planning_options.planning_scene_diff);
-
   rclcpp::Time planning_start = context_->moveit_cpp_->getNode()->now();
   RobotTrajCont traj_vec;
   try
@@ -227,7 +218,8 @@ void MoveGroupSequenceAction::executeMoveCallbackPlanOnly(
       return;
     }
 
-    traj_vec = command_list_manager_->solve(the_scene, planning_pipeline, goal->request);
+    auto scene = context_->planning_scene_monitor_->copyPlanningScene(goal->planning_options.planning_scene_diff);
+    traj_vec = command_list_manager_->solve(scene, planning_pipeline, goal->request);
   }
   catch (const MoveItErrorCodeException& ex)
   {
@@ -271,7 +263,10 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
 {
   setMoveState(move_group::PLANNING);
 
+<<<<<<< HEAD
   planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
+=======
+>>>>>>> e2b24f5ac (Ports moveit1 #3689 (#3357))
   RobotTrajCont traj_vec;
   try
   {
@@ -285,7 +280,11 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
       return false;
     }
 
+<<<<<<< HEAD
     traj_vec = command_list_manager_->solve(plan.planning_scene_, planning_pipeline, req);
+=======
+    traj_vec = command_list_manager_->solve(plan.copyPlanningScene(), planning_pipeline, req);
+>>>>>>> e2b24f5ac (Ports moveit1 #3689 (#3357))
   }
   catch (const MoveItErrorCodeException& ex)
   {

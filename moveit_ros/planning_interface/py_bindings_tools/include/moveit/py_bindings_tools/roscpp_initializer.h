@@ -66,8 +66,23 @@ void roscpp_init(const std::string& node_name, boost::python::list& argv);
 /** \brief Initialize ROScpp with specified command line args */
 void roscpp_init(boost::python::list& argv);
 
+<<<<<<< HEAD:moveit_ros/planning_interface/py_bindings_tools/include/moveit/py_bindings_tools/roscpp_initializer.h
 /** \brief Initialize ROScpp with default command line args */
 void roscpp_init();
+=======
+  /// An error code reflecting what went wrong (if anything)
+  moveit_msgs::msg::MoveItErrorCodes error_code;
+
+  planning_scene::PlanningScenePtr copyPlanningScene()
+  {
+    // planning_scene_ is based on the scene from this monitor
+    // (either it's the monitored scene or a diff on top of it)
+    // so in order to copy the scene, we must also lock the underlying monitor
+    planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
+    return planning_scene::PlanningScene::clone(planning_scene);
+  }
+};
+>>>>>>> e2b24f5ac (Ports moveit1 #3689 (#3357)):moveit_ros/planning/plan_execution/include/moveit/plan_execution/plan_representation.hpp
 
 void roscpp_shutdown();
 }  // namespace py_bindings_tools
