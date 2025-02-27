@@ -193,12 +193,6 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 {
   RCLCPP_INFO(getLogger(), "Planning request received for MoveGroup action. Forwarding to planning pipeline.");
 
-  // lock the scene so that it does not modify the world representation while diff() is called
-  planning_scene_monitor::LockedPlanningSceneRO lscene(context_->planning_scene_monitor_);
-  const planning_scene::PlanningSceneConstPtr& the_scene =
-      (moveit::core::isEmpty(goal->get_goal()->planning_options.planning_scene_diff)) ?
-          static_cast<const planning_scene::PlanningSceneConstPtr&>(lscene) :
-          lscene->diff(goal->get_goal()->planning_options.planning_scene_diff);
   planning_interface::MotionPlanResponse res;
 
   if (preempt_requested_)
@@ -219,7 +213,9 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 
   try
   {
-    if (!planning_pipeline->generatePlan(the_scene, goal->get_goal()->request, res, context_->debug_))
+    auto scene =
+        context_->planning_scene_monitor_->copyPlanningScene(goal->get_goal()->planning_options.planning_scene_diff);
+    if (!planning_pipeline->generatePlan(scene, goal->get_goal()->request, res, context_->debug_))
     {
       RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed.");
       res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
@@ -252,10 +248,9 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
     return solved;
   }
 
-  planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor);
   try
   {
-    solved = planning_pipeline->generatePlan(plan.planning_scene, req, res, context_->debug_);
+    solved = planning_pipeline->generatePlan(plan.copyPlanningScene(), req, res, context_->debug_);
   }
   catch (std::exception& ex)
   {
