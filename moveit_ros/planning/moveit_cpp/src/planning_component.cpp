@@ -121,10 +121,7 @@ PlanningComponent::PlanSolution PlanningComponent::plan(const PlanRequestParamet
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor =
       moveit_cpp_->getPlanningSceneMonitorNonConst();
   planning_scene_monitor->updateFrameTransforms();
-  const planning_scene::PlanningScenePtr planning_scene = [planning_scene_monitor] {
-    planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor);
-    return planning_scene::PlanningScene::clone(ls);
-  }();
+  const planning_scene::PlanningScenePtr planning_scene = planning_scene_monitor->copyPlanningScene();
   planning_scene_monitor.reset();  // release this pointer
 
   // Init MotionPlanRequest
