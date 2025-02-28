@@ -263,10 +263,6 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
 {
   setMoveState(move_group::PLANNING);
 
-<<<<<<< HEAD
-  planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
-=======
->>>>>>> e2b24f5ac (Ports moveit1 #3689 (#3357))
   RobotTrajCont traj_vec;
   try
   {
@@ -280,11 +276,7 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
       return false;
     }
 
-<<<<<<< HEAD
-    traj_vec = command_list_manager_->solve(plan.planning_scene_, planning_pipeline, req);
-=======
     traj_vec = command_list_manager_->solve(plan.copyPlanningScene(), planning_pipeline, req);
->>>>>>> e2b24f5ac (Ports moveit1 #3689 (#3357))
   }
   catch (const MoveItErrorCodeException& ex)
   {
