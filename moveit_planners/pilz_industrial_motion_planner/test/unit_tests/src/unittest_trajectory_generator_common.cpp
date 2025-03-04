@@ -53,7 +53,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <pilz_industrial_motion_planner/cartesian_limits_parameters.hpp>
+#include <cartesian_limits_parameters.hpp>
 
 const std::string PARAM_MODEL_NO_GRIPPER_NAME{ "robot_description" };
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME{ "robot_description_pg70" };

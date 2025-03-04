@@ -42,7 +42,7 @@
 #include <moveit/utils/logger.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 
-#include <moveit_ros_planning/default_response_adapter_parameters.hpp>
+#include <default_response_adapter_parameters.hpp>
 
 namespace default_planning_response_adapters
 {

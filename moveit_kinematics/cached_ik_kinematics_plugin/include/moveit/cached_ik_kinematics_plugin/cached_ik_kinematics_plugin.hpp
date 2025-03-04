@@ -56,7 +56,7 @@
 #include <utility>
 #include <filesystem>
 #include <moveit/utils/logger.hpp>
-#include <moveit_kinematics/cached_ik_kinematics_parameters.hpp>
+#include <cached_ik_kinematics_parameters.hpp>
 
 namespace cached_ik_kinematics_plugin
 {

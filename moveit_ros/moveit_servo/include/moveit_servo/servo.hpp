@@ -42,7 +42,7 @@
 #pragma once
 
 #include <moveit_servo/collision_monitor.hpp>
-#include <moveit_servo/moveit_servo_lib_parameters.hpp>
+#include <moveit_servo_lib_parameters.hpp>
 #include <moveit_servo/utils/command.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
 #include <moveit/kinematics_base/kinematics_base.hpp>

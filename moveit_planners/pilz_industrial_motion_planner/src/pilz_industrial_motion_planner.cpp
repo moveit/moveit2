@@ -40,7 +40,7 @@
 #include <pilz_industrial_motion_planner/planning_context_loader_ptp.hpp>
 #include <pilz_industrial_motion_planner/planning_exceptions.hpp>
 
-#include <pilz_industrial_motion_planner/cartesian_limits_parameters.hpp>
+#include <cartesian_limits_parameters.hpp>
 #include <pilz_industrial_motion_planner/joint_limits_aggregator.hpp>
 
 #include <pluginlib/class_list_macros.hpp>

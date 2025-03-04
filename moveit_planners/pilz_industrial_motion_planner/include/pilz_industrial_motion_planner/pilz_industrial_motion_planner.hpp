@@ -45,7 +45,7 @@
 #include <pluginlib/class_loader.hpp>
 #include <memory>
 
-#include <pilz_industrial_motion_planner/cartesian_limits_parameters.hpp>
+#include <cartesian_limits_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {

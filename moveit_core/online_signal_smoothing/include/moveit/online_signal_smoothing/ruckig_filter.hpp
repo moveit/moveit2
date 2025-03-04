@@ -42,7 +42,7 @@ Description: Applies jerk/acceleration/velocity limits to online motion commands
 
 #include <moveit/robot_model/robot_model.hpp>
 #include <moveit/online_signal_smoothing/smoothing_base_class.hpp>
-#include <moveit_core/moveit_ruckig_filter_parameters.hpp>
+#include <moveit_ruckig_filter_parameters.hpp>
 
 #include <ruckig/ruckig.hpp>
 

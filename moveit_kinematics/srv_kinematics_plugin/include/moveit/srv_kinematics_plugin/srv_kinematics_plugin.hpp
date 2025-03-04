@@ -55,7 +55,7 @@
 // MoveIt
 #include <moveit/kinematics_base/kinematics_base.hpp>
 #include <moveit/robot_state/robot_state.hpp>
-#include <moveit_kinematics/srv_kinematics_parameters.hpp>
+#include <srv_kinematics_parameters.hpp>
 
 namespace srv_kinematics_plugin
 {

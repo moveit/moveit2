@@ -49,7 +49,7 @@
 #include <moveit_msgs/msg/pipeline_state.hpp>
 #include <memory>
 #include <moveit_planning_pipeline_export.h>
-#include <moveit_ros_planning/planning_pipeline_parameters.hpp>
+#include <planning_pipeline_parameters.hpp>
 
 namespace planning_pipeline
 {

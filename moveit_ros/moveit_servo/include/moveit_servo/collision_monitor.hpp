@@ -43,7 +43,7 @@
 
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/planning_scene/planning_scene.hpp>
-#include <moveit_servo/moveit_servo_lib_parameters.hpp>
+#include <moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
