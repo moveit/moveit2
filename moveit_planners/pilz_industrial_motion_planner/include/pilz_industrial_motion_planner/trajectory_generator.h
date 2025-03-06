@@ -138,8 +138,16 @@ protected:
    * The trap profile returns uses the longer distance of translational and
    * rotational motion.
    */
-  std::unique_ptr<KDL::VelocityProfile> cartesianTrapVelocityProfile(const double& max_velocity_scaling_factor,
+    std::unique_ptr<KDL::VelocityProfile> cartesianTrapVelocityProfile(const double& max_velocity_scaling_factor,
                                                                      const double& max_acceleration_scaling_factor,
+                                                                     const std::unique_ptr<KDL::Path>& path) const;
+    /**
+   * @brief build cartesian velocity profile for the path
+   *
+   * Uses the path to get the cartesian length from start to goal.
+   * The rect profile returns a uniform velocity profile without considering the acceleration
+   */    
+   std::unique_ptr<KDL::VelocityProfile> cartesianRectVelocityProfile(const double& max_velocity_scaling_factor,
                                                                      const std::unique_ptr<KDL::Path>& path) const;
 
 private:
@@ -272,7 +280,7 @@ private:
 protected:
   const moveit::core::RobotModelConstPtr robot_model_;
   const pilz_industrial_motion_planner::LimitsContainer planner_limits_;
-  static constexpr double MIN_SCALING_FACTOR{ 0.0001 };
+  static constexpr double MIN_SCALING_FACTOR{ 0.0000001 };
   static constexpr double MAX_SCALING_FACTOR{ 1. };
   static constexpr double VELOCITY_TOLERANCE{ 1e-8 };
   const std::unique_ptr<rclcpp::Clock> clock_;
