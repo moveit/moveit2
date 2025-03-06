@@ -292,7 +292,9 @@ TEST_F(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
   /// + plan LIN trajectory +
   /// +++++++++++++++++++++++
   planning_interface::MotionPlanResponse res;
-  lin_->generate(planning_scene_, lin_joint_req, res, 0.01);
+  interpolation::Params interpolation_params;
+  interpolation_params.max_sample_time = 0.01;
+  lin_->generate(planning_scene_, lin_joint_req, res, interpolation_params);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
   ASSERT_TRUE(testutils::checkCartesianTranslationalPath(res.trajectory, target_link_hcd_));
@@ -304,6 +306,91 @@ TEST_F(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
     EXPECT_NEAR(0.0, res.trajectory->getLastWayPointPtr()->getVariableAcceleration(idx), other_tolerance_);
   }
 }
+
+/**
+ * @brief Unit test for the TrajectoryGeneratorLIN class to verify interpolation parameters.
+ *
+ * This test constructs a motion plan request and sets various interpolation parameters to check
+ * the behavior of the linear trajectory generation. It verifies the following:
+ * - Successful trajectory generation with default parameters.
+ * - Failure of interpolation when the max translation interpolation distance is set to a very small value.
+ * - Failure of interpolation when the max rotation interpolation distance is set to a very small value.
+ * - Successful trajectory generation and interpolation with specific test parameters.
+ */
+TEST_F(TrajectoryGeneratorLINTest, interpolationParameters)
+{
+  // construct motion plan request
+  moveit_msgs::msg::MotionPlanRequest lin_joint_req{ tdp_->getLinJoint("lin2").toRequest() };
+
+  interpolation::Params default_params;
+  interpolation::Params interpolation_params;
+  interpolation::Params test_params;
+  test_params.max_sample_time = 0.05;
+  test_params.max_translation_interpolation_distance = 0.001;
+  test_params.max_rotation_interpolation_distance = 0.001;
+
+  /// +++++++++++++++++++++++
+  /// + plan LIN trajectory +
+  /// +++++++++++++++++++++++
+  planning_interface::MotionPlanResponse res;
+  interpolation_params.max_sample_time = test_params.max_sample_time;
+  lin_->generate(planning_scene_, lin_joint_req, res, interpolation_params);
+  EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+
+  // set the max translation interpolation distance to a very small value
+  // and check that the interpolation fails
+  interpolation_params.max_translation_interpolation_distance = test_params.max_translation_interpolation_distance;
+  ASSERT_FALSE(testutils::checkInterpolationParameters(res.trajectory, target_link_hcd_, interpolation_params));
+  interpolation_params.max_translation_interpolation_distance = default_params.max_translation_interpolation_distance;
+
+  // set the max rotation interpolation distance to a very small value
+  // and check that the interpolation fails
+  interpolation_params.max_rotation_interpolation_distance = test_params.max_rotation_interpolation_distance;
+  ASSERT_FALSE(testutils::checkInterpolationParameters(res.trajectory, target_link_hcd_, interpolation_params));
+
+  // recompute the trajectory with the same interpolation parameters
+  // and check that the interpolation is successful
+  lin_->generate(planning_scene_, lin_joint_req, res, test_params);
+  ASSERT_TRUE(testutils::checkInterpolationParameters(res.trajectory, target_link_hcd_, test_params));
+}
+
+/**
+ * @brief Test case for verifying the interpolation parameters in the LIN trajectory generator.
+ *
+ * This test constructs a motion plan request for a linear joint motion and sets the interpolation parameters.
+ * It then generates a LIN trajectory and checks if the interpolation parameters are correctly applied.
+ * The test verifies the following:
+ * - The trajectory generation is successful with the initial interpolation parameters.
+ * - The interpolation parameters are correctly checked against the generated trajectory.
+ * - The trajectory generation is successful with modified interpolation parameters.
+ */
+// TEST_F(TrajectoryGeneratorLINTest, interpolationParametersNumericalIK)
+// {
+//   // construct motion plan request
+//   moveit_msgs::msg::MotionPlanRequest lin_joint_req{ tdp_->getLinJoint("lin2").toRequest() };
+
+//   interpolation::Params interpolation_params;
+//   interpolation_params.max_sample_time = 0.01;
+//   interpolation_params.max_translation_interpolation_distance = 0.001;
+//   interpolation_params.max_rotation_interpolation_distance = 1.0;
+
+//   /// +++++++++++++++++++++++
+//   /// + plan LIN trajectory +
+//   /// +++++++++++++++++++++++
+//   planning_interface::MotionPlanResponse res;
+//   lin_->generate(planning_scene_, lin_joint_req, res, interpolation_params);
+//   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+//   ASSERT_TRUE(testutils::checkInterpolationParameters(res.trajectory, target_link_hcd_, interpolation_params));
+
+//   interpolation_params.min_translation_interpolation_distance = 5e-4;
+//   interpolation_params.min_rotation_interpolation_distance = 5e-4;
+//   ASSERT_FALSE(testutils::checkInterpolationParameters(res.trajectory, target_link_hcd_, interpolation_params));
+
+//   // recompute the trajectory with the same interpolation parameters
+//   // and check that the interpolation is successful
+//   lin_->generate(planning_scene_, lin_joint_req, res, interpolation_params);
+//   ASSERT_TRUE(testutils::checkInterpolationParameters(res.trajectory, target_link_hcd_, interpolation_params));
+// }
 
 /**
  * @brief Check that lin planner returns 'false' if
