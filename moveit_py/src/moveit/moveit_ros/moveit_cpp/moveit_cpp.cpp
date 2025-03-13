@@ -64,7 +64,8 @@ void initMoveitPy(py::module& m)
 
       .def(py::init([](const std::string& node_name, const std::string& name_space,
                        const std::vector<std::string>& launch_params_filepaths, const py::object& config_dict,
-                       bool provide_planning_service, const std::optional<std::map<std::string, std::string>>& remappings) {
+                       bool provide_planning_service,
+                       const std::optional<std::map<std::string, std::string>>& remappings) {
              // This section is used to load the appropriate node parameters before spinning a moveit_cpp instance
              // Priority is given to parameters supplied directly via a config_dict, followed by launch parameters
              // and finally no supplied parameters.
@@ -89,10 +90,10 @@ void initMoveitPy(py::module& m)
 
              if (remappings.has_value())
              {
-               for (const auto &[key, value]: *remappings)
+               for (const auto& [key, value] : *remappings)
                {
-                  launch_arguments.push_back("--remap");
-                  launch_arguments.push_back(key + ":=" + value);
+                 launch_arguments.push_back("--remap");
+                 launch_arguments.push_back(key + ":=" + value);
                }
              }
 
