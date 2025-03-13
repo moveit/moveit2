@@ -152,6 +152,19 @@ PlanningSceneMonitor::~PlanningSceneMonitor()
   rm_loader_.reset();
 }
 
+planning_scene::PlanningScenePtr PlanningSceneMonitor::copyPlanningScene(const moveit_msgs::msg::PlanningScene& diff)
+{
+  // We cannot use LockedPlanningSceneRO for RAII because it requires a PSMPtr
+  // Instead assume clone will not throw
+  lockSceneRead();
+  auto scene = planning_scene::PlanningScene::clone(getPlanningScene());
+  unlockSceneRead();
+
+  if (!moveit::core::isEmpty(diff))
+    scene->setPlanningSceneDiffMsg(diff);
+  return scene;
+}
+
 void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& scene)
 {
   if (monitor_name_.empty())
@@ -223,7 +236,7 @@ void PlanningSceneMonitor::initialize(const planning_scene::PlanningScenePtr& sc
 
   shape_transform_cache_lookup_wait_time_ = rclcpp::Duration::from_seconds(temp_wait_time);
 
-  state_update_pending_ = false;
+  state_update_pending_.store(false);
   // Period for 0.1 sec
   using std::chrono::nanoseconds;
   state_update_timer_ = pnode_->create_wall_timer(dt_state_update_, [this]() { return stateUpdateTimerCallback(); });
@@ -1110,12 +1123,8 @@ bool PlanningSceneMonitor::waitForCurrentRobotState(const rclcpp::Time& t, doubl
        If waitForCurrentState failed, we didn't get any new state updates within wait_time. */
     if (success)
     {
-      std::unique_lock<std::mutex> lock(state_pending_mutex_);
-      if (state_update_pending_)  // enforce state update
+      if (state_update_pending_.load())  // perform state update
       {
-        state_update_pending_ = false;
-        last_robot_state_update_wall_time_ = std::chrono::system_clock::now();
-        lock.unlock();
         updateSceneWithCurrentState();
       }
       return true;
@@ -1354,7 +1363,7 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     current_state_monitor_->startStateMonitor(joint_states_topic);
 
     {
-      std::unique_lock<std::mutex> lock(state_pending_mutex_);
+      std::unique_lock<std::mutex> lock(state_update_mutex_);
       if (dt_state_update_.count() > 0)
       {
         // ROS original: state_update_timer_.start();
@@ -1387,69 +1396,29 @@ void PlanningSceneMonitor::stopStateMonitor()
   if (attached_collision_object_subscriber_)
     attached_collision_object_subscriber_.reset();
 
-  // stop must be called with state_pending_mutex_ unlocked to avoid deadlock
   if (state_update_timer_)
     state_update_timer_->cancel();
-  {
-    std::unique_lock<std::mutex> lock(state_pending_mutex_);
-    state_update_pending_ = false;
-  }
+  state_update_pending_.store(false);
 }
 
 void PlanningSceneMonitor::onStateUpdate(const sensor_msgs::msg::JointState::ConstSharedPtr& /*joint_state */)
 {
-  const std::chrono::system_clock::time_point& n = std::chrono::system_clock::now();
-  std::chrono::duration<double> dt = n - last_robot_state_update_wall_time_;
+  state_update_pending_.store(true);
 
-  bool update = false;
-  {
-    std::unique_lock<std::mutex> lock(state_pending_mutex_);
-
-    if (dt.count() < dt_state_update_.count())
-    {
-      state_update_pending_ = true;
-    }
-    else
-    {
-      state_update_pending_ = false;
-      last_robot_state_update_wall_time_ = n;
-      update = true;
-    }
-  }
-  // run the state update with state_pending_mutex_ unlocked
-  if (update)
-    updateSceneWithCurrentState();
+  // Read access to last_robot_state_update_wall_time_ and dt_state_update_ is unprotected here
+  // as reading invalid values is not critical (just postpones the next state update)
+  // only update every dt_state_update_ seconds
+  if (std::chrono::system_clock::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
+    updateSceneWithCurrentState(true);
 }
 
 void PlanningSceneMonitor::stateUpdateTimerCallback()
 {
-  if (state_update_pending_)
-  {
-    bool update = false;
-
-    std::chrono::system_clock::time_point n = std::chrono::system_clock::now();
-    std::chrono::duration<double> dt = n - last_robot_state_update_wall_time_;
-
-    {
-      // lock for access to dt_state_update_ and state_update_pending_
-      std::unique_lock<std::mutex> lock(state_pending_mutex_);
-      if (state_update_pending_ && dt.count() >= dt_state_update_.count())
-      {
-        state_update_pending_ = false;
-        last_robot_state_update_wall_time_ = std::chrono::system_clock::now();
-        auto sec = std::chrono::duration<double>(last_robot_state_update_wall_time_.time_since_epoch()).count();
-        update = true;
-        RCLCPP_DEBUG(logger_, "performPendingStateUpdate: %f", fmod(sec, 10));
-      }
-    }
-
-    // run the state update with state_pending_mutex_ unlocked
-    if (update)
-    {
-      updateSceneWithCurrentState();
-      RCLCPP_DEBUG(logger_, "performPendingStateUpdate done");
-    }
-  }
+  // Read access to last_robot_state_update_wall_time_ and dt_state_update_ is unprotected here
+  // as reading invalid values is not critical (just postpones the next state update)
+  if (state_update_pending_.load() &&
+      std::chrono::system_clock::now() - last_robot_state_update_wall_time_ >= dt_state_update_)
+    updateSceneWithCurrentState(true);
 }
 
 void PlanningSceneMonitor::octomapUpdateCallback()
@@ -1481,7 +1450,7 @@ void PlanningSceneMonitor::setStateUpdateFrequency(double hz)
   bool update = false;
   if (hz > std::numeric_limits<double>::epsilon())
   {
-    std::unique_lock<std::mutex> lock(state_pending_mutex_);
+    std::unique_lock<std::mutex> lock(state_update_mutex_);
     dt_state_update_ = std::chrono::duration<double>(1.0 / hz);
     // ROS original: state_update_timer_.start();
     // TODO: re-enable WallTimer start()
@@ -1489,14 +1458,14 @@ void PlanningSceneMonitor::setStateUpdateFrequency(double hz)
   }
   else
   {
-    // stop must be called with state_pending_mutex_ unlocked to avoid deadlock
+    // stop must be called with state_update_mutex_ unlocked to avoid deadlock
     // ROS original: state_update_timer_.stop();
     // TODO: re-enable WallTimer stop()
     if (state_update_timer_)
       state_update_timer_->cancel();
-    std::unique_lock<std::mutex> lock(state_pending_mutex_);
+    std::unique_lock<std::mutex> lock(state_update_mutex_);
     dt_state_update_ = std::chrono::duration<double>(0.0);
-    if (state_update_pending_)
+    if (state_update_pending_.load())
       update = true;
   }
   RCLCPP_INFO(logger_, "Updating internal planning scene state at most every %lf seconds", dt_state_update_.count());
@@ -1505,7 +1474,7 @@ void PlanningSceneMonitor::setStateUpdateFrequency(double hz)
     updateSceneWithCurrentState();
 }
 
-void PlanningSceneMonitor::updateSceneWithCurrentState()
+void PlanningSceneMonitor::updateSceneWithCurrentState(bool skip_update_if_locked)
 {
   rclcpp::Time time = node_->now();
   rclcpp::Clock steady_clock = rclcpp::Clock(RCL_STEADY_TIME);
@@ -1524,12 +1493,29 @@ void PlanningSceneMonitor::updateSceneWithCurrentState()
     }
 
     {
-      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_, std::defer_lock);
+      if (!skip_update_if_locked)
+      {
+        ulock.lock();
+      }
+      else if (!ulock.try_lock())
+      {
+        // Return if we can't lock scene_update_mutex, thus not blocking CurrentStateMonitor
+        return;
+      }
       last_update_time_ = last_robot_motion_time_ = current_state_monitor_->getCurrentStateTime();
       RCLCPP_DEBUG(logger_, "robot state update %f", fmod(last_robot_motion_time_.seconds(), 10.));
       current_state_monitor_->setToCurrentState(scene_->getCurrentStateNonConst());
       scene_->getCurrentStateNonConst().update();  // compute all transforms
     }
+
+    // Update state_update_mutex_ and last_robot_state_update_wall_time_
+    {
+      std::unique_lock<std::mutex> lock(state_update_mutex_);
+      last_robot_state_update_wall_time_ = std::chrono::system_clock::now();
+      state_update_pending_.store(false);
+    }
+
     triggerSceneUpdateEvent(UPDATE_STATE);
   }
   else

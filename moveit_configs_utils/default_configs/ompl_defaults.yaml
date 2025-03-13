@@ -1,8 +1,8 @@
 planner_configs:
   AnytimePathShortening:
     type: geometric::AnytimePathShortening
-    shortcut: true  # Attempt to shortcut all new solution paths
-    hybridize: true  # Compute hybrid solution trajectories
+    shortcut: 1  # Attempt to shortcut all new solution paths
+    hybridize: 1  # Compute hybrid solution trajectories
     max_hybrid_paths: 24  # Number of hybrid paths generated per iteration
     num_planners: 4  # The number of default planners to use for planning
     planners: ""  # A comma-separated list of planner types (e.g., "PRM,EST,RRTConnect"Optionally, planner parameters can be passed to change the default:"PRM[max_nearest_neighbors=5],EST[goal_bias=.5],RRT[range=10. goal_bias=.1]"
