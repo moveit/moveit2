@@ -64,7 +64,7 @@ void initMoveitPy(py::module& m)
 
       .def(py::init([](const std::string& node_name, const std::string& name_space,
                        const std::vector<std::string>& launch_params_filepaths, const py::object& config_dict,
-                       bool provide_planning_service, const py::object& remappings) {
+                       bool provide_planning_service, const std::optional<std::map<std::string, std::string>>& remappings) {
              // This section is used to load the appropriate node parameters before spinning a moveit_cpp instance
              // Priority is given to parameters supplied directly via a config_dict, followed by launch parameters
              // and finally no supplied parameters.
@@ -87,18 +87,12 @@ void initMoveitPy(py::module& m)
                }
              }
 
-             if (py::isinstance<py::list>(remappings))
+             if (remappings.has_value())
              {
-               for (auto item : remappings)
+               for (const auto &[key, value]: *remappings)
                {
-                 py::tuple item_tuple = item.cast<py::tuple>();
-                 if (item_tuple.size() != 2)
-                 {
-                   throw std::runtime_error("Remapping must be a list of tuples with 2 elements");
-                 }
-                 launch_arguments.push_back("--remap");
-                 launch_arguments.push_back(item_tuple[0].cast<std::string>() +
-                                            ":=" + item_tuple[1].cast<std::string>());
+                  launch_arguments.push_back("--remap");
+                  launch_arguments.push_back(key + ":=" + value);
                }
              }
 
