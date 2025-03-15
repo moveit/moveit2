@@ -92,8 +92,10 @@ void initMoveitPy(py::module& m)
              {
                for (const auto& [key, value] : *remappings)
                {
+                 std::string argument = key;
+                 argument.append(":=").append(value);
                  launch_arguments.push_back("--remap");
-                 launch_arguments.push_back(key + ":=" + value);
+                 launch_arguments.push_back(std::move(argument));
                }
              }
 
