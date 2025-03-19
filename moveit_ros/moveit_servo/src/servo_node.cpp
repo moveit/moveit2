@@ -155,6 +155,7 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
     response->message = message;
     return;
   }
+  std::lock_guard<std::mutex> lock_guard(lock_);
   servo_paused_ = request->data;
   response->success = (servo_paused_ == request->data);
   if (servo_paused_)
@@ -164,7 +165,6 @@ void ServoNode::pauseServo(const std::shared_ptr<std_srvs::srv::SetBool::Request
   }
   else
   {
-    std::lock_guard<std::mutex> lock_guard(lock_);
     // Reset the smoothing plugin with the robot's current state in case the robot moved between pausing and unpausing.
     last_commanded_state_ = servo_->getCurrentRobotState(true /* block for current robot state */);
     servo_->resetSmoothing(last_commanded_state_);
@@ -398,6 +398,7 @@ void ServoNode::servoLoop()
       else
       {
         // if no new command was created, use current robot state
+        last_commanded_state_ = current_state = servo_->getCurrentRobotState(false);
         updateSlidingWindow(current_state, joint_cmd_rolling_window_, servo_params_.max_expected_latency, cur_time);
         servo_->resetSmoothing(current_state);
       }
