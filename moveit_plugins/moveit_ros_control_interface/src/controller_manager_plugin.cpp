@@ -403,13 +403,8 @@ public:
   /**
    * \brief Filter lists for managed controller and computes switching set.
    * Stopped list might be extended by unsupported controllers that claim needed resources
-<<<<<<< HEAD
-   * @param activate
-   * @param deactivate
-=======
    * @param activate_base vector of controllers to be activated
    * @param deactivate_base vector of controllers to be deactivated
->>>>>>> dbf07b1ac (Add logic to Ros2ControlManager to match ros2_control (#3332))
    * @return true if switching succeeded
    */
   bool switchControllers(const std::vector<std::string>& activate_base,
