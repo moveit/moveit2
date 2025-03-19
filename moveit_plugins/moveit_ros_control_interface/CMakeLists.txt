@@ -70,7 +70,7 @@ if(BUILD_TESTING)
   set(ament_cmake_copyright_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
-  
+
   add_subdirectory(test)
 
   # Run all lint tests in package.xml except those listed above
