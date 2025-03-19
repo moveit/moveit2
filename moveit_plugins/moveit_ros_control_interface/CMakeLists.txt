@@ -66,20 +66,12 @@ ament_target_dependencies(${PROJECT_NAME}_empty_plugin
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
 
-<<<<<<< HEAD
   # These don't pass yet, disable them for now
   set(ament_cmake_copyright_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   set(ament_cmake_uncrustify_FOUND TRUE)
-=======
-if(BUILD_TESTING)
+  
   add_subdirectory(test)
-endif()
-
-# ##############################################################################
-# Install ##
-# ##############################################################################
->>>>>>> dbf07b1ac (Add logic to Ros2ControlManager to match ros2_control (#3332))
 
   # Run all lint tests in package.xml except those listed above
   ament_lint_auto_find_test_dependencies()
