@@ -42,6 +42,7 @@
 #include <moveit/planning_interface/planning_interface.hpp>
 
 #include <pilz_industrial_motion_planner/limits_container.hpp>
+#include <pilz_industrial_motion_planner/interpolation_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {
@@ -74,6 +75,13 @@ public:
    * @return true if limits could be set
    */
   virtual bool setLimits(const pilz_industrial_motion_planner::LimitsContainer& limits);
+
+  /**
+   * @brief Set the listener for interpolation parameters
+   * @param param_listener
+   * @return true on success, false otherwise
+   */
+  virtual bool setInterpolationParamListener(const std::shared_ptr<interpolation::ParamListener>& param_listener);
 
   /**
    * @brief Return the planning context
@@ -112,6 +120,9 @@ protected:
 
   /// The robot model
   moveit::core::RobotModelConstPtr model_;
+
+  /// Listener for interpolation parameters
+  std::shared_ptr<interpolation::ParamListener> interpolation_param_listener_;
 };
 
 typedef std::shared_ptr<PlanningContextLoader> PlanningContextLoaderPtr;
@@ -123,7 +134,7 @@ bool PlanningContextLoader::loadContext(planning_interface::PlanningContextPtr& 
 {
   if (limits_set_ && model_set_)
   {
-    planning_context = std::make_shared<T>(name, group, model_, limits_);
+    planning_context = std::make_shared<T>(name, group, model_, limits_, interpolation_param_listener_);
     return true;
   }
   else
