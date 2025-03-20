@@ -157,6 +157,7 @@ jobs:
         with:
           name: test-results-${{ matrix.env.IMAGE }}
           path: ${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml
+          overwrite: true
       - name: Generate codecov report
         uses: rhaschke/lcov-action@main
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
