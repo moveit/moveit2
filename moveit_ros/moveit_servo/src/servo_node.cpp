@@ -231,7 +231,8 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
     JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
     next_joint_state = servo_->getNextJointState(robot_state, command);
     // If the command failed, stop trying to process this message
-    if (servo_->getStatus() == StatusCode::INVALID) {
+    if (servo_->getStatus() == StatusCode::INVALID)
+    {
       new_joint_jog_msg_ = false;
     }
   }
@@ -266,7 +267,8 @@ std::optional<KinematicState> ServoNode::processTwistCommand(const moveit::core:
                                                latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
     const TwistCommand command{ latest_twist_.header.frame_id, velocities };
     next_joint_state = servo_->getNextJointState(robot_state, command);
-    if (servo_->getStatus() == StatusCode::INVALID) {
+    if (servo_->getStatus() == StatusCode::INVALID)
+    {
       new_twist_msg_ = false;
     }
   }
@@ -298,7 +300,8 @@ std::optional<KinematicState> ServoNode::processPoseCommand(const moveit::core::
   {
     const PoseCommand command = poseFromPoseStamped(latest_pose_);
     next_joint_state = servo_->getNextJointState(robot_state, command);
-    if (servo_->getStatus() == StatusCode::INVALID) {
+    if (servo_->getStatus() == StatusCode::INVALID)
+    {
       new_pose_msg_ = false;
     }
   }
