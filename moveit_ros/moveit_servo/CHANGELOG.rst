@@ -2,6 +2,18 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.13.0 (2025-02-15)
+-------------------
+* Update current state even if servo is paused (`#3341 <https://github.com/ros-planning/moveit2/issues/3341>`_)
+* Update robot state if time since last command exceeds timeout (`#3251 <https://github.com/ros-planning/moveit2/issues/3251>`_)
+* Fix docstring for Servo smoothHalt function (`#3298 <https://github.com/ros-planning/moveit2/issues/3298>`_)
+* servo_keyboard_input: Add Windows support (`#3290 <https://github.com/ros-planning/moveit2/issues/3290>`_)
+* Servo Node - pause service: check if request is different than current state. (`#3265 <https://github.com/ros-planning/moveit2/issues/3265>`_)
+* Reduce mutex scope in Servo thread (`#3259 <https://github.com/ros-planning/moveit2/issues/3259>`_)
+* Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_)
+* Address deprecations of StaticSingleThreadedExecutor and realtime_tools/thread_priority.hpp (`#3139 <https://github.com/ros-planning/moveit2/issues/3139>`_)
+* Contributors: Henning Kayser, Jelmer de Wolde, Kazuya Oguma, Paul Gesel, Sebastian Castro, Silvio Traversaro
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)
