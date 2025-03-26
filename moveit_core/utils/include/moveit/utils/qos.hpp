@@ -48,12 +48,12 @@ namespace core
 {
 
 /** \brief QoS for topics which must not drop any messages. */
-class RCLCPP_PUBLIC StableTopicQoS : public QoS
+class RCLCPP_PUBLIC StableTopicQoS : public rclcpp::QoS
 {
 public:
   explicit StableTopicQoS(
-      const QoSInitialization& qos_initialization = QoSInitialization::from_rmw(rmw_qos_profile_default))
-    : QoS(qos_initialization, rmw_qos_profile_default)
+      const rclcpp::QoSInitialization& qos_initialization = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default))
+    : rclcpp::QoS(qos_initialization, rmw_qos_profile_default)
   {
   }
 };
