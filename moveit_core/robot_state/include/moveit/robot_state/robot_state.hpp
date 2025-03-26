@@ -1519,6 +1519,9 @@ public:
   /** \brief Get all bodies attached to the model corresponding to this state */
   void getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies) const;
 
+  /** \brief Get all bodies attached to the model corresponding to this state */
+  void getAttachedBodies(std::map<std::string, const AttachedBody*>& attached_bodies) const;
+
   /** \brief Get all bodies attached to a particular group the model corresponding to this state */
   void getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const JointModelGroup* group) const;
 
