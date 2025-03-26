@@ -84,7 +84,6 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
                                         const JointNameToMoveGroupIndexMap& joint_name_group_index_map)
 {
   // Find the target joint position based on the commanded joint velocity
-  StatusCode status = StatusCode::NO_WARNING;
   const auto& group_name =
       servo_params.active_subgroup.empty() ? servo_params.move_group_name : servo_params.active_subgroup;
   const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(group_name);
@@ -93,7 +92,14 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
   Eigen::VectorXd velocities(joint_names.size());
 
   velocities.setZero();
-  bool names_valid = true;
+  if (command.velocities.size() != command.names.size())
+  {
+    RCLCPP_WARN_STREAM(getLogger(), "Invalid joint jog command. Each joint name must have one corresponding "
+                                    "velocity command. Received "
+                                        << command.names.size() << " joints with " << command.velocities.size()
+                                        << " commands.");
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
+  }
 
   for (size_t i = 0; i < command.names.size(); ++i)
   {
@@ -104,44 +110,34 @@ JointDeltaResult jointDeltaFromJointJog(const JointJogCommand& command, const mo
     }
     else
     {
-      RCLCPP_WARN_STREAM(getLogger(), "Invalid joint name: " << command.names[i]);
+      RCLCPP_WARN_STREAM(getLogger(), "Invalid joint name: " << command.names[i]
+                                                             << "Either you're sending commands for a joint "
+                                                                "that is not part of the move group or certain joints "
+                                                                "cannot be moved because a "
+                                                                "subgroup is active and they are not part of it.");
+      return std::make_pair(StatusCode::INVALID, joint_position_delta);
+    }
+  }
 
-      names_valid = false;
-      break;
-    }
-  }
-  const bool velocity_valid = isValidCommand(velocities);
-  if (names_valid && velocity_valid)
+  if (!isValidCommand(velocities))
   {
-    joint_position_delta = velocities * servo_params.publish_period;
-    if (servo_params.command_in_type == "unitless")
-    {
-      joint_position_delta *= servo_params.scale.joint;
-    }
+    RCLCPP_WARN_STREAM(getLogger(), "Invalid velocity values in joint jog command");
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
   }
-  else
+
+  joint_position_delta = velocities * servo_params.publish_period;
+  if (servo_params.command_in_type == "unitless")
   {
-    status = StatusCode::INVALID;
-    if (!names_valid)
-    {
-      RCLCPP_WARN_STREAM(getLogger(),
-                         "Invalid joint names in joint jog command. Either you're sending commands for a joint "
-                         "that is not part of the move group or certain joints cannot be moved because a "
-                         "subgroup is active and they are not part of it.");
-    }
-    if (!velocity_valid)
-    {
-      RCLCPP_WARN_STREAM(getLogger(), "Invalid velocity values in joint jog command");
-    }
+    joint_position_delta *= servo_params.scale.joint;
   }
 
   if (!servo_params.active_subgroup.empty() && servo_params.active_subgroup != servo_params.move_group_name)
   {
-    return std::make_pair(status, createMoveGroupDelta(joint_position_delta, robot_state, servo_params,
-                                                       joint_name_group_index_map));
+    return std::make_pair(StatusCode::NO_WARNING, createMoveGroupDelta(joint_position_delta, robot_state, servo_params,
+                                                                       joint_name_group_index_map));
   }
 
-  return std::make_pair(status, joint_position_delta);
+  return std::make_pair(StatusCode::NO_WARNING, joint_position_delta);
 }
 
 JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::core::RobotStatePtr& robot_state,
@@ -154,10 +150,23 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
   Eigen::VectorXd joint_position_delta(num_joints);
   Eigen::Vector<double, 6> cartesian_position_delta;
 
-  const bool valid_command = isValidCommand(command);
-  const bool is_planning_frame = (command.frame_id == planning_frame);
-  const bool is_zero = command.velocities.isZero();
-  if (!is_zero && is_planning_frame && valid_command)
+  if (command.frame_id != planning_frame)
+  {
+    RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << ", expected: " << planning_frame);
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
+  }
+
+  if (!isValidCommand(command))
+  {
+    RCLCPP_WARN_STREAM(getLogger(), "Invalid twist command.");
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
+  }
+
+  if (command.velocities.isZero())
+  {
+    joint_position_delta.setZero();
+  }
+  else
   {
     // Compute the Cartesian position delta based on incoming twist command.
     cartesian_position_delta = command.velocities * servo_params.publish_period;
@@ -208,22 +217,7 @@ JointDeltaResult jointDeltaFromTwist(const TwistCommand& command, const moveit::
       }
     }
   }
-  else if (is_zero)
-  {
-    joint_position_delta.setZero();
-  }
-  else
-  {
-    status = StatusCode::INVALID;
-    if (!valid_command)
-    {
-      RCLCPP_ERROR_STREAM(getLogger(), "Invalid twist command.");
-    }
-    if (!is_planning_frame)
-    {
-      RCLCPP_ERROR_STREAM(getLogger(), "Command frame is: " << command.frame_id << ", expected: " << planning_frame);
-    }
-  }
+
   return std::make_pair(status, joint_position_delta);
 }
 
@@ -237,74 +231,68 @@ JointDeltaResult jointDeltaFromPose(const PoseCommand& command, const moveit::co
       robot_state->getJointModelGroup(servo_params.move_group_name)->getActiveJointModelNames().size();
   Eigen::VectorXd joint_position_delta(num_joints);
 
-  const bool valid_command = isValidCommand(command);
-  const bool is_planning_frame = (command.frame_id == planning_frame);
-
-  if (valid_command && is_planning_frame)
+  if (!isValidCommand(command))
   {
-    Eigen::Vector<double, 6> cartesian_position_delta;
+    RCLCPP_WARN_STREAM(getLogger(), "Invalid pose command.");
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
+  }
 
-    // Compute linear and angular change needed.
-    const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(planning_frame).inverse() *
-                                     robot_state->getGlobalLinkTransform(ee_frame) };
-    const Eigen::Quaterniond q_current(ee_pose.rotation());
-    Eigen::Quaterniond q_target(command.pose.rotation());
-    Eigen::Vector3d translation_error = command.pose.translation() - ee_pose.translation();
+  if (command.frame_id != planning_frame)
+  {
+    RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << " expected: " << planning_frame);
+    return std::make_pair(StatusCode::INVALID, joint_position_delta);
+  }
 
-    // Limit the commands by the maximum linear and angular speeds provided.
-    if (servo_params.scale.linear > 0.0)
+  Eigen::Vector<double, 6> cartesian_position_delta;
+
+  // Compute linear and angular change needed.
+  const Eigen::Isometry3d ee_pose{ robot_state->getGlobalLinkTransform(planning_frame).inverse() *
+                                   robot_state->getGlobalLinkTransform(ee_frame) };
+  const Eigen::Quaterniond q_current(ee_pose.rotation());
+  Eigen::Quaterniond q_target(command.pose.rotation());
+  Eigen::Vector3d translation_error = command.pose.translation() - ee_pose.translation();
+
+  // Limit the commands by the maximum linear and angular speeds provided.
+  if (servo_params.scale.linear > 0.0)
+  {
+    const auto linear_speed_scale =
+        (translation_error.norm() / servo_params.publish_period) / servo_params.scale.linear;
+    if (linear_speed_scale > 1.0)
     {
-      const auto linear_speed_scale =
-          (translation_error.norm() / servo_params.publish_period) / servo_params.scale.linear;
-      if (linear_speed_scale > 1.0)
-      {
-        translation_error /= linear_speed_scale;
-      }
-    }
-    if (servo_params.scale.rotational > 0.0)
-    {
-      const auto angular_speed_scale =
-          (std::abs(q_target.angularDistance(q_current)) / servo_params.publish_period) / servo_params.scale.rotational;
-      if (angular_speed_scale > 1.0)
-      {
-        q_target = q_current.slerp(1.0 / angular_speed_scale, q_target);
-      }
-    }
-
-    // Compute the Cartesian deltas from the velocity-scaled values.
-    const auto angle_axis_error = Eigen::AngleAxisd(q_target * q_current.inverse());
-    cartesian_position_delta.head<3>() = translation_error;
-    cartesian_position_delta.tail<3>() = angle_axis_error.axis() * angle_axis_error.angle();
-
-    // Compute the required change in joint angles.
-    const auto delta_result =
-        jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params, joint_name_group_index_map);
-    status = delta_result.first;
-    if (status != StatusCode::INVALID)
-    {
-      joint_position_delta = delta_result.second;
-      // Get velocity scaling information for singularity.
-      const auto singularity_scaling_info =
-          velocityScalingFactorForSingularity(robot_state, cartesian_position_delta, servo_params);
-      // Apply velocity scaling for singularity, if there was any scaling.
-      if (singularity_scaling_info.second != StatusCode::NO_WARNING)
-      {
-        status = singularity_scaling_info.second;
-        RCLCPP_WARN_STREAM(getLogger(), SERVO_STATUS_CODE_MAP.at(status));
-        joint_position_delta *= singularity_scaling_info.first;
-      }
+      translation_error /= linear_speed_scale;
     }
   }
-  else
+  if (servo_params.scale.rotational > 0.0)
   {
-    status = StatusCode::INVALID;
-    if (!valid_command)
+    const auto angular_speed_scale =
+        (std::abs(q_target.angularDistance(q_current)) / servo_params.publish_period) / servo_params.scale.rotational;
+    if (angular_speed_scale > 1.0)
     {
-      RCLCPP_WARN_STREAM(getLogger(), "Invalid pose command.");
+      q_target = q_current.slerp(1.0 / angular_speed_scale, q_target);
     }
-    if (!is_planning_frame)
+  }
+
+  // Compute the Cartesian deltas from the velocity-scaled values.
+  const auto angle_axis_error = Eigen::AngleAxisd(q_target * q_current.inverse());
+  cartesian_position_delta.head<3>() = translation_error;
+  cartesian_position_delta.tail<3>() = angle_axis_error.axis() * angle_axis_error.angle();
+
+  // Compute the required change in joint angles.
+  const auto delta_result =
+      jointDeltaFromIK(cartesian_position_delta, robot_state, servo_params, joint_name_group_index_map);
+  status = delta_result.first;
+  if (status != StatusCode::INVALID)
+  {
+    joint_position_delta = delta_result.second;
+    // Get velocity scaling information for singularity.
+    const auto singularity_scaling_info =
+        velocityScalingFactorForSingularity(robot_state, cartesian_position_delta, servo_params);
+    // Apply velocity scaling for singularity, if there was any scaling.
+    if (singularity_scaling_info.second != StatusCode::NO_WARNING)
     {
-      RCLCPP_WARN_STREAM(getLogger(), "Command frame is: " << command.frame_id << " expected: " << planning_frame);
+      status = singularity_scaling_info.second;
+      RCLCPP_WARN_STREAM(getLogger(), SERVO_STATUS_CODE_MAP.at(status));
+      joint_position_delta *= singularity_scaling_info.first;
     }
   }
   return std::make_pair(status, joint_position_delta);

@@ -106,6 +106,25 @@ TEST_F(ServoRosFixture, testJointJog)
   moveit_servo::StatusCode status = status_;
   RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after jointjog: " << static_cast<size_t>(status));
   ASSERT_EQ(status_, moveit_servo::StatusCode::NO_WARNING);
+
+  // Ensure error when number of commands doesn't match number of joints
+  int traj_count_before = traj_count_;
+  jog_cmd.velocities.pop_back();
+  jog_cmd.header.stamp = servo_test_node_->now();
+  joint_jog_publisher->publish(jog_cmd);
+  rclcpp::sleep_for(std::chrono::milliseconds(100));
+  ASSERT_EQ(status_, moveit_servo::StatusCode::INVALID);
+  jog_cmd.velocities.push_back(1.0);
+  jog_cmd.velocities.push_back(1.0);
+  jog_cmd.header.stamp = servo_test_node_->now();
+  joint_jog_publisher->publish(jog_cmd);
+  rclcpp::sleep_for(std::chrono::milliseconds(100));
+  ASSERT_EQ(status_, moveit_servo::StatusCode::INVALID);
+
+  // No additional trajectories were generated with the invalid commands
+  ASSERT_EQ(traj_count_, traj_count_before);
+  status = status_;
+  RCLCPP_INFO_STREAM(servo_test_node_->get_logger(), "Status after invalid jointjog: " << static_cast<size_t>(status));
 }
 
 TEST_F(ServoRosFixture, testTwist)
