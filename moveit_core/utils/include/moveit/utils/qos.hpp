@@ -51,8 +51,8 @@ namespace core
 class RCLCPP_PUBLIC StableTopicQoS : public rclcpp::QoS
 {
 public:
-  explicit StableTopicQoS(
-      const rclcpp::QoSInitialization& qos_initialization = rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default))
+  explicit StableTopicQoS(const rclcpp::QoSInitialization& qos_initialization =
+                              rclcpp::QoSInitialization::from_rmw(rmw_qos_profile_default))
     : rclcpp::QoS(qos_initialization, rmw_qos_profile_default)
   {
   }
