@@ -40,7 +40,8 @@
 #include <moveit/exceptions/exceptions.hpp>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
 #include <moveit/utils/logger.hpp>
-#include <moveit/utils/qos.hpp>
+
+#include <rclcpp/qos.hpp>
 
 // TODO: Remove conditional includes when released to all active distros.
 #if __has_include(<tf2/exceptions.hpp>)
@@ -1199,7 +1200,7 @@ void PlanningSceneMonitor::startSceneMonitor(const std::string& scene_topic)
   if (!scene_topic.empty())
   {
     planning_scene_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningScene>(
-        scene_topic, moveit::core::StableTopicQoS(),
+        scene_topic, rclcpp::ServicesQoS(),
         [this](const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene) {
           return newPlanningSceneCallback(scene);
         });
@@ -1297,7 +1298,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   if (!collision_objects_topic.empty())
   {
     collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::CollisionObject>(
-        collision_objects_topic, moveit::core::StableTopicQoS(),
+        collision_objects_topic, rclcpp::ServicesQoS(),
         [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { processCollisionObjectMsg(obj); });
     RCLCPP_INFO(logger_, "Listening to '%s'", collision_objects_topic.c_str());
   }
@@ -1305,7 +1306,7 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   if (!planning_scene_world_topic.empty())
   {
     planning_scene_world_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::PlanningSceneWorld>(
-        planning_scene_world_topic, moveit::core::StableTopicQoS(),
+        planning_scene_world_topic, rclcpp::ServicesQoS(),
         [this](const moveit_msgs::msg::PlanningSceneWorld::ConstSharedPtr& world) {
           return newPlanningSceneWorldCallback(world);
         });
@@ -1379,7 +1380,7 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     {
       // using regular message filter as there's no header
       attached_collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::AttachedCollisionObject>(
-          attached_objects_topic, moveit::core::StableTopicQoS(),
+          attached_objects_topic, rclcpp::ServicesQoS(),
           [this](const moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr& obj) {
             processAttachedCollisionObjectMsg(obj);
           });

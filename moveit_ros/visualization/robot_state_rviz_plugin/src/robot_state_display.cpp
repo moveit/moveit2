@@ -37,7 +37,8 @@
 #include <moveit/robot_state_rviz_plugin/robot_state_display.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <moveit/utils/message_checks.hpp>
-#include <moveit/utils/qos.hpp>
+
+#include <rclcpp/qos.hpp>
 
 // #include <rviz/visualization_manager.h>
 #include <rviz_default_plugins/robot/robot.hpp>
@@ -305,7 +306,7 @@ void RobotStateDisplay::changedRobotStateTopic()
   setStatus(rviz_common::properties::StatusProperty::Warn, "RobotState", "No msg received");
 
   robot_state_subscriber_ = node_->create_subscription<moveit_msgs::msg::DisplayRobotState>(
-      robot_state_topic_property_->getStdString(), moveit::core::StableTopicQoS(),
+      robot_state_topic_property_->getStdString(), rclcpp::ServicesQoS(),
       [this](const moveit_msgs::msg::DisplayRobotState::ConstSharedPtr& state) { return newRobotStateCallback(state); });
 }
 

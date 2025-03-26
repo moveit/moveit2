@@ -43,7 +43,6 @@
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <moveit/utils/logger.hpp>
-#include <moveit/utils/qos.hpp>
 #include <moveit/trajectory_processing/trajectory_tools.hpp>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/properties/bool_property.hpp>
@@ -56,6 +55,8 @@
 #include <rviz_common/properties/string_property.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/window_manager_interface.hpp>
+
+#include <rclcpp/qos.hpp>
 
 #include <string>
 
@@ -185,7 +186,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
   }
 
   trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
-      trajectory_topic_property_->getStdString(), moveit::core::StableTopicQoS(),
+      trajectory_topic_property_->getStdString(), rclcpp::ServicesQoS(),
       [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) { return incomingDisplayTrajectory(msg); });
 }
 
@@ -296,7 +297,7 @@ void TrajectoryVisualization::changedTrajectoryTopic()
   if (!trajectory_topic_property_->getStdString().empty() && robot_state_)
   {
     trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
-        trajectory_topic_property_->getStdString(), moveit::core::StableTopicQoS(),
+        trajectory_topic_property_->getStdString(), rclcpp::ServicesQoS(),
         [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) {
           return incomingDisplayTrajectory(msg);
         });
