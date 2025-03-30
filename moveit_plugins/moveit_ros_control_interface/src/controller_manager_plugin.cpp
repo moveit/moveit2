@@ -56,7 +56,8 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.ros_control_interface");
 static const rclcpp::Duration CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1.0);
-static const double SERVICE_CALL_TIMEOUT = 1.0;
+// TODO: Create a ROS parameter allowing to customize this default timeout
+static constexpr double SERVICE_CALL_TIMEOUT = 3.0;
 
 namespace moveit_ros_control_interface
 {
