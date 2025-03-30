@@ -218,12 +218,23 @@ std::optional<KinematicState> ServoNode::processJointJogCommand(const moveit::co
   // Reject any other command types that had arrived simultaneously.
   new_twist_msg_ = new_pose_msg_ = false;
 
+  if (!latest_joint_jog_.displacements.empty())
+  {
+    RCLCPP_WARN(node_->get_logger(), "Joint jog command displacements field is not yet supported, ignoring.");
+    latest_joint_jog_.displacements.clear();  // Only warn once per message.
+  }
+
   const bool command_stale = (node_->now() - latest_joint_jog_.header.stamp) >=
                              rclcpp::Duration::from_seconds(servo_params_.incoming_command_timeout);
   if (!command_stale)
   {
     JointJogCommand command{ latest_joint_jog_.joint_names, latest_joint_jog_.velocities };
     next_joint_state = servo_->getNextJointState(robot_state, command);
+    // If the command failed, stop trying to process this message
+    if (servo_->getStatus() == StatusCode::INVALID)
+    {
+      new_joint_jog_msg_ = false;
+    }
   }
   else
   {
@@ -256,6 +267,10 @@ std::optional<KinematicState> ServoNode::processTwistCommand(const moveit::core:
                                                latest_twist_.twist.angular.y, latest_twist_.twist.angular.z };
     const TwistCommand command{ latest_twist_.header.frame_id, velocities };
     next_joint_state = servo_->getNextJointState(robot_state, command);
+    if (servo_->getStatus() == StatusCode::INVALID)
+    {
+      new_twist_msg_ = false;
+    }
   }
   else
   {
@@ -285,6 +300,10 @@ std::optional<KinematicState> ServoNode::processPoseCommand(const moveit::core::
   {
     const PoseCommand command = poseFromPoseStamped(latest_pose_);
     next_joint_state = servo_->getNextJointState(robot_state, command);
+    if (servo_->getStatus() == StatusCode::INVALID)
+    {
+      new_pose_msg_ = false;
+    }
   }
   else
   {
