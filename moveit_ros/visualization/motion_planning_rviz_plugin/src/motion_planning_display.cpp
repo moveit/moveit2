@@ -74,6 +74,8 @@
 #include "ui_motion_planning_rviz_plugin_frame.h"
 #include <moveit/utils/rclcpp_utils.h>
 
+#include <rclcpp/qos.hpp>
+
 namespace moveit_rviz_plugin
 {
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_ros_visualization.motion_planning_display");
@@ -284,7 +286,7 @@ void MotionPlanningDisplay::toggleSelectPlanningGroupSubscription(bool enable)
   if (enable)
   {
     planning_group_sub_ = node_->create_subscription<std_msgs::msg::String>(
-        "/rviz/moveit/select_planning_group", rclcpp::SystemDefaultsQoS(),
+        "/rviz/moveit/select_planning_group", rclcpp::ServicesQoS(),
         [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return selectPlanningGroupCallback(msg); });
   }
   else
