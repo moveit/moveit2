@@ -42,6 +42,8 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/logger.hpp>
 
+#include <rclcpp/qos.hpp>
+
 namespace trajectory_execution_manager
 {
 
@@ -200,7 +202,7 @@ void TrajectoryExecutionManager::initialize()
   auto options = rclcpp::SubscriptionOptions();
   options.callback_group = callback_group;
   event_topic_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
-      EXECUTION_EVENT_TOPIC, rclcpp::SystemDefaultsQoS(),
+      EXECUTION_EVENT_TOPIC, rclcpp::ServicesQoS(),
       [this](const std_msgs::msg::String::ConstSharedPtr& event) { return receiveEvent(event); }, options);
 
   controller_mgr_node_->get_parameter("trajectory_execution.execution_duration_monitoring",
