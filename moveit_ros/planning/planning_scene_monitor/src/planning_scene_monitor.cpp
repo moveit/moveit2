@@ -1198,15 +1198,9 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
   if (!collision_objects_topic.empty())
   {
     collision_object_subscriber_ = pnode_->create_subscription<moveit_msgs::msg::CollisionObject>(
-<<<<<<< HEAD
-        collision_objects_topic, rclcpp::SystemDefaultsQoS(),
+        collision_objects_topic, rclcpp::ServicesQoS(),
         [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { return collisionObjectCallback(obj); });
     RCLCPP_INFO(LOGGER, "Listening to '%s'", collision_objects_topic.c_str());
-=======
-        collision_objects_topic, rclcpp::ServicesQoS(),
-        [this](const moveit_msgs::msg::CollisionObject::ConstSharedPtr& obj) { processCollisionObjectMsg(obj); });
-    RCLCPP_INFO(logger_, "Listening to '%s'", collision_objects_topic.c_str());
->>>>>>> 49ff5d8ab (Planning scene monitor: reliable QoS (#3400))
   }
 
   if (!planning_scene_world_topic.empty())
