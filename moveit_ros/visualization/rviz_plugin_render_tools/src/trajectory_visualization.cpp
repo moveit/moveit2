@@ -56,6 +56,8 @@
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/window_manager_interface.hpp>
 
+#include <rclcpp/qos.hpp>
+
 #include <string>
 
 using namespace std::placeholders;
@@ -184,7 +186,7 @@ void TrajectoryVisualization::onInitialize(const rclcpp::Node::SharedPtr& node, 
   }
 
   trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
-      trajectory_topic_property_->getStdString(), rclcpp::SystemDefaultsQoS(),
+      trajectory_topic_property_->getStdString(), rclcpp::ServicesQoS(),
       [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) { return incomingDisplayTrajectory(msg); });
 }
 
@@ -294,7 +296,7 @@ void TrajectoryVisualization::changedTrajectoryTopic()
   if (!trajectory_topic_property_->getStdString().empty() && robot_state_)
   {
     trajectory_topic_sub_ = node_->create_subscription<moveit_msgs::msg::DisplayTrajectory>(
-        trajectory_topic_property_->getStdString(), rclcpp::SystemDefaultsQoS(),
+        trajectory_topic_property_->getStdString(), rclcpp::ServicesQoS(),
         [this](const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg) {
           return incomingDisplayTrajectory(msg);
         });
