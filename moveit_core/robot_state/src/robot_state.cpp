@@ -1036,6 +1036,13 @@ void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bo
     attached_bodies.push_back(it.second.get());
 }
 
+void RobotState::getAttachedBodies(std::map<std::string, const AttachedBody*>& attached_bodies) const
+{
+  attached_bodies.clear();
+  for (const auto& it : attached_body_map_)
+    attached_bodies[it.first] = it.second.get();
+}
+
 void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const JointModelGroup* group) const
 {
   attached_bodies.clear();
