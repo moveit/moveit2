@@ -131,7 +131,7 @@ MOVEIT_CLASS_FORWARD(Ros2ControlManager);  // Defines Ros2ControlManagerPtr, Con
 class Ros2ControlManager : public moveit_controller_manager::MoveItControllerManager
 {
   std::string ns_;
-  double service_call_timeout_ ;
+  double service_call_timeout_;
   pluginlib::ClassLoader<ControllerHandleAllocator> loader_;
   typedef std::map<std::string, controller_manager_msgs::msg::ControllerState> ControllersMap;
 
