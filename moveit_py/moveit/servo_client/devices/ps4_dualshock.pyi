@@ -1,74 +1,85 @@
-from rclpy.impl.rcutils_logger import RCUtilsLogger
-from moveit.servo_client.teleop import TeleopDevice as TeleopDevice
-from multiprocessing import Process as Process
-from sensor_msgs.msg import Joy as Joy
-from std_srvs.srv import Trigger as Trigger
+import rclpy
+from dataclasses import dataclass
+from geometry_msgs.msg import TwistStamped
+from sensor_msgs.msg import Joy
+from moveit.servo_client.teleop import TeleopDevice
 
+@dataclass
 class DualShockAxes:
-    LEFT_STICK_X: int
-    LEFT_STICK_Y: int
-    LEFT_TRIGGER: int
-    RIGHT_STICK_X: int
-    RIGHT_STICK_Y: int
-    RIGHT_TRIGGER: int
-    D_PAD_X: int
-    D_PAD_Y: int
-    def __init__(
-        self,
-        LEFT_STICK_X,
-        LEFT_STICK_Y,
-        LEFT_TRIGGER,
-        RIGHT_STICK_X,
-        RIGHT_STICK_Y,
-        RIGHT_TRIGGER,
-        D_PAD_X,
-        D_PAD_Y,
-    ) -> None: ...
+    """
+    Axis mappings for the DualShock4 controller.
+    """
+    LEFT_STICK_X: int = 0
+    LEFT_STICK_Y: int = 1
+    LEFT_TRIGGER: int = 2
+    RIGHT_STICK_X: int = 3
+    RIGHT_STICK_Y: int = 4
+    RIGHT_TRIGGER: int = 5
+    D_PAD_X: int = 6
+    D_PAD_Y: int = 7
 
+@dataclass
 class DualShockButtons:
-    X: int
-    O: int
-    TRIANGLE: int
-    SQUARE: int
-    L1: int
-    R1: int
-    L2: int
-    R2: int
-    SHARE: int
-    OPTIONS: int
-    HOME: int
-    LEFT_STICK_TRIGGER: int
-    RIGHT_STICK_TRIGGER: int
-    def __init__(
-        self,
-        X,
-        O,
-        TRIANGLE,
-        SQUARE,
-        L1,
-        R1,
-        L2,
-        R2,
-        SHARE,
-        OPTIONS,
-        HOME,
-        LEFT_STICK_TRIGGER,
-        RIGHT_STICK_TRIGGER,
-    ) -> None: ...
+    """
+    Button mappings for the DualShock4 controller.
+    """
+    X: int = 0
+    O: int = 1
+    TRIANGLE: int = 2
+    SQUARE: int = 3
+    L1: int = 4
+    R1: int = 5
+    L2: int = 6
+    R2: int = 7
+    SHARE: int = 8
+    OPTIONS: int = 9
+    HOME: int = 10
+    LEFT_STICK_TRIGGER: int = 11
+    RIGHT_STICK_TRIGGER: int = 12
 
+@dataclass
 class PS4DualShock:
-    Axes: DualShockAxes
-    Buttons: DualShockButtons
-    def __init__(self, Axes, Buttons) -> None: ...
+    """
+    A dataclass to store the configuration for a PS4 DualShock controller.
+    Conforms to the sensor_msgs/Joy message structure.
+    """
+    Axes: DualShockAxes = DualShockAxes()
+    Buttons: DualShockButtons = DualShockButtons()
 
 class PS4DualShockTeleop(TeleopDevice):
-    logger: RCUtilsLogger
+    """
+    Teleoperation functionalities for a PS4 DualShock controller.
+    """
+
     def __init__(
         self,
         ee_frame_name: str,
-        node_name: str = ...,
-        device_name: str = ...,
-        device_config: PS4DualShock = ...,
-    ) -> None: ...
-    def publish_command(self, data) -> None: ...
-    def record() -> None: ...
+        node_name: str = "ps4_dualshock_teleop",
+        device_name: str = "ps4_dualshock",
+        device_config: PS4DualShock = PS4DualShock(),
+    ) -> None:
+        """
+        Initialize the PS4DualShockTeleop instance.
+
+        Args:
+            ee_frame_name: End effector frame name.
+            node_name: Name of the ROS node (default: "ps4_dualshock_teleop").
+            device_name: Name of the teleop device (default: "ps4_dualshock").
+            device_config: Configuration of the PS4 DualShock device (default: PS4DualShock()).
+        """
+        ...
+        
+    def publish_command(self, data: Joy) -> None:
+        """
+        Publishes the teleop command based on the Joy message data.
+
+        Args:
+            data: The Joy message containing input from the PS4 DualShock controller.
+        """
+        ...
+        
+    def record(self) -> None:
+        """
+        Records trajectory data (not implemented).
+        """
+        ...
