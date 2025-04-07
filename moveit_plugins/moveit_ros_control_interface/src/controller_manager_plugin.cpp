@@ -325,7 +325,7 @@ public:
     {
       node_->get_parameter("controller_service_call_timeout", service_call_timeout_);
     }
-    RCLCPP_INFO_STREAM(getLogger(), "Using service call timeout"<< service_call_timeout_ <<"seconds");
+    RCLCPP_INFO_STREAM(getLogger(), "Using service call timeout" << service_call_timeout_ << "seconds");
 
     list_controllers_service_ = node_->create_client<controller_manager_msgs::srv::ListControllers>(
         getAbsName("controller_manager/list_controllers"));
