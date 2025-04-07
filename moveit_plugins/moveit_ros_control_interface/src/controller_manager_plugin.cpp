@@ -317,8 +317,15 @@ public:
       }
     }
 
-    service_call_timeout_ = node_->declare_parameter<double>("controller_service_call_timeout", 3.0);
-    RCLCPP_INFO(getLogger(), "Using service call timeout: %f seconds", service_call_timeout_);
+    if (!node_->has_parameter("controller_service_call_timeout"))
+    {
+      service_call_timeout_ = node_->declare_parameter<double>("controller_service_call_timeout", 3.0);
+    }
+    else
+    {
+      node_->get_parameter("controller_service_call_timeout", service_call_timeout_);
+    }
+    RCLCPP_INFO_STREAM(getLogger(), "Using service call timeout"<< service_call_timeout_ <<"seconds");
 
     list_controllers_service_ = node_->create_client<controller_manager_msgs::srv::ListControllers>(
         getAbsName("controller_manager/list_controllers"));
