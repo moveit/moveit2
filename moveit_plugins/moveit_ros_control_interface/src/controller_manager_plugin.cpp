@@ -322,14 +322,15 @@ public:
     double timeout_seconds;
     if (!node_->has_parameter("controller_service_call_timeout"))
     {
-      timeout_seconds = node_->declare_parameter<double>("controller_service_call_timeout", DEFAULT_SERVICE_CALL_TIMEOUT);
+      timeout_seconds =
+          node_->declare_parameter<double>("controller_service_call_timeout", DEFAULT_SERVICE_CALL_TIMEOUT);
     }
     else
     {
       node_->get_parameter("controller_service_call_timeout", timeout_seconds);
     }
     service_call_timeout_ = std::chrono::duration<double>(timeout_seconds);
-    
+
     RCLCPP_INFO_STREAM(getLogger(), "Using service call timeout " << service_call_timeout_.count() << " seconds");
 
     list_controllers_service_ = node_->create_client<controller_manager_msgs::srv::ListControllers>(
