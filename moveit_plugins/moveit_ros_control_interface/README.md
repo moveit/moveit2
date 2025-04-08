@@ -23,7 +23,7 @@ In your MoveIt launch file (e.g. `ROBOT_moveit_config/launch/ROBOT_moveit_contro
 ```
 
 Make sure to set the `ros_control_namespace` parameter to the namespace (without the /controller_manager/ part) of the ros_control-based node you like to interface. 
-Also, the timeout in seconds for the service call to the controller can be changed from the default value of 3, by setting the `controller_service_call_timeout` parameter. 
+Also, the timeout in seconds for the service call to the controller can be changed from the default value, by setting the `controller_service_call_timeout` parameter. 
 If you are using `moveit_setup_assistant`, you can add it to `ROBOT_moveit_config/config/moveit_controllers.yaml`, e.g.:
 ```
 ros_control_namespace: /ROS_CONTROL_NODE
