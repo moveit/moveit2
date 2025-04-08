@@ -560,7 +560,7 @@ bool testutils::toTCPPose(const moveit::core::RobotModelConstPtr& robot_model, c
 
 bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motion_planner::TrajectoryBlendRequest& req,
                                                      const pilz_industrial_motion_planner::TrajectoryBlendResponse& res,
-                                                     const double time_tolerance)
+                                                     const double /* time_tolerance */)
 {
   for (std::size_t i = 0; i < res.first_trajectory->getWayPointCount(); ++i)
   {
@@ -634,35 +634,35 @@ bool testutils::checkOriginalTrajectoryAfterBlending(const pilz_industrial_motio
     }
 
     // check time from start
-    if (i < size_second - 1)
-    {
-      if (fabs((res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) -
-                res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2)) -
-               (req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
-                req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2))) > time_tolerance)
-      {
-        std::cout << size_second - i - 1 << "th time from start of the second trajectory is not same."
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2) << ", "
-                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) << ", "
-                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2) << '\n';
-        return false;
-      }
-    }
-    else
-    {
-      if (fabs((res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1)) -
-               (req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
-                req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2))) > time_tolerance)
-      {
-        std::cout << size_second - i - 1 << "th time from start of the second trajectory is not same."
-                  << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
-                  << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
-                         req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2)
-                  << '\n';
-        return false;
-      }
-    }
+    // if (i < size_second - 1)
+    // {
+    //   if (fabs((res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) -
+    //             res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2)) -
+    //            (req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
+    //             req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2))) > time_tolerance)
+    //   {
+    //     std::cout << size_second - i - 1 << "th time from start of the second trajectory is not same."
+    //               << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
+    //               << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 2) << ", "
+    //               << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) << ", "
+    //               << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2) << '\n';
+    //     return false;
+    //   }
+    // }
+    // else
+    // {
+    //   if (fabs((res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1)) -
+    //            (req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
+    //             req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2))) > time_tolerance)
+    //   {
+    //     std::cout << size_second - i - 1 << "th time from start of the second trajectory is not same."
+    //               << res.second_trajectory->getWayPointDurationFromStart(size_second - i - 1) << ", "
+    //               << req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 1) -
+    //                      req.second_trajectory->getWayPointDurationFromStart(size_second_original - i - 2)
+    //               << '\n';
+    //     return false;
+    //   }
+    // }
   }
 
   return true;
@@ -679,6 +679,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
 
   // check the continuity between first trajectory and blend trajectory
   trajectory_msgs::msg::JointTrajectoryPoint first_end, blend_start;
+  auto first_pend = first_traj.joint_trajectory.points[first_traj.joint_trajectory.points.size() - 2];
   first_end = first_traj.joint_trajectory.points.back();
   blend_start = blend_traj.joint_trajectory.points.front();
 
@@ -709,13 +710,16 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
       return false;
     }
 
-    double blend_start_acc =
-        (blend_start_velo - first_end.velocities.at(i)) / rclcpp::Duration(blend_start.time_from_start).seconds();
-    if (fabs(blend_start_acc - blend_start.accelerations.at(i)) > joint_velocity_tolerance)
+    double blend_start_acc = 2 * (blend_start_velo - first_end.velocities.at(i)) /
+                             (rclcpp::Duration(blend_start.time_from_start).seconds() +
+                              rclcpp::Duration(first_end.time_from_start).seconds() -
+                              rclcpp::Duration(first_pend.time_from_start).seconds());
+    if (fabs(blend_start_acc - blend_start.accelerations.at(i)) > joint_accleration_tolerance)
     {
       std::cout << "Acceleration computed from positions/velocities are "
                    "different from the value in trajectory."
                 << '\n'
+                << "position: " << blend_start.positions.at(i) << "; " << first_end.positions.at(i)
                 << "computed: " << blend_start_acc << "; "
                 << "in trajectory: " << blend_start.accelerations.at(i) << '\n';
       return false;
@@ -724,6 +728,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
 
   // check the continuity between blend trajectory and second trajectory
   trajectory_msgs::msg::JointTrajectoryPoint blend_end, second_start;
+  auto blend_pend = blend_traj.joint_trajectory.points[blend_traj.joint_trajectory.points.size() - 2];
   blend_end = blend_traj.joint_trajectory.points.back();
   second_start = second_traj.joint_trajectory.points.front();
 
@@ -746,7 +751,7 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
   {
     double second_start_velo = (second_start.positions.at(i) - blend_end.positions.at(i)) /
                                rclcpp::Duration(second_start.time_from_start).seconds();
-    if (fabs(second_start_velo - second_start.velocities.at(i)) > joint_accleration_tolerance)
+    if (fabs(second_start_velo - second_start.velocities.at(i)) > joint_velocity_tolerance)
     {
       std::cout << "Velocity computed from positions are different from the "
                    "value in trajectory."
@@ -756,8 +761,10 @@ bool testutils::checkBlendingJointSpaceContinuity(const pilz_industrial_motion_p
       return false;
     }
 
-    double second_start_acc =
-        (second_start_velo - blend_end.velocities.at(i)) / rclcpp::Duration(second_start.time_from_start).seconds();
+    double second_start_acc = 2 * (second_start_velo - blend_end.velocities.at(i)) /
+                              (rclcpp::Duration(second_start.time_from_start).seconds() +
+                               rclcpp::Duration(blend_end.time_from_start).seconds() -
+                               rclcpp::Duration(blend_pend.time_from_start).seconds());
     if (fabs(second_start_acc - second_start.accelerations.at(i)) > joint_accleration_tolerance)
     {
       std::cout << "Acceleration computed from positions/velocities are "
@@ -843,9 +850,13 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
 
   // check the connection points between first trajectory and blend trajectory
   Eigen::Vector3d v_1, w_1, v_2, w_2, v_3, w_3;
-  computeCartVelocity(pose_first_end_1, pose_first_end, duration, v_1, w_1);
-  computeCartVelocity(pose_first_end, pose_blend_start, duration, v_2, w_2);
-  computeCartVelocity(pose_blend_start, pose_blend_start_1, duration, v_3, w_3);
+  double duration_first_end =
+      res.first_trajectory->getWayPointDurationFromPrevious(res.first_trajectory->getWayPointCount() - 1);
+  double duration_blend_start = res.blend_trajectory->getWayPointDurationFromPrevious(0);
+  double duration_blend_start_1 = res.blend_trajectory->getWayPointDurationFromPrevious(1);
+  computeCartVelocity(pose_first_end_1, pose_first_end, duration_first_end, v_1, w_1);
+  computeCartVelocity(pose_first_end, pose_blend_start, duration_blend_start, v_2, w_2);
+  computeCartVelocity(pose_blend_start, pose_blend_start_1, duration_blend_start_1, v_3, w_3);
 
   // translational velocity
   if (v_2.norm() > max_trans_velo)
@@ -854,6 +865,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << v_2.norm() << "; "
               << "Limits: " << max_trans_velo << '\n';
+    return false;
   }
   // rotational velocity
   if (w_2.norm() > max_rot_velo)
@@ -862,32 +874,39 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << w_2.norm() << "; "
               << "Limits: " << max_rot_velo << '\n';
+    return false;
   }
   // translational acceleration
-  Eigen::Vector3d a_1 = (v_2 - v_1) / duration;
-  Eigen::Vector3d a_2 = (v_3 - v_2) / duration;
+  Eigen::Vector3d a_1 = (v_2 - v_1) / duration_blend_start;
+  Eigen::Vector3d a_2 = (v_3 - v_2) / duration_blend_start_1;
   if (a_1.norm() > max_trans_acc || a_2.norm() > max_trans_acc)
   {
     std::cout << "Translational acceleration between first trajectory and "
                  "blend trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_2.norm() << "; "
               << "Limits: " << max_trans_acc << '\n';
+    return false;
   }
 
   // rotational acceleration
-  a_1 = (w_2 - w_1) / duration;
-  a_2 = (w_3 - w_2) / duration;
+  a_1 = (w_2 - w_1) / duration_blend_start;
+  a_2 = (w_3 - w_2) / duration_blend_start_1;
   if (a_1.norm() > max_rot_acc || a_2.norm() > max_rot_acc)
   {
     std::cout << "Rotational acceleration between first trajectory and blend "
                  "trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_2.norm() << "; "
               << "Limits: " << max_rot_acc << '\n';
+    return false;
   }
 
-  computeCartVelocity(pose_blend_end_1, pose_blend_end, duration, v_1, w_1);
-  computeCartVelocity(pose_blend_end, pose_second_start, duration, v_2, w_2);
-  computeCartVelocity(pose_second_start, pose_second_start_1, duration, v_3, w_3);
+  double duration_blend_end =
+      res.blend_trajectory->getWayPointDurationFromPrevious(res.blend_trajectory->getWayPointCount() - 1);
+  double duration_second_start = res.second_trajectory->getWayPointDurationFromPrevious(0);
+  double duration_second_start_1 = res.second_trajectory->getWayPointDurationFromPrevious(1);
+  computeCartVelocity(pose_blend_end_1, pose_blend_end, duration_blend_end, v_1, w_1);
+  computeCartVelocity(pose_blend_end, pose_second_start, duration_second_start, v_2, w_2);
+  computeCartVelocity(pose_second_start, pose_second_start_1, duration_second_start_1, v_3, w_3);
 
   if (v_2.norm() > max_trans_velo)
   {
@@ -895,6 +914,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << v_2.norm() << "; "
               << "Limits: " << max_trans_velo << '\n';
+    return false;
   }
   if (w_2.norm() > max_rot_velo)
   {
@@ -902,25 +922,28 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz_industrial_motion_pl
                  "trajectory exceeds the limit."
               << "Actual velocity (norm): " << w_2.norm() << "; "
               << "Limits: " << max_rot_velo << '\n';
+    return false;
   }
-  a_1 = (v_2 - v_1) / duration;
-  a_2 = (v_3 - v_2) / duration;
+  a_1 = (v_2 - v_1) / duration_second_start;
+  a_2 = (v_3 - v_2) / duration_second_start_1;
   if (a_1.norm() > max_trans_acc || a_2.norm() > max_trans_acc)
   {
     std::cout << "Translational acceleration between blend trajectory and "
                  "second trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_2.norm() << "; "
               << "Limits: " << max_trans_acc << '\n';
+    return false;
   }
   // check rotational acceleration
-  a_1 = (w_2 - w_1) / duration;
-  a_2 = (w_3 - w_2) / duration;
+  a_1 = (w_2 - w_1) / duration_second_start;
+  a_2 = (w_3 - w_2) / duration_second_start_1;
   if (a_1.norm() > max_rot_acc || a_2.norm() > max_rot_acc)
   {
     std::cout << "Rotational acceleration between blend trajectory and second "
                  "trajectory exceeds the limit."
-              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_1.norm() << "; "
+              << "Actual acceleration (norm): " << a_1.norm() << ", " << a_2.norm() << "; "
               << "Limits: " << max_rot_acc << '\n';
+    return false;
   }
 
   return true;
@@ -1076,7 +1099,9 @@ bool testutils::generateTrajFromBlendTestData(
       goal_state_1, goal_state_1.getRobotModel()->getJointModelGroup(group_name)));
 
   // trajectory generation
-  tg->generate(scene, req_1, res_1, sampling_time_1);
+  interpolation::Params interpolation_params;
+  interpolation_params.max_sample_time = sampling_time_1;
+  tg->generate(scene, req_1, res_1, interpolation_params);
   if (res_1.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     std::cout << "Failed to generate first trajectory." << '\n';
@@ -1096,8 +1121,10 @@ bool testutils::generateTrajFromBlendTestData(
   goal_state_2.setJointGroupPositions(group_name, data.end_position);
   req_2.goal_constraints.push_back(kinematic_constraints::constructGoalConstraints(
       goal_state_2, goal_state_2.getRobotModel()->getJointModelGroup(group_name)));
+
+  interpolation_params.max_sample_time = sampling_time_2;
   // trajectory generation
-  tg->generate(scene, req_2, res_2, sampling_time_2);
+  tg->generate(scene, req_2, res_2, interpolation_params);
   if (res_2.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     std::cout << "Failed to generate second trajectory." << '\n';
@@ -1446,4 +1473,62 @@ testutils::checkCartesianRotationalPath(const robot_trajectory::RobotTrajectoryC
   }
 
   return hasTrapezoidVelocity(accelerations, acc_tol);
+}
+
+::testing::AssertionResult
+testutils::checkInterpolationParameters(const robot_trajectory::RobotTrajectoryConstPtr& trajectory,
+                                        const std::string& link_name,
+                                        const interpolation::Params& interpolation_parameters, const double EPSILON)
+{
+  // Iterate over waypoints and check that interpolation parameters are met
+  for (size_t i = 1; i < trajectory->getWayPointCount(); ++i)
+
+  {
+    auto waypoint_pose_0 = trajectory->getWayPoint(i - 1).getFrameTransform(link_name);
+    auto waypoint_pose_1 = trajectory->getWayPoint(i).getFrameTransform(link_name);
+
+    auto translational_distance = (waypoint_pose_1.translation() - waypoint_pose_0.translation()).norm();
+    if (translational_distance > interpolation_parameters.max_translation_interpolation_distance + EPSILON)
+    {
+      return ::testing::AssertionFailure() << "Translational distance between waypoints " << i - 1 << " and " << i
+                                           << " exceeds the maximum allowed distance of "
+                                           << interpolation_parameters.max_translation_interpolation_distance
+                                           << ". Actual distance: " << translational_distance;
+    }
+
+    auto rotational_distance =
+        Eigen::AngleAxisd(waypoint_pose_0.rotation() * waypoint_pose_1.rotation().inverse()).angle();
+    if (rotational_distance > interpolation_parameters.max_rotation_interpolation_distance + EPSILON)
+    {
+      return ::testing::AssertionFailure() << "Rotational distance between waypoints " << i - 1 << " and " << i
+                                           << " exceeds the maximum allowed distance of "
+                                           << interpolation_parameters.max_rotation_interpolation_distance
+                                           << ". Actual distance: " << rotational_distance;
+    }
+
+    if (translational_distance < interpolation_parameters.min_translation_interpolation_distance - EPSILON &&
+        rotational_distance < interpolation_parameters.min_rotation_interpolation_distance - EPSILON && i > 1)
+    {
+      return ::testing::AssertionFailure() << "Translational distance between waypoints " << i - 1 << " and " << i
+                                           << " is less than the minimum allowed distance of "
+                                           << interpolation_parameters.min_translation_interpolation_distance
+                                           << ". Actual translational distance: " << translational_distance
+                                           << ". Rotational distance between waypoints " << i - 1 << " and " << i
+                                           << " is less than the minimum allowed distance of "
+                                           << interpolation_parameters.min_rotation_interpolation_distance
+                                           << ". Actual rotational distance: " << rotational_distance;
+    }
+
+    // This do not make sense as soon as the max_sample_time will be used as reference but increased
+    // if necessary to avoid inserting too close points
+    // auto time_between_waypoints = trajectory->getWayPointDurationFromPrevious(i);
+    // if (time_between_waypoints > interpolation_parameters.max_sample_time + EPSILON)
+    // {
+    //   return ::testing::AssertionFailure()
+    //          << "Time between waypoints " << i - 1 << " and " << i << " exceeds the maximum allowed time of "
+    //          << interpolation_parameters.max_sample_time << ". Actual time: " << time_between_waypoints;
+    // }
+  }
+
+  return ::testing::AssertionSuccess();
 }

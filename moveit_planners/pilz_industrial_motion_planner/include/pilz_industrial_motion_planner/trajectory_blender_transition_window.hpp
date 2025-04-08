@@ -101,12 +101,10 @@ private:
   /**
    * @brief validate trajectory blend request
    * @param req
-   * @param sampling_time: get the same sampling time of the two input
-   * trajectories
    * @param error_code
    * @return
    */
-  bool validateRequest(const pilz_industrial_motion_planner::TrajectoryBlendRequest& req, double& sampling_time,
+  bool validateRequest(const pilz_industrial_motion_planner::TrajectoryBlendRequest& req,
                        moveit_msgs::msg::MoveItErrorCodes& error_code) const;
   /**
    * @brief searchBlendPoint
@@ -164,13 +162,12 @@ private:
    * @param first_interse_index
    * @param second_interse_index
    * @param blend_begin_index
-   * @param sampling_time
    * @param trajectory: the resulting blend trajectory inside the blending
    * sphere
    */
   void blendTrajectoryCartesian(const pilz_industrial_motion_planner::TrajectoryBlendRequest& req,
                                 const std::size_t first_interse_index, const std::size_t second_interse_index,
-                                const std::size_t blend_align_index, double sampling_time,
+                                const std::size_t blend_align_index,
                                 pilz_industrial_motion_planner::CartesianTrajectory& trajectory) const;
 
 private:  // static members
