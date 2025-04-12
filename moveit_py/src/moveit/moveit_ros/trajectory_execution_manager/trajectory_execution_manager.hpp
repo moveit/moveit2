@@ -38,6 +38,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/functional.h>
+#include <pybind11/stl.h>
 #include <moveit_py/moveit_py_utils/copy_ros_msg.hpp>
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
 #include <rclcpp/rclcpp.hpp>
