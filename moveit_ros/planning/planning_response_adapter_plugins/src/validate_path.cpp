@@ -57,6 +57,8 @@ public:
   {
   }
 
+  ~ValidateSolution() = default;
+
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     auto param_listener =

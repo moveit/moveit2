@@ -58,6 +58,8 @@ public:
   {
   }
 
+  ~CheckStartStateCollision() = default;
+
   [[nodiscard]] std::string getDescription() const override
   {
     return std::string("CheckStartStateCollision");

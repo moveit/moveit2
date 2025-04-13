@@ -56,6 +56,8 @@ public:
   {
   }
 
+  ~CheckForStackedConstraints() = default;
+
   [[nodiscard]] std::string getDescription() const override
   {
     return std::string("CheckForStackedConstraints");

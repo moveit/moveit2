@@ -85,6 +85,7 @@ void loadPluginVector(const std::shared_ptr<rclcpp::Node>& node,
     // If loading was successful, initialize plugin and add to vector
     if (adapter)
     {
+      // buggy
       adapter->initialize(node, parameter_namespace);
       plugin_vector.push_back(std::move(adapter));
       RCLCPP_INFO(node->get_logger(), "Loaded adapter '%s'", plugin_name.c_str());

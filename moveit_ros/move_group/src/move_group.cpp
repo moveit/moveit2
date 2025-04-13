@@ -46,6 +46,10 @@
 #include <set>
 #include <moveit/utils/logger.hpp>
 
+#include <chrono>
+#include <thread>
+#include <iostream>
+
 static const std::string ROBOT_DESCRIPTION =
     "robot_description";  // name of the robot description (a param name, so it can be changed externally)
 
@@ -289,7 +293,14 @@ int main(int argc, char** argv)
   // Initialize MoveItCpp
   const auto moveit_cpp = std::make_shared<moveit_cpp::MoveItCpp>(nh, moveit_cpp_options);
   const auto planning_scene_monitor = moveit_cpp->getPlanningSceneMonitorNonConst();
-
+  // planning_scene_monitor.reset();
+  // moveit_cpp.reset();
+  // using namespace std::chrono_literals;
+  // std::this_thread::sleep_for(10000ms);
+  // std::cerr <<  "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
+  
+  // moveit_cpp.reset();
+  
   if (planning_scene_monitor->getPlanningScene())
   {
     bool debug = false;

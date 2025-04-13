@@ -192,6 +192,7 @@ void PlanningPipeline::configure()
 
     if (request_adapter_plugin_loader_)
     {
+      // buggy
       loadPluginVector<planning_interface::PlanningRequestAdapter>(node_, request_adapter_plugin_loader_,
                                                                    planning_request_adapter_vector_,
                                                                    pipeline_parameters_.request_adapters,

@@ -53,6 +53,7 @@ public:
   {
   }
 
+  ~ResolveConstraintFrames() = default;
   [[nodiscard]] std::string getDescription() const override
   {
     return std::string("ResolveConstraintFrames");
