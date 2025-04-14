@@ -1,6 +1,6 @@
 class World:
     """
-        Maintain a representation of the environment
+    Maintain a representation of the environment
     """
 
-    def __init__(self) -> None:  ...
+    def __init__(self) -> None: ...
