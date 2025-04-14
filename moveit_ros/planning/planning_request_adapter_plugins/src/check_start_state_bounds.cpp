@@ -94,7 +94,7 @@ public:
             planning_scene->getRobotModel()->getJointModels();
 
     // Read parameters
-    const default_request_adapter_parameters::Params params = param_listener_->get_params();
+    const auto params = param_listener_->get_params();
 
     bool should_fix_state = false;
     bool is_out_of_bounds = false;
