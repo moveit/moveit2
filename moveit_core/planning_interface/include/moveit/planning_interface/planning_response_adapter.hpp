@@ -52,8 +52,7 @@ MOVEIT_CLASS_FORWARD(PlanningResponseAdapter);  // Defines PlanningResponseAdapt
 class PlanningResponseAdapter
 {
 public:
-
-  virtual ~PlanningResponseAdapter() = default;    
+  virtual ~PlanningResponseAdapter() = default;
   /** @brief Initialize parameters using the passed Node and parameter namespace.
    *  @param node Node instance used by the adapter
    *  @param parameter_namespace Parameter namespace for adapter

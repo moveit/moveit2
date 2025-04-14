@@ -56,7 +56,7 @@ public:
   {
   }
 
-  ~AddRuckigTrajectorySmoothing() = default;
+  ~AddRuckigTrajectorySmoothing() override = default;
 
   [[nodiscard]] std::string getDescription() const override
   {

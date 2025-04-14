@@ -54,9 +54,6 @@
 #include <moveit/utils/logger.hpp>
 
 #include <moveit_ros_planning/default_request_adapter_parameters.hpp>
-#include <iostream>
-#include <chrono>
-#include <thread>
 
 namespace default_planning_request_adapters
 {
@@ -69,25 +66,11 @@ public:
   {
   }
 
-  ~CheckStartStateBounds() {
-    //using namespace std::chrono_literals;
-    std::cerr << "ONCESI  ....................." << std::endl;
-    //std::this_thread::sleep_for(1000ms);
-    param_listener_.reset();
-    std::cerr << "SONRASI ....................." << std::endl;
-    //std::this_thread::sleep_for(1000ms);
-  } 
+  ~CheckStartStateBounds() override = default;
 
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     param_listener_ = std::make_unique<default_request_adapter_parameters::ParamListener>(node, parameter_namespace);
-    
-    //using namespace std::chrono_literals;
-    //std::cerr << "OO MITA ONCESI  ....................." << std::endl;
-    //std::this_thread::sleep_for(1000ms);
-    //param_listener_.reset();
-    //std::cerr << "OO MITA SONRASI ....................." << std::endl;
-    //std::this_thread::sleep_for(1000ms);
   }
 
   [[nodiscard]] std::string getDescription() const override

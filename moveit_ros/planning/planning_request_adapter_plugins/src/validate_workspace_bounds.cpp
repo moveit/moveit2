@@ -57,9 +57,7 @@ public:
   {
   }
 
-  ~ValidateWorkspaceBounds() {
-  	param_listener_.reset();
-  }
+  ~ValidateWorkspaceBounds() override = default;
 
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {

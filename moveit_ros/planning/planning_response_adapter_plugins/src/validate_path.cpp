@@ -57,7 +57,7 @@ public:
   {
   }
 
-  ~ValidateSolution() = default;
+  ~ValidateSolution() override = default;
 
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
