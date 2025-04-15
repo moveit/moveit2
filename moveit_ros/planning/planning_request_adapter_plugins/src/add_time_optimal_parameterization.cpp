@@ -52,6 +52,8 @@ public:
   {
   }
 
+  ~AddTimeOptimalParameterization() override = default;
+
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     path_tolerance_ = getParam(node, LOGGER, parameter_namespace, "path_tolerance", 0.1);

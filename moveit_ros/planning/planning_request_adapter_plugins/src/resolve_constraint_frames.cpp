@@ -49,7 +49,12 @@ public:
   {
   }
 
+<<<<<<< HEAD
   void initialize(const rclcpp::Node::SharedPtr& /* node */, const std::string& /* parameter_namespace */) override
+=======
+  ~ResolveConstraintFrames() override = default;
+  [[nodiscard]] std::string getDescription() const override
+>>>>>>> 59211df9e (Make the destructors of the base classes of planning adapters virtual and close move_group gracefully (#3435))
   {
   }
 

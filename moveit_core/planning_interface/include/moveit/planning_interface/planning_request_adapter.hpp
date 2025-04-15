@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2019, PickNik Inc.
+ *  Copyright (c) 2023, PickNik Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,55 +32,45 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Omid Heidari */
+/* Author: Ioan Sucan, Sebastian Jahr
+   Description: Generic interface to adapting motion planning requests
+*/
+
 #pragma once
 
-#include <ros/ros.h>
-#include <trajopt_sco/sco_common.hpp>
-#include <moveit/planning_interface/planning_interface.h>
-#include "problem_description.h"
+#include <moveit/macros/class_forward.hpp>
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
+#include <rclcpp/logging.hpp>
+#include <rclcpp/node.hpp>
 
-namespace trajopt_interface
+namespace planning_interface
 {
-MOVEIT_CLASS_FORWARD(TrajOptInterface);  // Defines TrajOptInterfacePtr, ConstPtr, WeakPtr... etc
+MOVEIT_CLASS_FORWARD(PlanningRequestAdapter);  // Defines PlanningRequestAdapterPtr, ConstPtr, WeakPtr... etc
 
-class TrajOptInterface
+/** @brief Concept in MoveIt which can be used to modify the planning problem(pre-processing) in a planning pipeline.
+ * PlanningRequestAdapters enable adjusting to or validating a planning problem for a subsequent planning algorithm.
+ */
+class PlanningRequestAdapter
 {
 public:
-<<<<<<< HEAD:moveit_planners/trajopt/include/trajopt_interface/trajopt_interface.h
-  TrajOptInterface(const ros::NodeHandle& nh = ros::NodeHandle("~"));
-=======
-  virtual ~PlanningResponseAdapter() = default;
+  virtual ~PlanningRequestAdapter() = default;
   /** @brief Initialize parameters using the passed Node and parameter namespace.
    *  @param node Node instance used by the adapter
    *  @param parameter_namespace Parameter namespace for adapter
    *  @details The default implementation is empty */
   virtual void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace){};
->>>>>>> 59211df9e (Make the destructors of the base classes of planning adapters virtual and close move_group gracefully (#3435)):moveit_core/planning_interface/include/moveit/planning_interface/planning_response_adapter.hpp
 
-  const sco::BasicTrustRegionSQPParameters& getParams() const
-  {
-    return params_;
-  }
+  /** @brief Get a description of this adapter
+   *  @return Returns a short string that identifies the planning request adapter
+   */
+  [[nodiscard]] virtual std::string getDescription() const = 0;
 
-  bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const planning_interface::MotionPlanRequest& req, moveit_msgs::MotionPlanDetailedResponse& res);
-
-protected:
-  /** @brief Configure everything using the param server */
-  void setTrajOptParams(sco::BasicTrustRegionSQPParameters& param);
-  void setDefaultTrajOPtParams();
-  void setProblemInfoParam(ProblemInfo& problem_info);
-  void setJointPoseTermInfoParams(JointPoseTermInfoPtr& jp, std::string name);
-  trajopt::DblVec extractStartJointValues(const planning_interface::MotionPlanRequest& req,
-                                          const std::vector<std::string>& group_joint_names);
-
-  ros::NodeHandle nh_;  /// The ROS node handle
-  sco::BasicTrustRegionSQPParameters params_;
-  std::vector<sco::Optimizer::Callback> optimizer_callbacks_;
-  TrajOptProblemPtr trajopt_problem_;
-  std::string name_;
+  /** @brief Adapt the planning request
+   *  @param planning_scene Representation of the environment for the planning
+   *  @param req Motion planning request with a set of constraints
+   *  @return True if response was generated correctly */
+  [[nodiscard]] virtual moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                                            planning_interface::MotionPlanRequest& req) const = 0;
 };
-
-void callBackFunc(sco::OptProb* opt_prob, sco::OptResults& opt_res);
-}  // namespace trajopt_interface
+}  // namespace planning_interface
