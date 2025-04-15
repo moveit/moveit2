@@ -55,7 +55,7 @@ rclcpp::Logger& getGlobalRootLogger()
     auto name = fmt::format("moveit_{}", rsl::rng()());
     try
     {
-      static auto* moveit_node = new rclcpp::Node(name);
+      static rclcpp::Node::SharedPtr moveit_node = rclcpp::Node::make_shared(name);
       return moveit_node->get_logger();
     }
     catch (const std::exception& ex)

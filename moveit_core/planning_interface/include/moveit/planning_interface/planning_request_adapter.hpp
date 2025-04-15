@@ -54,6 +54,7 @@ MOVEIT_CLASS_FORWARD(PlanningRequestAdapter);  // Defines PlanningRequestAdapter
 class PlanningRequestAdapter
 {
 public:
+  virtual ~PlanningRequestAdapter() = default;
   /** @brief Initialize parameters using the passed Node and parameter namespace.
    *  @param node Node instance used by the adapter
    *  @param parameter_namespace Parameter namespace for adapter

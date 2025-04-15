@@ -53,6 +53,8 @@ public:
   {
   }
 
+  ~AddTimeOptimalParameterization() override = default;
+
   void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
   {
     param_listener_ = std::make_unique<default_response_adapter_parameters::ParamListener>(node, parameter_namespace);
