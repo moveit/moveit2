@@ -52,7 +52,7 @@ joint_limit_margins: [0.12]
 ## Topic names
 cartesian_command_in_topic: ~/delta_twist_cmds  # Topic for incoming Cartesian twist commands
 joint_command_in_topic: ~/delta_joint_cmds  # Topic for incoming joint angle commands
-joint_topic: /joint_states  # Get joint states from this tpoic
+joint_topic: /joint_states  # Get joint states from this topic
 status_topic: ~/status  # Publish status to this topic
 command_out_topic: /panda_arm_controller/joint_trajectory  # Publish outgoing commands here
 
