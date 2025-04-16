@@ -2,6 +2,9 @@
 Changelog for package moveit_resources_prbt_moveit_config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.12.2 (2025-02-15)
 -------------------
 

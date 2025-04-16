@@ -2,6 +2,12 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Make the destructors of the base classes of planning adapters virtual and close move_group gracefully (`#3435 <https://github.com/ros-planning/moveit2/issues/3435>`_) (`#3443 <https://github.com/ros-planning/moveit2/issues/3443>`_)
+* fix: ensure attached objects update during motion execution (`#3327 <https://github.com/ros-planning/moveit2/issues/3327>`_) (`#3414 <https://github.com/ros-planning/moveit2/issues/3414>`_)
+* Contributors: Cihat Kurtuluş Altıparmak, Marco Magri
+
 2.12.2 (2025-02-15)
 -------------------
 * Reverts `#2985 <https://github.com/ros-planning/moveit2/issues/2985>`_, Ports moveit `#3388 <https://github.com/ros-planning/moveit2/issues/3388>`_ `#3470 <https://github.com/ros-planning/moveit2/issues/3470>`_ `#3539 <https://github.com/ros-planning/moveit2/issues/3539>`_ (`#3284 <https://github.com/ros-planning/moveit2/issues/3284>`_) (`#3320 <https://github.com/ros-planning/moveit2/issues/3320>`_)

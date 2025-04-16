@@ -2,6 +2,9 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.12.2 (2025-02-15)
 -------------------
 

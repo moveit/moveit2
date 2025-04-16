@@ -2,6 +2,9 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.12.2 (2025-02-15)
 -------------------
 

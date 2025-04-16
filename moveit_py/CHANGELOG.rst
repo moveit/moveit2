@@ -2,6 +2,12 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Allow conversion from list[str] to std::vector<std::string> (`#3423 <https://github.com/ros-planning/moveit2/issues/3423>`_) (`#3425 <https://github.com/ros-planning/moveit2/issues/3425>`_)
+* feat: add remapping argument to MoveItPy initialization (`#3367 <https://github.com/ros-planning/moveit2/issues/3367>`_) (`#3386 <https://github.com/ros-planning/moveit2/issues/3386>`_).
+* Contributors: Jens Vanhooydonck, Kazuya Oguma
+
 2.12.2 (2025-02-15)
 -------------------
 * move TrajectoryExecutionManager::clear() to private (`#3226 <https://github.com/ros-planning/moveit2/issues/3226>`_) (`#3238 <https://github.com/ros-planning/moveit2/issues/3238>`_)

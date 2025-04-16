@@ -2,6 +2,9 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.12.2 (2025-02-15)
 -------------------
 * Use ! in place of not keyword for Pilz and CHOMP planners (`#3217 <https://github.com/ros-planning/moveit2/issues/3217>`_) (`#3222 <https://github.com/ros-planning/moveit2/issues/3222>`_)

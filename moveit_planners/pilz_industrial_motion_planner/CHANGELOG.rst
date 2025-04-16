@@ -2,6 +2,12 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (`#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_) (`#3365 <https://github.com/ros-planning/moveit/issues/3365>`_)
+  * Publish planning scene while planning (`#3689 <https://github.com/ros-planning/moveit/issues/3689>`_)
+* Contributors: Mark Johnson
+
 2.12.2 (2025-02-15)
 -------------------
 * Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_) (`#3258 <https://github.com/ros-planning/moveit2/issues/3258>`_)
