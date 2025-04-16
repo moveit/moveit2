@@ -2,6 +2,9 @@
 Changelog for package moveit_resources_prbt_pg70_support
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.13.0 (2025-02-15)
 -------------------
 

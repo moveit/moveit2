@@ -2,6 +2,11 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use ament_cmake_ros build tool in moveit_setup_assistant packages (`#3441 <https://github.com/ros-planning/moveit2/issues/3441>`_)
+* Contributors: Sebastian Castro
+
 2.13.0 (2025-02-15)
 -------------------
 

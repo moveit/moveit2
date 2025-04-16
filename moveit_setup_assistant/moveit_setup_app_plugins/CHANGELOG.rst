@@ -2,6 +2,9 @@
 Changelog for package moveit_setup_app_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.13.0 (2025-02-15)
 -------------------
 
