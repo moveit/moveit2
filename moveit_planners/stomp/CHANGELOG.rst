@@ -2,6 +2,9 @@
 Changelog for package moveit_planners_stomp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.13.1 (2025-04-15)
 -------------------
 * Add `stomp` target link to `moveit_planners_stomp` tests (`#3437 <https://github.com/ros-planning/moveit2/issues/3437>`_)
