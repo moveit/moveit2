@@ -2,6 +2,11 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update ompl_defaults.yaml to not have an invalid AnytimePathShortening configuration (`#3374 <https://github.com/ros-planning/moveit2/issues/3374>`_) (`#3375 <https://github.com/ros-planning/moveit2/issues/3375>`_)
+* Contributors: Stephanie Eng
+
 2.5.8 (2025-02-09)
 ------------------
 * Switch to get for Dict lookup to prevent KeyError (`#3043 <https://github.com/ros-planning/moveit2/issues/3043>`_) (`#3193 <https://github.com/ros-planning/moveit2/issues/3193>`_)

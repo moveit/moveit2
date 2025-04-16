@@ -2,6 +2,9 @@
 Changelog for package moveit_planners
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 2.5.8 (2025-02-09)
 ------------------
 * fix chomp depend, closes `#3228 <https://github.com/ros-planning/moveit2/issues/3228>`_ (backport `#3229 <https://github.com/ros-planning/moveit2/issues/3229>`_) (`#3230 <https://github.com/ros-planning/moveit2/issues/3230>`_)

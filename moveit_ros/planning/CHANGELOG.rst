@@ -2,6 +2,14 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Planning scene monitor: reliable QoS (backport `#3400 <https://github.com/ros-planning/moveit2/issues/3400>`_) (`#3409 <https://github.com/ros-planning/moveit2/issues/3409>`_)
+* Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (backport `#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_) (`#3364 <https://github.com/ros-planning/moveit2/issues/3364>`_)
+  * Publish planning scene while planning (`#3689 <https://github.com/ros-planning/moveit/issues/3689>`_)
+* Enable allowed_execution_duration_scaling and allowed_goal_duration_margin for each controller (`#3335 <https://github.com/ros-planning/moveit2/issues/3335>`_) (`#3337 <https://github.com/ros-planning/moveit2/issues/3337>`_)
+* Contributors: Aleksey Nogin, Daniel García López, Mark Johnson
+
 2.5.8 (2025-02-09)
 ------------------
 * load robot_description from other namespace (backport `#3269 <https://github.com/ros-planning/moveit2/issues/3269>`_) (`#3324 <https://github.com/ros-planning/moveit2/issues/3324>`_)
