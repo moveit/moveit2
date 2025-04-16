@@ -2,6 +2,9 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.13.2 (2025-04-16)
+-------------------
+
 2.13.1 (2025-04-15)
 -------------------
 * Allow conversion from list[str] to std::vector<std::string> (`#3423 <https://github.com/ros-planning/moveit2/issues/3423>`_)

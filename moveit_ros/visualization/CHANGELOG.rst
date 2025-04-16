@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.13.2 (2025-04-16)
+-------------------
+
 2.13.1 (2025-04-15)
 -------------------
 * Planning scene monitor: reliable QoS (`#3400 <https://github.com/ros-planning/moveit2/issues/3400>`_)

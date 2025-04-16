@@ -2,6 +2,9 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.13.2 (2025-04-16)
+-------------------
+
 2.13.1 (2025-04-15)
 -------------------
 * Minor typo fix in simulated Panda servo config (`#3444 <https://github.com/ros-planning/moveit2/issues/3444>`_)
