@@ -2,8 +2,8 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.5.9 (2025-04-15)
+------------------
 * Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (backport `#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_) (`#3364 <https://github.com/ros-planning/moveit2/issues/3364>`_)
   * Publish planning scene while planning (`#3689 <https://github.com/ros-planning/moveit/issues/3689>`_)
 * Contributors: Mark Johnson
