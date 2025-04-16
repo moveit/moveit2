@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.1 (2025-04-15)
+-------------------
 * Planning scene monitor: reliable QoS (`#3400 <https://github.com/ros-planning/moveit2/issues/3400>`_)
 * Respect robot alpha value in trail trajectory visual (`#3353 <https://github.com/ros-planning/moveit2/issues/3353>`_)
 * Contributors: Aleksey Nogin, Florian Beck, Mark Johnson

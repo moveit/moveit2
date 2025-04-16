@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.13.1 (2025-04-15)
+-------------------
 * Use ament_cmake_ros build tool in moveit_setup_assistant packages (`#3441 <https://github.com/ros-planning/moveit2/issues/3441>`_)
 * Contributors: Sebastian Castro
 
