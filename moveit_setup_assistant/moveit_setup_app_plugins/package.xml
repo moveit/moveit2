@@ -8,7 +8,7 @@
   <license>BSD-3-Clause</license>
   <author email="davidvlu@gmail.com">David V. Lu!!</author>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
   <depend>ament_index_cpp</depend>
   <depend>moveit_configs_utils</depend>
