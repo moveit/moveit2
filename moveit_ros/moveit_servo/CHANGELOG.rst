@@ -2,6 +2,12 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.3 (2025-04-15)
+-------------------
+* Minor typo fix in simulated Panda servo config (`#3444 <https://github.com/ros-planning/moveit2/issues/3444>`_) (`#3445 <https://github.com/ros-planning/moveit2/issues/3445>`_)
+* Fix Servo JointJog Crash (`#3351 <https://github.com/ros-planning/moveit2/issues/3351>`_) (`#3401 <https://github.com/ros-planning/moveit2/issues/3401>`_)
+* Contributors: Gautham Sam, Matthew Foran
+
 2.12.2 (2025-02-15)
 -------------------
 * Update current state even if servo is paused (`#3341 <https://github.com/ros-planning/moveit2/issues/3341>`_) (`#3347 <https://github.com/ros-planning/moveit2/issues/3347>`_)

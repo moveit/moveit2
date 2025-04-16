@@ -2,6 +2,11 @@
 Changelog for package moveit_planners_stomp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.3 (2025-04-15)
+-------------------
+* Add `stomp` target link to `moveit_planners_stomp` tests (`#3437 <https://github.com/ros-planning/moveit2/issues/3437>`_) (`#3438 <https://github.com/ros-planning/moveit2/issues/3438>`_)
+* Contributors: Bckempa
+
 2.12.2 (2025-02-15)
 -------------------
 * Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_) (`#3258 <https://github.com/ros-planning/moveit2/issues/3258>`_)
