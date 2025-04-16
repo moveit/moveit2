@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.9 (2025-04-15)
+------------------
+* SERVICE_CALL_TIMEOUT = 1 second is harsh 🥵 (`#3382 <https://github.com/ros-planning/moveit2/issues/3382>`_) (`#3406 <https://github.com/ros-planning/moveit2/issues/3406>`_)
+* Add logic to Ros2ControlManager to match ros2_control (backport `#3332 <https://github.com/ros-planning/moveit2/issues/3332>`_) (`#3342 <https://github.com/ros-planning/moveit2/issues/3342>`_)
+* Contributors: Paul Gesel, Sebastian Castro, Yoan Mollard
+
 2.5.8 (2025-02-09)
 ------------------
 * Fix Ros2ControlManager chained controller logic (`#3301 <https://github.com/ros-planning/moveit2/issues/3301>`_) (`#3306 <https://github.com/ros-planning/moveit2/issues/3306>`_)

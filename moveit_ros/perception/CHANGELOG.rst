@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.9 (2025-04-15)
+------------------
+
 2.5.8 (2025-02-09)
 ------------------
 * fix: pointcloud_octomap_updater not cleaning objects at max_range (backport `#3294 <https://github.com/ros-planning/moveit2/issues/3294>`_) (`#3303 <https://github.com/ros-planning/moveit2/issues/3303>`_)
