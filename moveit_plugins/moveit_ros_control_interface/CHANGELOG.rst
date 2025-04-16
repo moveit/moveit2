@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.3 (2025-04-15)
+-------------------
 * ROS Parameter for service call timeout for ros_control controllers (`#3419 <https://github.com/ros-planning/moveit2/issues/3419>`_) (`#3433 <https://github.com/ros-planning/moveit2/issues/3433>`_)
 * SERVICE_CALL_TIMEOUT = 1 second is harsh 🥵 (`#3382 <https://github.com/ros-planning/moveit2/issues/3382>`_) (`#3407 <https://github.com/ros-planning/moveit2/issues/3407>`_)
 * Contributors: Ashwin Sajith Nambiar, Yoan Mollard

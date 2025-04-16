@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.12.3 (2025-04-15)
+-------------------
 * Make the destructors of the base classes of planning adapters virtual and close move_group gracefully (`#3435 <https://github.com/ros-planning/moveit2/issues/3435>`_) (`#3443 <https://github.com/ros-planning/moveit2/issues/3443>`_)
 * fix: ensure attached objects update during motion execution (`#3327 <https://github.com/ros-planning/moveit2/issues/3327>`_) (`#3414 <https://github.com/ros-planning/moveit2/issues/3414>`_)
 * Planning scene monitor: reliable QoS (`#3400 <https://github.com/ros-planning/moveit2/issues/3400>`_) (`#3410 <https://github.com/ros-planning/moveit2/issues/3410>`_)
