@@ -56,11 +56,22 @@
 
 static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit.plugins.ros_control_interface");
 static const rclcpp::Duration CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1.0);
-// TODO: Create a ROS parameter allowing to customize this default timeout
-static constexpr double SERVICE_CALL_TIMEOUT = 3.0;
 
 namespace moveit_ros_control_interface
 {
+<<<<<<< HEAD
+=======
+static constexpr double DEFAULT_SERVICE_CALL_TIMEOUT = 3.0;
+
+namespace
+{
+rclcpp::Logger getLogger()
+{
+  return moveit::getLogger("moveit.plugins.ros_control_interface");
+}
+}  // namespace
+
+>>>>>>> 64e934ff4 (ROS Parameter for service call timeout for ros_control controllers (#3419))
 /**
  * \brief Get joint name from resource name reported by ros2_control, since claimed_interfaces return by ros2_control
  * will have the interface name as suffix joint_name/INTERFACE_TYPE
@@ -124,6 +135,7 @@ MOVEIT_CLASS_FORWARD(Ros2ControlManager);  // Defines Ros2ControlManagerPtr, Con
 class Ros2ControlManager : public moveit_controller_manager::MoveItControllerManager
 {
   std::string ns_;
+  std::chrono::duration<double> service_call_timeout_;
   pluginlib::ClassLoader<ControllerHandleAllocator> loader_;
   typedef std::map<std::string, controller_manager_msgs::msg::ControllerState> ControllersMap;
 
@@ -181,11 +193,17 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
 
     auto request = std::make_shared<controller_manager_msgs::srv::ListControllers::Request>();
     auto result_future = list_controllers_service_->async_send_request(request);
-    if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
+    if (result_future.wait_for(service_call_timeout_) == std::future_status::timeout)
     {
+<<<<<<< HEAD
       RCLCPP_WARN_STREAM(LOGGER, "Failed to read controllers from " << list_controllers_service_->get_service_name()
                                                                     << " within " << SERVICE_CALL_TIMEOUT
                                                                     << " seconds");
+=======
+      RCLCPP_WARN_STREAM(getLogger(), "Failed to read controllers from "
+                                          << list_controllers_service_->get_service_name() << " within "
+                                          << service_call_timeout_.count() << " seconds");
+>>>>>>> 64e934ff4 (ROS Parameter for service call timeout for ros_control controllers (#3419))
       return;
     }
 
@@ -306,6 +324,20 @@ public:
         node_->get_parameter<std::string>("ros_control_namespace", ns_);
       }
     }
+
+    double timeout_seconds;
+    if (!node_->has_parameter("controller_service_call_timeout"))
+    {
+      timeout_seconds =
+          node_->declare_parameter<double>("controller_service_call_timeout", DEFAULT_SERVICE_CALL_TIMEOUT);
+    }
+    else
+    {
+      node_->get_parameter("controller_service_call_timeout", timeout_seconds);
+    }
+    service_call_timeout_ = std::chrono::duration<double>(timeout_seconds);
+
+    RCLCPP_INFO_STREAM(getLogger(), "Using service call timeout " << service_call_timeout_.count() << " seconds");
 
     list_controllers_service_ = node_->create_client<controller_manager_msgs::srv::ListControllers>(
         getAbsName("controller_manager/list_controllers"));
@@ -523,11 +555,17 @@ public:
     if (!request->activate_controllers.empty() || !request->deactivate_controllers.empty())
     {  // something to switch?
       auto result_future = switch_controller_service_->async_send_request(request);
-      if (result_future.wait_for(std::chrono::duration<double>(SERVICE_CALL_TIMEOUT)) == std::future_status::timeout)
+      if (result_future.wait_for(service_call_timeout_) == std::future_status::timeout)
       {
+<<<<<<< HEAD
         RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
                                                                       << " within " << SERVICE_CALL_TIMEOUT
                                                                       << " seconds");
+=======
+        RCLCPP_ERROR_STREAM(getLogger(), "Couldn't switch controllers at "
+                                             << switch_controller_service_->get_service_name() << " within "
+                                             << service_call_timeout_.count() << " seconds");
+>>>>>>> 64e934ff4 (ROS Parameter for service call timeout for ros_control controllers (#3419))
         return false;
       }
       discover(true);
