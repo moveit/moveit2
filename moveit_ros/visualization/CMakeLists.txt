@@ -33,6 +33,7 @@ find_package(Eigen3 REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(rviz_default_plugins REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
+find_package(rviz_resource_interfaces REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
@@ -82,7 +83,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     Eigen3
     rviz_ogre_vendor
     rviz_common
-    rviz_default_plugins)
+    rviz_default_plugins
+    rviz_resource_interfaces)
 
 include_directories(
   rviz_plugin_render_tools/include robot_state_rviz_plugin/include
