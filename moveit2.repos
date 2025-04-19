@@ -12,3 +12,7 @@ repositories:
     type: git
     url: https://github.com/moveit/srdfdom.git
     version: ros2
+  ompl:
+    type: git
+    url: https://github.com/ompl/ompl.git
+    version: 1.7.0
