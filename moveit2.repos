@@ -1,9 +1,5 @@
 repositories:
   # Keep moveit_* repos here because they are released with moveit
-  geometric_shapes:
-    type: git
-    url: https://github.com/moveit/geometric_shapes.git
-    version: ros2
   moveit_msgs:
     type: git
     url: https://github.com/moveit/moveit_msgs.git
@@ -12,10 +8,6 @@ repositories:
     type: git
     url: https://github.com/moveit/moveit_resources.git
     version: ros2
-  ompl:
-    type: git
-    url: https://github.com/ompl/ompl.git
-    version: main
   srdfdom:
     type: git
     url: https://github.com/moveit/srdfdom.git
