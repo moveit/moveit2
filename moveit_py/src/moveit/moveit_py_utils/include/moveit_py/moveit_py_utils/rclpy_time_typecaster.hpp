@@ -14,9 +14,9 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * The name of Robert Haschke may not be use to endorse or promote
- *     products derived from this software without specific prior
- *     written permission.
+ *   * Neither the name of the copyright holder nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -48,42 +48,44 @@ namespace detail
 template <typename T>
 struct type_caster<rclcpp::Time>
 {
-  PYBIND11_TYPE_CASTER(rclcpp::Time, _("rclcpp::Time"));   
-  
+  PYBIND11_TYPE_CASTER(rclcpp::Time, _("rclcpp::Time"));
+
   // convert from rclpy::Time to rclcpp::Time
-  bool load(py::handle src, bool){
-    if(src.is_none())
-        return false;
+  bool load(py::handle src, bool)
+  {
+    if (src.is_none())
+      return false;
 
     // check to validate if the object is a rclcpp::Time object
-    if(!py::hasattr(src,"nanaoseconds") || !py::hasattr(src,"clock_type")){
-        return false;
+    if (!py::hasattr(src, "nanaoseconds") || !py::hasattr(src, "clock_type"))
+    {
+      return false;
     }
 
-    //Extract the value for constructing the rclcpp::Time object
+    // Extract the value for constructing the rclcpp::Time object
     int64_t nanoseconds = src.attr("nanoseconds").cast<int64_t>();
     int clock_type = src.attr("clock_type").cast<int>();
 
-    //Construct the rclcpp::Time object
+    // Construct the rclcpp::Time object
     value = rclcpp::Time(nanoseconds, static_cast<rcl_clock_type_t>(clock_type));
     return true;
-
   }
 
-  //convet from rclcpp::Time to rclpy::Time
-  static py::handle cast(const rclcpp::Time& src, return_value_policy /* policy */, py::handle /* parent */){
+  // convet from rclcpp::Time to rclpy::Time
+  static py::handle cast(const rclcpp::Time& src, return_value_policy /* policy */, py::handle /* parent */)
+  {
+    py::module rclpy_time = py::module::import("rclpy.time");
+    py::object Time = rclpy_time.attr("Time");
 
-  py::module rclpy_time = py::module::import("rclpy.time"); 
-  py::object Time = rclpy_time.attr("Time");
+    int64_t nanoseconds = src.nanoseconds();
+    int clock_type = static_cast<int>(src.get_clock_type());
 
-  int64_t nanoseconds = src.nanoseconds();
-  int clock_type = static_cast<int>(src.get_clock_type());
-
-  return Time(py::arg("nanoseconds") = nanoseconds,
-              py::arg("clock_type") = clock_type).release(); // release the ownership of the object
+    return Time(py::arg("nanoseconds") = nanoseconds,
+                py::arg("clock_type") = clock_type)
+        .release();  // release the ownership of the object
   }
-}
+};
 } // namespace detail
 } // namespace pybind11
 
-  
+   
