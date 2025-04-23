@@ -45,7 +45,7 @@ namespace pybind11
 {
 namespace detail
 {
-template <typename T>
+template <>
 struct type_caster<rclcpp::Time>
 {
   PYBIND11_TYPE_CASTER(rclcpp::Time, _("rclcpp::Time"));
@@ -85,7 +85,5 @@ struct type_caster<rclcpp::Time>
         .release();  // release the ownership of the object
   }
 };
-} // namespace detail
-} // namespace pybind11
-
-   
+}  // namespace detail
+}  // namespace pybind11
