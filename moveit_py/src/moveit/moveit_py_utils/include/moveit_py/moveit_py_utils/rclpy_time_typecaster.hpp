@@ -71,7 +71,7 @@ struct type_caster<rclcpp::Time>
     return true;
   }
 
-  // convet from rclcpp::Time to rclpy::Time
+  // convert from rclcpp::Time to rclpy::Time
   static py::handle cast(const rclcpp::Time& src, return_value_policy /* policy */, py::handle /* parent */)
   {
     py::module rclpy_time = py::module::import("rclpy.time");
