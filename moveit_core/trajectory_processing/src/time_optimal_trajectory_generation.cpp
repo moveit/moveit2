@@ -203,6 +203,23 @@ Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : lengt
   ++path_iterator2;
   std::list<Eigen::VectorXd>::const_iterator path_iterator3;
   Eigen::VectorXd start_config = *path_iterator1;
+
+  // if an initial velocity has been supplied
+  if ()
+  {
+    // first segment is a circular path segment which is tangential to the initial position and initial velocity
+    // CircularPathSegment* blend_segment =
+    //       new CircularPathSegment(0.5 * (*path_iterator1 + *path_iterator2), *path_iterator2,
+    //                               0.5 * (*path_iterator2 + *path_iterator3), max_deviation);
+    //   Eigen::VectorXd end_config = blend_segment->getConfig(0.0);
+
+    // add the segment
+    path_segments_.emplace_back(blend_segment);
+
+    // update the start config
+    start_config = blend_segment->getConfig(blend_segment->getLength());
+  }
+
   while (path_iterator2 != path.end())
   {
     path_iterator3 = path_iterator2;
