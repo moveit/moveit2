@@ -57,7 +57,7 @@ struct type_caster<rclcpp::Time>
       return false;
 
     // check to validate if the object is a rclcpp::Time object
-    if (!py::hasattr(src, "nanaoseconds") || !py::hasattr(src, "clock_type"))
+    if (!py::hasattr(src, "nanoseconds") || !py::hasattr(src, "clock_type"))
     {
       return false;
     }
