@@ -44,6 +44,7 @@
 #include <moveit_msgs/msg/planning_scene.hpp>
 #include <moveit_msgs/srv/apply_planning_scene.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit_py/moveit_py_utils/rclpy_time_typecaster.hpp>
 
 namespace py = pybind11;
 
