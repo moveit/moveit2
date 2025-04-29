@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2023, PickNik Robotics Inc.
+ *  Copyright (c) 2022, Shobin Vinod
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,53 +32,58 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Tyler Weaver */
+/* Author: Shobin Vinod */
 
+#include <pybind11/pybind11.h>
 #include <rclcpp/rclcpp.hpp>
-#include <moveit/utils/logger.hpp>
-#include <string>
-#include <rsl/random.hpp>
-#include <fmt/format.h>
+#include <rclcpp/serialization.hpp>
+#include <rclcpp/duration.hpp>
 
-namespace moveit
-{
+namespace py = pybind11;
 
-// This is the function that stores the global logger used by moveit.
-// As it returns a reference to the static logger it can be changed through the
-// `setNodeLoggerName` function.
-rclcpp::Logger& getGlobalRootLogger()
+namespace pybind11
 {
-  static rclcpp::Logger logger = [&] {
-    // A random number is appended to the name used for the node to make it unique.
-    // This unique node and logger name is only used if a user does not set a logger
-    // through the `setNodeLoggerName` method to their node's logger.
-    auto name = fmt::format("moveit_{}", rsl::rng()());
-    try
+namespace detail
+{
+template <>
+struct type_caster<rclcpp::Time>
+{
+  PYBIND11_TYPE_CASTER(rclcpp::Time, _("rclcpp::Time"));
+
+  // convert from rclpy::Time to rclcpp::Time
+  bool load(py::handle src, bool)
+  {
+    if (src.is_none())
+      return false;
+
+    // check to validate if the object is a rclcpp::Time object
+    if (!py::hasattr(src, "nanoseconds") || !py::hasattr(src, "clock_type"))
     {
-      static rclcpp::Node::SharedPtr moveit_node = rclcpp::Node::make_shared(name);
-      return moveit_node->get_logger();
+      return false;
     }
-    catch (const std::exception& ex)
-    {
-      // rclcpp::init was not called so rcl context is null, return non-node logger
-      auto logger = rclcpp::get_logger(name);
-      RCLCPP_WARN_STREAM(logger, "exception thrown while creating node for logging: " << ex.what());
-      RCLCPP_WARN(logger, "if rclcpp::init was not called, messages from this logger may be missing from /rosout");
-      return logger;
-    }
-  }();
-  return logger;
-}
 
-void setNodeLoggerName(const std::string& name)
-{
-  static auto node = std::make_shared<rclcpp::Node>("moveit", name);
-  getGlobalRootLogger() = node->get_logger();
-}
+    // Extract the value for constructing the rclcpp::Time object
+    int64_t nanoseconds = src.attr("nanoseconds").cast<int64_t>();
+    int clock_type = src.attr("clock_type").cast<int>();
 
-rclcpp::Logger getLogger(const std::string& name)
-{
-  return getGlobalRootLogger().get_child(name);
-}
+    // Construct the rclcpp::Time object
+    value = rclcpp::Time(nanoseconds, static_cast<rcl_clock_type_t>(clock_type));
+    return true;
+  }
 
-}  // namespace moveit
+  // convert from rclcpp::Time to rclpy::Time
+  static py::handle cast(const rclcpp::Time& src, return_value_policy /* policy */, py::handle /* parent */)
+  {
+    py::module rclpy_time = py::module::import("rclpy.time");
+    py::object Time = rclpy_time.attr("Time");
+
+    int64_t nanoseconds = src.nanoseconds();
+    int clock_type = static_cast<int>(src.get_clock_type());
+
+    return Time(py::arg("nanoseconds") = nanoseconds,
+                py::arg("clock_type") = clock_type)
+        .release();  // release the ownership of the object
+  }
+};
+}  // namespace detail
+}  // namespace pybind11

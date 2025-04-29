@@ -2,6 +2,19 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.13.2 (2025-04-16)
+-------------------
+
+2.13.1 (2025-04-15)
+-------------------
+* Make the destructors of the base classes of planning adapters virtual and close move_group gracefully (`#3435 <https://github.com/ros-planning/moveit2/issues/3435>`_)
+* fix: ensure attached objects update during motion execution (`#3327 <https://github.com/ros-planning/moveit2/issues/3327>`_)
+* Planning scene monitor: reliable QoS (`#3400 <https://github.com/ros-planning/moveit2/issues/3400>`_)
+* Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (`#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_)
+  * Publish planning scene while planning (`#3689 <https://github.com/ros-planning/moveit/issues/3689>`_)
+* fix: explicitly add the same namespace as the parent node (`#3360 <https://github.com/ros-planning/moveit2/issues/3360>`_)
+* Contributors: Aleksey Nogin, Cihat Kurtuluş Altıparmak, Kazuya Oguma, Marco Magri, Mark Johnson
+
 2.13.0 (2025-02-15)
 -------------------
 * Enable allowed_execution_duration_scaling and allowed_goal_duration_margin for each controller (`#3335 <https://github.com/ros-planning/moveit2/issues/3335>`_)
