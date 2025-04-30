@@ -571,6 +571,7 @@ TEST(time_optimal_trajectory_generation, testTimeStepZeroMakesTrajectoryInvalid)
 TEST(time_optimal_trajectory_generation, testNonZeroInitialVelocity)
 {  double path_tolerance = 0.1;
   double resample_dt = 0.1;
+  double max_deviation = 0.1; // rad
   Eigen::VectorXd waypoint(2);
   std::list<Eigen::VectorXd> waypoints;
   Eigen::VectorXd max_velocities(2);
@@ -601,7 +602,7 @@ TEST(time_optimal_trajectory_generation, testNonZeroInitialVelocity)
   max_accelerations << 1.0,
                        2.0;
 
-  Path path(waypoints, max_deviation, initial_velocity, max_accelerations);
+  Path path(waypoints, initial_velocity, max_accelerations, max_deviation);
 
   EXPECT_TRUE(true);
 }
