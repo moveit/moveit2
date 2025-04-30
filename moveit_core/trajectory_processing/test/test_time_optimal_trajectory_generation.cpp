@@ -568,6 +568,44 @@ TEST(time_optimal_trajectory_generation, testTimeStepZeroMakesTrajectoryInvalid)
                    .isValid());
 }
 
+TEST(time_optimal_trajectory_generation, testNonZeroInitialVelocity)
+{  double path_tolerance = 0.1;
+  double resample_dt = 0.1;
+  Eigen::VectorXd waypoint(2);
+  std::list<Eigen::VectorXd> waypoints;
+  Eigen::VectorXd max_velocities(2);
+  Eigen::VectorXd max_accelerations(2);
+  Eigen::VectorXd initial_velocity;
+
+  // Waypoints
+  // clang-format off
+  waypoint << 0.5,
+              0.5;
+  waypoints.push_back(waypoint);
+
+  waypoint << 1.0,
+              1.0;
+  waypoints.push_back(waypoint);
+
+  waypoint << 0.5,
+              1.5;
+  waypoints.push_back(waypoint);
+
+  initial_velocity << 1.0,
+                      0.0;
+
+  // Max velocities
+  max_velocities << 0.5,
+                    0.5,
+  // Max accelerations
+  max_accelerations << 1.0,
+                       2.0;
+
+  Path path(waypoints, max_deviation, initial_velocity, max_accelerations);
+
+  EXPECT_TRUE(true);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);

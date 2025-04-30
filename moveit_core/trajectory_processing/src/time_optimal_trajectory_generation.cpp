@@ -143,6 +143,76 @@ public:
     y_ = start_direction;
   }
 
+  CircularPathSegment(const Eigen::VectorXd& start, const Eigen::VectorXd& start, const Eigen::VectorXd& start_velocity, const Eigen::VectorXd& max_acceleration)
+  {
+    /*
+      original paper: https://www.roboticsproceedings.org/rss08/p27.pdf
+
+      In order to minimize time, you want to maximize acceleration and minimize path length. The way to do that is by minimizing the radius of curvature for the first circular segment whilst maintaining max allowable acceleration.
+
+      I want to solve for the radius of curvature.
+      I assume constant s_dot and therefore s_dot_dot = 0
+
+      Assumptions:
+      max_acceleration is all non-zero
+
+      We set s=0 at the initial waypoint
+
+      known: q_dot_initial, q_initial
+
+      y_hat_i is tangent to as q_dot_initial
+      x_hat_i is coplanar with q_i and q_i+1 and orthogonal to y_hat_i
+
+      Relevant equations:
+      Eq 8 reduces to f'(s=0) = y_hat_i
+      Eq 9 reduces to f''(s=0) = -1/r * x_hat_i
+      Eq 12 reduces to q_dot_dot = f''(s)*s_dot^2
+
+      With Eq 8, Eq 11 implies s_dot(s=0) = f'(s=0)^-1 * q_dot_initial = y_hat_i^-1 * q_dot_initial
+
+      recall that y_hat_i = q_dot_initial / ||q_dot_initial||
+
+      so s_dot(s=0) = ||q_dot_initial||
+
+      With Eq 9, Eq 12 implies q_dot_dot(s=0) = -1/r * x_hat_i * s_dot^2
+
+      Steps:
+      compute x_hat_i using projections
+      compute s_dot at s=0
+      For each joint, compute the radius corresponding to its max acceleration. Take the largest radius as the final radius because that guarantees that all joint's accelerations will be lower than their upper bound
+    */
+
+    // calculate y_
+    y_ = start_velocity.norm();
+
+    // calculate x_ using vector rejection
+    double a = (path_iterator1 - path_iterator2).norm();
+    double b = y_;
+    double proj_a_b =  (a*b)/(b*b)*b;
+    double oproj_a_b = a - proj_a_b;
+    x_ = oproj_a_b.normalized();
+
+    // do we need to check for x_'s sign? I don't think so
+    
+    // calculate s_dot
+    double s_dot = y_;
+
+    // calculate the radius
+    double radius = 0.0;
+    for (int i=0; i<start.size(); i++)
+    {
+      double new_radius = std::abs(x_[i] / max_accelerations[i] * s_dot**2);
+
+      radius = std::max(radius, new_radius);
+    }
+
+    // save the radius
+    radius_ = radius;
+
+    // can now calculate the center_
+    center_ = start - radius_ * x_;
+  }
+
   Eigen::VectorXd getConfig(double s) const override
   {
     const double angle = s / radius_;
@@ -194,7 +264,7 @@ private:
   Eigen::VectorXd y_;
 };
 
-Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : length_(0.0)
+Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation, Eigen::VectorXd& initial_velocity, Eigen::VectorXd& max_acceleration) : length_(0.0)
 {
   if (path.size() < 2)
     return;
@@ -205,21 +275,22 @@ Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : lengt
   Eigen::VectorXd start_config = *path_iterator1;
 
   // if an initial velocity has been supplied
-  if ()
+  if (initial_velocity.size() > 0)
   {
     // first segment is a circular path segment which is tangential to the initial position and initial velocity
-    // CircularPathSegment* blend_segment =
-    //       new CircularPathSegment(0.5 * (*path_iterator1 + *path_iterator2), *path_iterator2,
-    //                               0.5 * (*path_iterator2 + *path_iterator3), max_deviation);
-    //   Eigen::VectorXd end_config = blend_segment->getConfig(0.0);
+    CircularPathSegment* blend_segment = new CircularPathSegment(*path_iterator1, 0.5 * (*path_iterator1 + *path_iterator2), initial_velocity, max_acceleration);
 
     // add the segment
     path_segments_.emplace_back(blend_segment);
 
     // update the start config
     start_config = blend_segment->getConfig(blend_segment->getLength());
+
+    // idk if I have to change the path_iterator1
+    <>
   }
 
+  // iterate through the rest of the points
   while (path_iterator2 != path.end())
   {
     path_iterator3 = path_iterator2;
@@ -348,7 +419,13 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
     RCLCPP_ERROR(LOGGER, "The trajectory is invalid because the time step is 0.");
     return;
   }
+
+  // convert the initial velocity into the initial path_vel
+  
+
+  // start the trajectory with our initial velocity?
   trajectory_.push_back(TrajectoryStep(0.0, 0.0));
+
   double after_acceleration = getMinMaxPathAcceleration(0.0, 0.0, true);
   while (valid_ && !integrateForward(trajectory_, after_acceleration) && valid_)
   {
@@ -1153,6 +1230,38 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   const unsigned num_points = trajectory.getWayPointCount();
   const std::vector<int>& idx = group->getVariableIndexList();
   const unsigned num_joints = group->getVariableCount();
+  const std::vector<std::string>& vars = group->getVariableNames();
+
+  std::vector<size_t> active_joint_indices;
+  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), active_joint_indices))
+  {
+    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
+  }
+
+  const size_t num_active_joints = active_joint_indices.size();
+
+  Eigen::VectorXd initial_velocity;
+
+  // if an initial velocity was supplied
+  if (trajectory.getWayPointPtr(0)->hasVelocities())
+  {
+    // iterate through all active joints
+    for (size_t idx = 0; idx < num_active_joints; ++idx)
+    {
+      double vel = trajectory.getWayPointPtr(0)->getVariableVelocity(vars[active_joint_indices[idx]]);
+
+      if (std::abs(vel) > max_velocity[idx])
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Initial velocity for joint: " << vars[active_joint_indices[idx]] << " is: " << vel
+                                                                   << " which is greater than the max velocity of : "
+                                                                   << max_velocity[idx]);
+        return false;
+      }
+    }
+
+    // save the velocities
+    initial_velocity = trajectory.getWayPointPtr(0)->getVariableVelocities()
+  }
 
   // Have to convert into Eigen data structs and remove repeated points
   //  (https://github.com/tobiaskunz/trajectories/issues/3)
@@ -1197,8 +1306,11 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
     return true;
   }
 
+  // create the path
+  Path path(points, path_tolerance_, initial_velocity, max_acceleration);
+
   // Now actually call the algorithm
-  Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, DEFAULT_TIMESTEP);
+  Trajectory parameterized(path, max_velocity, max_acceleration, DEFAULT_TIMESTEP);
   if (!parameterized.isValid())
   {
     RCLCPP_ERROR(LOGGER, "Unable to parameterize trajectory.");

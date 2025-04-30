@@ -81,7 +81,7 @@ protected:
 class Path
 {
 public:
-  Path(const std::list<Eigen::VectorXd>& path, double max_deviation = 0.0);
+  Path(const std::list<Eigen::VectorXd>& path, double max_deviation = 0.0, Eigen::VectorXd& initial_velocity, Eigen::VectorXd& max_acceleration);
   Path(const Path& path);
   double getLength() const;
   Eigen::VectorXd getConfig(double s) const;
