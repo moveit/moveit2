@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.9 (2025-04-15)
+------------------
+* Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (backport `#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_) (`#3364 <https://github.com/ros-planning/moveit2/issues/3364>`_)
+  * Publish planning scene while planning (`#3689 <https://github.com/ros-planning/moveit/issues/3689>`_)
+* Contributors: Mark Johnson
+
 2.5.8 (2025-02-09)
 ------------------
 * Ports moveit `#3676 <https://github.com/ros-planning/moveit2/issues/3676>`_ and `#3682 <https://github.com/ros-planning/moveit2/issues/3682>`_ (backport `#3283 <https://github.com/ros-planning/moveit2/issues/3283>`_) (`#3317 <https://github.com/ros-planning/moveit2/issues/3317>`_)
