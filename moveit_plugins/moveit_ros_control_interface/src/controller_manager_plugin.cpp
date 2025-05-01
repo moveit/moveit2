@@ -184,9 +184,9 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
     auto result_future = list_controllers_service_->async_send_request(request);
     if (result_future.wait_for(service_call_timeout_) == std::future_status::timeout)
     {
-      RCLCPP_WARN_STREAM(LOGGER, "Failed to read controllers from "
-                                          << list_controllers_service_->get_service_name() << " within "
-                                          << service_call_timeout_.count() << " seconds");
+      RCLCPP_WARN_STREAM(LOGGER, "Failed to read controllers from " << list_controllers_service_->get_service_name()
+                                                                    << " within " << service_call_timeout_.count()
+                                                                    << " seconds");
       return;
     }
 
@@ -540,9 +540,9 @@ public:
       auto result_future = switch_controller_service_->async_send_request(request);
       if (result_future.wait_for(service_call_timeout_) == std::future_status::timeout)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at "
-                                             << switch_controller_service_->get_service_name() << " within "
-                                             << service_call_timeout_.count() << " seconds");
+        RCLCPP_ERROR_STREAM(LOGGER, "Couldn't switch controllers at " << switch_controller_service_->get_service_name()
+                                                                      << " within " << service_call_timeout_.count()
+                                                                      << " seconds");
         return false;
       }
       discover(true);
