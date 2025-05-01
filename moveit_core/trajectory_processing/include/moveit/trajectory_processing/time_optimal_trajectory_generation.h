@@ -73,6 +73,8 @@ public:
   virtual PathSegment* clone() const = 0;
 
   double position_;
+  bool valid_{true};
+  double s_dot_initial_{0.0};
 
 protected:
   double length_;
@@ -98,6 +100,12 @@ public:
 
   /// @brief Return a list of all switching points as a pair (arc length to switching point, discontinuity)
   std::list<std::pair<double, bool>> getSwitchingPoints() const;
+
+  /// @brief whether the path is valid
+  bool valid_{true};
+
+  /// @brief initial arc length velocity. Default 0.0
+  double s_dot_initial_{0.0};
 
 private:
   PathSegment* getPathSegment(double& s) const;

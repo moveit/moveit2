@@ -201,13 +201,13 @@ public:
     // do we need to check for x_'s sign? I don't think so
     
     // calculate s_dot
-    double s_dot = length_start_velocity;
+    s_dot_initial_ = length_start_velocity;
 
     // calculate the radius
     double radius = 0.0;
     for (int i=0; i<start.size(); i++)
     {
-      double new_radius = std::abs(x_[i] / max_acceleration[i] * std::pow(s_dot, 2));
+      double new_radius = std::abs(x_[i] / max_acceleration[i] * std::pow(s_dot_initial_, 2));
 
       radius = std::max(radius, new_radius);
     }
@@ -230,6 +230,13 @@ public:
 
     // get the length
     double length_v_c_end = v_c_end.norm();
+
+    // must check if the length is less than the segment's radius. If so, then the resultant path will be invalid
+    if (length_v_c_end < radius_)
+    {
+      valid_ = false;
+      return;
+    }
 
     // compute beta. This will always be less than 90 degrees so no need to check the quadrant
     double beta = acos(radius_ / length_v_c_end);
@@ -331,6 +338,16 @@ Path::Path(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initia
   {
     // first segment is a circular path segment which is tangential to the initial position and initial velocity
     CircularPathSegment* blend_segment = new CircularPathSegment(*path_iterator1, *path_iterator2, initial_velocity, max_acceleration);
+
+    // if the blend_segment was invalid, it means our initial velocity is too great compared to waypoint2 and the path is invalid
+    if (!blend_segment->valid_)
+    {
+      valid_ = false;
+      return;
+    }
+
+    // save the initial s_dot
+    s_dot_initial_ = blend_segment->s_dot_initial_;
 
     // add the segment
     path_segments_.emplace_back(blend_segment);
@@ -475,11 +492,8 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
     return;
   }
 
-  // convert the initial velocity into the initial path_vel
-  
-
   // start the trajectory with our initial velocity?
-  trajectory_.push_back(TrajectoryStep(0.0, 0.0));
+  trajectory_.push_back(TrajectoryStep(0.0, path.s_dot_initial_));
 
   double after_acceleration = getMinMaxPathAcceleration(0.0, 0.0, true);
   while (valid_ && !integrateForward(trajectory_, after_acceleration) && valid_)
@@ -1366,6 +1380,13 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
 
   // create the path
   Path path(points, const_initial_velocities, max_acceleration, path_tolerance_);
+
+  // ensure the path is valid
+  if (!path.valid_)
+  {
+    RCLCPP_ERROR(LOGGER, "Invalid Path. Returning.");
+    return false;
+  }
 
   // Now actually call the algorithm
   Trajectory parameterized(path, max_velocity, max_acceleration, DEFAULT_TIMESTEP);
