@@ -569,6 +569,46 @@ TEST(time_optimal_trajectory_generation, testTimeStepZeroMakesTrajectoryInvalid)
 }
 
 TEST(time_optimal_trajectory_generation, testNonZeroInitialVelocity)
+{
+  double path_tolerance = 0.1;
+  double resample_dt = 0.1;
+  double max_deviation = 0.1; // rad
+  Eigen::VectorXd waypoint(2);
+  std::list<Eigen::VectorXd> waypoints;
+  Eigen::VectorXd max_velocities(2);
+  Eigen::VectorXd max_accelerations(2);
+  Eigen::VectorXd initial_velocity(2);
+
+  // Waypoints
+  // clang-format off
+  waypoint << 0.0,
+              0.0;
+  waypoints.push_back(waypoint);
+
+  waypoint << 5.0,
+              5.0;
+  waypoints.push_back(waypoint);
+
+  waypoint << 0.0,
+              10.0;
+  waypoints.push_back(waypoint);
+
+  initial_velocity << 1.0,
+                      0.0;
+
+  // Max velocities
+  max_velocities << 0.5,
+                      0.5,
+  // Max accelerations
+  max_accelerations << 1.0,
+                      2.0;
+
+  trajectory_processing::Path path(waypoints, initial_velocity, max_accelerations, max_deviation);
+
+  EXPECT_TRUE(path.valid_);
+}
+
+TEST(time_optimal_trajectory_generation, testInitialVelocityTooGreat)
 {  double path_tolerance = 0.1;
   double resample_dt = 0.1;
   double max_deviation = 0.1; // rad
@@ -604,7 +644,7 @@ TEST(time_optimal_trajectory_generation, testNonZeroInitialVelocity)
 
   Path path(waypoints, initial_velocity, max_accelerations, max_deviation);
 
-  EXPECT_TRUE(true);
+  EXPECT_FALSE(path.valid_);
 }
 
 int main(int argc, char** argv)

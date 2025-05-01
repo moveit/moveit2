@@ -192,7 +192,7 @@ public:
 
     //// calculate x_ using vector rejection
     // a is the vector from the end to the start because we want x_hat_i to be in the same direction as it
-    Eigen::VectorXd a = (end - start).normalized();
+    Eigen::VectorXd a = (start - end).normalized();
     Eigen::VectorXd b = y_; // already normalized
     Eigen::VectorXd proj_a_b = (a.dot(b)) * b;
     Eigen::VectorXd oproj_a_b = a - proj_a_b;
@@ -312,18 +312,22 @@ private:
 };
 
 
-
-Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : length_(0.0)
+Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation)
 {
   Eigen::VectorXd initial_velocity, max_acceleration;
   
-  Path(path, initial_velocity, max_acceleration, max_deviation);
+  Init(path, initial_velocity, max_acceleration, max_deviation);
 }
 
 Path::Path(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initial_velocity, const Eigen::VectorXd& max_acceleration, double max_deviation) : length_(0.0)
 {
+  Init(path, initial_velocity, max_acceleration, max_deviation);
+}
+
+bool Path::Init(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initial_velocity, const Eigen::VectorXd& max_acceleration, double max_deviation)
+{
   if (path.size() < 2)
-    return;
+    return false;
   std::list<Eigen::VectorXd>::const_iterator path_iterator1 = path.begin();
   std::list<Eigen::VectorXd>::const_iterator path_iterator2 = path_iterator1;
   ++path_iterator2;
@@ -336,14 +340,14 @@ Path::Path(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initia
   // if an initial velocity has been supplied
   if (initial_velocity.size() > 0)
   {
-    // first segment is a circular path segment which is tangential to the initial position and initial velocity
-    CircularPathSegment* blend_segment = new CircularPathSegment(*path_iterator1, *path_iterator2, initial_velocity, max_acceleration);
+    // first segment is a circular path segment which is tangential to the initial position and initial velocity. path_pt_1 is the furthest this initial blend segment is allowed to go in order to be compatible with the rest of the generated Path
+    CircularPathSegment* blend_segment = new CircularPathSegment(*path_iterator1, path_pt_1, initial_velocity, max_acceleration);
 
     // if the blend_segment was invalid, it means our initial velocity is too great compared to waypoint2 and the path is invalid
     if (!blend_segment->valid_)
     {
       valid_ = false;
-      return;
+      return false;;
     }
 
     // save the initial s_dot
@@ -355,7 +359,7 @@ Path::Path(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initia
     // update the start config to the end of this segment
     start_config = blend_segment->getConfig(blend_segment->getLength());
 
-    // update path_pt_1 to the end of this segment (which is the start of the next segment)
+    // update path_pt_1 to the end of this segment (which is the start of the next segment). This could also be kept as 0.5 * (*path_iterator1 + *path_iterator2), as it was originally, but I think that could lead to a slowdown in some situations by forcing the path to use a linear line segment for the portion between start_config and 0.5 * (*path_iterator1 + *path_iterator2) when instead it could use a circular segment curving toward path_iterator3, thereby reducing total path length and therefore total time taken.
     path_pt_1 = start_config;
   }
 
@@ -386,8 +390,12 @@ Path::Path(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initia
     path_iterator1 = path_iterator2;
     ++path_iterator2;
 
-    // update path_pt_1 to be used in the circular path segment
-    path_pt_1 = 0.5 * (*path_iterator1 + *path_iterator2);
+    // only if we're still not at the end
+    if (path_iterator2 != path.end())
+    {
+      // update path_pt_1 to be used in the circular path segment in the next iteration
+      path_pt_1 = 0.5 * (*path_iterator1 + *path_iterator2);
+    }
   }
 
   // Create list of switching point candidates, calculate total path length and
@@ -407,6 +415,8 @@ Path::Path(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initia
     switching_points_.push_back(std::make_pair(length_, true));
   }
   switching_points_.pop_back();
+
+  return true;
 }
 
 Path::Path(const Path& path) : length_(path.length_), switching_points_(path.switching_points_)
@@ -492,10 +502,11 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
     return;
   }
 
-  // start the trajectory with our initial velocity?
-  trajectory_.push_back(TrajectoryStep(0.0, path.s_dot_initial_));
+  // start the trajectory with our initial velocity, subtracted by EPS to avoid any numerical issues
+  double s_dot_initial = path.s_dot_initial_ - EPS;
+  trajectory_.push_back(TrajectoryStep(0.0, s_dot_initial));
 
-  double after_acceleration = getMinMaxPathAcceleration(0.0, 0.0, true);
+  double after_acceleration = getMinMaxPathAcceleration(0.0, s_dot_initial, true);
   while (valid_ && !integrateForward(trajectory_, after_acceleration) && valid_)
   {
     double before_acceleration;
