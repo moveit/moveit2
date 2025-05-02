@@ -597,8 +597,8 @@ TEST(time_optimal_trajectory_generation, testNonZeroInitialVelocity)
                       0.0;
 
   // Max velocities
-  max_velocities << 0.5,
-                      0.5,
+  max_velocities << 1.5,
+                      1.5;
   // Max accelerations
   max_accelerations << 1.0,
                       2.0;
@@ -616,7 +616,7 @@ TEST(time_optimal_trajectory_generation, testInitialVelocityTooGreat)
   std::list<Eigen::VectorXd> waypoints;
   Eigen::VectorXd max_velocities(2);
   Eigen::VectorXd max_accelerations(2);
-  Eigen::VectorXd initial_velocity;
+  Eigen::VectorXd initial_velocity(2);
 
   // Waypoints
   // clang-format off

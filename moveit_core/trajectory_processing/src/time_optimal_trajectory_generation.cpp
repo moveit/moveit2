@@ -647,10 +647,10 @@ bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& 
                                                double& before_acceleration, double& after_acceleration)
 {
   bool start = false;
-  path_pos -= DEFAULT_TIMESTEP;
+  path_pos -= time_step_;
   do
   {
-    path_pos += DEFAULT_TIMESTEP;
+    path_pos += time_step_;
 
     if (getMinMaxPhaseSlope(path_pos, getVelocityMaxPathVelocity(path_pos), false) >=
         getVelocityMaxPathVelocityDeriv(path_pos))
@@ -666,7 +666,7 @@ bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& 
     return true;  // end of trajectory reached
   }
 
-  double before_path_pos = path_pos - DEFAULT_TIMESTEP;
+  double before_path_pos = path_pos - time_step_;
   double after_path_pos = path_pos;
   while (after_path_pos - before_path_pos > EPS)
   {
@@ -1049,8 +1049,8 @@ Eigen::VectorXd Trajectory::getAcceleration(double time) const
 }
 
 TimeOptimalTrajectoryGeneration::TimeOptimalTrajectoryGeneration(const double path_tolerance, const double resample_dt,
-                                                                 const double min_angle_change)
-  : path_tolerance_(path_tolerance), resample_dt_(resample_dt), min_angle_change_(min_angle_change)
+                                                                 const double min_angle_change, const double time_step)
+  : path_tolerance_(path_tolerance), resample_dt_(resample_dt), min_angle_change_(min_angle_change), time_step_(time_step)
 {
 }
 
@@ -1400,7 +1400,7 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   }
 
   // Now actually call the algorithm
-  Trajectory parameterized(path, max_velocity, max_acceleration, DEFAULT_TIMESTEP);
+  Trajectory parameterized(path, max_velocity, max_acceleration, time_step_);
   if (!parameterized.isValid())
   {
     RCLCPP_ERROR(LOGGER, "Unable to parameterize trajectory.");
