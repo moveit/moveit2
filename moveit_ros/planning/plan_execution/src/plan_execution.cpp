@@ -286,7 +286,7 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
     moveit::core::RobotState state = plan.planning_scene->getCurrentState();
     std::map<std::string, const moveit::core::AttachedBody*> current_attached_objects, waypoint_attached_objects;
     state.getAttachedBodies(current_attached_objects);
-    if (plan_components_attached_objects_.size() > path_segment.first)
+    if (plan_components_attached_objects_.size() > static_cast<size_t>(path_segment.first))
       waypoint_attached_objects = plan_components_attached_objects_[path_segment.first];
     for (std::size_t i = std::max(path_segment.second - 1, 0); i < wpc; ++i)
     {
