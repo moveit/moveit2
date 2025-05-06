@@ -484,7 +484,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
         }
       }
     }
-    if (trajectory_attached_objects.size() > 0)
+    if (!trajectory_attached_objects.empty())
       plan_components_attached_objects_.push_back(trajectory_attached_objects);
   }
 
