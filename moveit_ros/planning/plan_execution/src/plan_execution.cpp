@@ -286,7 +286,8 @@ bool plan_execution::PlanExecution::isRemainingPathValid(const ExecutableMotionP
     moveit::core::RobotState state = plan.planning_scene->getCurrentState();
     std::map<std::string, const moveit::core::AttachedBody*> current_attached_objects, waypoint_attached_objects;
     state.getAttachedBodies(current_attached_objects);
-    waypoint_attached_objects = plan_components_attached_objects_[path_segment.first];
+    if (plan_components_attached_objects_.size() > path_segment.first)
+      waypoint_attached_objects = plan_components_attached_objects_[path_segment.first];
     for (std::size_t i = std::max(path_segment.second - 1, 0); i < wpc; ++i)
     {
       collision_detection::CollisionResult res;
@@ -469,7 +470,7 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
   {
     const auto& trajectory = component.trajectory;
     std::map<std::string, const moveit::core::AttachedBody*> trajectory_attached_objects;
-    if (trajectory)
+    if (trajectory && trajectory->getWayPointCount() > 0)
     {
       std::map<std::string, const moveit::core::AttachedBody*> attached_objects;
       trajectory->getWayPoint(0).getAttachedBodies(trajectory_attached_objects);
@@ -483,7 +484,8 @@ moveit_msgs::msg::MoveItErrorCodes plan_execution::PlanExecution::executeAndMoni
         }
       }
     }
-    plan_components_attached_objects_.push_back(trajectory_attached_objects);
+    if (trajectory_attached_objects.size() > 0)
+      plan_components_attached_objects_.push_back(trajectory_attached_objects);
   }
 
   while (rclcpp::ok() && !execution_complete_ && !path_became_invalid_)
