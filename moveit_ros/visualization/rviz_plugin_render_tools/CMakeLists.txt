@@ -26,8 +26,8 @@ set_target_properties(moveit_rviz_plugin_render_tools
 
 target_link_libraries(moveit_rviz_plugin_render_tools Qt5::Widgets)
 
-ament_target_dependencies(
-  moveit_rviz_plugin_render_tools
+target_link_libraries(moveit_rviz_plugin_render_tools
+  PUBLIC
   rclcpp
   moveit_core
   Boost

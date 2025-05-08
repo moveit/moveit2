@@ -10,8 +10,8 @@ target_include_directories(
 # TODO: Fix the versioning
 set_target_properties(moveit_planning_scene
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_planning_scene
+target_link_libraries(moveit_planning_scene
+  PUBLIC
   Boost
   rclcpp
   urdfdom

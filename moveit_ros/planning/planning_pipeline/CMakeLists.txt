@@ -11,8 +11,8 @@ target_include_directories(
 set_target_properties(moveit_planning_pipeline
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-ament_target_dependencies(moveit_planning_pipeline moveit_core moveit_msgs
-                          rclcpp pluginlib)
+target_link_libraries(moveit_planning_pipeline PUBLIC
+                      moveit_core moveit_msgs rclcpp pluginlib)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

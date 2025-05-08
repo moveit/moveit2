@@ -10,8 +10,8 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_planning_scene_monitor
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_planning_scene_monitor
+target_link_libraries(moveit_planning_scene_monitor
+  PUBLIC
   moveit_ros_occupancy_map_monitor
   message_filters
   urdf
@@ -23,7 +23,7 @@ target_link_libraries(moveit_planning_scene_monitor moveit_robot_model_loader
                       moveit_collision_plugin_loader)
 
 add_executable(demo_scene demos/demo_scene.cpp)
-ament_target_dependencies(
+target_link_libraries(
   demo_scene
   PUBLIC
   rclcpp

@@ -4,7 +4,7 @@ set_target_properties(moveit_plan_execution
 target_link_libraries(
   moveit_plan_execution moveit_planning_pipeline moveit_planning_scene_monitor
   moveit_trajectory_execution_manager)
-ament_target_dependencies(moveit_plan_execution moveit_core rclcpp Boost
-                          class_loader pluginlib)
+target_link_libraries(moveit_plan_execution PUBLIC
+                      moveit_core rclcpp Boost class_loader pluginlib)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

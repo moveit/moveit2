@@ -12,8 +12,8 @@ target_include_directories(
 )# for this library
 
 # This line ensures that messages are built before the library is built
-ament_target_dependencies(
-  moveit_kinematics_base
+target_link_libraries(moveit_kinematics_base
+  PUBLIC
   rclcpp
   urdf
   urdfdom_headers

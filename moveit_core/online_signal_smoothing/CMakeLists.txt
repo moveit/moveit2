@@ -10,7 +10,7 @@ include(GenerateExportHeader)
 generate_export_header(moveit_smoothing_base)
 set_target_properties(moveit_smoothing_base
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_smoothing_base rclcpp tf2_eigen)
+target_link_libraries(moveit_smoothing_base PUBLIC rclcpp tf2_eigen)
 
 # Plugin implementations
 add_library(moveit_acceleration_filter SHARED src/acceleration_filter.cpp)
@@ -25,10 +25,10 @@ generate_parameter_library(moveit_acceleration_filter_parameters
 target_link_libraries(
   moveit_acceleration_filter moveit_acceleration_filter_parameters
   moveit_robot_state moveit_smoothing_base osqp::osqp)
-ament_target_dependencies(
-  moveit_acceleration_filter srdfdom # include dependency from
-                                     # moveit_robot_model
-  pluginlib)
+target_link_libraries(
+  moveit_acceleration_filter  # include dependency from
+  PUBLIC srdfdom pluginlib    # moveit_robot_model
+)
 
 add_library(moveit_butterworth_filter SHARED src/butterworth_filter.cpp)
 generate_export_header(moveit_butterworth_filter)
@@ -42,8 +42,8 @@ generate_parameter_library(moveit_butterworth_filter_parameters
 target_link_libraries(
   moveit_butterworth_filter moveit_butterworth_filter_parameters
   moveit_robot_model moveit_smoothing_base)
-ament_target_dependencies(
-  moveit_butterworth_filter
+target_link_libraries(
+  moveit_butterworth_filter PUBLIC
   srdfdom # include dependency from moveit_robot_model
   pluginlib)
 
@@ -58,8 +58,8 @@ generate_parameter_library(moveit_ruckig_filter_parameters
 target_link_libraries(
   moveit_ruckig_filter moveit_robot_state moveit_ruckig_filter_parameters
   moveit_smoothing_base ruckig::ruckig)
-ament_target_dependencies(
-  moveit_ruckig_filter srdfdom # include dependency from moveit_robot_model
+target_link_libraries(moveit_ruckig_filter PUBLIC
+  srdfdom # include dependency from moveit_robot_model
   pluginlib)
 
 # Installation

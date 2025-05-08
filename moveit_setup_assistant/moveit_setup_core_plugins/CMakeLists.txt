@@ -36,8 +36,8 @@ add_library(
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include/moveit_setup_core_plugins>)
-ament_target_dependencies(
-  ${PROJECT_NAME}
+target_link_libraries(${PROJECT_NAME}
+  PUBLIC
   ament_index_cpp
   moveit_ros_visualization
   moveit_setup_framework

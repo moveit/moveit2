@@ -46,13 +46,13 @@ add_library(
 set_target_properties(moveit_servo_lib_cpp PROPERTIES VERSION
                                                       "${moveit_servo_VERSION}")
 target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters)
-ament_target_dependencies(moveit_servo_lib_cpp ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_servo_lib_cpp PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(moveit_servo_lib_ros SHARED src/servo_node.cpp)
 set_target_properties(moveit_servo_lib_ros PROPERTIES VERSION
                                                       "${moveit_servo_VERSION}")
 target_link_libraries(moveit_servo_lib_ros moveit_servo_lib_cpp)
-ament_target_dependencies(moveit_servo_lib_ros ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_servo_lib_ros PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # ##############################################################################
 # Components ##
@@ -68,22 +68,22 @@ rclcpp_components_register_node(moveit_servo_lib_ros PLUGIN
 # Executable node for the joint jog demo
 add_executable(demo_joint_jog demos/cpp_interface/demo_joint_jog.cpp)
 target_link_libraries(demo_joint_jog moveit_servo_lib_cpp)
-ament_target_dependencies(demo_joint_jog ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(demo_joint_jog PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Executable node for the twist demo
 add_executable(demo_twist demos/cpp_interface/demo_twist.cpp)
 target_link_libraries(demo_twist moveit_servo_lib_cpp)
-ament_target_dependencies(demo_twist ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(demo_twist PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Executable node for the pose demo
 add_executable(demo_pose demos/cpp_interface/demo_pose.cpp)
 target_link_libraries(demo_pose moveit_servo_lib_cpp)
-ament_target_dependencies(demo_pose ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(demo_pose PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Keyboard control example for servo
 add_executable(servo_keyboard_input demos/servo_keyboard_input.cpp)
 target_include_directories(servo_keyboard_input PUBLIC include)
-ament_target_dependencies(servo_keyboard_input ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(servo_keyboard_input PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # ##############################################################################
 # Install ##

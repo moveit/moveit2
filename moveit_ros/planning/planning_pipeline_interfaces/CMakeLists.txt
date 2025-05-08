@@ -13,8 +13,8 @@ set_target_properties(moveit_planning_pipeline_interfaces
 target_link_libraries(moveit_planning_pipeline_interfaces
                       moveit_planning_pipeline)
 
-ament_target_dependencies(moveit_planning_pipeline_interfaces moveit_core
-                          moveit_msgs rclcpp)
+target_link_libraries(moveit_planning_pipeline_interfaces PUBLIC
+                      moveit_core moveit_msgs rclcpp)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(

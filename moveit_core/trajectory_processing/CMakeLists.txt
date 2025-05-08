@@ -8,8 +8,8 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_trajectory_processing
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_trajectory_processing
+target_link_libraries(moveit_trajectory_processing
+  PUBLIC
   rclcpp
   rmw_implementation
   urdf

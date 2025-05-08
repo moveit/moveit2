@@ -15,8 +15,8 @@ target_include_directories(
 set_target_properties(moveit_collision_distance_field
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-ament_target_dependencies(moveit_collision_distance_field urdf
-                          visualization_msgs tf2_eigen geometric_shapes octomap)
+target_link_libraries(moveit_collision_distance_field PUBLIC
+                      urdf visualization_msgs tf2_eigen geometric_shapes octomap)
 
 target_link_libraries(
   moveit_collision_distance_field moveit_planning_scene moveit_distance_field

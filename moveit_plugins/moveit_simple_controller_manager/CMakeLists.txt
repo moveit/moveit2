@@ -29,8 +29,8 @@ set_target_properties(
   moveit_simple_controller_manager
   PROPERTIES VERSION "${moveit_simple_controller_manager_VERSION}")
 
-ament_target_dependencies(moveit_simple_controller_manager
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+target_link_libraries(moveit_simple_controller_manager PUBLIC
+                      ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
 install(
   TARGETS moveit_simple_controller_manager

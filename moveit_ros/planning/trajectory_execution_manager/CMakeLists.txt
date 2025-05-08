@@ -7,8 +7,8 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_trajectory_execution_manager
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_trajectory_execution_manager
+target_link_libraries(moveit_trajectory_execution_manager
+  PUBLIC
   moveit_core
   moveit_ros_occupancy_map_monitor
   rclcpp

@@ -29,8 +29,8 @@ add_library(
   src/robotconfiguration.cpp src/sequence.cpp src/xml_testdata_loader.cpp)
 
 # Specify libraries to link a library or executable target against
-ament_target_dependencies(
-  pilz_industrial_motion_planner_testutils
+target_link_libraries(pilz_industrial_motion_planner_testutils
+  PUBLIC
   Boost
   Eigen3
   eigen3_cmake_module

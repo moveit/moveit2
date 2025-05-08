@@ -2,8 +2,8 @@ add_library(moveit_pointcloud_octomap_updater_core SHARED
             src/pointcloud_octomap_updater.cpp)
 set_target_properties(moveit_pointcloud_octomap_updater_core
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_pointcloud_octomap_updater_core
+target_link_libraries(moveit_pointcloud_octomap_updater_core
+  PUBLIC
   rclcpp
   moveit_core
   tf2_ros
@@ -24,8 +24,8 @@ set_target_properties(
 add_library(moveit_pointcloud_octomap_updater SHARED src/plugin_init.cpp)
 set_target_properties(moveit_pointcloud_octomap_updater
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_pointcloud_octomap_updater
+target_link_libraries(moveit_pointcloud_octomap_updater
+  PUBLIC
   rclcpp
   moveit_core
   tf2_ros

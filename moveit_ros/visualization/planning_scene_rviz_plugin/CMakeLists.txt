@@ -11,8 +11,8 @@ set_target_properties(moveit_planning_scene_rviz_plugin_core
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_planning_scene_rviz_plugin_core
                       moveit_rviz_plugin_render_tools)
-ament_target_dependencies(
-  moveit_planning_scene_rviz_plugin_core
+target_link_libraries(moveit_planning_scene_rviz_plugin_core
+  PUBLIC
   rclcpp
   rviz2
   moveit_ros_planning_interface
@@ -28,8 +28,8 @@ set_target_properties(moveit_planning_scene_rviz_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_planning_scene_rviz_plugin
                       moveit_planning_scene_rviz_plugin_core Qt5::Widgets)
-ament_target_dependencies(moveit_planning_scene_rviz_plugin pluginlib
-                          rviz_ogre_vendor)
+target_link_libraries(moveit_planning_scene_rviz_plugin PUBLIC
+                      pluginlib rviz_ogre_vendor)
 target_include_directories(moveit_planning_scene_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 

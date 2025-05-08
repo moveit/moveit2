@@ -9,8 +9,8 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_constraint_samplers
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_constraint_samplers urdf urdfdom
-                          urdfdom_headers visualization_msgs)
+target_link_libraries(moveit_constraint_samplers PUBLIC
+                      urdf urdfdom urdfdom_headers visualization_msgs)
 target_link_libraries(
   moveit_constraint_samplers
   moveit_robot_trajectory

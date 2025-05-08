@@ -9,8 +9,8 @@ target_include_directories(
 target_link_libraries(moveit_distance_field moveit_macros moveit_utils)
 set_target_properties(moveit_distance_field
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_distance_field
+target_link_libraries(moveit_distance_field
+  PUBLIC
   Boost
   eigen_stl_containers
   urdfdom

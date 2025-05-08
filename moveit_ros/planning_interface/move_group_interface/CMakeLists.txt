@@ -9,8 +9,8 @@ set_target_properties(moveit_move_group_interface
 target_link_libraries(
   moveit_move_group_interface moveit_common_planning_interface_objects
   moveit_planning_scene_interface ${Boost_THREAD_LIBRARY})
-ament_target_dependencies(
-  moveit_move_group_interface
+target_link_libraries(moveit_move_group_interface
+  PUBLIC
   moveit_core
   moveit_msgs
   moveit_ros_move_group

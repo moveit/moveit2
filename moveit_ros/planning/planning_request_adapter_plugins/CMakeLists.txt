@@ -12,8 +12,8 @@ target_link_libraries(moveit_default_planning_request_adapter_plugins
 
 set_target_properties(moveit_default_planning_request_adapter_plugins
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_default_planning_request_adapter_plugins
-                          moveit_core rclcpp pluginlib)
+target_link_libraries(moveit_default_planning_request_adapter_plugins PUBLIC
+                      moveit_core rclcpp pluginlib)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

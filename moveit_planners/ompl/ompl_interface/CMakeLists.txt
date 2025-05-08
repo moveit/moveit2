@@ -29,7 +29,7 @@ if(APPLE)
   target_link_directories(moveit_ompl_interface PUBLIC ${OMPL_LIBRARY_DIRS})
 endif()
 
-ament_target_dependencies(
+target_link_libraries(
   moveit_ompl_interface
   moveit_core
   moveit_msgs
@@ -57,7 +57,7 @@ set_target_properties(moveit_generate_state_database
 add_library(moveit_ompl_planner_plugin SHARED src/ompl_planner_manager.cpp)
 set_target_properties(moveit_ompl_planner_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
+target_link_libraries(
   moveit_ompl_planner_plugin
   moveit_core
   moveit_ros_planning

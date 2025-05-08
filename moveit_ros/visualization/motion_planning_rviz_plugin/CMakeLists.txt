@@ -31,8 +31,8 @@ set_target_properties(moveit_motion_planning_rviz_plugin_core
 target_link_libraries(
   moveit_motion_planning_rviz_plugin_core moveit_rviz_plugin_render_tools
   moveit_planning_scene_rviz_plugin)
-ament_target_dependencies(
-  moveit_motion_planning_rviz_plugin_core
+target_link_libraries(moveit_motion_planning_rviz_plugin_core
+  PUBLIC
   moveit_ros_robot_interaction
   moveit_ros_planning_interface
   moveit_ros_warehouse
@@ -48,9 +48,8 @@ set_target_properties(moveit_motion_planning_rviz_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_motion_planning_rviz_plugin
                       moveit_motion_planning_rviz_plugin_core)
-ament_target_dependencies(
-  moveit_motion_planning_rviz_plugin moveit_ros_robot_interaction
-  moveit_ros_warehouse pluginlib rviz_ogre_vendor)
+target_link_libraries(moveit_motion_planning_rviz_plugin  PUBLIC
+  moveit_ros_robot_interaction moveit_ros_warehouse pluginlib rviz_ogre_vendor)
 target_include_directories(moveit_motion_planning_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 

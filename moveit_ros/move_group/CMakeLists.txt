@@ -34,8 +34,8 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_ros_move_group>)
 set_target_properties(moveit_move_group_capabilities_base
                       PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
-ament_target_dependencies(moveit_move_group_capabilities_base
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_move_group_capabilities_base PUBLIC
+                      ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(
   moveit_move_group_default_capabilities SHARED
@@ -59,19 +59,19 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_ros_move_group>)
 set_target_properties(moveit_move_group_default_capabilities
                       PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
-ament_target_dependencies(moveit_move_group_default_capabilities
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_move_group_default_capabilities PUBLIC
+                      ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_move_group_default_capabilities
                       moveit_move_group_capabilities_base)
 
 add_executable(move_group src/move_group.cpp)
 target_include_directories(move_group PUBLIC include)
-ament_target_dependencies(move_group ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+target_link_libraries(move_group PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 target_link_libraries(move_group moveit_move_group_capabilities_base)
 
 add_executable(list_move_group_capabilities src/list_capabilities.cpp)
-ament_target_dependencies(list_move_group_capabilities
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(list_move_group_capabilities PUBLIC
+                      ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(list_move_group_capabilities
                       moveit_move_group_capabilities_base fmt)
 

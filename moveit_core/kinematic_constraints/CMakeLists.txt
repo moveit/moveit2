@@ -16,8 +16,8 @@ target_include_directories(
 set_target_properties(moveit_kinematic_constraints
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-ament_target_dependencies(
-  moveit_kinematic_constraints
+target_link_libraries(moveit_kinematic_constraints
+  PUBLIC
   urdf
   urdfdom
   urdfdom_headers

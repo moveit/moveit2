@@ -43,8 +43,8 @@ if(NOT WIN32)
   target_compile_options(prbt_manipulator_moveit_ikfast_plugin
                          PRIVATE -Wno-unused-variable)
 endif()
-ament_target_dependencies(
-  prbt_manipulator_moveit_ikfast_plugin
+target_link_libraries(prbt_manipulator_moveit_ikfast_plugin
+  PUBLIC
   moveit_core
   pluginlib
   rclcpp

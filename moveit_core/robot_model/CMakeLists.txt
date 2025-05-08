@@ -28,8 +28,8 @@ target_include_directories(
     $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_robot_model
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_robot_model
+target_link_libraries(moveit_robot_model
+  PUBLIC
   angles
   moveit_msgs
   Eigen3

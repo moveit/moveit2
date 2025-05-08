@@ -12,8 +12,8 @@ target_link_libraries(
   moveit_trajectory_rviz_plugin_core moveit_rviz_plugin_render_tools
   moveit_planning_scene_rviz_plugin_core rviz_ogre_vendor::OgreMain)
 
-ament_target_dependencies(
-  moveit_trajectory_rviz_plugin_core
+target_link_libraries(moveit_trajectory_rviz_plugin_core
+  PUBLIC
   rclcpp
   rviz2
   moveit_msgs
@@ -29,8 +29,8 @@ set_target_properties(moveit_trajectory_rviz_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_trajectory_rviz_plugin
                       moveit_trajectory_rviz_plugin_core)
-ament_target_dependencies(moveit_trajectory_rviz_plugin rclcpp pluginlib Boost
-                          rviz_ogre_vendor)
+target_link_libraries(moveit_trajectory_rviz_plugin PUBLIC
+                      rclcpp pluginlib Boost rviz_ogre_vendor)
 target_include_directories(moveit_trajectory_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 

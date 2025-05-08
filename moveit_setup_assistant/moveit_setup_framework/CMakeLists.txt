@@ -47,8 +47,8 @@ target_include_directories(
   moveit_setup_framework
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_framework>)
-ament_target_dependencies(
-  moveit_setup_framework
+target_link_libraries(moveit_setup_framework
+  PUBLIC
   ament_index_cpp
   moveit_core
   moveit_ros_planning
