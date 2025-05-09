@@ -67,8 +67,8 @@ class Xacro(Substitution):
         for key, value in self.__mappings.items():
             normalized_key = normalize_to_list_of_substitutions(key)
             normalized_value = normalize_to_list_of_substitutions(value)
-            expanded_mappings[
-                perform_substitutions(context, normalized_key)
-            ] = perform_substitutions(context, normalized_value)
+            expanded_mappings[perform_substitutions(context, normalized_key)] = (
+                perform_substitutions(context, normalized_value)
+            )
 
         return load_xacro(Path(expanded_file_path), mappings=expanded_mappings)
