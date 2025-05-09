@@ -11,10 +11,9 @@ target_include_directories(
 set_target_properties(moveit_planning_pipeline_interfaces
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_planning_pipeline_interfaces
-                      moveit_planning_pipeline)
+                      moveit_planning_pipeline PUBLIC ${moveit_msgs_TARGETS} moveit_core::moveit_collision_detection rclcpp::rclcpp
+)
 
-target_link_libraries(moveit_planning_pipeline_interfaces PUBLIC
-                      moveit_core moveit_msgs rclcpp)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(

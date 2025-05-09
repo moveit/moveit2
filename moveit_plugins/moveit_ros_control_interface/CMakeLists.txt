@@ -25,7 +25,13 @@ set_target_properties(
   PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_plugin PRIVATE include)
 target_link_libraries(moveit_ros_control_interface_plugin PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+                          ${controller_manager_msgs_TARGETS}
+                          ${trajectory_msgs_TARGETS}
+                          moveit_core::moveit_collision_detection
+                          moveit_simple_controller_manager::moveit_simple_controller_manager
+                          pluginlib::pluginlib
+                          rclcpp_action::rclcpp_action
+)
 
 add_library(moveit_ros_control_interface_trajectory_plugin SHARED
             src/joint_trajectory_controller_plugin.cpp)
@@ -35,7 +41,13 @@ set_target_properties(
 target_include_directories(moveit_ros_control_interface_trajectory_plugin
                            PRIVATE include)
 target_link_libraries(moveit_ros_control_interface_trajectory_plugin PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+                          ${controller_manager_msgs_TARGETS}
+                          ${trajectory_msgs_TARGETS}
+                          moveit_core::moveit_collision_detection
+                          moveit_simple_controller_manager::moveit_simple_controller_manager
+                          pluginlib::pluginlib
+                          rclcpp_action::rclcpp_action
+)
 
 add_library(moveit_ros_control_interface_gripper_plugin SHARED
             src/gripper_command_controller_plugin.cpp)
@@ -45,7 +57,13 @@ set_target_properties(
 target_include_directories(moveit_ros_control_interface_gripper_plugin
                            PRIVATE include)
 target_link_libraries(moveit_ros_control_interface_gripper_plugin PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+                          ${controller_manager_msgs_TARGETS}
+                          ${trajectory_msgs_TARGETS}
+                          moveit_core::moveit_collision_detection
+                          moveit_simple_controller_manager::moveit_simple_controller_manager
+                          pluginlib::pluginlib
+                          rclcpp_action::rclcpp_action
+)
 
 add_library(moveit_ros_control_interface_parallel_gripper_plugin SHARED
             src/parallel_gripper_command_controller_plugin.cpp)
@@ -55,7 +73,13 @@ set_target_properties(
 target_include_directories(moveit_ros_control_interface_parallel_gripper_plugin
                            PRIVATE include)
 target_link_libraries(moveit_ros_control_interface_parallel_gripper_plugin PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+                          ${controller_manager_msgs_TARGETS}
+                          ${trajectory_msgs_TARGETS}
+                          moveit_core::moveit_collision_detection
+                          moveit_simple_controller_manager::moveit_simple_controller_manager
+                          pluginlib::pluginlib
+                          rclcpp_action::rclcpp_action
+)
 
 add_library(moveit_ros_control_interface_empty_plugin SHARED
             src/empty_controller_plugin.cpp)
@@ -65,7 +89,13 @@ set_target_properties(
 target_include_directories(moveit_ros_control_interface_empty_plugin
                            PRIVATE include)
 target_link_libraries(moveit_ros_control_interface_empty_plugin PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+                          ${controller_manager_msgs_TARGETS}
+                          ${trajectory_msgs_TARGETS}
+                          moveit_core::moveit_collision_detection
+                          moveit_simple_controller_manager::moveit_simple_controller_manager
+                          pluginlib::pluginlib
+                          rclcpp_action::rclcpp_action
+)
 
 if(BUILD_TESTING)
   add_subdirectory(test)

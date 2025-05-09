@@ -1,7 +1,7 @@
 add_library(moveit_semantic_world SHARED src/semantic_world.cpp)
 set_target_properties(moveit_semantic_world
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(
+ament_target_dependencies(
   moveit_semantic_world
   PUBLIC
   rclcpp

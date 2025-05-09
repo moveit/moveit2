@@ -41,9 +41,11 @@ target_include_directories(
   moveit_setup_assistant
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_assistant>)
-target_link_libraries(moveit_setup_assistant PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_setup_assistant ${Boost_LIBRARIES})
+target_link_libraries(moveit_setup_assistant ${Boost_LIBRARIES} PUBLIC
+                          ament_index_cpp::ament_index_cpp
+                          pluginlib::pluginlib
+                          rclcpp::rclcpp
+)
 
 add_executable(moveit_setup_assistant_updater src/collisions_updater.cpp)
 target_include_directories(
@@ -52,7 +54,10 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_setup_assistant>)
 
 target_link_libraries(moveit_setup_assistant_updater PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS})
+                          ament_index_cpp::ament_index_cpp
+                          pluginlib::pluginlib
+                          rclcpp::rclcpp
+)
 
 set_target_properties(moveit_setup_assistant_updater
                       PROPERTIES OUTPUT_NAME collisions_updater PREFIX "")

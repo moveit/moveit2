@@ -5,8 +5,8 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_robot_trajectory
                       PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
-target_link_libraries(moveit_robot_trajectory PUBLIC
-                      rclcpp urdfdom urdfdom_headers)
+ament_target_dependencies(moveit_robot_trajectory rclcpp urdfdom
+                          urdfdom_headers)
 
 target_link_libraries(moveit_robot_trajectory moveit_robot_model
                       moveit_robot_state moveit_utils)

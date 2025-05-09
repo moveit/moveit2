@@ -7,8 +7,8 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_robot_state PROPERTIES VERSION
                                                     ${${PROJECT_NAME}_VERSION})
-target_link_libraries(moveit_robot_state
-  PUBLIC
+ament_target_dependencies(
+  moveit_robot_state
   eigen_stl_containers
   urdf
   tf2_geometry_msgs

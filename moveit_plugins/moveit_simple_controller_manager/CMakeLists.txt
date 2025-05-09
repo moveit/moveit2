@@ -30,7 +30,12 @@ set_target_properties(
   PROPERTIES VERSION "${moveit_simple_controller_manager_VERSION}")
 
 target_link_libraries(moveit_simple_controller_manager PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+                          ${control_msgs_TARGETS}
+                          moveit_core::moveit_collision_detection
+                          pluginlib::pluginlib
+                          rclcpp::rclcpp
+                          rclcpp_action::rclcpp_action
+)
 
 install(
   TARGETS moveit_simple_controller_manager

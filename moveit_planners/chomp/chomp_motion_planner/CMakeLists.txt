@@ -23,7 +23,7 @@ add_library(
   src/chomp_optimizer.cpp src/chomp_planner.cpp)
 set_target_properties(chomp_motion_planner
                       PROPERTIES VERSION "${chomp_motion_planner_VERSION}")
-target_link_libraries(chomp_motion_planner PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(chomp_motion_planner PUBLIC ${trajectory_msgs_TARGETS} ${visualization_msgs_TARGETS} moveit_core::moveit_collision_detection rclcpp::rclcpp)
 
 install(
   TARGETS chomp_motion_planner

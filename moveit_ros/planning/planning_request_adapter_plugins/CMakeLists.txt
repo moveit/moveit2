@@ -8,12 +8,11 @@ add_library(
   src/resolve_constraint_frames.cpp)
 
 target_link_libraries(moveit_default_planning_request_adapter_plugins
-                      default_request_adapter_parameters)
+                      default_request_adapter_parameters PUBLIC moveit_core::moveit_collision_detection pluginlib::pluginlib rclcpp::rclcpp
+)
 
 set_target_properties(moveit_default_planning_request_adapter_plugins
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_default_planning_request_adapter_plugins PUBLIC
-                      moveit_core rclcpp pluginlib)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

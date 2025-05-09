@@ -9,14 +9,12 @@ if(BUILD_TESTING)
   add_library(warehouse_fixture SHARED fixtures/warehouse_fixture.cpp)
   target_include_directories(
     warehouse_fixture PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
-  ament_target_dependencies(warehouse_fixture ${TRAJECTORY_CACHE_DEPENDENCIES}
-                            ament_cmake_gtest warehouse_ros_sqlite)
+  target_link_libraries(warehouse_fixture PUBLIC)
 
   add_library(move_group_fixture SHARED fixtures/move_group_fixture.cpp)
   target_include_directories(
     move_group_fixture PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
-  ament_target_dependencies(move_group_fixture ${TRAJECTORY_CACHE_DEPENDENCIES}
-                            ament_cmake_gtest warehouse_ros_sqlite)
+  target_link_libraries(move_group_fixture PUBLIC)
 
   # Test utils library.
   ament_add_gtest(test_utils utils/test_utils.cpp)

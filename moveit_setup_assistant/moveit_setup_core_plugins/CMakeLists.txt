@@ -38,13 +38,12 @@ target_include_directories(
                          $<INSTALL_INTERFACE:include/moveit_setup_core_plugins>)
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
-  ament_index_cpp
-  moveit_ros_visualization
-  moveit_setup_framework
-  pluginlib
-  rclcpp
-  srdfdom
-  urdf)
+  ament_index_cpp::ament_index_cpp
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  srdfdom::srdfdom
+  urdf::urdf
+)
 
 install(
   TARGETS moveit_setup_core_plugins

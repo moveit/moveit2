@@ -6,8 +6,6 @@ target_include_directories(
 set_target_properties(moveit_dynamics_solver
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(moveit_dynamics_solver PUBLIC
-                      urdf urdfdom_headers orocos_kdl visualization_msgs kdl_parser)
-target_link_libraries(moveit_dynamics_solver moveit_robot_state moveit_utils)
+target_link_libraries(moveit_dynamics_solver moveit_robot_state moveit_utils PUBLIC ${visualization_msgs_TARGETS} kdl_parser::kdl_parser urdf::urdf)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

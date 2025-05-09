@@ -6,8 +6,8 @@ target_include_directories(
 target_link_libraries(moveit_transforms moveit_macros moveit_utils)
 set_target_properties(moveit_transforms PROPERTIES VERSION
                                                    "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_transforms
-  PUBLIC
+ament_target_dependencies(
+  moveit_transforms
   geometric_shapes
   tf2_eigen
   rclcpp

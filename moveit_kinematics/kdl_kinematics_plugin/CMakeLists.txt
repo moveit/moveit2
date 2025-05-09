@@ -6,8 +6,8 @@ generate_parameter_library(
 add_library(moveit_kdl_kinematics_plugin SHARED
             src/kdl_kinematics_plugin.cpp src/chainiksolver_vel_mimic_svd.cpp)
 
-target_link_libraries(moveit_kdl_kinematics_plugin
-  PUBLIC
+ament_target_dependencies(
+  moveit_kdl_kinematics_plugin
   rclcpp
   random_numbers
   pluginlib

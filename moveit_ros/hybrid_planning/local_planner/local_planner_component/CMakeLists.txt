@@ -5,6 +5,6 @@ add_library(moveit_local_planner_component SHARED
             src/local_planner_component.cpp)
 set_target_properties(moveit_local_planner_component
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_local_planner_component local_planner_parameters)
-target_link_libraries(moveit_local_planner_component PUBLIC
-                      ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_local_planner_component local_planner_parameters PUBLIC
+                          
+)

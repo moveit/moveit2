@@ -5,16 +5,15 @@ add_library(
 set_target_properties(moveit_robot_state_rviz_plugin_core
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_robot_state_rviz_plugin_core
-                      moveit_rviz_plugin_render_tools)
-target_link_libraries(moveit_robot_state_rviz_plugin_core
+                      moveit_rviz_plugin_render_tools
   PUBLIC
-  rclcpp
-  rviz2
-  moveit_ros_planning
-  moveit_msgs
-  pluginlib
-  Boost
-  rviz_ogre_vendor)
+  ${moveit_msgs_TARGETS}
+  moveit_ros_planning::kinematics_parameters
+  moveit_ros_planning::moveit_collision_plugin_loader
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rviz_ogre_vendor::OgreMain
+)
 target_include_directories(moveit_robot_state_rviz_plugin_core
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 
@@ -22,9 +21,8 @@ add_library(moveit_robot_state_rviz_plugin SHARED src/plugin_init.cpp)
 set_target_properties(moveit_robot_state_rviz_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_robot_state_rviz_plugin
-                      moveit_robot_state_rviz_plugin_core)
-target_link_libraries(moveit_robot_state_rviz_plugin PUBLIC
-                      rclcpp pluginlib Boost rviz_ogre_vendor)
+                      moveit_robot_state_rviz_plugin_core PUBLIC pluginlib::pluginlib rclcpp::rclcpp rviz_ogre_vendor::OgreMain
+)
 target_include_directories(moveit_robot_state_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 

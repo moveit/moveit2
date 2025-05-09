@@ -26,7 +26,7 @@ generate_parameter_library(
 set(IKFAST_LIBRARY_NAME _LIBRARY_NAME_)
 add_library(${IKFAST_LIBRARY_NAME} SHARED
             src/_ROBOT_NAME___GROUP_NAME__ikfast_moveit_plugin.cpp)
-target_link_libraries(
+ament_target_dependencies(
   ${IKFAST_LIBRARY_NAME}
   rclcpp
   moveit_core

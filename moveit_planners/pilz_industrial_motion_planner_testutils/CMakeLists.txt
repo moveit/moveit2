@@ -31,13 +31,11 @@ add_library(
 # Specify libraries to link a library or executable target against
 target_link_libraries(pilz_industrial_motion_planner_testutils
   PUBLIC
-  Boost
-  Eigen3
-  eigen3_cmake_module
-  rclcpp
-  moveit_core
-  moveit_msgs
-  tf2_eigen)
+  ${moveit_msgs_TARGETS}
+  moveit_core::moveit_collision_detection
+  rclcpp::rclcpp
+  tf2_eigen::tf2_eigen
+)
 
 # ##############################################################################
 # Install ##

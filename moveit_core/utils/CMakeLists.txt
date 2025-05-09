@@ -3,7 +3,7 @@ add_library(moveit_utils SHARED src/lexical_casts.cpp src/message_checks.cpp
 target_include_directories(
   moveit_utils PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                       $<INSTALL_INTERFACE:include/moveit_core>)
-target_link_libraries(moveit_utils PUBLIC Boost moveit_msgs rclcpp fmt)
+ament_target_dependencies(moveit_utils Boost moveit_msgs rclcpp fmt)
 target_link_libraries(moveit_utils rsl::rsl)
 set_target_properties(moveit_utils PROPERTIES VERSION
                                               "${${PROJECT_NAME}_VERSION}")
@@ -18,8 +18,8 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 target_link_libraries(moveit_test_utils moveit_robot_model
                       moveit_kinematics_base rsl::rsl)
-target_link_libraries(moveit_test_utils
-  PUBLIC
+ament_target_dependencies(
+  moveit_test_utils
   ament_index_cpp
   Boost
   geometry_msgs

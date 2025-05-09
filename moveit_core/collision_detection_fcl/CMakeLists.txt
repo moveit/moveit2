@@ -11,8 +11,8 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_collision_detection_fcl
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_collision_detection_fcl
-  PUBLIC
+ament_target_dependencies(
+  moveit_collision_detection_fcl
   rclcpp
   rmw_implementation
   urdf
@@ -26,8 +26,8 @@ add_library(collision_detector_fcl_plugin SHARED
             src/collision_detector_fcl_plugin_loader.cpp)
 set_target_properties(collision_detector_fcl_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(collision_detector_fcl_plugin PUBLIC
-                      rclcpp urdf visualization_msgs pluginlib rmw_implementation)
+ament_target_dependencies(collision_detector_fcl_plugin rclcpp urdf
+                          visualization_msgs pluginlib rmw_implementation)
 target_link_libraries(
   collision_detector_fcl_plugin moveit_collision_detection_fcl
   moveit_planning_scene moveit_utils)
