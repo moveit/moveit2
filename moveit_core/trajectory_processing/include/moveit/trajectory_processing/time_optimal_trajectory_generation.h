@@ -73,6 +73,8 @@ public:
   virtual PathSegment* clone() const = 0;
 
   double position_;
+  bool valid_{true};
+  double s_dot_initial_{0.0};
 
 protected:
   double length_;
@@ -82,6 +84,9 @@ class Path
 {
 public:
   Path(const std::list<Eigen::VectorXd>& path, double max_deviation = 0.0);
+  Path(const std::list<Eigen::VectorXd>& path,  const Eigen::VectorXd& initial_velocity, const Eigen::VectorXd& max_acceleration, double max_deviation = 0.0);
+  bool Init(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initial_velocity,
+       const Eigen::VectorXd& max_acceleration, double max_deviation);
   Path(const Path& path);
   double getLength() const;
   Eigen::VectorXd getConfig(double s) const;
@@ -97,6 +102,12 @@ public:
 
   /// @brief Return a list of all switching points as a pair (arc length to switching point, discontinuity)
   std::list<std::pair<double, bool>> getSwitchingPoints() const;
+
+  /// @brief whether the path is valid
+  bool valid_{true};
+
+  /// @brief initial arc length velocity. Default 0.0
+  double s_dot_initial_{0.0};
 
 private:
   PathSegment* getPathSegment(double& s) const;
@@ -181,7 +192,7 @@ class TimeOptimalTrajectoryGeneration : public TimeParameterization
 {
 public:
   TimeOptimalTrajectoryGeneration(const double path_tolerance = 0.1, const double resample_dt = 0.1,
-                                  const double min_angle_change = 0.001);
+                                  const double min_angle_change = 0.001, const double time_step = 1e-3);
 
   // clang-format off
 /**
@@ -191,6 +202,7 @@ public:
   * However, controller execution is separate from MoveIt and may deviate from the intended path between waypoints.
   * path_tolerance_ is defined in configuration space, so the unit is rad for revolute joints,
   * meters for prismatic joints.
+  * time_step_ is the integration time-step. Use a larger value if you care more about compute time and less about accuracy, although there's a risk that the trajectory will overshoot some velocity or acceleration limits. Larger time step may lead to a sub-optimal final trajectory, but shouldn't affect algorithm failure rate (see original paper for details).
   * \param[in,out] trajectory A path which needs time-parameterization. It's OK if this path has already been
   * time-parameterized; this function will re-time-parameterize it.
   * \param max_velocity_scaling_factor A factor in the range [0,1] which can slow down the trajectory.
@@ -265,6 +277,7 @@ private:
   const double path_tolerance_;
   const double resample_dt_;
   const double min_angle_change_;
+  const double time_step_;
 };
 
 // clang-format off

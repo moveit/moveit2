@@ -143,6 +143,123 @@ public:
     y_ = start_direction;
   }
 
+  CircularPathSegment(const Eigen::VectorXd& start, const Eigen::VectorXd& end, const Eigen::VectorXd& start_velocity, const Eigen::VectorXd& max_acceleration)
+  {
+    /*
+      original paper: https://www.roboticsproceedings.org/rss08/p27.pdf
+
+      In order to minimize time, you want to maximize acceleration and minimize path length. By inspection, the way to do that is by minimizing the radius of curvature for the first circular segment whilst maintaining max allowable acceleration.
+
+      I want to solve for the radius of curvature.
+
+      Assumptions:
+      constant s_dot 
+      s_dot_dot = 0
+      max_acceleration is all non-zero
+
+      We set s=0 at the initial waypoint
+
+      known: q_dot_initial, q_initial
+
+      y_hat_i is tangent to q_dot_initial
+      x_hat_i is coplanar with q_i and q_i+1 and orthogonal to y_hat_i
+
+      Relevant equations:
+      Eq 8 reduces to f'(s=0) = y_hat_i
+      Eq 9 reduces to f''(s=0) = -1/r * x_hat_i
+      Eq 12 reduces to q_dot_dot = f''(s)*s_dot^2
+
+      With Eq 8, Eq 11 implies s_dot(s=0) = f'(s=0)^-1 * q_dot_initial
+      implies s_dot(s=0) = y_hat_i^-1 * q_dot_initial
+
+      recall that y_hat_i = q_dot_initial / ||q_dot_initial||
+
+      so s_dot(s=0) = ||q_dot_initial||
+
+      With Eq 9, Eq 12 implies q_dot_dot(s=0) = -1/r * x_hat_i * s_dot^2
+
+      Steps:
+      compute x_hat_i using projections
+      compute s_dot at s=0
+      For each joint, compute the radius corresponding to its max acceleration. Take the largest radius as the final radius because that guarantees that all joint's accelerations will be lower than their upper bound
+    */
+
+    // compute the start velocity norm
+    double length_start_velocity = start_velocity.norm();
+
+    // calculate y_
+    y_ = start_velocity / length_start_velocity;
+
+    //// calculate x_ using vector rejection
+    // a is the vector from the end to the start because we want x_hat_i to be in the same direction as it
+    Eigen::VectorXd a = (start - end).normalized();
+    Eigen::VectorXd b = y_; // already normalized
+    Eigen::VectorXd proj_a_b = (a.dot(b)) * b;
+    Eigen::VectorXd oproj_a_b = a - proj_a_b;
+    x_ = oproj_a_b.normalized();
+
+    // do we need to check for x_'s sign? I don't think so
+    
+    // calculate s_dot
+    s_dot_initial_ = length_start_velocity;
+
+    // calculate the radius
+    double radius = 0.0;
+    for (int i=0; i<start.size(); i++)
+    {
+      double new_radius = std::abs(x_[i] / max_acceleration[i] * std::pow(s_dot_initial_, 2));
+
+      radius = std::max(radius, new_radius);
+    }
+
+    // save the radius
+    radius_ = radius;
+
+    // can now calculate the center_
+    center_ = start - radius_ * x_;
+
+    /*
+      now we must calculate the length_
+
+      from here:
+      https://math.stackexchange.com/questions/4011412/finding-length-of-arc-intercepted-by-two-tangent-lines-given-radius-and-distance
+    */
+
+    // compute the vector from center to q_{i+1}
+    const Eigen::VectorXd v_c_end = end - center_;
+
+    // get the length
+    double length_v_c_end = v_c_end.norm();
+
+    // must check if the length is less than the segment's radius. If so, then the resultant path will be invalid
+    if (length_v_c_end < radius_)
+    {
+      valid_ = false;
+      return;
+    }
+
+    // compute beta. This will always be less than 90 degrees so no need to check the quadrant
+    double beta = acos(radius_ / length_v_c_end);
+
+    // compute the unit vector from center to end
+    const Eigen::VectorXd unit_v_c_end = v_c_end / length_v_c_end;
+
+    // find the angle between the start vector (x_) the unit vector from center to end. acos will always give a value less than 180 degrees so we must use the initial velocity direction (aka y_hat_i) to see if the actual angle is between 180-360 degrees
+    double alpha_beta = acos(x_.dot(unit_v_c_end));
+
+    // if y_hat_i is in the same direction as unit_v_c_end, then alpha_beta is >180 deg, otherwise it's <180 deg
+    if (y_.dot(unit_v_c_end) < 0)
+    {
+      alpha_beta = 2 * M_PI - alpha_beta;
+    }
+
+    // compute the alpha
+    double alpha = alpha_beta - beta;
+
+    // finally can get the length
+    length_ = alpha * radius_;
+  }
+
   Eigen::VectorXd getConfig(double s) const override
   {
     const double angle = s / radius_;
@@ -194,15 +311,62 @@ private:
   Eigen::VectorXd y_;
 };
 
-Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : length_(0.0)
+
+Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation)
+{
+  Eigen::VectorXd initial_velocity, max_acceleration;
+  
+  Init(path, initial_velocity, max_acceleration, max_deviation);
+}
+
+Path::Path(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initial_velocity, const Eigen::VectorXd& max_acceleration, double max_deviation) : length_(0.0)
+{
+  Init(path, initial_velocity, max_acceleration, max_deviation);
+}
+
+bool Path::Init(const std::list<Eigen::VectorXd>& path, const Eigen::VectorXd& initial_velocity, const Eigen::VectorXd& max_acceleration, double max_deviation)
 {
   if (path.size() < 2)
-    return;
+    return false;
   std::list<Eigen::VectorXd>::const_iterator path_iterator1 = path.begin();
   std::list<Eigen::VectorXd>::const_iterator path_iterator2 = path_iterator1;
   ++path_iterator2;
   std::list<Eigen::VectorXd>::const_iterator path_iterator3;
   Eigen::VectorXd start_config = *path_iterator1;
+
+  // use path_pt_1 so that the initial velocity section can modify it
+  Eigen::VectorXd path_pt_1 = 0.5 * (*path_iterator1 + *path_iterator2);
+
+  // if an initial velocity has been supplied
+  if (initial_velocity.size() > 0)
+  {
+    // first segment is a circular path segment which is tangential to the initial position and initial velocity. q_dot(s=length) must be in line with *path_iterator2. 
+    CircularPathSegment* blend_segment = new CircularPathSegment(start_config, *path_iterator2, initial_velocity, max_acceleration);
+
+    // if the blend_segment was invalid, it means our initial velocity is too great compared to *path_iterator2 and the path is invalid
+    if (!blend_segment->valid_)
+    {
+      valid_ = false;
+      return false;
+    }
+
+    // Use half the distance between q1 and q2 as the min allowable distance from q(s=length) and q2, similar to what's used in the rest of the path. If the distance as less than that, then we must recompute, slow down in a linear segment first, then can curve toward *path_iterator2
+    // TODO
+
+    // save the initial s_dot
+    s_dot_initial_ = blend_segment->s_dot_initial_;
+
+    // add the segment
+    path_segments_.emplace_back(blend_segment);
+
+    // update the start config to the end of this segment
+    start_config = blend_segment->getConfig(blend_segment->getLength());
+
+    // update path_pt_1 to the end of this segment (which is the start of the next segment). This could also be kept as 0.5 * (*path_iterator1 + *path_iterator2), as it was originally, but I think that could lead to a slowdown in some situations by forcing the path to use a linear line segment for the portion between start_config and 0.5 * (*path_iterator1 + *path_iterator2) when instead it could use a circular segment curving toward path_iterator3, thereby reducing total path length and therefore total time taken.
+    path_pt_1 = start_config;
+  }
+
+  // iterate through the rest of the points
   while (path_iterator2 != path.end())
   {
     path_iterator3 = path_iterator2;
@@ -210,7 +374,7 @@ Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : lengt
     if (max_deviation > 0.0 && path_iterator3 != path.end())
     {
       CircularPathSegment* blend_segment =
-          new CircularPathSegment(0.5 * (*path_iterator1 + *path_iterator2), *path_iterator2,
+          new CircularPathSegment(path_pt_1, *path_iterator2,
                                   0.5 * (*path_iterator2 + *path_iterator3), max_deviation);
       Eigen::VectorXd end_config = blend_segment->getConfig(0.0);
       if ((end_config - start_config).norm() > 0.000001)
@@ -228,6 +392,13 @@ Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : lengt
     }
     path_iterator1 = path_iterator2;
     ++path_iterator2;
+
+    // only if we're still not at the end
+    if (path_iterator2 != path.end())
+    {
+      // update path_pt_1 to be used in the circular path segment in the next iteration
+      path_pt_1 = 0.5 * (*path_iterator1 + *path_iterator2);
+    }
   }
 
   // Create list of switching point candidates, calculate total path length and
@@ -247,6 +418,8 @@ Path::Path(const std::list<Eigen::VectorXd>& path, double max_deviation) : lengt
     switching_points_.push_back(std::make_pair(length_, true));
   }
   switching_points_.pop_back();
+
+  return true;
 }
 
 Path::Path(const Path& path) : length_(path.length_), switching_points_(path.switching_points_)
@@ -331,22 +504,34 @@ Trajectory::Trajectory(const Path& path, const Eigen::VectorXd& max_velocity, co
     RCLCPP_ERROR(LOGGER, "The trajectory is invalid because the time step is 0.");
     return;
   }
-  trajectory_.push_back(TrajectoryStep(0.0, 0.0));
-  double after_acceleration = getMinMaxPathAcceleration(0.0, 0.0, true);
+
+  // start the trajectory with our initial velocity
+  double s_dot_initial = path.s_dot_initial_;
+
+  // initial trajectory step
+  trajectory_.push_back(TrajectoryStep(0.0, s_dot_initial));
+
+  double after_acceleration = getMinMaxPathAcceleration(0.0 + EPS, s_dot_initial, true);
   while (valid_ && !integrateForward(trajectory_, after_acceleration) && valid_)
   {
     double before_acceleration;
     TrajectoryStep switching_point;
+
+    // Step 4
     if (getNextSwitchingPoint(trajectory_.back().path_pos_, switching_point, before_acceleration, after_acceleration))
     {
       break;
     }
+
+    // Step 5
     integrateBackward(trajectory_, switching_point.path_pos_, switching_point.path_vel_, before_acceleration);
   }
 
   if (valid_)
   {
-    double before_acceleration = getMinMaxPathAcceleration(path_.getLength(), 0.0, false);
+    double before_acceleration = getMinMaxPathAcceleration(path_.getLength() - EPS, 0.0, false);
+
+    // Step 5
     integrateBackward(trajectory_, path_.getLength(), 0.0, before_acceleration);
   }
 
@@ -473,10 +658,10 @@ bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& 
                                                double& before_acceleration, double& after_acceleration)
 {
   bool start = false;
-  path_pos -= DEFAULT_TIMESTEP;
+  path_pos -= time_step_;
   do
   {
-    path_pos += DEFAULT_TIMESTEP;
+    path_pos += time_step_;
 
     if (getMinMaxPhaseSlope(path_pos, getVelocityMaxPathVelocity(path_pos), false) >=
         getVelocityMaxPathVelocityDeriv(path_pos))
@@ -492,7 +677,7 @@ bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& 
     return true;  // end of trajectory reached
   }
 
-  double before_path_pos = path_pos - DEFAULT_TIMESTEP;
+  double before_path_pos = path_pos - time_step_;
   double after_path_pos = path_pos;
   while (after_path_pos - before_path_pos > EPS)
   {
@@ -534,6 +719,7 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
     double old_path_pos = path_pos;
     double old_path_vel = path_vel;
 
+    // Step 2, Section VI.2)
     path_vel += time_step_ * acceleration;
     path_pos += time_step_ * 0.5 * (old_path_vel + path_vel);
 
@@ -563,6 +749,9 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
     }
 
     if (path_vel > getVelocityMaxPathVelocity(path_pos) &&
+        // Section VI.3), first bullet point. Go back to Step 2 (a.k.a. forward integration at max accel)
+        // Issue: this uses getVelocityMaxPathVelocityDeriv but the paper uses getAccelerationMaxPathVelocityDeriv .... which is wrong?
+        // This looks most similar to Eq 40, which is trying to find switching points caused by velocity constraints
         getMinMaxPhaseSlope(old_path_pos, getVelocityMaxPathVelocity(old_path_pos), false) <=
             getVelocityMaxPathVelocityDeriv(old_path_pos))
     {
@@ -582,6 +771,9 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
       return true;
     }
 
+    // Section VI.2), bullet points 2 & 3
+    // from the above if statement, we would only get here if path_vel > getAccelerationMaxPathVelocity(path_pos) or (path_vel > getVelocityMaxPathVelocity(path_pos) AND getMinMaxPhaseSlope(old_path_pos, getVelocityMaxPathVelocity(old_path_pos), false) > getVelocityMaxPathVelocityDeriv(old_path_pos)))
+    // basically, a sign change has occured
     if (path_vel > getAccelerationMaxPathVelocity(path_pos) || path_vel > getVelocityMaxPathVelocity(path_pos))
     {
       // Find more accurate intersection with max-velocity curve using bisection
@@ -617,20 +809,26 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
       }
       trajectory.push_back(TrajectoryStep(before, before_path_vel));
 
+      // s_dot_max_acc < s_dot_max_vel, as in, s_dot > s_dot_max_acc but isn't necessarily > s_dot_max_vel
       if (getAccelerationMaxPathVelocity(after) < getVelocityMaxPathVelocity(after))
       {
         if (after > next_discontinuity->first)
         {
           return false;
         }
+        // Section VI.3), 2nd bullet point. go to step 4. 
+        // Issue: this is in Step 3, but in order to get to step 3, s_dot > s_dot_max_vel but right now s_dot_max_acc < s_dot_max_vel. Maybe it doesn't matter. s_dot is still > s_dot_max_vel
         else if (getMinMaxPhaseSlope(trajectory.back().path_pos_, trajectory.back().path_vel_, true) >
                  getAccelerationMaxPathVelocityDeriv(trajectory.back().path_pos_))
         {
           return false;
         }
       }
+      // s_dot must be > s_dot_max_vel here
       else
       {
+        // Section VI.3), 2nd bullet point. go to step 4.
+        // Issue: in the paper they use getAccelerationMaxPathVelocityDeriv here, NOT getVelocityMaxPathVelocityDeriv
         if (getMinMaxPhaseSlope(trajectory.back().path_pos_, trajectory_.back().path_vel_, false) >
             getVelocityMaxPathVelocityDeriv(trajectory_.back().path_pos_))
         {
@@ -698,6 +896,11 @@ void Trajectory::integrateBackward(std::list<TrajectoryStep>& start_trajectory, 
   end_trajectory_ = trajectory;
 }
 
+/// @brief min-max path acceleration as a function of the acceleration limits.
+/// @param path_pos 
+/// @param path_vel 
+/// @param max 
+/// @return 
 double Trajectory::getMinMaxPathAcceleration(double path_pos, double path_vel, bool max)
 {
   Eigen::VectorXd config_deriv = path_.getTangent(path_pos);
@@ -708,6 +911,7 @@ double Trajectory::getMinMaxPathAcceleration(double path_pos, double path_vel, b
   {
     if (config_deriv[i] != 0.0)
     {
+      // Eq 23
       max_path_acceleration =
           std::min(max_path_acceleration, max_acceleration_[i] / std::abs(config_deriv[i]) -
                                               factor * config_deriv2[i] * path_vel * path_vel / config_deriv[i]);
@@ -718,9 +922,13 @@ double Trajectory::getMinMaxPathAcceleration(double path_pos, double path_vel, b
 
 double Trajectory::getMinMaxPhaseSlope(double path_pos, double path_vel, bool max)
 {
+  // inline equation, Section VI.3)
   return getMinMaxPathAcceleration(path_pos, path_vel, max) / path_vel;
 }
 
+/// @brief max path velocity limited by joint acceleration limits
+/// @param path_pos 
+/// @return 
 double Trajectory::getAccelerationMaxPathVelocity(double path_pos) const
 {
   double max_path_velocity = std::numeric_limits<double>::infinity();
@@ -737,6 +945,7 @@ double Trajectory::getAccelerationMaxPathVelocity(double path_pos) const
           double a_ij = config_deriv2[i] / config_deriv[i] - config_deriv2[j] / config_deriv[j];
           if (a_ij != 0.0)
           {
+            // Eq 31, 1st argument
             max_path_velocity = std::min(max_path_velocity, sqrt((max_acceleration_[i] / std::abs(config_deriv[i]) +
                                                                   max_acceleration_[j] / std::abs(config_deriv[j])) /
                                                                  std::abs(a_ij)));
@@ -746,29 +955,40 @@ double Trajectory::getAccelerationMaxPathVelocity(double path_pos) const
     }
     else if (config_deriv2[i] != 0.0)
     {
+      // Eq 31, 2nd argument
       max_path_velocity = std::min(max_path_velocity, sqrt(max_acceleration_[i] / std::abs(config_deriv2[i])));
     }
   }
   return max_path_velocity;
 }
 
+/// @brief max path velocity limited by joint velocity limits
+/// @param path_pos 
+/// @return 
 double Trajectory::getVelocityMaxPathVelocity(double path_pos) const
 {
   const Eigen::VectorXd tangent = path_.getTangent(path_pos);
   double max_path_velocity = std::numeric_limits<double>::max();
   for (unsigned int i = 0; i < joint_num_; ++i)
   {
+    // Eq 36
     max_path_velocity = std::min(max_path_velocity, max_velocity_[i] / std::abs(tangent[i]));
   }
   return max_path_velocity;
 }
 
+/// @brief numerical derivative of getAccelerationMaxPathVelocity w.r.t. s
+/// @param path_pos 
+/// @return 
 double Trajectory::getAccelerationMaxPathVelocityDeriv(double path_pos)
 {
   return (getAccelerationMaxPathVelocity(path_pos + EPS) - getAccelerationMaxPathVelocity(path_pos - EPS)) /
          (2.0 * EPS);
 }
 
+/// @brief analytical derivative of getVelocityMaxPathVelocity w.r.t. s
+/// @param path_pos 
+/// @return 
 double Trajectory::getVelocityMaxPathVelocityDeriv(double path_pos)
 {
   const Eigen::VectorXd tangent = path_.getTangent(path_pos);
@@ -783,6 +1003,7 @@ double Trajectory::getVelocityMaxPathVelocityDeriv(double path_pos)
       active_constraint = i;
     }
   }
+  // Eq 37
   return -(max_velocity_[active_constraint] * path_.getCurvature(path_pos)[active_constraint]) /
          (tangent[active_constraint] * std::abs(tangent[active_constraint]));
 }
@@ -875,8 +1096,8 @@ Eigen::VectorXd Trajectory::getAcceleration(double time) const
 }
 
 TimeOptimalTrajectoryGeneration::TimeOptimalTrajectoryGeneration(const double path_tolerance, const double resample_dt,
-                                                                 const double min_angle_change)
-  : path_tolerance_(path_tolerance), resample_dt_(resample_dt), min_angle_change_(min_angle_change)
+                                                                 const double min_angle_change, const double time_step)
+  : path_tolerance_(path_tolerance), resample_dt_(resample_dt), min_angle_change_(min_angle_change), time_step_(time_step)
 {
 }
 
@@ -1136,6 +1357,42 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
   const unsigned num_points = trajectory.getWayPointCount();
   const std::vector<int>& idx = group->getVariableIndexList();
   const unsigned num_joints = group->getVariableCount();
+  const std::vector<std::string>& vars = group->getVariableNames();
+
+  std::vector<size_t> active_joint_indices;
+  if (!group->computeJointVariableIndices(group->getActiveJointModelNames(), active_joint_indices))
+  {
+    RCLCPP_ERROR(LOGGER, "Failed to get active variable indices.");
+  }
+
+  const size_t num_active_joints = active_joint_indices.size();
+  Eigen::VectorXd initial_velocities;
+
+  // if an initial velocity was supplied
+  if (trajectory.getWayPointPtr(0)->hasVelocities())
+  {
+    // only resize if we have velocities
+    initial_velocities.resize(num_active_joints);
+
+    // iterate through all active joints
+    for (size_t idx = 0; idx < num_active_joints; ++idx)
+    {
+      double vel = trajectory.getWayPointPtr(0)->getVariableVelocity(vars[active_joint_indices[idx]]);
+
+      // check if vel is greater than max velocity. Subtract EPS in case they're very close to avoid false positives
+      if (std::abs(vel) - EPS > max_velocity[idx])
+      {
+        RCLCPP_ERROR_STREAM(LOGGER, "Initial velocity for joint: " << vars[active_joint_indices[idx]] << " is: " << vel << " which is greater than the max velocity of : " << max_velocity[idx]);
+        return false;
+      }
+
+      // save to initial velocities
+      initial_velocities(idx) = vel;
+    }
+  }
+
+  // convert to const
+  const Eigen::VectorXd const_initial_velocities = initial_velocities;
 
   // Have to convert into Eigen data structs and remove repeated points
   //  (https://github.com/tobiaskunz/trajectories/issues/3)
@@ -1180,8 +1437,18 @@ bool TimeOptimalTrajectoryGeneration::doTimeParameterizationCalculations(robot_t
     return true;
   }
 
+  // create the path
+  Path path(points, const_initial_velocities, max_acceleration, path_tolerance_);
+
+  // ensure the path is valid
+  if (!path.valid_)
+  {
+    RCLCPP_ERROR(LOGGER, "Invalid Path. Returning.");
+    return false;
+  }
+
   // Now actually call the algorithm
-  Trajectory parameterized(Path(points, path_tolerance_), max_velocity, max_acceleration, DEFAULT_TIMESTEP);
+  Trajectory parameterized(path, max_velocity, max_acceleration, time_step_);
   if (!parameterized.isValid())
   {
     RCLCPP_ERROR(LOGGER, "Unable to parameterize trajectory.");
