@@ -1,5 +1,5 @@
 add_executable(cancel_action cancel_action.cpp)
-ament_target_dependencies(cancel_action PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(cancel_action PUBLIC)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

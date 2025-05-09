@@ -47,20 +47,19 @@ target_include_directories(
   moveit_setup_framework
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_framework>)
-ament_target_dependencies(
-  moveit_setup_framework
-  ament_index_cpp
-  moveit_core
-  moveit_ros_planning
-  moveit_ros_visualization
-  pluginlib
-  Qt5Core
-  Qt5Widgets
-  rclcpp
-  rviz_common
-  rviz_rendering
-  srdfdom
-  urdf)
+target_link_libraries(moveit_setup_framework
+  PUBLIC
+  ament_index_cpp::ament_index_cpp
+  moveit_core::moveit_collision_detection
+  moveit_ros_planning::kinematics_parameters
+  moveit_ros_planning::moveit_collision_plugin_loader
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rviz_common::rviz_common
+  rviz_rendering::rviz_rendering
+  srdfdom::srdfdom
+  urdf::urdf
+)
 
 install(DIRECTORY include/ DESTINATION include/moveit_setup_framework)
 install(FILES moveit_setup_framework_plugins.xml
