@@ -1033,9 +1033,29 @@ void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bo
   attached_bodies.clear();
   attached_bodies.reserve(attached_body_map_.size());
   for (const auto& it : attached_body_map_)
-    attached_bodies.push_back(it.second.get());
+  {
+    if (it.second)
+    {
+      attached_bodies.push_back(it.second.get());
+    }
+  }
 }
 
+<<<<<<< HEAD
+=======
+void RobotState::getAttachedBodies(std::map<std::string, const AttachedBody*>& attached_bodies) const
+{
+  attached_bodies.clear();
+  for (const auto& it : attached_body_map_)
+  {
+    if (it.second && !it.first.empty())
+    {
+      attached_bodies[it.first] = it.second.get();
+    }
+  }
+}
+
+>>>>>>> c81ac917e (Fix seg fault with attached objects during motion execution (#3466))
 void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const JointModelGroup* group) const
 {
   attached_bodies.clear();
