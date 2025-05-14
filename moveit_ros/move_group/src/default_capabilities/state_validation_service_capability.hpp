@@ -49,8 +49,8 @@ public:
   void initialize() override;
 
 protected:
-  bool isStateValid(planning_scene_monitor::LockedPlanningSceneRO& ls,
-    moveit::core::RobotState& rs, 
+  bool isStateValid(const planning_scene_monitor::LockedPlanningSceneRO& ls,
+    const moveit::core::RobotState& rs,
     const std::string& group_name,
     const moveit_msgs::msg::Constraints& constraints,
     std::vector<moveit_msgs::msg::ContactInformation>& contacts,
