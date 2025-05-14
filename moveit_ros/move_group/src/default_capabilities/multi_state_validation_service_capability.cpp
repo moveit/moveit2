@@ -19,14 +19,12 @@ void MoveGroupMultiStateValidationService::initialize()
 }
 
 bool MoveGroupMultiStateValidationService::computeService(
-    const std::shared_ptr<rmw_request_id_t>& /* unused */,
-    const std::shared_ptr<moveit_msgs::srv::GetMultiStateValidity::Request>& req,
-    const std::shared_ptr<moveit_msgs::srv::GetMultiStateValidity::Response>& res){
-
+                    const std::shared_ptr<rmw_request_id_t>& /* unused */,
+                    const std::shared_ptr<moveit_msgs::srv::GetMultiStateValidity::Request>& req,
+                    const std::shared_ptr<moveit_msgs::srv::GetMultiStateValidity::Response>& res){
     planning_scene_monitor::LockedPlanningSceneRO ls(context_->planning_scene_monitor_);
     moveit::core::RobotState rs = ls->getCurrentState();
     moveit::core::robotStateMsgToRobotState(req->robot_state, rs);
-
     for(size_t i=0; i<req->joint_states.size(); ++i){
         // Update robot state with next set of joint states
         rs.setVariableValues(req->joint_states[i]);
@@ -40,7 +38,6 @@ bool MoveGroupMultiStateValidationService::computeService(
             break;
         }
     }
-        
     return true;
 }
 }  // namespace move_group

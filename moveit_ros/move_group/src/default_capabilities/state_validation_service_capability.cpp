@@ -55,7 +55,6 @@ void MoveGroupStateValidationService::initialize()
       });
 }
 
-// todo see what i can make const and what i cant make const
 bool MoveGroupStateValidationService::isStateValid(const planning_scene_monitor::LockedPlanningSceneRO& ls,
                                                    const moveit::core::RobotState& rs,
                                                    const std::string& group_name,
@@ -134,9 +133,7 @@ bool MoveGroupStateValidationService::computeService(
   planning_scene_monitor::LockedPlanningSceneRO ls(context_->planning_scene_monitor_);
   moveit::core::RobotState rs = ls->getCurrentState();
   moveit::core::robotStateMsgToRobotState(req->robot_state, rs);
-
   res->valid = isStateValid(ls, rs, req->group_name, req->constraints, res->contacts, res->cost_sources, res->constraint_result);
-
   return true;
 }
 }  // namespace move_group
