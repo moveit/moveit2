@@ -1,6 +1,6 @@
 #pragma once
 
-#include "state_validation_service_capability.h"
+#include "state_validation_service_capability.hpp"
 #include <moveit_msgs/srv/get_multi_state_validity.hpp>
 
 namespace move_group
