@@ -43,9 +43,7 @@
 
 namespace move_group
 {
-MoveGroupStateValidationService::MoveGroupStateValidationService() : MoveGroupCapability("state_validation_service")
-{
-}
+MoveGroupStateValidationService::MoveGroupStateValidationService() : MoveGroupCapability("state_validation_service"){}
 
 void MoveGroupStateValidationService::initialize()
 {
@@ -65,9 +63,6 @@ bool MoveGroupStateValidationService::isStateValid(const planning_scene_monitor:
                                                    std::vector<moveit_msgs::msg::ContactInformation>& contacts,
                                                    std::vector<moveit_msgs::msg::CostSource>& cost_sources,
                                                    std::vector<moveit_msgs::msg::ConstraintEvalResult>& constraint_result){
-  // required variables in: req->group_name, req->constraints
-  // required? variables out: res->contacts, res->cost_sources, res->constraint_result
-
   bool valid = true;
 
   // configure collision request

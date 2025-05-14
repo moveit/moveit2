@@ -8,8 +8,6 @@ namespace move_group
 class MoveGroupMultiStateValidationService : public MoveGroupStateValidationService
 {
 public:
-MoveGroupMultiStateValidationService();
-
   void initialize() override;
 
 private:

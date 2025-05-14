@@ -7,9 +7,6 @@
 
 namespace move_group
 {
-MoveGroupMultiStateValidationService::MoveGroupMultiStateValidationService()
-{
-}
 
 void MoveGroupMultiStateValidationService::initialize()
 {
@@ -31,18 +28,14 @@ bool MoveGroupMultiStateValidationService::computeService(
     moveit::core::robotStateMsgToRobotState(req->robot_state, rs);
 
     for(size_t i=0; i<req->joint_states.size(); ++i){
-
         // Update robot state with next set of joint states
         rs.setVariableValues(req->joint_states[i]);
 
         // Check validity of given joint state
         res->valid = isStateValid(ls, rs, req->group_name, req->constraints, res->contacts, res->cost_sources, res->constraint_result);
 
-        // Break on first invalid joint state
-        /*
-            Not necessarily, depends on whether users want speed or a complete list of the states that were invalid.
-            You could consider adding an "early stop" boolean in the service request?
-        */
+        // This service only checks up to the first invalid joint state,
+        // with the result then holding the information about the first invalid state
         if(!res->valid){
             break;
         }
