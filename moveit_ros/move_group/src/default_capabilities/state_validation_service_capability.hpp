@@ -39,29 +39,29 @@
 #include <moveit/move_group/move_group_capability.hpp>
 #include <moveit_msgs/srv/get_state_validity.hpp>
 
-namespace move_group
-{
-class MoveGroupStateValidationService : public MoveGroupCapability
-{
+namespace move_group {
+class MoveGroupStateValidationService : public MoveGroupCapability {
 public:
   MoveGroupStateValidationService();
 
   void initialize() override;
 
 protected:
-  bool isStateValid(const planning_scene_monitor::LockedPlanningSceneRO& ls,
-    const moveit::core::RobotState& rs,
-    const std::string& group_name,
-    const moveit_msgs::msg::Constraints& constraints,
-    std::vector<moveit_msgs::msg::ContactInformation>& contacts,
-    std::vector<moveit_msgs::msg::CostSource>& cost_sources,
-    std::vector<moveit_msgs::msg::ConstraintEvalResult>& constraint_result);
+  bool isStateValid(
+      const planning_scene_monitor::LockedPlanningSceneRO &ls,
+      const moveit::core::RobotState &rs, const std::string &group_name,
+      const moveit_msgs::msg::Constraints &constraints,
+      std::vector<moveit_msgs::msg::ContactInformation> &contacts,
+      std::vector<moveit_msgs::msg::CostSource> &cost_sources,
+      std::vector<moveit_msgs::msg::ConstraintEvalResult> &constraint_result);
 
 private:
-  bool computeService(const std::shared_ptr<rmw_request_id_t>& request_header,
-                      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request>& req,
-                      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response>& res);
+  bool computeService(
+      const std::shared_ptr<rmw_request_id_t> &request_header,
+      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request> &req,
+      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response> &res);
 
-  rclcpp::Service<moveit_msgs::srv::GetStateValidity>::SharedPtr validity_service_;
+  rclcpp::Service<moveit_msgs::srv::GetStateValidity>::SharedPtr
+      validity_service_;
 };
-}  // namespace move_group
+} // namespace move_group
