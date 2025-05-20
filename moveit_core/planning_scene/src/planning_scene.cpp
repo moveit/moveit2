@@ -518,6 +518,11 @@ collision_detection::AllowedCollisionMatrix& PlanningScene::getAllowedCollisionM
   return *acm_;
 }
 
+void PlanningScene::setAllowedCollisionMatrix(const collision_detection::AllowedCollisionMatrix& acm)
+{
+  getAllowedCollisionMatrixNonConst() = acm;
+}
+
 const moveit::core::Transforms& PlanningScene::getTransforms()
 {
   // Trigger an update of the robot transforms
