@@ -58,13 +58,9 @@ namespace moveit_py
 {
 namespace bind_planning_component
 {
-planning_interface::MotionPlanResponse
+moveit_cpp::PlanningComponent::PlanSolution
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
-     std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters,
-     std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>& multi_plan_parameters,
-     std::shared_ptr<planning_scene::PlanningScene>& planning_scene,
-     std::optional<const moveit::planning_pipeline_interfaces::SolutionSelectionFunction> solution_selection_function,
-     std::optional<moveit::planning_pipeline_interfaces::StoppingCriterionFunction> stopping_criterion_callback);
+     std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters);
 
 bool setGoal(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
              std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state,
@@ -76,7 +72,7 @@ bool setStartState(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_comp
 
 void initPlanRequestParameters(py::module& m);
 
-void initMultiPlanRequestParameters(py::module& m);
+// void initMultiPlanRequestParameters(py::module& m);
 
 void initPlanningComponent(py::module& m);
 }  // namespace bind_planning_component

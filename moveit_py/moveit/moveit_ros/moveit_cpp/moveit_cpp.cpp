@@ -158,12 +158,17 @@ void initMoveitPy(py::module& m)
            Initialize moveit_cpp node and the planning scene service.
            )")
       .def("execute",
-           py::overload_cast<const robot_trajectory::RobotTrajectoryPtr&, const std::vector<std::string>&>(
-               &moveit_cpp::MoveItCpp::execute),
-           py::arg("robot_trajectory"), py::arg("controllers"), py::call_guard<py::gil_scoped_release>(),
+           &moveit_cpp::MoveItCpp::execute,
+           py::arg("group_name"), py::arg("robot_trajectory"), py::arg("blocking") = true,
            R"(
-	   Execute a trajectory (planning group is inferred from robot trajectory object).
-	   )")
+           Execute a trajectory for a specific planning group.
+           Args:
+               group_name (str): Name of the planning group.
+               robot_trajectory (RobotTrajectory): The trajectory to execute.
+               blocking (bool): Whether to block until execution finishes. Defaults to True.
+           Returns:
+               :py:class::`moveit_py.controller_manager.ExecutionStatus`: The status of the execution. \\ TODO(@samu): verify the module return type
+           )")
       .def("get_planning_component", &moveit_py::bind_moveit_cpp::getPlanningComponent,
            py::arg("planning_component_name"), py::return_value_policy::take_ownership,
            R"(
