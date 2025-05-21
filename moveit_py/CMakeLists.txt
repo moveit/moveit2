@@ -37,7 +37,7 @@ endfunction()
 
 pybind11_add_module(
   core
-  # src/moveit/core.cpp
+  moveit/core.cpp
   moveit/moveit_core/collision_detection/collision_common.cpp
   moveit/moveit_core/collision_detection/collision_matrix.cpp
   moveit/moveit_core/collision_detection/world.cpp
