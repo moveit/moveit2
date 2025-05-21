@@ -39,7 +39,6 @@
   <depend>trajectory_msgs</depend>
 
   <exec_depend>controller_manager</exec_depend>
-  <exec_depend>gripper_controllers</exec_depend>
   <exec_depend>joint_state_broadcaster</exec_depend>
   <exec_depend>joint_trajectory_controller</exec_depend>
   <exec_depend>joy</exec_depend>
