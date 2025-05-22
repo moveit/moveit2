@@ -10,12 +10,19 @@
 
 5. In `moveit.cpp`, `moveit/utils/logger.hpp` was used, but it no longer exists. It seems only `rclcpp`'s logger is now used. I followed the logging pattern from other modules.
 
-6. In trajectory_Execution_manager commentato il getter execution_duration_monitoring e i vari getters che non c'erano in trajectory_execution_manager.h/.cpp.
+6. In `trajectory_execution_manager`, commented out the `execution_duration_monitoring` getter and other missing getters that are not defined in the `.h/.cpp` files.
 
-7. In planning_component.hpp rimossi tutti i riferimenti a MultiPipelinePlanRequestParameters e plan con if se single_plan_request param o multi plan rimosso e lasciato parameters come .hpp di moveit2.
+7. In `planning_component.hpp`, removed all references to `MultiPipelinePlanRequestParameters` and `plan` branches based on `single_plan_request_param`; retained only `parameters` as done in MoveIt 2.
 
-8. TODOOOO: In plannin_component.hpp/.cpp plan() ritornava un planning_interface::MotionPlanResponse, però in humble ritornava un moveit_cpp::PlanningComponent::PlanSolution. Anche in humble c'era definito un planning_interface::MotionPlanResponse in planning_response.hpp ma dato che torna un planSOlution ora ritorno plan solution. Però, non mi sembra definito la classe python corrispondente, come la faccio? Dove la metto?
+8. In `planning_component.hpp/.cpp`, `plan()` used to return a `planning_interface::MotionPlanResponse`, but in Humble it returns a `moveit_cpp::PlanningComponent::PlanSolution`. Although `MotionPlanResponse` still exists in `planning_response.hpp`, the Python equivalent for `PlanSolution` is missing and needs to be implemented and exposed via bindings.
 
-9. In initPlanRequestParameters viene fatto params.load(node, ns) però ns non era usato in humble, non c'era proprio, come verranno gestiti i namespace?
+9. In `initPlanRequestParameters`, the method call `params.load(node, ns)` includes `ns`, which was not used or present in Humble. Needs clarification on how namespaces are now handled for parameter loading.
 
-10.                :py:class::`moveit_py.controller_manager.ExecutionStatus`: The status of the execution. \\ TODO(@samu): verify the module return type
+10. In `controller_manager`, `:py:class:\`moveit_py.controller_manager.ExecutionStatus\`` documents the execution status. \\ TODO(@samu): verify the actual return type from the module.
+
+
+
+
+
+
+
