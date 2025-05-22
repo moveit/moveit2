@@ -60,7 +60,7 @@ namespace bind_planning_component
 {
 moveit_cpp::PlanningComponent::PlanSolution
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
-     std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& single_plan_parameters);
+     std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& parameters);
 
 bool setGoal(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
              std::optional<std::string> configuration_name, std::optional<moveit::core::RobotState> robot_state,
@@ -75,5 +75,7 @@ void initPlanRequestParameters(py::module& m);
 // void initMultiPlanRequestParameters(py::module& m);
 
 void initPlanningComponent(py::module& m);
+
+void initPlanSolution(py::module& m);
 }  // namespace bind_planning_component
 }  // namespace moveit_py
