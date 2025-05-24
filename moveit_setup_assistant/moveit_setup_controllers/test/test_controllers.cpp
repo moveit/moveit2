@@ -124,7 +124,6 @@ TEST_F(ControllersTest, OutputFanuc)
 
 TEST_F(ControllersTest, AddDefaultControllers)
 {
-  // only preload urdf and srdf
   auto config_dir = getSharePath("moveit_resources_panda_moveit_config");
   YAML::Node settings = YAML::LoadFile(config_dir / ".setup_assistant")["moveit_setup_assistant_config"];
   config_data_->get<moveit_setup::URDFConfig>("urdf")->loadPrevious(config_dir, settings["URDF"]);
@@ -133,20 +132,15 @@ TEST_F(ControllersTest, AddDefaultControllers)
 
   auto ros2_controllers_config = config_data_->get<ROS2ControllersConfig>("ros2_controllers");
 
-  // Initially no controllers
   EXPECT_EQ(ros2_controllers_config->getControllers().size(), 0u);
 
-  // Run the setup step
   moveit_setup::controllers::ROS2Controllers setup_step;
   initializeStep(setup_step);
 
-  // Adding default controllers, a controller for each planning group
   setup_step.addDefaultControllers();
 
-  // Number of the planning groups defined in the model srdf
   size_t group_count = srdf_config->getGroups().size();
 
-  // Test that addDefaultControllers() did actually add a controller for the new_group
   EXPECT_EQ(ros2_controllers_config->getControllers().size(), group_count);
 }
 
