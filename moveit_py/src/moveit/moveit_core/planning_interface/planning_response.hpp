@@ -54,15 +54,10 @@ namespace bind_planning_interface
 std::shared_ptr<robot_trajectory::RobotTrajectory>
 getMotionPlanResponseTrajectory(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
 
-// moveit_msgs::msg::RobotState
-// getMotionPlanResponseStartState(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
-
 moveit_msgs::msg::MoveItErrorCodes
 getMotionPlanResponseErrorCode(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
 
 double getMotionPlanResponsePlanningTime(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
-
-// std::string getMotionPlanResponsePlannerId(std::shared_ptr<planning_interface::MotionPlanResponse>& response);
 
 void initMotionPlanResponse(py::module& m);
 }  // namespace bind_planning_interface

@@ -47,13 +47,6 @@ getMotionPlanResponseTrajectory(std::shared_ptr<planning_interface::MotionPlanRe
   return response->trajectory_;
 }
 
-// moveit_msgs::msg::RobotState
-// getMotionPlanResponseStartState(std::shared_ptr<planning_interface::MotionPlanResponse>& response)
-// {
-//   moveit_msgs::msg::RobotState robot_state_msg = response->start_state;
-//   return robot_state_msg;
-// }
-
 moveit_msgs::msg::MoveItErrorCodes
 getMotionPlanResponseErrorCode(std::shared_ptr<planning_interface::MotionPlanResponse>& response)
 {
@@ -66,11 +59,6 @@ double getMotionPlanResponsePlanningTime(std::shared_ptr<planning_interface::Mot
 {
   return response->planning_time_;
 }
-
-// std::string getMotionPlanResponsePlannerId(std::shared_ptr<planning_interface::MotionPlanResponse>& response)
-// {
-//   return response->planner_id;
-// }
 
 void initMotionPlanResponse(py::module& m)
 {
@@ -89,12 +77,6 @@ void initMotionPlanResponse(py::module& m)
 
       .def_property("error_code", &moveit_py::bind_planning_interface::getMotionPlanResponseErrorCode, nullptr,
                     py::return_value_policy::copy, R"()")
-
-      // .def_property("start_state", &moveit_py::bind_planning_interface::getMotionPlanResponseStartState, nullptr,
-      //               py::return_value_policy::copy, R"()")
-
-      // .def_readonly("planner_id", &planning_interface::MotionPlanResponse::planner_id, py::return_value_policy::copy,
-      //               R"()")
 
       .def("__bool__", [](std::shared_ptr<planning_interface::MotionPlanResponse>& response) {
         return response->error_code_.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS;

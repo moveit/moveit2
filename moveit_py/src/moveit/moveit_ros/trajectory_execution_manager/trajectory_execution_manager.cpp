@@ -210,12 +210,6 @@ void initTrajectoryExecutionManager(py::module& m)
            If a controller takes longer than expected, the trajectory is canceled.
            )")
 
-     //  .def("execution_duration_monitoring",
-     //       &trajectory_execution_manager::TrajectoryExecutionManager::executionDurationMonitoring,
-     //       R"(
-     //       Get the current status of the monitoring of trajectory execution duration.
-     //       )")
-
       .def("set_allowed_execution_duration_scaling",
            &trajectory_execution_manager::TrajectoryExecutionManager::setAllowedExecutionDurationScaling,
            py::arg("scaling"),
@@ -223,23 +217,11 @@ void initTrajectoryExecutionManager(py::module& m)
            When determining the expected duration of a trajectory, this multiplicative factor is applied to get the allowed duration of execution.
            )")
 
-     //  .def("allowed_execution_duration_scaling",
-     //       &trajectory_execution_manager::TrajectoryExecutionManager::allowedExecutionDurationScaling,
-     //       R"(
-     //       Get the current scaling of the duration of a trajectory to get the allowed duration of execution.
-     //       )")
-
       .def("set_allowed_goal_duration_margin",
            &trajectory_execution_manager::TrajectoryExecutionManager::setAllowedGoalDurationMargin, py::arg("margin"),
            R"(
            When determining the expected duration of a trajectory, this additional margin s applied after scalign to allow more than the expected execution time before triggering trajectory cancel.
            )")
-
-     //  .def("allowed_goal_duration_margin",
-     //       &trajectory_execution_manager::TrajectoryExecutionManager::allowedGoalDurationMargin,
-     //       R"(
-     //       Get the current margin of the duration of a trajectory to get the allowed duration of execution.
-     //       )")
 
       .def("set_execution_velocity_scaling",
            &trajectory_execution_manager::TrajectoryExecutionManager::setExecutionVelocityScaling, py::arg("scaling"),
@@ -249,34 +231,17 @@ void initTrajectoryExecutionManager(py::module& m)
            By default, this is 1.0
            )")
 
-     //  .def("execution_velocity_scaling",
-     //       &trajectory_execution_manager::TrajectoryExecutionManager::executionVelocityScaling,
-     //       R"(
-     //       Get the current scaling of the execution velocities.
-     //       )")
-
       .def("set_allowed_start_tolerance",
            &trajectory_execution_manager::TrajectoryExecutionManager::setAllowedStartTolerance, py::arg("tolerance"),
            R"(
            Set joint-value tolerance for validating trajectory's start point against current robot state.
            )")
 
-     //  .def("allowed_start_tolerance", &trajectory_execution_manager::TrajectoryExecutionManager::allowedStartTolerance,
-     //       R"(
-     //       Get the current joint-value for validating trajectory's start point against current robot state.
-     //       )")
-
       .def("set_wait_for_trajectory_completion",
            &trajectory_execution_manager::TrajectoryExecutionManager::setWaitForTrajectoryCompletion, py::arg("flag"),
            R"(
            Enable or disable waiting for trajectory completion.
            )")
-
-     //  .def("wait_for_trajectory_completion",
-     //       &trajectory_execution_manager::TrajectoryExecutionManager::waitForTrajectoryCompletion,
-     //       R"(
-     //       Get the current state of waiting for the trajectory being completed.
-     //       )")
      ;
 
   // ToDo(MatthijsBurgh)

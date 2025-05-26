@@ -38,7 +38,6 @@
 #include "moveit_cpp.hpp"
 #include <pybind11/pytypes.h>
 #include <rclcpp/logger.hpp>
-// #include <moveit/utils/logger.h>
 #include <string>
 
 namespace moveit_py

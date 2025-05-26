@@ -73,8 +73,6 @@ bool setStartState(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_comp
 
 void initPlanRequestParameters(py::module& m);
 
-// void initMultiPlanRequestParameters(py::module& m);
-
 void initPlanningComponent(py::module& m);
 
 void initPlanSolution(py::module& m);

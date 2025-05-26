@@ -42,27 +42,6 @@ namespace moveit_py
 namespace bind_planning_scene_monitor
 {
 
-// bool processCollisionObject(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-//                             moveit_msgs::msg::CollisionObject& collision_object_msg,
-//                             std::optional<moveit_msgs::msg::ObjectColor> color_msg)
-// {
-//   moveit_msgs::msg::CollisionObject::ConstSharedPtr const_ptr =
-//       std::make_shared<const moveit_msgs::msg::CollisionObject>(collision_object_msg);
-//   if (color_msg)
-//   {
-//     return planning_scene_monitor->processCollisionObjectMsg(const_ptr, *std::move(color_msg));
-//   }
-//   return planning_scene_monitor->processCollisionObjectMsg(const_ptr);
-// }
-
-// bool processAttachedCollisionObjectMsg(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
-//                                        moveit_msgs::msg::AttachedCollisionObject& attached_collision_object_msg)
-// {
-//   moveit_msgs::msg::AttachedCollisionObject::ConstSharedPtr const_ptr =
-//       std::make_shared<const moveit_msgs::msg::AttachedCollisionObject>(attached_collision_object_msg);
-//   return planning_scene_monitor->processAttachedCollisionObjectMsg(const_ptr);
-// }
-
 LockedPlanningSceneContextManagerRO
 readOnly(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor)
 {
@@ -158,23 +137,6 @@ void initPlanningSceneMonitor(py::module& m)
            R"(
            Clears the octomap.
            )")
-     //  .def("process_collision_object", &moveit_py::bind_planning_scene_monitor::processCollisionObject,
-     //       py::arg("collision_object_msg"), py::arg("color_msg") = nullptr,
-     //       R"(
-     //       Apply a collision object to the planning scene.
-
-	//       Args:
-     //           collision_object_msg (moveit_msgs.msg.CollisionObject): The collision object to apply to the planning scene.
-     //       )")
-     //  .def("process_attached_collision_object",
-     //       &moveit_py::bind_planning_scene_monitor::processAttachedCollisionObjectMsg,
-     //       py::arg("attached_collision_object_msg"),
-     //       R"(
-     //       Apply an attached collision object msg to the planning scene.
-
-	//       Args:
-     //           attached_collision_object_msg (moveit_msgs.msg.AttachedCollisionObject): The attached collision object to apply to the planning scene.
-     //       )")
 
       .def("new_planning_scene_message", &planning_scene_monitor::PlanningSceneMonitor::newPlanningSceneMessage,
            py::arg("scene"),

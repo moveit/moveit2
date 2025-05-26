@@ -146,9 +146,6 @@ void initPlanningScene(py::module& m)
                        &planning_scene::PlanningScene::getAllowedCollisionMatrix,
                        py::return_value_policy::reference_internal)
 
-     //  .def_property("allowed_collision_matrix", &planning_scene::PlanningScene::getAllowedCollisionMatrix,
-     //                &planning_scene::PlanningScene::setAllowedCollisionMatrix,
-     //                py::return_value_policy::reference_internal)
       // methods
       .def("__copy__",
            [](const planning_scene::PlanningScene* self) {
