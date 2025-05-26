@@ -16,7 +16,7 @@ find_package(Eigen3 REQUIRED)
 # enables using the Python extensions from the build space for testing
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test_moveit/__init__.py" "")
 
-add_subdirectory(moveit/moveit_py_utils)
+add_subdirectory(src/moveit/moveit_py_utils)
 
 ament_python_install_package(moveit)
 
@@ -37,20 +37,20 @@ endfunction()
 
 pybind11_add_module(
   core
-  moveit/core.cpp
-  moveit/moveit_core/collision_detection/collision_common.cpp
-  moveit/moveit_core/collision_detection/collision_matrix.cpp
-  moveit/moveit_core/collision_detection/world.cpp
-  moveit/moveit_core/controller_manager/controller_manager.cpp
-  moveit/moveit_core/kinematic_constraints/utils.cpp
-  moveit/moveit_core/planning_interface/planning_response.cpp
-  moveit/moveit_core/planning_scene/planning_scene.cpp
-  moveit/moveit_core/transforms/transforms.cpp
-  moveit/moveit_core/robot_model/joint_model.cpp
-  moveit/moveit_core/robot_model/joint_model_group.cpp
-  moveit/moveit_core/robot_model/robot_model.cpp
-  moveit/moveit_core/robot_state/robot_state.cpp
-  moveit/moveit_core/robot_trajectory/robot_trajectory.cpp
+  src/moveit/core.cpp
+  src/moveit/moveit_core/collision_detection/collision_common.cpp
+  src/moveit/moveit_core/collision_detection/collision_matrix.cpp
+  src/moveit/moveit_core/collision_detection/world.cpp
+  src/moveit/moveit_core/controller_manager/controller_manager.cpp
+  src/moveit/moveit_core/kinematic_constraints/utils.cpp
+  src/moveit/moveit_core/planning_interface/planning_response.cpp
+  src/moveit/moveit_core/planning_scene/planning_scene.cpp
+  src/moveit/moveit_core/transforms/transforms.cpp
+  src/moveit/moveit_core/robot_model/joint_model.cpp
+  src/moveit/moveit_core/robot_model/joint_model_group.cpp
+  src/moveit/moveit_core/robot_model/robot_model.cpp
+  src/moveit/moveit_core/robot_state/robot_state.cpp
+  src/moveit/moveit_core/robot_trajectory/robot_trajectory.cpp
 )
 target_link_libraries(
   core
@@ -69,11 +69,11 @@ configure_build_install_location(core)
 
 pybind11_add_module(
   planning
-  moveit/planning.cpp
-  moveit/moveit_ros/moveit_cpp/moveit_cpp.cpp
-  moveit/moveit_ros/moveit_cpp/planning_component.cpp
-  moveit/moveit_ros/planning_scene_monitor/planning_scene_monitor.cpp
-  moveit/moveit_ros/trajectory_execution_manager/trajectory_execution_manager.cpp
+  src/moveit/planning.cpp
+  src/moveit/moveit_ros/moveit_cpp/moveit_cpp.cpp
+  src/moveit/moveit_ros/moveit_cpp/planning_component.cpp
+  src/moveit/moveit_ros/planning_scene_monitor/planning_scene_monitor.cpp
+  src/moveit/moveit_ros/trajectory_execution_manager/trajectory_execution_manager.cpp
 )
 target_link_libraries(
   planning
