@@ -87,20 +87,20 @@ configure_build_install_location(planning)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
-  # set(_pytest_tests test/unit/test_robot_model.py test/unit/test_robot_state.py)
-  # foreach(test_path ${_pytest_tests})
-  #   get_filename_component(_test_name ${test_path} NAME_WE)
-  #   ament_add_pytest_test(
-  #     ${_test_name}
-  #     ${test_path}
-  #     APPEND_ENV
-  #     AMENT_PREFIX_INDEX=${ament_index_build_path}
-  #     PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}
-  #     TIMEOUT
-  #     60
-  #     WORKING_DIRECTORY
-  #     "${CMAKE_SOURCE_DIR}")
-  # endforeach()
+  set(_pytest_tests test/unit/test_robot_model.py test/unit/test_robot_state.py)
+  foreach(test_path ${_pytest_tests})
+    get_filename_component(_test_name ${test_path} NAME_WE)
+    ament_add_pytest_test(
+      ${_test_name}
+      ${test_path}
+      APPEND_ENV
+      AMENT_PREFIX_INDEX=${ament_index_build_path}
+      PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}
+      TIMEOUT
+      60
+      WORKING_DIRECTORY
+      "${CMAKE_SOURCE_DIR}")
+  endforeach()
 endif()
 
 ament_export_targets(moveit_py_utilsTargets HAS_LIBRARY_TARGET)
