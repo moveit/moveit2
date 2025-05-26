@@ -19,10 +19,3 @@
 9. In `initPlanRequestParameters`, the method call `params.load(node, ns)` includes `ns`, which was not used or present in Humble. Needs clarification on how namespaces are now handled for parameter loading.
 
 10. In `controller_manager`, `:py:class:\`moveit_py.controller_manager.ExecutionStatus\`` documents the execution status. \\ TODO(@samu): verify the actual return type from the module.
-
-
-
-
-
-
-
