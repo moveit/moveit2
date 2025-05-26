@@ -142,9 +142,8 @@ void initPlanningScene(py::module& m)
                     py::return_value_policy::move)
 
       .def_property("transforms", py::overload_cast<>(&planning_scene::PlanningScene::getTransforms), nullptr)
-      .def_property_readonly("allowed_collision_matrix",
-                       &planning_scene::PlanningScene::getAllowedCollisionMatrix,
-                       py::return_value_policy::reference_internal)
+      .def_property_readonly("allowed_collision_matrix", &planning_scene::PlanningScene::getAllowedCollisionMatrix,
+                             py::return_value_policy::reference_internal)
 
       // methods
       .def("__copy__",

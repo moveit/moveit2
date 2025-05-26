@@ -241,8 +241,7 @@ void initTrajectoryExecutionManager(py::module& m)
            &trajectory_execution_manager::TrajectoryExecutionManager::setWaitForTrajectoryCompletion, py::arg("flag"),
            R"(
            Enable or disable waiting for trajectory completion.
-           )")
-     ;
+           )");
 
   // ToDo(MatthijsBurgh)
   // https://github.com/moveit/moveit2/issues/2442

@@ -157,9 +157,8 @@ void initMoveitPy(py::module& m)
            R"(
            Initialize moveit_cpp node and the planning scene service.
            )")
-      .def("execute",
-           &moveit_cpp::MoveItCpp::execute,
-           py::arg("group_name"), py::arg("robot_trajectory"), py::arg("blocking") = true,
+      .def("execute", &moveit_cpp::MoveItCpp::execute, py::arg("group_name"), py::arg("robot_trajectory"),
+           py::arg("blocking") = true,
            R"(
            Execute a trajectory for a specific planning group.
            Args:

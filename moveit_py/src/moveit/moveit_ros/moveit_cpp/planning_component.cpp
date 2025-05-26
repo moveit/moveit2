@@ -44,10 +44,9 @@ namespace bind_planning_component
 {
 moveit_cpp::PlanningComponent::PlanSolution
 plan(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_component,
-     std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& parameters
-)
+     std::shared_ptr<moveit_cpp::PlanningComponent::PlanRequestParameters>& parameters)
 {
-  if(parameters)
+  if (parameters)
   {
     // cast parameters
     std::shared_ptr<const moveit_cpp::PlanningComponent::PlanRequestParameters> const_single_plan_parameters =
@@ -323,19 +322,19 @@ void initPlanningComponent(py::module& m)
 }
 void initPlanSolution(py::module& m)
 {
-py::class_<moveit_cpp::PlanningComponent::PlanSolution,
-           moveit_cpp::PlanningComponent::PlanSolutionPtr>(m, "PlanSolution", R"(
+  py::class_<moveit_cpp::PlanningComponent::PlanSolution, moveit_cpp::PlanningComponent::PlanSolutionPtr>(
+      m, "PlanSolution", R"(
     Represents a planning solution, including the trajectory and any error codes.
 )")
-    .def_readonly("start_state", &moveit_cpp::PlanningComponent::PlanSolution::start_state,
-                  "The starting state used for planning.")
-    .def_readonly("trajectory", &moveit_cpp::PlanningComponent::PlanSolution::trajectory,
-                  "The resulting planned trajectory.")
-    .def_readonly("error_code", &moveit_cpp::PlanningComponent::PlanSolution::error_code,
-                  "The MoveIt error code of the planning request.")
-    .def("__bool__", [](const moveit_cpp::PlanningComponent::PlanSolution &self) {
-        return static_cast<bool>(self);
-    }, "Return True if planning was successful.");
+      .def_readonly("start_state", &moveit_cpp::PlanningComponent::PlanSolution::start_state,
+                    "The starting state used for planning.")
+      .def_readonly("trajectory", &moveit_cpp::PlanningComponent::PlanSolution::trajectory,
+                    "The resulting planned trajectory.")
+      .def_readonly("error_code", &moveit_cpp::PlanningComponent::PlanSolution::error_code,
+                    "The MoveIt error code of the planning request.")
+      .def(
+          "__bool__", [](const moveit_cpp::PlanningComponent::PlanSolution& self) { return static_cast<bool>(self); },
+          "Return True if planning was successful.");
 }
 }  // namespace bind_planning_component
 }  // namespace moveit_py
