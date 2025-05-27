@@ -44,6 +44,8 @@ PYBIND11_MODULE(planning, m)
 {
   m.doc() = "Python bindings for moveit_cpp functionalities.";
 
+  py::module_::import("moveit.core");
+
   // Provide custom function signatures
   py::options options;
   options.disable_function_signatures();
