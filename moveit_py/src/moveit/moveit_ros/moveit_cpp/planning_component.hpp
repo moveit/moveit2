@@ -48,10 +48,10 @@
 #include <moveit/moveit_cpp/planning_component.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/move_it_error_codes.hpp>
 
 #include "moveit_cpp.hpp"
 #include "../planning_scene_monitor/planning_scene_monitor.hpp"
-#include "../../moveit_core/planning_interface/planning_response.hpp"
 
 namespace py = pybind11;
 
@@ -74,6 +74,9 @@ bool setStartState(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_comp
 void initPlanRequestParameters(py::module& m);
 
 void initPlanningComponent(py::module& m);
+
+moveit_msgs::msg::MoveItErrorCodes
+getMotionPlanResponseErrorCode(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution);
 
 void initPlanSolution(py::module& m);
 }  // namespace bind_planning_component

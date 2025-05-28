@@ -147,6 +147,14 @@ bool setStartState(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_comp
   }
 }
 
+moveit_msgs::msg::MoveItErrorCodes
+getMotionPlanResponseErrorCode(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution)
+{
+  moveit_msgs::msg::MoveItErrorCodes error_code_msg =
+      static_cast<moveit_msgs::msg::MoveItErrorCodes>(plan_solution->error_code);
+  return error_code_msg;
+}
+
 void initPlanRequestParameters(py::module& m)
 {
   py::class_<moveit_cpp::PlanningComponent::PlanRequestParameters,
@@ -188,23 +196,6 @@ void initPlanRequestParameters(py::module& m)
                      )");
 }
 
-// void initMultiPlanRequestParameters(py::module& m)
-// {
-//   py::class_<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters,
-//              std::shared_ptr<moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters>>(
-//       m, "MultiPipelinePlanRequestParameters",
-//       R"(
-//                              Planner parameters provided with a MotionPlanRequest.
-//                              )")
-//       .def(py::init([](std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp,
-//                        const std::vector<std::string>& planning_pipeline_names) {
-//         const rclcpp::Node::SharedPtr& node = moveit_cpp->getNode();
-//         moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters params{ node, planning_pipeline_names };
-//         return params;
-//       }))
-//       .def_readonly("multi_plan_request_parameters",
-//                     &moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters::plan_request_parameter_vector);
-// }
 void initPlanningComponent(py::module& m)
 {
   py::class_<moveit_cpp::PlanningComponent, std::shared_ptr<moveit_cpp::PlanningComponent>>(m, "PlanningComponent",
@@ -330,8 +321,8 @@ void initPlanSolution(py::module& m)
                     "The starting state used for planning.")
       .def_readonly("trajectory", &moveit_cpp::PlanningComponent::PlanSolution::trajectory,
                     "The resulting planned trajectory.")
-      .def_readonly("error_code", &moveit_cpp::PlanningComponent::PlanSolution::error_code,
-                    "The MoveIt error code of the planning request.")
+      .def_property("error_code", &moveit_py::bind_planning_component::getMotionPlanResponseErrorCode, nullptr,
+                    py::return_value_policy::copy, "The MoveIt error code of the planning request.")
       .def(
           "__bool__", [](const moveit_cpp::PlanningComponent::PlanSolution& self) { return static_cast<bool>(self); },
           "Return True if planning was successful.");
