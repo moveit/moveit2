@@ -546,11 +546,10 @@ void PlanningSceneMonitor::scenePublishingThread()
       planning_scene_publisher_->publish(msg);
       if (is_full)
         RCLCPP_DEBUG(logger_, "Published full planning scene: '%s'", msg.name.c_str());
-      // make sure the node is still running before sleeping otherwise it will crash on shutdown
+      // finish thread on rclcpp shutdown (otherwise rate.sleep() will crash)
       if (!rclcpp::ok())
-        rclcpp::shutdown();
-      else
-        rate.sleep();
+        break;
+      rate.sleep();
     }
   } while (publish_planning_scene_);
 }
