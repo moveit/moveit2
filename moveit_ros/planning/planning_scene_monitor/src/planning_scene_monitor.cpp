@@ -491,7 +491,14 @@ void PlanningSceneMonitor::scenePublishingThread()
     {
       planning_scene_publisher_->publish(msg);
       if (is_full)
+<<<<<<< HEAD
         RCLCPP_DEBUG(LOGGER, "Published full planning scene: '%s'", msg.name.c_str());
+=======
+        RCLCPP_DEBUG(logger_, "Published full planning scene: '%s'", msg.name.c_str());
+      // finish thread on rclcpp shutdown (otherwise rate.sleep() will crash)
+      if (!rclcpp::ok())
+        break;
+>>>>>>> f4cf780f8 (PSM: finish thread on rclcpp::shutdown (#3484))
       rate.sleep();
     }
   } while (publish_planning_scene_);
