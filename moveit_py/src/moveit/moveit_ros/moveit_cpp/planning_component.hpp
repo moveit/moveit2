@@ -49,6 +49,7 @@
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_msgs/msg/robot_state.hpp>
 
 #include "moveit_cpp.hpp"
 #include "../planning_scene_monitor/planning_scene_monitor.hpp"
@@ -76,7 +77,13 @@ void initPlanRequestParameters(py::module& m);
 void initPlanningComponent(py::module& m);
 
 moveit_msgs::msg::MoveItErrorCodes
-getMotionPlanResponseErrorCode(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution);
+getMotionPlanSolutionErrorCode(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution);
+
+moveit_msgs::msg::RobotState
+getMotionPlanSolutionStartState(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution);
+
+std::shared_ptr<robot_trajectory::RobotTrajectory>
+getMotionPlanSolutionTrajectory(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution);
 
 void initPlanSolution(py::module& m);
 }  // namespace bind_planning_component

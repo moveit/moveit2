@@ -147,12 +147,25 @@ bool setStartState(std::shared_ptr<moveit_cpp::PlanningComponent>& planning_comp
   }
 }
 
+moveit_msgs::msg::RobotState
+getMotionPlanSolutionStartState(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution)
+{
+  moveit_msgs::msg::RobotState robot_state_msg = plan_solution->start_state;
+  return robot_state_msg;
+}
+
 moveit_msgs::msg::MoveItErrorCodes
-getMotionPlanResponseErrorCode(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution)
+getMotionPlanSolutionErrorCode(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution)
 {
   moveit_msgs::msg::MoveItErrorCodes error_code_msg =
       static_cast<moveit_msgs::msg::MoveItErrorCodes>(plan_solution->error_code);
   return error_code_msg;
+}
+
+std::shared_ptr<robot_trajectory::RobotTrajectory>
+getMotionPlanSolutionTrajectory(std::shared_ptr<moveit_cpp::PlanningComponent::PlanSolution>& plan_solution)
+{
+  return plan_solution->trajectory;
 }
 
 void initPlanRequestParameters(py::module& m)
@@ -315,13 +328,12 @@ void initPlanSolution(py::module& m)
 {
   py::class_<moveit_cpp::PlanningComponent::PlanSolution, moveit_cpp::PlanningComponent::PlanSolutionPtr>(
       m, "PlanSolution", R"(
-    Represents a planning solution, including the trajectory and any error codes.
-)")
-      .def_readonly("start_state", &moveit_cpp::PlanningComponent::PlanSolution::start_state,
-                    "The starting state used for planning.")
-      .def_readonly("trajectory", &moveit_cpp::PlanningComponent::PlanSolution::trajectory,
-                    "The resulting planned trajectory.")
-      .def_property("error_code", &moveit_py::bind_planning_component::getMotionPlanResponseErrorCode, nullptr,
+    Represents a planning solution, including the trajectory and any error codes.)")
+      .def_property("start_state", &moveit_py::bind_planning_component::getMotionPlanSolutionStartState, nullptr,
+                    py::return_value_policy::copy, "The starting state used for planning.")
+      .def_property("trajectory", &moveit_py::bind_planning_component::getMotionPlanSolutionTrajectory, nullptr,
+                    py::return_value_policy::copy, "The resulting planned trajectory.")
+      .def_property("error_code", &moveit_py::bind_planning_component::getMotionPlanSolutionErrorCode, nullptr,
                     py::return_value_policy::copy, "The MoveIt error code of the planning request.")
       .def(
           "__bool__", [](const moveit_cpp::PlanningComponent::PlanSolution& self) { return static_cast<bool>(self); },
