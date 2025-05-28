@@ -1,2 +1,6 @@
 class World:
-    def __init__(self, *args, **kwargs) -> None: ...
+    """
+    Maintain a representation of the environment
+    """
+
+    def __init__(self) -> None: ...
