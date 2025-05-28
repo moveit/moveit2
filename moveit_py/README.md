@@ -1,21 +1,35 @@
-## Notes on Python Bindings Modifications
+# MoveIt 2 Python Library
+<img src="./banner.png" width="50%">
 
-1. `planning_interface::MotionPlanResponse` does not have the `start_state` and `planner_id` attributes. I commented out the related property definitions with their setters and getters.
+`moveit_py` is a Python library for interfacing with the core functionalities of MoveIt 2.
+The goal of this library is to provide a simplified interface for MoveIt 2 Python users.
 
-2. In `planning_scene.cpp`, the method `PlanningScene::setAllowedCollisionMatrix` was not implemented in `moveit_core::planning_scene`. I copied the implementation, but since full compilation would be required, I commented out the setter method and replaced it with a read-only version.
+This Python library depends on [pybind11](https://pybind11.readthedocs.io/en/stable/index.html) for generating Python bindings.
+The project is split into the following folders:
 
-3. In `trajectory_tools`, newer versions include `applyTOTGTimeParameterization`, which is not available here. It applies the Time-Optimal Trajectory Generation; currently commented out, but we could copy the implementation if needed.
+    ├── docs                 # Sphinx documentation files
+    ├── moveit               # Python library stubs; Python functionalities built on top of bindings
+    ├── src/moveit           # pybind11 binding code
+    ├── test                 # Unit and integration testing
 
-4. In `planning_scene_monitor.cpp` (part of `moveit_ros`, now in `moveit_py`), `process_attached_collision_object` and `process_collision_object` were defined but are not actual methods of `PlanningSceneMonitor`—only of `PlanningScene`. Consider implementing them in `PlanningSceneMonitor` as well.
+## Tutorials
+We are continuing to add tutorials for the MoveIt 2 Python library. Of particular note is the fact that one can interact with MoveIt interactively since Python is an interpreted language, our tutorials demonstrate this through leveraging Jupyter notebooks. For further details please consult the [MoveIt 2 tutorials site](https://moveit.picknik.ai/main/index.html).
 
-5. In `moveit.cpp`, `moveit/utils/logger.hpp` was used, but it no longer exists. It seems only `rclcpp`'s logger is now used. I followed the logging pattern from other modules.
+## Contribution Guidelines
+Community contributions are welcome.
 
-6. In `trajectory_execution_manager`, commented out the `execution_duration_monitoring` getter and other missing getters that are not defined in the `.h/.cpp` files.
+For detailed contribution guidelines please consult the official [MoveIt contribution guidelines](https://moveit.ros.org/documentation/contributing/).
 
-7. In `planning_component.hpp`, removed all references to `MultiPipelinePlanRequestParameters` and `plan` branches based on `single_plan_request_param`; retained only `parameters` as done in MoveIt 2.
+## Citing the Library
+If you use this library in your work please use the following citation:
+```bibtex
+@software{fagan2023moveitpy,
+  author = {Fagan, Peter David},
+  title = {{MoveIt 2 Python Library: A Software Library for Robotics Education and Research}},
+  url = {https://github.com/moveit/moveit2/tree/main/moveit_py},
+  year = {2023}
+}
+```
 
-8. In `planning_component.hpp/.cpp`, `plan()` used to return a `planning_interface::MotionPlanResponse`, but in Humble it returns a `moveit_cpp::PlanningComponent::PlanSolution`. Although `MotionPlanResponse` still exists in `planning_response.hpp`, the Python equivalent for `PlanSolution` is missing and needs to be implemented and exposed via bindings.
-
-9. In `initPlanRequestParameters`, the method call `params.load(node, ns)` includes `ns`, which was not used or present in Humble. Needs clarification on how namespaces are now handled for parameter loading.
-
-10. In `controller_manager`, `:py:class:\`moveit_py.controller_manager.ExecutionStatus\`` documents the execution status. \\ TODO(@samu): verify the actual return type from the module.
+## Acknowledgements
+Thank you to the [Google Summer of Code program](https://summerofcode.withgoogle.com/) for sponsoring the development of this Python library. Thank you to the MoveIt maintainers Henning Kayser (@henningkayser) and Michael Goerner (@v4hn) for their guidance as supervisors of my GSoC project. Finally thank you to the [ML Collective](https://mlcollective.org/) for providing compute support for this project.
