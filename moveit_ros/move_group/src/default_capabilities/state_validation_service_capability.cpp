@@ -87,6 +87,7 @@ bool MoveGroupStateValidationService::isStateValid(
     valid = false;
     for (collision_detection::CollisionResult::ContactMap::const_iterator it = cres.contacts.begin();
          it != cres.contacts.end(); ++it)
+    {
       for (const collision_detection::Contact& contact : it->second)
       {
         contacts.resize(contacts.size() + 1);
@@ -94,6 +95,7 @@ bool MoveGroupStateValidationService::isStateValid(
         contacts.back().header.frame_id = ls->getPlanningFrame();
         contacts.back().header.stamp = time_now;
       }
+    }
   }
 
   // copy cost sources
