@@ -6,12 +6,10 @@
   <description>Python binding for MoveIt 2</description>
 
   <maintainer email="peterdavidfagan@gmail.com">Peter David Fagan</maintainer>
-  <maintainer email="samuele.sandrini@stiima.cnr.it">Samuele Sandrini</maintainer>
 
   <license>BSD</license>
 
   <author email="peterdavidfagan@gmail.com">Peter David Fagan</author>
-  <author email="samuele.sandrini@stiima.cnr.it">Samuele Sandrini</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

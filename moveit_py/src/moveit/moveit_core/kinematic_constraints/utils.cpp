@@ -2,7 +2,6 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2022, Peter David Fagan
- *  Copyright (c) 2025, Samuele Sandrini
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Authors: Peter David Fagan, Samuele Sandrini */
+/* Authors: Peter David Fagan */
 
 #include "utils.hpp"
 #include <rclcpp/rclcpp.hpp>

@@ -75,7 +75,7 @@ struct type_caster<rclcpp::Time>
   static py::handle cast(const rclcpp::Time& src, return_value_policy /* policy */, py::handle /* parent */)
   {
     py::module rclpy_time = py::module::import("rclpy.time");
-    py::object Time = rclpy_time.attr("Time");
+    py::object Time = rclpy_time.attr("Time");  // NOLINT(readability-identifier-naming)
 
     int64_t nanoseconds = src.nanoseconds();
     int clock_type = static_cast<int>(src.get_clock_type());

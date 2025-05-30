@@ -2,7 +2,6 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2023, Jafar Uruç
- *  Copyright (c) 2025, Samuele Sandrini
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Authors: Jafar Uruç, Samuele Sandrini */
+/* Authors: Jafar Uruç */
 
 #pragma once
 

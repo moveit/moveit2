@@ -2,7 +2,6 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2023, Matthijs van der Burgh
- *  Copyright (c) 2025, Samuele Sandrini
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Authors: Matthijs van der Burgh, Samuele Sandrini */
+/* Authors: Matthijs van der Burgh */
 
 #pragma once
 

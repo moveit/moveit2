@@ -2,7 +2,6 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2022, Peter David Fagan
- *  Copyright (c) 2025, Samuele Sandrini
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -33,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Peter David Fagan, Samuele Sandrini */
+/* Author: Peter David Fagan */
 
 #include "planning_scene.hpp"
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
