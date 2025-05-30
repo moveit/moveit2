@@ -9,6 +9,7 @@ if(APPLE)
   find_package(X11 REQUIRED)
 endif()
 
+find_package(Boost REQUIRED COMPONENTS random filesystem)
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(pluginlib REQUIRED)

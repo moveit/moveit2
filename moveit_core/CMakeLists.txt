@@ -7,6 +7,7 @@ moveit_package()
 
 find_package(ament_cmake REQUIRED)
 find_package(angles REQUIRED)
+find_package(Boost REQUIRED COMPONENTS random filesystem)
 find_package(Bullet 2.87 REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(eigen_stl_containers REQUIRED)

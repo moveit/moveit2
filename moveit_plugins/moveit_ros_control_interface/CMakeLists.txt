@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 project(moveit_ros_control_interface LANGUAGES CXX)
 
 find_package(ament_cmake REQUIRED)
+find_package(Boost REQUIRED COMPONENTS random filesystem)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     rclcpp_action controller_manager_msgs moveit_core
