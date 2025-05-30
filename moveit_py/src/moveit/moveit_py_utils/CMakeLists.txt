@@ -6,8 +6,7 @@ target_include_directories(
 set_target_properties(moveit_py_utils PROPERTIES VERSION
                                                  "${${PROJECT_NAME}_VERSION}")
 
-ament_target_dependencies(moveit_py_utils rclcpp moveit_msgs geometry_msgs
-                          pybind11)
+target_link_libraries(moveit_py_utils PUBLIC ${geometry_msgs_TARGETS} ${moveit_msgs_TARGETS} rclcpp::rclcpp)
 
 install(
   TARGETS moveit_py_utils
