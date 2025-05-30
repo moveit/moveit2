@@ -6,6 +6,7 @@ find_package(
   thread
   system
   filesystem
+  random
   regex
   date_time
   program_options)

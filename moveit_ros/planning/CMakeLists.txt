@@ -7,6 +7,7 @@ moveit_package()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+find_package(Boost REQUIRED COMPONENTS random filesystem)
 find_package(Eigen3 REQUIRED)
 find_package(fmt REQUIRED)
 find_package(generate_parameter_library REQUIRED)
