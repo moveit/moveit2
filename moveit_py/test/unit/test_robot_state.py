@@ -3,8 +3,8 @@ import numpy as np
 
 from geometry_msgs.msg import Pose
 
-from moveit.core.robot_state import RobotState
-from moveit.core.robot_model import RobotModel
+from test_moveit.core.robot_state import RobotState
+from test_moveit.core.robot_model import RobotModel
 
 
 # TODO (peterdavidfagan): depend on moveit_resources package directly.

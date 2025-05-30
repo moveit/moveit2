@@ -1,5 +1,5 @@
 import unittest
-from moveit.core.robot_model import JointModelGroup, RobotModel
+from test_moveit.core.robot_model import JointModelGroup, RobotModel
 
 # TODO (peterdavidfagan): depend on moveit_resources package directly.
 # (https://github.com/peterdavidfagan/moveit2/blob/moveit_py/moveit_core/utils/src/robot_model_test_utils.cpp)
