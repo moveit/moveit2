@@ -3,6 +3,7 @@
 find_package(
   Boost
   REQUIRED
+  random
   system
   filesystem
   date_time

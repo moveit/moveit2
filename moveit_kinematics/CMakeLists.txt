@@ -6,7 +6,7 @@ find_package(moveit_common REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
-
+find_package(Boost REQUIRED system random)
 find_package(Eigen3 REQUIRED)
 find_package(class_loader REQUIRED)
 find_package(generate_parameter_library REQUIRED)

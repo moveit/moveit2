@@ -11,6 +11,7 @@ find_package(
   system
   filesystem
   date_time
+  random
   thread
   serialization)
 find_package(moveit_core REQUIRED)

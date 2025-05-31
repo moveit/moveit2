@@ -7,6 +7,7 @@ moveit_package()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(Boost REQUIRED COMPONENTS random filesystem)
 find_package(moveit_core REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rsl REQUIRED)

@@ -5,6 +5,7 @@ project(moveit_ros_robot_interaction LANGUAGES CXX)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
+find_package(Boost REQUIRED COMPONENTS random filesystem)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(interactive_markers REQUIRED)

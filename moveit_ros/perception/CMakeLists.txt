@@ -3,6 +3,7 @@ project(moveit_ros_perception LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
+find_package(Boost REQUIRED COMPONENTS random filesystem)
 moveit_package()
 
 option(WITH_OPENGL "Build the parts that depend on OpenGL" ON)
