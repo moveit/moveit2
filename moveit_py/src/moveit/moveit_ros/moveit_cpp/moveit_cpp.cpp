@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Authors: Peter David Fagan */
+/* Author: Peter David Fagan */
 
 #include "moveit_cpp.hpp"
 #include <pybind11/pytypes.h>

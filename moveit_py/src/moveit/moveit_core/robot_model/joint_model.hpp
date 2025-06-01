@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Authors: Jafar Uruç */
+/* Author: Jafar Uruç */
 
 #pragma once
 

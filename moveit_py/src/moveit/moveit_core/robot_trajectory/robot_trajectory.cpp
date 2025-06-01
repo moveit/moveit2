@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Authors: Peter David Fagan */
+/* Author: Peter David Fagan */
 
 #include "robot_trajectory.hpp"
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
