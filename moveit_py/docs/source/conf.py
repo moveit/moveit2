@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = "moveit_py"
-copyright = "2022, Peter David Fagan; 2025, Samuele Sandrini"
-author = "Peter David Fagan, Samuele Sandrini"
+copyright = "2022, Peter David Fagan; 2025"
+author = "Peter David Fagan"
 
 
 # -- General configuration ---------------------------------------------------
