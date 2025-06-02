@@ -1,27 +1,27 @@
-from _typeshed import Incomplete
+from typing import Any
 
 class AllowedCollisionMatrix:
     def __init__(self, *args, **kwargs) -> None: ...
-    def clear(self, *args, **kwargs): ...
-    def get_entry(self, *args, **kwargs): ...
-    def remove_entry(self, *args, **kwargs): ...
-    def set_entry(self, *args, **kwargs): ...
+    def clear(self, *args, **kwargs) -> Any: ...
+    def get_entry(self, *args, **kwargs) -> Any: ...
+    def remove_entry(self, *args, **kwargs) -> Any: ...
+    def set_entry(self, *args, **kwargs) -> Any: ...
 
 class CollisionRequest:
-    contacts: Incomplete
-    cost: Incomplete
-    distance: Incomplete
-    joint_model_group_name: Incomplete
-    max_contacts: Incomplete
-    max_contacts_per_pair: Incomplete
-    max_cost_sources: Incomplete
-    verbose: Incomplete
+    contacts: Any
+    cost: Any
+    distance: Any
+    joint_model_group_name: Any
+    max_contacts: Any
+    max_contacts_per_pair: Any
+    max_cost_sources: Any
+    verbose: Any
     def __init__(self, *args, **kwargs) -> None: ...
 
 class CollisionResult:
-    collision: Incomplete
-    contact_count: Incomplete
-    contacts: Incomplete
-    cost_sources: Incomplete
-    distance: Incomplete
+    collision: Any
+    contact_count: Any
+    contacts: Any
+    cost_sources: Any
+    distance: Any
     def __init__(self, *args, **kwargs) -> None: ...
