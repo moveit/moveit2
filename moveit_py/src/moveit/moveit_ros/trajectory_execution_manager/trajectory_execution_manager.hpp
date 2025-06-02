@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Authors: Matthijs van der Burgh */
+/* Author: Matthijs van der Burgh */
 
 #pragma once
 
