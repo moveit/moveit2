@@ -26,7 +26,7 @@ RUN --mount=type=cache,target=/root/.ccache/ \
     . "/opt/ros/${ROS_DISTRO}/setup.sh" &&\
     # Install dependencies from rosdep
     apt-get -q update && \
-    rosdep update && \
+#     rosdep update && \
     DEBIAN_FRONTEND=noninteractive \
     rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     rm -rf /var/lib/apt/lists/* && \
