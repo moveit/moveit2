@@ -7,6 +7,21 @@ ARG ROS_DISTRO=rolling
 FROM moveit/moveit2:${ROS_DISTRO}-ci
 LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
 
+## TEMPORARY Update the signing key
+# Remove this once the base ros:jazzy-ros-core image is updated
+RUN rm /etc/apt/sources.list.d/ros2-latest.list \
+  && rm /usr/share/keyrings/ros2-latest-archive-keyring.gpg
+
+RUN apt-get update \
+  && apt-get install -y ca-certificates curl
+
+RUN export ROS_APT_SOURCE_VERSION=$(curl -s https://api.github.com/repos/ros-infrastructure/ros-apt-source/releases/latest | grep -F "tag_name" | awk -F\" '{print $4}') ;\
+    curl -L -s -o /tmp/ros2-apt-source.deb "https://github.com/ros-infrastructure/ros-apt-source/releases/download/${ROS_APT_SOURCE_VERSION}/ros2-apt-source_${ROS_APT_SOURCE_VERSION}.$(. /etc/os-release && echo $VERSION_CODENAME)_all.deb" \
+    && apt-get update \
+    && apt-get install /tmp/ros2-apt-source.deb \
+    && rm -f /tmp/ros2-apt-source.deb
+## TEMPORARY Update the signing key
+
 # Export ROS_UNDERLAY for downstream docker containers
 ENV ROS_UNDERLAY /root/ws_moveit/install
 WORKDIR $ROS_UNDERLAY/..
@@ -26,7 +41,7 @@ RUN --mount=type=cache,target=/root/.ccache/ \
     . "/opt/ros/${ROS_DISTRO}/setup.sh" &&\
     # Install dependencies from rosdep
     apt-get -q update && \
-#     rosdep update && \
+    rosdep update && \
     DEBIAN_FRONTEND=noninteractive \
     rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
     rm -rf /var/lib/apt/lists/* && \
