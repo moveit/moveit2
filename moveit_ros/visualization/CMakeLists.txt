@@ -52,6 +52,10 @@ find_package(rviz_ogre_vendor REQUIRED)
 # Finds Boost Components
 include(ConfigExtras.cmake)
 
+# Qt Stuff
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Test Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Test Widgets)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -123,7 +127,7 @@ install(
   DESTINATION include/moveit_ros_visualization)
 
 ament_export_targets(moveit_ros_visualizationTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} Qt${QT_VERSION_MAJOR})
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
 

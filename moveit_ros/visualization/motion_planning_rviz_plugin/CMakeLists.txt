@@ -1,3 +1,6 @@
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
 set(HEADERS
     include/moveit/motion_planning_rviz_plugin/motion_planning_display.hpp
     include/moveit/motion_planning_rviz_plugin/motion_planning_frame.hpp
@@ -38,7 +41,7 @@ ament_target_dependencies(
   moveit_ros_warehouse
   rviz2
   rviz_ogre_vendor
-  ${QT_VERSION_NAME}
+  Qt${QT_VERSION_MAJOR}
   pluginlib)
 target_include_directories(moveit_motion_planning_rviz_plugin_core
                            PRIVATE "${OGRE_PREFIX_DIR}/include")

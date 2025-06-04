@@ -26,14 +26,31 @@ find_package(moveit_setup_srdf_plugins REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-    ament_index_cpp
-    moveit_setup_framework
-    moveit_setup_srdf_plugins
-    pluginlib
-    Qt${QT_VERSION_MAJOR}Core
-    Qt${QT_VERSION_MAJOR}Widgets
-    rclcpp)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core)
+
+if(${QT_VERSION_MAJOR} GREATER "5")
+  find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core
+                                                         Core5Compat)
+  set(THIS_PACKAGE_INCLUDE_DEPENDS
+      ament_index_cpp
+      moveit_setup_framework
+      moveit_setup_srdf_plugins
+      pluginlib
+      Qt${QT_VERSION_MAJOR}Core
+      Qt${QT_VERSION_MAJOR}Core5Compat
+      Qt${QT_VERSION_MAJOR}Widgets
+      rclcpp)
+else()
+  find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
+  set(THIS_PACKAGE_INCLUDE_DEPENDS
+      ament_index_cpp
+      moveit_setup_framework
+      moveit_setup_srdf_plugins
+      pluginlib
+      Qt${QT_VERSION_MAJOR}Core
+      Qt${QT_VERSION_MAJOR}Widgets
+      rclcpp)
+endif()
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
 set(HEADERS include/moveit_setup_assistant/navigation_widget.hpp
@@ -41,6 +58,8 @@ set(HEADERS include/moveit_setup_assistant/navigation_widget.hpp
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
+
+qt_wrap_cpp(MOC_FILES ${HEADERS})
 
 add_executable(
   moveit_setup_assistant src/main.cpp src/setup_assistant_widget.cpp

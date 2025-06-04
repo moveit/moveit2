@@ -28,9 +28,10 @@ find_package(rclcpp REQUIRED)
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-add_library(
-  moveit_setup_simulation src/simulation.cpp src/simulation_widget.cpp
-                          include/moveit_setup_simulation/simulation_widget.hpp)
+qt_wrap_cpp(MOC_FILES include/moveit_setup_simulation/simulation_widget.hpp)
+
+add_library(moveit_setup_simulation src/simulation.cpp
+                                    src/simulation_widget.cpp ${MOC_FILES})
 target_include_directories(
   moveit_setup_simulation
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

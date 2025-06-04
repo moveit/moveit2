@@ -36,7 +36,7 @@
 
 #include <moveit_setup_srdf_plugins/collision_linear_model.hpp>
 #include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
-
+#include <QRegExp>
 #include <QItemSelection>
 #include <QPainter>
 #include <QRegularExpression>
