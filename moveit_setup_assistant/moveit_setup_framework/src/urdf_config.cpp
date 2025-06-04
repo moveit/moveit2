@@ -86,7 +86,7 @@ void URDFConfig::loadFromPath(const std::filesystem::path& urdf_file_path, const
 {
   urdf_path_ = urdf_file_path;
   xacro_args_vec_ = xacro_args;
-  xacro_args_ = fmt::format("{}", fmt::join(xacro_args_vec_, " "));
+  xacro_args_ = fmt::format("{}", rcpputils::join(xacro_args_vec_, " "));
   setPackageName();
   load();
 }
