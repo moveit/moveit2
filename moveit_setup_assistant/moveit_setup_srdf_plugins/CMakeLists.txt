@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_setup_srdf_plugins LANGUAGES CXX)
-
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core5Compat)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core5Compat)
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
@@ -10,7 +11,7 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
 find_package(pluginlib REQUIRED)
 
-qt5_wrap_cpp(
+qt_wrap_cpp(
   MOC_FILES
   include/moveit_setup_srdf_plugins/collision_linear_model.hpp
   include/moveit_setup_srdf_plugins/collision_matrix_model.hpp
@@ -46,12 +47,18 @@ add_library(
   src/virtual_joints.cpp
   src/virtual_joints_widget.cpp
   ${MOC_FILES})
+  
 target_include_directories(
   moveit_setup_srdf_plugins
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_srdf_plugins>)
-ament_target_dependencies(moveit_setup_srdf_plugins moveit_setup_framework
-                          pluginlib)
+
+target_link_libraries(moveit_setup_srdf_plugins PUBLIC
+			Qt${QT_VERSION_MAJOR}::Widgets
+			Qt${QT_VERSION_MAJOR}::Core5Compat
+                        pluginlib::pluginlib
+                        moveit_core::moveit_macros
+                        moveit_setup_framework::moveit_setup_framework)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

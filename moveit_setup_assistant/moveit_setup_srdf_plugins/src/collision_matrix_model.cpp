@@ -36,6 +36,7 @@
 
 #include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
 #include <boost/assign.hpp>
+#include <QRegularExpression>
 #include <QVector>
 #include <QBrush>
 #include <QColor>
@@ -197,7 +198,8 @@ void CollisionMatrixModel::setEnabled(const QModelIndexList& indexes, bool value
 void CollisionMatrixModel::setFilterRegExp(const QString& filter)
 {
   beginResetModel();
-  QRegExp regexp(filter);
+  QRegularExpression regexp;
+  regexp.setPattern(filter);
   visual_to_index_.clear();
   for (int idx = 0, end = q_names_.size(); idx != end; ++idx)
   {
