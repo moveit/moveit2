@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_setup_app_plugins LANGUAGES CXX)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core)
+if(Qt${QT_VERSION_MAJOR} STREQUAL "Qt6")
+  find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Test Widgets Core5Compat)
+elseif()
+  find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Test Widgets )
+endif()
+
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
@@ -17,8 +24,8 @@ find_package(rclcpp REQUIRED)
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt5_wrap_cpp(MOC_FILES include/moveit_setup_app_plugins/launches_widget.hpp
-             include/moveit_setup_app_plugins/perception_widget.hpp)
+qt_wrap_cpp(MOC_FILES include/moveit_setup_app_plugins/launches_widget.hpp
+            include/moveit_setup_app_plugins/perception_widget.hpp)
 
 add_library(
   moveit_setup_app_plugins
@@ -33,9 +40,24 @@ target_include_directories(
   moveit_setup_app_plugins
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_app_plugins>)
-ament_target_dependencies(
-  moveit_setup_app_plugins ament_index_cpp moveit_ros_visualization
-  moveit_setup_framework pluginlib rclcpp)
+
+if(Qt${QT_VERSION_MAJOR} STREQUAL "Qt6")
+  target_link_libraries(
+    moveit_setup_app_plugins
+    PUBLIC ament_index_cpp::ament_index_cpp
+        moveit_setup_framework::moveit_setup_framework pluginlib::pluginlib
+        rclcpp::rclcpp
+        Qt${QT_VERSION_MAJOR}::Widgets
+        Qt${QT_VERSION_MAJOR}::Core5Compat)
+elseif()
+  target_link_libraries(
+    moveit_setup_app_plugins
+    PUBLIC ament_index_cpp::ament_index_cpp
+        moveit_setup_framework::moveit_setup_framework pluginlib::pluginlib
+        rclcpp::rclcpp
+        Qt${QT_VERSION_MAJOR}::Widgets)
+endif()
+
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

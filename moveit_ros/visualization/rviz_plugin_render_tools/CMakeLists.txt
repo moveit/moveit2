@@ -1,3 +1,6 @@
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
 set(HEADERS
     include/moveit/rviz_plugin_render_tools/octomap_render.hpp
     include/moveit/rviz_plugin_render_tools/planning_link_updater.hpp
@@ -24,7 +27,8 @@ add_library(
 set_target_properties(moveit_rviz_plugin_render_tools
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(moveit_rviz_plugin_render_tools Qt5::Widgets)
+target_link_libraries(moveit_rviz_plugin_render_tools
+                      Qt${QT_VERSION_MAJOR}::Widgets)
 
 ament_target_dependencies(
   moveit_rviz_plugin_render_tools

@@ -12,18 +12,33 @@ find_package(Boost REQUIRED program_options)
 find_package(moveit_setup_framework REQUIRED)
 find_package(moveit_setup_srdf_plugins REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
 find_package(rclcpp REQUIRED)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-    ament_index_cpp
-    moveit_setup_framework
-    moveit_setup_srdf_plugins
-    pluginlib
-    Qt5Core
-    Qt5Widgets
-    rclcpp)
+if(Qt${QT_VERSION_MAJOR} STREQUAL "Qt6")
+  find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core Core5Compat)
+  set(THIS_PACKAGE_INCLUDE_DEPENDS
+      ament_index_cpp
+      moveit_setup_framework
+      moveit_setup_srdf_plugins
+      pluginlib
+      Qt${QT_VERSION_MAJOR}Core
+      Qt${QT_VERSION_MAJOR}Core5Compat
+      Qt${QT_VERSION_MAJOR}Widgets
+      rclcpp)
+elseif()
+  find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets )
+  set(THIS_PACKAGE_INCLUDE_DEPENDS
+      ament_index_cpp
+      moveit_setup_framework
+      moveit_setup_srdf_plugins
+      pluginlib
+      Qt${QT_VERSION_MAJOR}Core
+      Qt${QT_VERSION_MAJOR}Widgets
+      rclcpp)
+endif()
+
+
+
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
 set(HEADERS include/moveit_setup_assistant/navigation_widget.hpp
@@ -32,7 +47,7 @@ set(HEADERS include/moveit_setup_assistant/navigation_widget.hpp
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt5_wrap_cpp(MOC_FILES ${HEADERS})
+qt_wrap_cpp(MOC_FILES ${HEADERS})
 
 add_executable(
   moveit_setup_assistant src/main.cpp src/setup_assistant_widget.cpp

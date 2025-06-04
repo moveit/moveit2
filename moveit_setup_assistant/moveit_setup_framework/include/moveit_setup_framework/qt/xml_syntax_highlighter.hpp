@@ -35,6 +35,7 @@
 /* Author: Robert Haschke */
 
 #pragma once
+#include <QStringRef>
 
 #include <QtGui/QSyntaxHighlighter>
 #include <QRegularExpression>
