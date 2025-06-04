@@ -36,7 +36,7 @@
 
 #include <moveit_setup_srdf_plugins/collision_linear_model.hpp>
 #include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
-
+#include <QRegExp>
 #include <QItemSelection>
 #include <QPainter>
 #include <cmath>
@@ -264,8 +264,8 @@ bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& s
       m->data(m->index(source_row, 2), Qt::CheckStateRole) != Qt::Checked)
     return false;  // not accepted due to check state
 
-  const QRegExp regexp = filterRegExp();
-  if (regexp.isEmpty())
+  const QRegularExpression regexp = filterRegularExpression();
+  if (regexp.captureCount() <1 )
     return true;
 
   return m->data(m->index(source_row, 0, source_parent), Qt::DisplayRole).toString().contains(regexp) ||
