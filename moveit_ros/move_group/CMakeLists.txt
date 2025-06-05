@@ -47,10 +47,14 @@ add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/query_planners_service_capability.cpp
   src/default_capabilities/kinematics_service_capability.cpp
   src/default_capabilities/state_validation_service_capability.cpp
+<<<<<<< HEAD
   src/default_capabilities/cartesian_path_service_capability.cpp
   src/default_capabilities/get_planning_scene_service_capability.cpp
   src/default_capabilities/apply_planning_scene_service_capability.cpp
   src/default_capabilities/clear_octomap_service_capability.cpp
+=======
+  src/default_capabilities/multi_state_validation_service_capability.cpp
+>>>>>>> fb34bff59 (Adds multi (joint) state validation service (#3426))
   src/default_capabilities/tf_publisher_capability.cpp)
 
 set_target_properties(moveit_move_group_capabilities_base
