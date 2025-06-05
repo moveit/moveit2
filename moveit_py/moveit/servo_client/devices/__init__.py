@@ -1,1 +1,1 @@
-""" Teleoperation device implementations. """
+"""Teleoperation device implementations."""
