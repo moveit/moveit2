@@ -58,8 +58,10 @@ class PlanningContextPTP : public pilz_industrial_motion_planner::PlanningContex
 {
 public:
   PlanningContextPTP(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
-                     const pilz_industrial_motion_planner::LimitsContainer& limits)
-    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorPTP>(name, group, model, limits)
+                     const pilz_industrial_motion_planner::LimitsContainer& limits,
+                     const std::shared_ptr<interpolation::ParamListener>& interpolation_param_listener)
+    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorPTP>(name, group, model, limits,
+                                                                                  interpolation_param_listener)
   {
   }
 };

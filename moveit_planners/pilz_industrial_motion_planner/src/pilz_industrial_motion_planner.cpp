@@ -80,6 +80,9 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
       std::make_shared<cartesian_limits::ParamListener>(node, PARAM_NAMESPACE_LIMITS + ".cartesian_limits");
   params_ = param_listener_->get_params();
 
+  interpolation_param_listener_ =
+      std::make_shared<interpolation::ParamListener>(node, PARAM_NAMESPACE_LIMITS + ".interpolation");
+
   // Load the planning context loader
   planner_context_loader_ = std::make_unique<pluginlib::ClassLoader<PlanningContextLoader>>(
       "pilz_industrial_motion_planner", "pilz_industrial_motion_planner::PlanningContextLoader");
@@ -106,6 +109,7 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
 
     loader_pointer->setLimits(limits);
     loader_pointer->setModel(model_);
+    loader_pointer->setInterpolationParamListener(interpolation_param_listener_);
 
     registerContextLoader(loader_pointer);
   }
