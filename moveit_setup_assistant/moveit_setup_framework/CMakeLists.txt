@@ -12,8 +12,8 @@ find_package(fmt REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_visualization REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rviz_common REQUIRED)
@@ -23,7 +23,7 @@ find_package(urdf REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-qt5_wrap_cpp(
+qt_wrap_cpp(
   MOC_FILES
   include/moveit_setup_framework/qt/helper_widgets.hpp
   include/moveit_setup_framework/qt/setup_step_widget.hpp
@@ -54,8 +54,8 @@ ament_target_dependencies(
   moveit_ros_planning
   moveit_ros_visualization
   pluginlib
-  Qt5Core
-  Qt5Widgets
+  Qt${QT_VERSION_MAJOR}Core
+  Qt${QT_VERSION_MAJOR}Widgets
   rclcpp
   rviz_common
   rviz_rendering
@@ -80,8 +80,8 @@ install(
 
 ament_export_dependencies(fmt)
 ament_export_dependencies(rclcpp)
-ament_export_dependencies(Qt5Core)
-ament_export_dependencies(Qt5Widgets)
+ament_export_dependencies(Qt${QT_VERSION_MAJOR}Core)
+ament_export_dependencies(Qt${QT_VERSION_MAJOR}Widgets)
 ament_export_dependencies(moveit_common)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(moveit_ros_planning)
