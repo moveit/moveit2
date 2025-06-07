@@ -92,7 +92,6 @@ public:
   void setEnabled(const QItemSelection& selection, bool value);
 
 protected:
-  bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const override;
   bool lessThan(const QModelIndex& src_left, const QModelIndex& src_right) const override;
 
 private Q_SLOTS:
