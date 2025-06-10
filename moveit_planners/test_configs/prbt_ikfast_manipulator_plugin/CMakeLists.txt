@@ -45,10 +45,10 @@ if(NOT WIN32)
 endif()
 
 target_link_libraries(prbt_manipulator_moveit_ikfast_plugin
-                      prbt_ikfast_kinematics_parameters
   PUBLIC
   moveit_core::moveit_collision_detection
   pluginlib::pluginlib
+  prbt_ikfast_kinematics_parameters
   rclcpp::rclcpp
   tf2_eigen::tf2_eigen
   tf2_eigen_kdl::tf2_eigen_kdl

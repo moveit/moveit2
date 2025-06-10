@@ -50,8 +50,7 @@ pybind11_add_module(
   src/moveit/moveit_core/robot_model/robot_model.cpp
   src/moveit/moveit_core/robot_state/robot_state.cpp
   src/moveit/moveit_core/robot_trajectory/robot_trajectory.cpp)
-target_link_libraries(
-  core
+target_link_libraries(core
   PRIVATE moveit_ros_planning::moveit_cpp
           rclcpp::rclcpp
           moveit_core::moveit_transforms
@@ -61,7 +60,8 @@ target_link_libraries(
           moveit_core::moveit_utils
           moveit_core::moveit_robot_model
           moveit_core::moveit_robot_state
-          moveit_py_utils)
+          moveit_py_utils
+          pybind11::pybind11)
 configure_build_install_location(core)
 
 pybind11_add_module(
@@ -72,14 +72,14 @@ pybind11_add_module(
   src/moveit/moveit_ros/planning_scene_monitor/planning_scene_monitor.cpp
   src/moveit/moveit_ros/trajectory_execution_manager/trajectory_execution_manager.cpp
 )
-target_link_libraries(
-  planning
+target_link_libraries(planning
   PRIVATE moveit_ros_planning::moveit_cpp
           moveit_ros_planning::moveit_planning_scene_monitor
           moveit_ros_planning::moveit_trajectory_execution_manager
           moveit_core::moveit_utils
           rclcpp::rclcpp
-          moveit_py_utils)
+          moveit_py_utils
+)
 configure_build_install_location(planning)
 
 if(BUILD_TESTING)

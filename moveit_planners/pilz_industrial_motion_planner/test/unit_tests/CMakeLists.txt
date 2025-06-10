@@ -38,7 +38,12 @@ target_link_libraries(unittest_trajectory_generator ${PROJECT_NAME})
 # Trajectory Functions Unit Test
 ament_add_gtest_executable(unittest_trajectory_functions
                            src/unittest_trajectory_functions.cpp)
-target_link_libraries(unittest_trajectory_functions ${PROJECT_NAME}_test_utils trajectory_generation_common joint_limits_common PUBLIC)
+target_link_libraries(unittest_trajectory_functions
+  ${PROJECT_NAME}_test_utils
+  trajectory_generation_common
+  pilz_industrial_motion_planner_testutils::pilz_industrial_motion_planner_testutils
+  joint_limits_common
+)
 add_ros_test(launch/unittest_trajectory_functions.test.py ARGS
              "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -47,9 +52,11 @@ ament_add_gtest_executable(
   unittest_trajectory_blender_transition_window
   src/unittest_trajectory_blender_transition_window.cpp
   ${CMAKE_SOURCE_DIR}/src/trajectory_blender_transition_window.cpp)
-target_link_libraries(
-  unittest_trajectory_blender_transition_window ${PROJECT_NAME}_test_utils trajectory_generation_common planning_context_loader_lin PUBLIC
-                          
+target_link_libraries(unittest_trajectory_blender_transition_window
+  ${PROJECT_NAME}_test_utils
+  pilz_industrial_motion_planner_testutils::pilz_industrial_motion_planner_testutils
+  trajectory_generation_common
+  planning_context_loader_lin
 )
 add_ros_test(launch/unittest_trajectory_blender_transition_window.test.py ARGS
              "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
@@ -69,8 +76,8 @@ ament_add_gtest_executable(unittest_trajectory_generator_circ
                            src/unittest_trajectory_generator_circ.cpp)
 target_link_libraries(unittest_trajectory_generator_circ
                       ${PROJECT_NAME}_test_utils
-                      planning_context_loader_circ PUBLIC
-                          
+                      pilz_industrial_motion_planner_testutils::pilz_industrial_motion_planner_testutils
+                      planning_context_loader_circ
 )
 add_ros_test(launch/unittest_trajectory_generator_circ.test.py ARGS
              "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
@@ -80,8 +87,8 @@ ament_add_gtest_executable(unittest_trajectory_generator_lin
                            src/unittest_trajectory_generator_lin.cpp)
 target_link_libraries(unittest_trajectory_generator_lin
                       ${PROJECT_NAME}_test_utils
-                      planning_context_loader_lin PUBLIC
-                          
+                      pilz_industrial_motion_planner_testutils::pilz_industrial_motion_planner_testutils
+                      planning_context_loader_lin
 )
 add_ros_test(launch/unittest_trajectory_generator_lin.test.py ARGS
              "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")

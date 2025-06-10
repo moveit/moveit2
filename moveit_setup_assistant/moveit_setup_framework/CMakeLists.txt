@@ -51,8 +51,10 @@ target_link_libraries(moveit_setup_framework
   PUBLIC
   ament_index_cpp::ament_index_cpp
   moveit_core::moveit_collision_detection
+  moveit_core::moveit_planning_scene
   moveit_ros_planning::kinematics_parameters
   moveit_ros_planning::moveit_collision_plugin_loader
+  moveit_ros_visualization::moveit_robot_state_rviz_plugin_core
   pluginlib::pluginlib
   rclcpp::rclcpp
   rviz_common::rviz_common

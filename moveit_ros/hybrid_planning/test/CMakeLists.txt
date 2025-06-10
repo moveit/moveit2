@@ -1,5 +1,10 @@
 add_executable(cancel_action cancel_action.cpp)
-target_link_libraries(cancel_action PUBLIC)
+target_link_libraries(cancel_action
+  PUBLIC
+    ${moveit_msgs_TARGETS}
+    rclcpp::rclcpp
+    rclcpp_action::rclcpp_action
+)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

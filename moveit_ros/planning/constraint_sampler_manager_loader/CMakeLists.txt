@@ -4,7 +4,11 @@ add_library(moveit_constraint_sampler_manager_loader SHARED
 set_target_properties(moveit_constraint_sampler_manager_loader
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_constraint_sampler_manager_loader
-                      moveit_rdf_loader PUBLIC moveit_core::moveit_collision_detection pluginlib::pluginlib rclcpp::rclcpp
+    PUBLIC
+    moveit_rdf_loader
+    moveit_core::moveit_collision_detection
+    pluginlib::pluginlib
+    rclcpp::rclcpp
 )
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

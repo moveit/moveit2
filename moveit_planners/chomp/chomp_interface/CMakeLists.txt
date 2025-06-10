@@ -30,7 +30,7 @@ target_link_libraries(moveit_chomp_interface PUBLIC
 )
 
 add_library(moveit_chomp_planner_plugin SHARED src/chomp_plugin.cpp)
-target_link_libraries(moveit_chomp_planner_plugin moveit_chomp_interface PUBLIC
+target_link_libraries(moveit_chomp_planner_plugin PUBLIC moveit_chomp_interface
                           chomp_motion_planner::chomp_motion_planner
                           moveit_core::moveit_collision_detection
                           pluginlib::pluginlib
