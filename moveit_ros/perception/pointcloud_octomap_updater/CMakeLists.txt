@@ -3,8 +3,8 @@ add_library(moveit_pointcloud_octomap_updater_core SHARED
 set_target_properties(moveit_pointcloud_octomap_updater_core
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_pointcloud_octomap_updater_core
-                      moveit_point_containment_filter
   PUBLIC
+  moveit_point_containment_filter
   ${sensor_msgs_TARGETS}
   message_filters::message_filters
   moveit_core::moveit_collision_detection
@@ -26,8 +26,8 @@ add_library(moveit_pointcloud_octomap_updater SHARED src/plugin_init.cpp)
 set_target_properties(moveit_pointcloud_octomap_updater
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_pointcloud_octomap_updater
-                      moveit_pointcloud_octomap_updater_core
   PUBLIC
+  moveit_pointcloud_octomap_updater_core
   ${sensor_msgs_TARGETS}
   message_filters::message_filters
   moveit_core::moveit_collision_detection

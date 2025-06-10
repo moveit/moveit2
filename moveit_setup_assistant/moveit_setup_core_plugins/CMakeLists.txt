@@ -43,6 +43,8 @@ target_link_libraries(${PROJECT_NAME}
   rclcpp::rclcpp
   srdfdom::srdfdom
   urdf::urdf
+  Qt5::Widgets
+  moveit_setup_framework::moveit_setup_framework
 )
 
 install(

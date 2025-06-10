@@ -15,37 +15,40 @@ include(GenerateExportHeader)
 generate_export_header(moveit_collision_detection_bullet)
 target_include_directories(
   moveit_collision_detection_bullet
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    ${BULLET_INCLUDE_DIRS}
+)
 set_target_properties(moveit_collision_detection_bullet
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_collision_detection_bullet SYSTEM BULLET
+target_link_libraries(moveit_collision_detection_bullet
   PUBLIC
+  ${BULLET_LIBRARIES}
   ${octomap_msgs_TARGETS}
   ${visualization_msgs_TARGETS}
+  moveit_collision_detection
+  moveit_utils
   rclcpp::rclcpp
   rmw_implementation::rmw_implementation
   urdf::urdf
 )
-target_link_libraries(moveit_collision_detection_bullet
-                      moveit_collision_detection moveit_utils)
 
 add_library(collision_detector_bullet_plugin SHARED
             src/collision_detector_bullet_plugin_loader.cpp)
 set_target_properties(collision_detector_bullet_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(collision_detector_bullet_plugin SYSTEM BULLET)
 target_link_libraries(collision_detector_bullet_plugin
   PUBLIC
+  ${BULLET_LIBRARIES}
   ${octomap_msgs_TARGETS}
   ${visualization_msgs_TARGETS}
   pluginlib::pluginlib
+  moveit_collision_detection_bullet
+  moveit_planning_scene moveit_utils
   rclcpp::rclcpp
   rmw_implementation::rmw_implementation
   urdf::urdf
 )
-target_link_libraries(
-  collision_detector_bullet_plugin moveit_collision_detection_bullet
-  moveit_planning_scene moveit_utils)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(

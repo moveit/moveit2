@@ -42,11 +42,12 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
 target_link_libraries(moveit_ros_trajectory_cache_utils_lib PUBLIC
-                          ${geometry_msgs_TARGETS}
-                          ${trajectory_msgs_TARGETS}
-                          rclcpp::rclcpp
-                          tf2::tf2
-                          tf2_ros::tf2_ros
+  ${geometry_msgs_TARGETS}
+  ${trajectory_msgs_TARGETS}
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  moveit_ros_planning_interface::moveit_move_group_interface
 )
 
 # Features library
@@ -56,12 +57,13 @@ add_library(
   src/features/get_cartesian_path_request_features.cpp)
 generate_export_header(moveit_ros_trajectory_cache_features_lib)
 target_link_libraries(moveit_ros_trajectory_cache_features_lib
-                      moveit_ros_trajectory_cache_utils_lib PUBLIC
-                          ${geometry_msgs_TARGETS}
-                          ${trajectory_msgs_TARGETS}
-                          rclcpp::rclcpp
-                          tf2::tf2
-                          tf2_ros::tf2_ros
+  PUBLIC
+    moveit_ros_trajectory_cache_utils_lib
+    ${geometry_msgs_TARGETS}
+    ${trajectory_msgs_TARGETS}
+    rclcpp::rclcpp
+    tf2::tf2
+    tf2_ros::tf2_ros
 )
 target_include_directories(
   moveit_ros_trajectory_cache_features_lib
@@ -74,15 +76,15 @@ add_library(
   src/cache_insert_policies/always_insert_never_prune_policy.cpp
   src/cache_insert_policies/best_seen_execution_time_policy.cpp)
 generate_export_header(moveit_ros_trajectory_cache_cache_insert_policies_lib)
-target_link_libraries(
-  moveit_ros_trajectory_cache_cache_insert_policies_lib
-  moveit_ros_trajectory_cache_features_lib
-  moveit_ros_trajectory_cache_utils_lib PUBLIC
-                          ${geometry_msgs_TARGETS}
-                          ${trajectory_msgs_TARGETS}
-                          rclcpp::rclcpp
-                          tf2::tf2
-                          tf2_ros::tf2_ros
+target_link_libraries(moveit_ros_trajectory_cache_cache_insert_policies_lib
+  PUBLIC
+    moveit_ros_trajectory_cache_features_lib
+    moveit_ros_trajectory_cache_utils_lib
+    ${geometry_msgs_TARGETS}
+    ${trajectory_msgs_TARGETS}
+    rclcpp::rclcpp
+    tf2::tf2
+    tf2_ros::tf2_ros
 )
 target_include_directories(
   moveit_ros_trajectory_cache_cache_insert_policies_lib
@@ -92,19 +94,18 @@ target_include_directories(
 # Trajectory cache library
 add_library(moveit_ros_trajectory_cache_lib SHARED src/trajectory_cache.cpp)
 generate_export_header(moveit_ros_trajectory_cache_lib)
-target_link_libraries(
-  moveit_ros_trajectory_cache_lib
-  moveit_ros_trajectory_cache_cache_insert_policies_lib
-  moveit_ros_trajectory_cache_features_lib
-  moveit_ros_trajectory_cache_utils_lib PUBLIC
-                          ${geometry_msgs_TARGETS}
-                          ${trajectory_msgs_TARGETS}
-                          rclcpp::rclcpp
-                          tf2::tf2
-                          tf2_ros::tf2_ros
+target_link_libraries(moveit_ros_trajectory_cache_lib
+  PUBLIC
+    moveit_ros_trajectory_cache_cache_insert_policies_lib
+    moveit_ros_trajectory_cache_features_lib
+    moveit_ros_trajectory_cache_utils_lib PUBLIC
+    ${geometry_msgs_TARGETS}
+    ${trajectory_msgs_TARGETS}
+    rclcpp::rclcpp
+    tf2::tf2
+    tf2_ros::tf2_ros
 )
-target_include_directories(
-  moveit_ros_trajectory_cache_lib
+target_include_directories(moveit_ros_trajectory_cache_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
 

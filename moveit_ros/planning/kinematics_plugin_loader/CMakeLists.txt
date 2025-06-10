@@ -8,7 +8,16 @@ generate_parameter_library(
   src/kinematics_parameters.yaml # path to input yaml file
 )
 
-target_link_libraries(moveit_kinematics_plugin_loader moveit_rdf_loader kinematics_parameters PUBLIC class_loader::class_loader moveit_core::moveit_collision_detection pluginlib::pluginlib rclcpp::rclcpp urdf::urdf)
+target_link_libraries(moveit_kinematics_plugin_loader
+  PUBLIC
+    moveit_rdf_loader
+    kinematics_parameters
+    class_loader::class_loader
+    moveit_core::moveit_collision_detection
+    pluginlib::pluginlib
+    rclcpp::rclcpp
+    urdf::urdf
+)
 
 install(
   TARGETS kinematics_parameters
