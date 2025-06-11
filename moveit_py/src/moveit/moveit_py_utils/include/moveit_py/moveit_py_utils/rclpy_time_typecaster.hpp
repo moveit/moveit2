@@ -51,7 +51,7 @@ struct type_caster<rclcpp::Time>
   PYBIND11_TYPE_CASTER(rclcpp::Time, _("rclcpp::Time"));
 
   // convert from rclpy::Time to rclcpp::Time
-  bool load(py::handle src, bool)
+  bool load(py::handle src, bool /*unused*/)
   {
     if (src.is_none())
       return false;
