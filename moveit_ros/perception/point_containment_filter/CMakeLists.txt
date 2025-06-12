@@ -6,6 +6,10 @@ set_target_properties(
   PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 set_target_properties(moveit_point_containment_filter
                       PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
-target_link_libraries(moveit_point_containment_filter PUBLIC ${sensor_msgs_TARGETS} geometric_shapes::geometric_shapes moveit_core::moveit_collision_detection rclcpp::rclcpp sensor_msgs::sensor_msgs_library)
+target_link_libraries(
+  moveit_point_containment_filter
+  PUBLIC ${sensor_msgs_TARGETS} geometric_shapes::geometric_shapes
+         moveit_core::moveit_collision_detection rclcpp::rclcpp
+         sensor_msgs::sensor_msgs_library)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

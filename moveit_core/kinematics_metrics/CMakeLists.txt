@@ -6,13 +6,9 @@ target_include_directories(
 set_target_properties(moveit_kinematics_metrics
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(moveit_kinematics_metrics
-  PUBLIC
-    moveit_robot_model
-    moveit_robot_state
-    moveit_utils
-    ${visualization_msgs_TARGETS}
-    urdf::urdf
-)
+target_link_libraries(
+  moveit_kinematics_metrics
+  PUBLIC moveit_robot_model moveit_robot_state moveit_utils
+         ${visualization_msgs_TARGETS} urdf::urdf)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

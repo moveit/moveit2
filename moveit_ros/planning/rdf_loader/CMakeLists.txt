@@ -2,7 +2,11 @@ add_library(moveit_rdf_loader SHARED src/rdf_loader.cpp
                                      src/synchronized_string_parameter.cpp)
 set_target_properties(moveit_rdf_loader PROPERTIES VERSION
                                                    "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_rdf_loader PUBLIC ament_index_cpp::ament_index_cpp moveit_core::moveit_collision_detection rclcpp::rclcpp srdfdom::srdfdom urdf::urdf)
+target_link_libraries(
+  moveit_rdf_loader
+  PUBLIC ament_index_cpp::ament_index_cpp
+         moveit_core::moveit_collision_detection rclcpp::rclcpp
+         srdfdom::srdfdom urdf::urdf)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(DIRECTORY test/data test/launch

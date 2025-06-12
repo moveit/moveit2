@@ -11,21 +11,20 @@ target_include_directories(
 set_target_properties(moveit_planning_scene
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(moveit_planning_scene
-  PUBLIC
-    moveit_robot_model
-    moveit_robot_state
-    moveit_exceptions
-    moveit_transforms
-    moveit_collision_detection_fcl
-    moveit_collision_detection
-    moveit_kinematic_constraints
-    moveit_robot_trajectory
-    moveit_trajectory_processing
-    moveit_utils
-    ${octomap_msgs_TARGETS}
-    rclcpp::rclcpp
-)
+target_link_libraries(
+  moveit_planning_scene
+  PUBLIC moveit_robot_model
+         moveit_robot_state
+         moveit_exceptions
+         moveit_transforms
+         moveit_collision_detection_fcl
+         moveit_collision_detection
+         moveit_kinematic_constraints
+         moveit_robot_trajectory
+         moveit_trajectory_processing
+         moveit_utils
+         ${octomap_msgs_TARGETS}
+         rclcpp::rclcpp)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_export.h
@@ -42,7 +41,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_planning_scene test/test_planning_scene.cpp
                   APPEND_LIBRARY_DIRS "${APPEND_LIBRARY_DIRS}")
-  target_link_libraries(test_planning_scene moveit_test_utils moveit_planning_scene geometric_shapes::geometric_shapes srdfdom::srdfdom)
+  target_link_libraries(
+    test_planning_scene moveit_test_utils moveit_planning_scene
+    geometric_shapes::geometric_shapes srdfdom::srdfdom)
 
   ament_add_gtest(test_collision_objects test/test_collision_objects.cpp
                   APPEND_LIBRARY_DIRS "${APPEND_LIBRARY_DIRS}")

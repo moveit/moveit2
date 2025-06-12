@@ -2,7 +2,10 @@ add_library(moveit_planning_scene_interface SHARED
             src/planning_scene_interface.cpp)
 set_target_properties(moveit_planning_scene_interface
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_planning_scene_interface PUBLIC ${moveit_msgs_TARGETS} moveit_core::moveit_collision_detection moveit_ros_move_group::moveit_move_group_capabilities_base)
+target_link_libraries(
+  moveit_planning_scene_interface
+  PUBLIC ${moveit_msgs_TARGETS} moveit_core::moveit_collision_detection
+         moveit_ros_move_group::moveit_move_group_capabilities_base)
 
 # TODO(JafarAbdi): Support python wrapper
 # add_library(moveit_planning_scene_interface_python

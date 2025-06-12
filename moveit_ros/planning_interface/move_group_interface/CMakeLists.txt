@@ -6,18 +6,17 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_move_group_interface
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_move_group_interface
-  PRIVATE
-    moveit_common_planning_interface_objects moveit_planning_scene_interface ${Boost_THREAD_LIBRARY}
-  PUBLIC
-    ${moveit_msgs_TARGETS}
-    moveit_core::moveit_collision_detection
-    moveit_ros_move_group::moveit_move_group_capabilities_base
-    moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-    moveit_ros_planning::kinematics_parameters
-    moveit_ros_planning::moveit_collision_plugin_loader
-    moveit_ros_warehouse::moveit_warehouse
-)
+target_link_libraries(
+  moveit_move_group_interface
+  PRIVATE moveit_common_planning_interface_objects
+          moveit_planning_scene_interface ${Boost_THREAD_LIBRARY}
+  PUBLIC ${moveit_msgs_TARGETS}
+         moveit_core::moveit_collision_detection
+         moveit_ros_move_group::moveit_move_group_capabilities_base
+         moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+         moveit_ros_planning::kinematics_parameters
+         moveit_ros_planning::moveit_collision_plugin_loader
+         moveit_ros_warehouse::moveit_warehouse)
 
 # TODO (ddengster) : port wrap_python_move_group
 # add_library(moveit_move_group_interface_python src/wrap_python_move_group.cpp)

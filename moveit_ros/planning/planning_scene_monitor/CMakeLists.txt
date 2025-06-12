@@ -10,30 +10,24 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_planning_scene_monitor
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_planning_scene_monitor
-  PUBLIC
-    moveit_robot_model_loader
-    moveit_collision_plugin_loader
-    ${moveit_msgs_TARGETS}
-    message_filters::message_filters
-    moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-    moveit_core::moveit_planning_scene
-    pluginlib::pluginlib
-    rclcpp::rclcpp
-    urdf::urdf
-)
+target_link_libraries(
+  moveit_planning_scene_monitor
+  PUBLIC moveit_robot_model_loader
+         moveit_collision_plugin_loader
+         ${moveit_msgs_TARGETS}
+         message_filters::message_filters
+         moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+         moveit_core::moveit_planning_scene
+         pluginlib::pluginlib
+         rclcpp::rclcpp
+         urdf::urdf)
 
 add_executable(demo_scene demos/demo_scene.cpp)
-target_link_libraries(demo_scene
-  PRIVATE
-    moveit_planning_scene_monitor
-  PUBLIC
-    ${moveit_msgs_TARGETS}
-    message_filters::message_filters
-    pluginlib::pluginlib
-    rclcpp::rclcpp
-    urdf::urdf
-)
+target_link_libraries(
+  demo_scene
+  PRIVATE moveit_planning_scene_monitor
+  PUBLIC ${moveit_msgs_TARGETS} message_filters::message_filters
+         pluginlib::pluginlib rclcpp::rclcpp urdf::urdf)
 
 install(TARGETS demo_scene DESTINATION lib/${PROJECT_NAME})
 
@@ -48,9 +42,9 @@ if(BUILD_TESTING)
 
   ament_add_gmock(current_state_monitor_tests
                   test/current_state_monitor_tests.cpp)
-  target_link_libraries(current_state_monitor_tests
-                        moveit_planning_scene_monitor
-                        moveit_core::moveit_test_utils)
+  target_link_libraries(
+    current_state_monitor_tests moveit_planning_scene_monitor
+    moveit_core::moveit_test_utils)
 
   ament_add_gmock(trajectory_monitor_tests test/trajectory_monitor_tests.cpp)
   target_link_libraries(trajectory_monitor_tests moveit_planning_scene_monitor
@@ -58,9 +52,10 @@ if(BUILD_TESTING)
 
   ament_add_gtest_executable(planning_scene_monitor_test
                              test/planning_scene_monitor_test.cpp)
-  target_link_libraries(planning_scene_monitor_test
-                        moveit_planning_scene_monitor ${moveit_msgs_TARGETS} moveit_core::moveit_collision_detection rclcpp::rclcpp
-)
+  target_link_libraries(
+    planning_scene_monitor_test moveit_planning_scene_monitor
+    ${moveit_msgs_TARGETS} moveit_core::moveit_collision_detection
+    rclcpp::rclcpp)
 
   add_ros_test(test/launch/planning_scene_monitor.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")

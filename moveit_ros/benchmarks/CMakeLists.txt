@@ -34,7 +34,8 @@ set_target_properties(moveit_ros_benchmarks
 if(WIN32)
   set(EXTRA_LIB ws2_32.lib)
 endif()
-target_link_libraries(moveit_ros_benchmarks
+target_link_libraries(
+  moveit_ros_benchmarks
   moveit_core::moveit_collision_detection
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
   moveit_ros_planning::moveit_cpp
@@ -43,20 +44,18 @@ target_link_libraries(moveit_ros_benchmarks
   pluginlib::pluginlib
   rclcpp::rclcpp
   tf2_eigen::tf2_eigen
-  moveit_ros_warehouse::moveit_warehouse
-)
+  moveit_ros_warehouse::moveit_warehouse)
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
-target_link_libraries(moveit_run_benchmark
-  PUBLIC
-    moveit_ros_benchmarks
-    moveit_core::moveit_collision_detection
-    moveit_ros_planning::kinematics_parameters
-    moveit_ros_planning::moveit_collision_plugin_loader
-    pluginlib::pluginlib
-    rclcpp::rclcpp
-    tf2_eigen::tf2_eigen
-)
+target_link_libraries(
+  moveit_run_benchmark
+  PUBLIC moveit_ros_benchmarks
+         moveit_core::moveit_collision_detection
+         moveit_ros_planning::kinematics_parameters
+         moveit_ros_planning::moveit_collision_plugin_loader
+         pluginlib::pluginlib
+         rclcpp::rclcpp
+         tf2_eigen::tf2_eigen)
 
 install(
   TARGETS moveit_ros_benchmarks

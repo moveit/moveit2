@@ -29,7 +29,8 @@ if(APPLE)
   target_link_directories(moveit_ompl_interface PUBLIC ${OMPL_LIBRARY_DIRS})
 endif()
 
-target_link_libraries(moveit_ompl_interface
+target_link_libraries(
+  moveit_ompl_interface
   ${moveit_msgs_TARGETS}
   moveit_core::moveit_utils
   moveit_core::moveit_planning_scene
@@ -44,11 +45,9 @@ target_link_libraries(moveit_ompl_interface
   moveit_core::moveit_constraint_samplers
   tf2_ros::tf2_ros
   ${OMPL_LIBRARIES}
-  # OMPL
-  # Boost
+  # OMPL Boost
   srdfdom::srdfdom
-  random_numbers::random_numbers
-)
+  random_numbers::random_numbers)
 set_target_properties(
   moveit_ompl_interface PROPERTIES COMPILE_FLAGS
                                    "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -57,13 +56,13 @@ set_target_properties(moveit_ompl_interface PROPERTIES LINK_FLAGS
 
 add_executable(moveit_generate_state_database
                scripts/generate_state_database.cpp)
-target_link_libraries(moveit_generate_state_database
+target_link_libraries(
+  moveit_generate_state_database
   moveit_ompl_interface
   moveit_core::moveit_planning_scene
   moveit_ros_planning::moveit_planning_scene_monitor
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  parameter_traits::parameter_traits
-)
+  parameter_traits::parameter_traits)
 set_target_properties(moveit_generate_state_database
                       PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 set_target_properties(moveit_generate_state_database
@@ -72,15 +71,15 @@ set_target_properties(moveit_generate_state_database
 add_library(moveit_ompl_planner_plugin SHARED src/ompl_planner_manager.cpp)
 set_target_properties(moveit_ompl_planner_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_ompl_planner_plugin
+target_link_libraries(
+  moveit_ompl_planner_plugin
   moveit_core::moveit_utils
   moveit_core::moveit_planning_scene
-    # moveit_ros_planning
+  # moveit_ros_planning
   rclcpp::rclcpp
   pluginlib::pluginlib
   tf2_ros::tf2_ros
-  #OMPL
-  # Boost
+  # OMPL Boost
 )
 target_link_libraries(moveit_ompl_planner_plugin moveit_ompl_interface)
 
@@ -93,21 +92,24 @@ if(BUILD_TESTING)
   find_package(Eigen3 REQUIRED)
 
   ament_add_gtest(test_state_space test/test_state_space.cpp)
-  target_link_libraries(test_state_space moveit_core::moveit_test_utils )#OMPL Boost Eigen3)
+  target_link_libraries(test_state_space moveit_core::moveit_test_utils
+  )# OMPL Boost Eigen3)
   target_link_libraries(test_state_space moveit_ompl_interface)
   set_target_properties(test_state_space PROPERTIES LINK_FLAGS
                                                     "${OpenMP_CXX_FLAGS}")
 
   ament_add_gtest(test_state_validity_checker
                   test/test_state_validity_checker.cpp)
-  target_link_libraries(test_state_validity_checker moveit_core::moveit_test_utils )#OMPL Boost
+  target_link_libraries(test_state_validity_checker
+                        moveit_core::moveit_test_utils) # OMPL Boost
   target_link_libraries(test_state_validity_checker moveit_ompl_interface)
   set_target_properties(test_state_validity_checker
                         PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")
 
   ament_add_gtest(test_planning_context_manager
                   test/test_planning_context_manager.cpp)
-  target_link_libraries(test_planning_context_manager moveit_core::moveit_test_utils tf2_eigen::tf2_eigen)
+  target_link_libraries(test_planning_context_manager
+                        moveit_core::moveit_test_utils tf2_eigen::tf2_eigen)
   target_link_libraries(test_planning_context_manager moveit_ompl_interface)
 
   # Disabling flaky test TODO (vatanaksoytezer): Uncomment once this is fixed
@@ -117,8 +119,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_constrained_planning_state_space
                   test/test_constrained_planning_state_space.cpp)
-  target_link_libraries(test_constrained_planning_state_space moveit_core::moveit_test_utils)
-                            # OMPL Boost Eigen3)
+  target_link_libraries(test_constrained_planning_state_space
+                        moveit_core::moveit_test_utils)
+  # OMPL Boost Eigen3)
   target_link_libraries(test_constrained_planning_state_space
                         moveit_ompl_interface)
   set_target_properties(test_constrained_planning_state_space
@@ -127,9 +130,8 @@ if(BUILD_TESTING)
   ament_add_gtest(test_constrained_state_validity_checker
                   test/test_constrained_state_validity_checker.cpp)
   target_link_libraries(test_constrained_state_validity_checker
-    moveit_core::moveit_test_utils
-  )
-                            # OMPL Boost Eigen3)
+                        moveit_core::moveit_test_utils)
+  # OMPL Boost Eigen3)
   target_link_libraries(test_constrained_state_validity_checker
                         moveit_ompl_interface)
   set_target_properties(test_constrained_state_validity_checker
@@ -137,8 +139,9 @@ if(BUILD_TESTING)
 
   ament_add_gtest(test_threadsafe_state_storage
                   test/test_threadsafe_state_storage.cpp)
-  target_link_libraries(test_threadsafe_state_storage moveit_core::moveit_test_utils)
-#  OMPL Boost Eigen3)
+  target_link_libraries(test_threadsafe_state_storage
+                        moveit_core::moveit_test_utils)
+  # OMPL Boost Eigen3)
   target_link_libraries(test_threadsafe_state_storage moveit_ompl_interface)
   set_target_properties(test_threadsafe_state_storage
                         PROPERTIES LINK_FLAGS "${OpenMP_CXX_FLAGS}")

@@ -29,13 +29,10 @@ add_library(
   src/robotconfiguration.cpp src/sequence.cpp src/xml_testdata_loader.cpp)
 
 # Specify libraries to link a library or executable target against
-target_link_libraries(pilz_industrial_motion_planner_testutils
-  PUBLIC
-  ${moveit_msgs_TARGETS}
-  moveit_core::moveit_collision_detection
-  rclcpp::rclcpp
-  tf2_eigen::tf2_eigen
-)
+target_link_libraries(
+  pilz_industrial_motion_planner_testutils
+  PUBLIC ${moveit_msgs_TARGETS} moveit_core::moveit_collision_detection
+         rclcpp::rclcpp tf2_eigen::tf2_eigen)
 
 # ##############################################################################
 # Install ##

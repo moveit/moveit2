@@ -3,18 +3,17 @@ target_include_directories(
   moveit_kinematics_base
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_core>)
-target_link_libraries(moveit_kinematics_base
-  PUBLIC
-  moveit_macros
-  moveit_robot_model
-  moveit_utils
-  ${geometry_msgs_TARGETS}
-  ${moveit_msgs_TARGETS}
-  geometric_shapes::geometric_shapes
-  rclcpp::rclcpp
-  srdfdom::srdfdom
-  urdf::urdf
-)
+target_link_libraries(
+  moveit_kinematics_base
+  PUBLIC moveit_macros
+         moveit_robot_model
+         moveit_utils
+         ${geometry_msgs_TARGETS}
+         ${moveit_msgs_TARGETS}
+         geometric_shapes::geometric_shapes
+         rclcpp::rclcpp
+         srdfdom::srdfdom
+         urdf::urdf)
 include(GenerateExportHeader)
 generate_export_header(moveit_kinematics_base)
 target_include_directories(

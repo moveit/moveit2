@@ -44,17 +44,16 @@ if(NOT WIN32)
                          PRIVATE -Wno-unused-variable)
 endif()
 
-target_link_libraries(prbt_manipulator_moveit_ikfast_plugin
-  PUBLIC
-  moveit_core::moveit_collision_detection
-  pluginlib::pluginlib
-  prbt_ikfast_kinematics_parameters
-  rclcpp::rclcpp
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-)
+target_link_libraries(
+  prbt_manipulator_moveit_ikfast_plugin
+  PUBLIC moveit_core::moveit_collision_detection
+         pluginlib::pluginlib
+         prbt_ikfast_kinematics_parameters
+         rclcpp::rclcpp
+         tf2_eigen::tf2_eigen
+         tf2_eigen_kdl::tf2_eigen_kdl
+         tf2_geometry_msgs::tf2_geometry_msgs
+         tf2_kdl::tf2_kdl)
 
 pluginlib_export_plugin_description_file(
   moveit_core prbt_manipulator_moveit_ikfast_plugin_description.xml)
