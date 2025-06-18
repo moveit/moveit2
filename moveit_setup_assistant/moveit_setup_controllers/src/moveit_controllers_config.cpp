@@ -193,17 +193,39 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
           emitter << YAML::Value;
           emitter << YAML::BeginSeq;
 
-          // Iterate through the joints
           for (const std::string& joint : controller.joints_)
           {
             emitter << joint;
           }
           emitter << YAML::EndSeq;
 
+          if (controller.parameters_.count("action_ns"))
+          {
+            emitter << YAML::Key << "action_ns"
+                    << YAML::Value << controller.parameters_.at("action_ns");
+          }
+          else
+          {
+            emitter << YAML::Key << "action_ns"
+                    << YAML::Value << "follow_joint_trajectory";
+          }
+
+          if (controller.parameters_.count("default"))
+          {
+            emitter << YAML::Key << "default"
+                    << YAML::Value << controller.parameters_.at("default");
+          }
+          else
+          {
+            emitter << YAML::Key << "default" << YAML::Value << true;
+          }
+
           for (const auto& pair : controller.parameters_)
           {
-            emitter << YAML::Key << pair.first;
-            emitter << YAML::Value << pair.second;
+            if (pair.first == "action_ns" || pair.first == "default")
+              continue;
+            emitter << YAML::Key << pair.first
+                    << YAML::Value << pair.second;
           }
         }
         emitter << YAML::EndMap;
