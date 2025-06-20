@@ -2,6 +2,13 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.0 (2025-06-13)
+-------------------
+* Adds multi (joint) state validation service (`#3426 <https://github.com/moveit/moveit2/issues/3426>`_)
+  Co-authored-by: Tom Noble <tom@rivelinrobotics.com>
+  Co-authored-by: Mark Johnson <104826595+rr-mark@users.noreply.github.com>
+* Contributors: Lucian
+
 2.13.2 (2025-04-16)
 -------------------
 

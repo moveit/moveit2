@@ -247,6 +247,26 @@ void initPlanningScene(py::module& m)
            This method will remove all collision object from the scene except for attached collision objects.
            )")
 
+      .def("set_current_state",
+           py::overload_cast<const moveit_msgs::msg::RobotState&>(&planning_scene::PlanningScene::setCurrentState),
+           py::arg("robot_state"),
+           R"(
+           Set the current state using a moveit_msgs::msg::RobotState message.
+
+           Args:
+           robot_state (moveit_msgs.msg.RobotState): The robot state message to set as current state.
+           )")
+
+      .def("set_current_state",
+           py::overload_cast<const moveit::core::RobotState&>(&planning_scene::PlanningScene::setCurrentState),
+           py::arg("robot_state"),
+           R"(
+           Set the current state using a moveit::core::RobotState object.
+
+           Args:
+           robot_state (moveit_py.core.RobotState): The robot state object to set as current state.
+           )")
+
       // checking state validity
       .def("is_state_valid",
            py::overload_cast<const moveit::core::RobotState&, const std::string&, bool>(
