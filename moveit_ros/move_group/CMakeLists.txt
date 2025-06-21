@@ -74,7 +74,7 @@ add_executable(list_move_group_capabilities src/list_capabilities.cpp)
 ament_target_dependencies(list_move_group_capabilities
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(list_move_group_capabilities
-                      moveit_move_group_capabilities_base fmt)
+                      moveit_move_group_capabilities_base fmt::fmt)
 
 install(TARGETS move_group list_move_group_capabilities
         RUNTIME DESTINATION lib/moveit_ros_move_group)
