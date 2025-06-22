@@ -145,7 +145,7 @@ public:
         do
         {
           status = result_future.wait_for(50ms);
-          if ((status == std::future_status::timeout) and ((node_->now() - start) > timeout))
+          if ((status == std::future_status::timeout) && ((node_->now() - start) > timeout))
           {
             RCLCPP_WARN(logger_, "waitForExecution timed out");
             return false;
