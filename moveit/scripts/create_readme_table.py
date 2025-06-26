@@ -62,9 +62,9 @@ def define_urls(target, params):
         )
         params["url"] = "{base_url}/view/{R}src_u{U}/job/{job}".format(**params)
     elif target == "bin":
-        params[
-            "job"
-        ] = "{R}bin_u{U}64__{package}__ubuntu_{ubuntu}_amd64__binary".format(**params)
+        params["job"] = (
+            "{R}bin_u{U}64__{package}__ubuntu_{ubuntu}_amd64__binary".format(**params)
+        )
         params["url"] = "{base_url}/view/{R}bin_u{U}64/job/{job}".format(**params)
 
 
