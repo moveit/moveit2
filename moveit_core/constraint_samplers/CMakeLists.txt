@@ -9,16 +9,16 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_constraint_samplers
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_constraint_samplers urdf urdfdom
-                          urdfdom_headers visualization_msgs)
 target_link_libraries(
   moveit_constraint_samplers
-  moveit_robot_trajectory
-  moveit_robot_state
-  moveit_kinematic_constraints
-  moveit_kinematics_base
-  moveit_planning_scene
-  moveit_utils)
+  PUBLIC moveit_robot_trajectory
+         moveit_robot_state
+         moveit_kinematic_constraints
+         moveit_kinematics_base
+         moveit_planning_scene
+         moveit_utils
+         ${visualization_msgs_TARGETS}
+         urdf::urdf)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
@@ -43,7 +43,6 @@ if(BUILD_TESTING)
                   test/pr2_arm_kinematics_plugin.cpp test/pr2_arm_ik.cpp)
   target_include_directories(test_constraint_samplers
                              PUBLIC ${geometry_msgs_INCLUDE_DIRS})
-  ament_target_dependencies(test_constraint_samplers kdl_parser)
   target_link_libraries(test_constraint_samplers moveit_test_utils moveit_utils
-                        moveit_constraint_samplers)
+                        moveit_constraint_samplers kdl_parser::kdl_parser)
 endif()

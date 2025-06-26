@@ -38,14 +38,27 @@ add_library(
 set_target_properties(
   moveit_ros_occupancy_map_monitor
   PROPERTIES VERSION "${moveit_ros_occupancy_map_monitor_VERSION}")
-ament_target_dependencies(moveit_ros_occupancy_map_monitor
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  moveit_ros_occupancy_map_monitor
+  PUBLIC ${moveit_msgs_TARGETS}
+         ${OCTOMATH_LIBRARIES}
+         ${OCTOMAP_LIBRARIES}
+         geometric_shapes::geometric_shapes
+         moveit_core::moveit_collision_detection
+         pluginlib::pluginlib
+         rclcpp::rclcpp)
 
 add_executable(moveit_ros_occupancy_map_server src/occupancy_map_server.cpp)
-ament_target_dependencies(moveit_ros_occupancy_map_server PUBLIC
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_ros_occupancy_map_server
-                      PRIVATE moveit_ros_occupancy_map_monitor)
+target_link_libraries(
+  moveit_ros_occupancy_map_server
+  PRIVATE moveit_ros_occupancy_map_monitor
+  PUBLIC ${moveit_msgs_TARGETS}
+         ${OCTOMATH_LIBRARIES}
+         ${OCTOMAP_LIBRARIES}
+         geometric_shapes::geometric_shapes
+         moveit_core::moveit_collision_detection
+         pluginlib::pluginlib
+         rclcpp::rclcpp)
 
 install(
   TARGETS moveit_ros_occupancy_map_monitor

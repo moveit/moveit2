@@ -12,10 +12,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # pilz_industrial_motion_testhelpers
 add_library(${PROJECT_NAME}_test_utils test_utils.cpp)
-ament_target_dependencies(${PROJECT_NAME}_test_utils
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(${PROJECT_NAME}_test_utils joint_limits_common
-                      trajectory_generation_common)
+target_link_libraries(${PROJECT_NAME}_test_utils
+                      PUBLIC joint_limits_common trajectory_generation_common)
 
 # Unit tests
 add_subdirectory(unit_tests)

@@ -25,6 +25,7 @@
   <depend>pluginlib</depend>
   <depend>qtbase5-dev</depend>
   <depend>rclcpp</depend>
+  <depend>rviz_common</depend>
   <depend>moveit_setup_framework</depend>
   <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->
   <exec_depend>moveit_configs_utils</exec_depend>
