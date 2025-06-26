@@ -87,7 +87,7 @@ int main(int argc, char** argv)
   }
 
   // If no flags specified, default to world (backwards compatibility)
-  if (!vm.count("scene") && !vm.count("world"))
+  if (!publish_scene && !publish_world)
   {
     publish_world = true;
   }
