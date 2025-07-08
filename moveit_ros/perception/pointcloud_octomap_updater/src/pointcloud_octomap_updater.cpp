@@ -74,15 +74,38 @@ PointCloudOctomapUpdater::PointCloudOctomapUpdater()
 
 bool PointCloudOctomapUpdater::setParams(const std::string& name_space)
 {
+  auto check_required = [this, &name_space](const std::string& key, auto& target,
+                                            std::vector<std::string>& missing_keys) {
+    if (!this->node_->get_parameter(name_space + "." + key, target))
+    {
+      missing_keys.push_back(key);
+    }
+  };
   // This parameter is optional
   node_->get_parameter_or(name_space + ".ns", ns_, std::string());
-  return node_->get_parameter(name_space + ".point_cloud_topic", point_cloud_topic_) &&
-         node_->get_parameter(name_space + ".max_range", max_range_) &&
-         node_->get_parameter(name_space + ".padding_offset", padding_) &&
-         node_->get_parameter(name_space + ".padding_scale", scale_) &&
-         node_->get_parameter(name_space + ".point_subsample", point_subsample_) &&
-         node_->get_parameter(name_space + ".max_update_rate", max_update_rate_) &&
-         node_->get_parameter(name_space + ".filtered_cloud_topic", filtered_cloud_topic_);
+
+  std::vector<std::string> missing_keys;
+
+  check_required("point_cloud_topic", point_cloud_topic_, missing_keys);
+  check_required("max_range", max_range_, missing_keys);
+  check_required("padding_offset", padding_, missing_keys);
+  check_required("padding_scale", scale_, missing_keys);
+  check_required("point_subsample", point_subsample_, missing_keys);
+  check_required("max_update_rate", max_update_rate_, missing_keys);
+  check_required("filtered_cloud_topic", filtered_cloud_topic_, missing_keys);
+
+  if (missing_keys.empty())
+  {
+    return true;
+  }
+  std::ostringstream oss;
+  for (const auto& name : missing_keys)
+  {
+    oss << ", "
+        << "'" << name << "'";
+  }
+  RCLCPP_ERROR(node_->get_logger(), "Missing parameters under '%s': %s", name_space.c_str(), oss.str().c_str());
+  return false;
 }
 
 bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
