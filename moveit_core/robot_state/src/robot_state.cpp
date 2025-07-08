@@ -1975,7 +1975,7 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
         found_valid_frame = true;
         break;
       }  // end if pose_frame
-    }  // end for solver_tip_frames
+    }    // end for solver_tip_frames
 
     // Make sure one of the tip frames worked
     if (!found_valid_frame)
