@@ -103,9 +103,9 @@ void initTrajectoryExecutionManager(py::module& m)
            )")
 
       .def("push",
-           (bool(trajectory_execution_manager::TrajectoryExecutionManager::*)(const moveit_msgs::msg::RobotTrajectory&,
-                                                                              const std::string&)) &
-               trajectory_execution_manager::TrajectoryExecutionManager::push,
+           (bool (trajectory_execution_manager::TrajectoryExecutionManager::*)(
+               const moveit_msgs::msg::RobotTrajectory&,
+               const std::string&))&trajectory_execution_manager::TrajectoryExecutionManager::push,
            py::arg("trajectory"), py::arg("controller") = "",
            R"(
            Add a trajectory for future execution. Optionally specify a controller to use for the trajectory.
@@ -114,9 +114,9 @@ void initTrajectoryExecutionManager(py::module& m)
            )")
 
       .def("push",
-           (bool(trajectory_execution_manager::TrajectoryExecutionManager::*)(
-               const trajectory_msgs::msg::JointTrajectory&, const std::string&)) &
-               trajectory_execution_manager::TrajectoryExecutionManager::push,
+           (bool (trajectory_execution_manager::TrajectoryExecutionManager::*)(
+               const trajectory_msgs::msg::JointTrajectory&,
+               const std::string&))&trajectory_execution_manager::TrajectoryExecutionManager::push,
            py::arg("trajectory"), py::arg("controller") = "",
            R"(
            Add a trajectory for future execution. Optionally specify a controller to use for the trajectory.
@@ -125,9 +125,9 @@ void initTrajectoryExecutionManager(py::module& m)
            )")
 
       .def("push",
-           (bool(trajectory_execution_manager::TrajectoryExecutionManager::*)(const moveit_msgs::msg::RobotTrajectory&,
-                                                                              const std::vector<std::string>&)) &
-               trajectory_execution_manager::TrajectoryExecutionManager::push,
+           (bool (trajectory_execution_manager::TrajectoryExecutionManager::*)(
+               const moveit_msgs::msg::RobotTrajectory&,
+               const std::vector<std::string>&))&trajectory_execution_manager::TrajectoryExecutionManager::push,
            py::arg("trajectory"), py::arg("controllers"),
            R"(
            Add a trajectory for future execution.
@@ -139,9 +139,9 @@ void initTrajectoryExecutionManager(py::module& m)
            )")
 
       .def("push",
-           (bool(trajectory_execution_manager::TrajectoryExecutionManager::*)(
-               const trajectory_msgs::msg::JointTrajectory&, const std::vector<std::string>&)) &
-               trajectory_execution_manager::TrajectoryExecutionManager::push,
+           (bool (trajectory_execution_manager::TrajectoryExecutionManager::*)(
+               const trajectory_msgs::msg::JointTrajectory&,
+               const std::vector<std::string>&))&trajectory_execution_manager::TrajectoryExecutionManager::push,
            py::arg("trajectory"), py::arg("controllers"),
            R"(
            Add a trajectory for future execution.

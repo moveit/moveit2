@@ -122,7 +122,7 @@ calcEulerAngles(const Eigen::MatrixBase<Derived>& R)
     res[0] = atan2(spos, cpos);
     res[2] = 0;
     return { res, false };
-  }                                       // cos(beta) == 0 and sin(beta) == -1
+  }  // cos(beta) == 0 and sin(beta) == -1
   const Scalar sneg = R(k, j) - R(j, i);  // 2*sin(alpha + gamma)
   const Scalar cneg = R(j, j) + R(k, i);  // 2*cos(alpha + gamma)
   res[0] = atan2(sneg, cneg);

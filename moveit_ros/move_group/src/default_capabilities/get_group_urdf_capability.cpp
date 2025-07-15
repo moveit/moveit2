@@ -109,9 +109,9 @@ void GetUrdfService::initialize()
           auto substring = full_urdf_string.substr(start, full_urdf_string.size() - start);
 
           // Link elements can be closed either by "/>" or "</link>" so we need to consider both cases
-          auto const substring_without_opening = substring.substr(1, substring.size() - 2);
-          auto const general_opening_pos_a = substring_without_opening.find('<');
-          auto const link_closing_pos_b = substring.find(GENERAL_ELEMENT_CLOSING);
+          const auto substring_without_opening = substring.substr(1, substring.size() - 2);
+          const auto general_opening_pos_a = substring_without_opening.find('<');
+          const auto link_closing_pos_b = substring.find(GENERAL_ELEMENT_CLOSING);
           // Case "/>"
           if (link_closing_pos_b < general_opening_pos_a)
           {
@@ -139,7 +139,7 @@ void GetUrdfService::initialize()
           const auto parent_link_element = subgroup->getJointModel(joint_name)->getParentLinkModel()->getName();
           if (std::find(link_names.begin(), link_names.end(), parent_link_element) == link_names.end())
           {
-            auto const base_link_element = "<link name=\"" + parent_link_element + "\"/>";
+            const auto base_link_element = "<link name=\"" + parent_link_element + "\"/>";
             res->urdf_string += base_link_element;
             link_names.push_back(parent_link_element);
           }

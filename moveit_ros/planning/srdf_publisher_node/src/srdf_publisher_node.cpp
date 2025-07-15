@@ -72,7 +72,7 @@ public:
     // Once Humble is EOL use add_post_set_parameters_callback.
     on_set_parameters_handle_ =
         this->add_on_set_parameters_callback([this](const std::vector<rclcpp::Parameter>& parameters) {
-          for (auto const& parameter : parameters)
+          for (const auto& parameter : parameters)
           {
             if (parameter.get_name() == "robot_description_semantic")
             {

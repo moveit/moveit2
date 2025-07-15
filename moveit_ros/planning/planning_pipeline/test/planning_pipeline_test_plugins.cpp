@@ -101,7 +101,7 @@ public:
   {
     return true;
   }
-  void clear() override{};
+  void clear() override {};
 };
 
 /// @brief A dummy planning manager that does nothing

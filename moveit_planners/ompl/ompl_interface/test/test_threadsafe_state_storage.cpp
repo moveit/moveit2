@@ -60,7 +60,7 @@ public:
     robot_state_->setJointGroupPositions(joint_model_group_, position_in_limits);
 
     // Construct the TSStateStorage using the constructor taking the robot state
-    ompl_interface::TSStateStorage const tss(*robot_state_);
+    const ompl_interface::TSStateStorage tss(*robot_state_);
 
     // Readback the stored state
     auto robot_state_stored = tss.getStateStorage();

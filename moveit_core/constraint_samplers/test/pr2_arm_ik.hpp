@@ -128,7 +128,7 @@ public:
    *
    */
   PR2ArmIK();
-  ~PR2ArmIK(){};
+  ~PR2ArmIK() {};
 
   /**
       @brief Initialize the solver by providing a urdf::Model and a root and tip name.

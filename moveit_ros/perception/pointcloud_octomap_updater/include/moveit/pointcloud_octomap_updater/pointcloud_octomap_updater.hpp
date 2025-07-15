@@ -58,7 +58,7 @@ class PointCloudOctomapUpdater : public OccupancyMapUpdater
 {
 public:
   PointCloudOctomapUpdater();
-  ~PointCloudOctomapUpdater() override{};
+  ~PointCloudOctomapUpdater() override {};
 
   bool setParams(const std::string& name_space) override;
 

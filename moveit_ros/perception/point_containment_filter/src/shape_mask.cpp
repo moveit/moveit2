@@ -178,7 +178,7 @@ void point_containment_filter::ShapeMask::maskContainment(const sensor_msgs::msg
 
     // Cloud iterators are not incremented in the for loop, because of the pragma
     // Comment out below parallelization as it can result in very high CPU consumption
-    //#pragma omp parallel for schedule(dynamic)
+    // #pragma omp parallel for schedule(dynamic)
     for (int i = 0; i < static_cast<int>(np); ++i)
     {
       Eigen::Vector3d pt = Eigen::Vector3d(*(iter_x + i), *(iter_y + i), *(iter_z + i));

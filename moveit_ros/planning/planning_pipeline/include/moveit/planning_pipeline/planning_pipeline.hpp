@@ -103,9 +103,9 @@ void loadPluginVector(const std::shared_ptr<rclcpp::Node>& node,
 class MOVEIT_PLANNING_PIPELINE_EXPORT PlanningPipeline
 {
 public:
-  /** \brief Given a robot model, a ROS node, and a parameter namespace, initialize the planning pipeline. The planner plugin
-     and adapters are provided in form of ROS parameters. The order of the elements in the adapter vectors corresponds
-     to the order in the motion planning pipeline.
+  /** \brief Given a robot model, a ROS node, and a parameter namespace, initialize the planning pipeline. The planner
+     plugin and adapters are provided in form of ROS parameters. The order of the elements in the adapter vectors
+     corresponds to the order in the motion planning pipeline.
      \param model The robot model for which this pipeline is initialized.
      \param node The ROS node that should be used for reading parameters needed for configuration
      \param parameter_namespace parameter namespace where the planner configurations are stored
@@ -131,9 +131,9 @@ public:
   /*
   BEGIN BLOCK OF DEPRECATED FUNCTIONS: TODO(sjahr): Remove after 04/2024 (6 months from merge)
   */
-  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void displayComputedMotionPlans(bool /*flag*/){};
-  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void publishReceivedRequests(bool /*flag*/){};
-  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void checkSolutionPaths(bool /*flag*/){};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void displayComputedMotionPlans(bool /*flag*/) {};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void publishReceivedRequests(bool /*flag*/) {};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void checkSolutionPaths(bool /*flag*/) {};
   [[deprecated("Use generatePlan or ROS parameter API instead.")]] bool getDisplayComputedMotionPlans() const
   {
     return false;

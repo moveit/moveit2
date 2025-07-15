@@ -86,7 +86,7 @@ public:
   PR2ArmIKSolver(const urdf::ModelInterface& robot_model, const std::string& root_frame_name,
                  const std::string& tip_frame_name, double search_discretization_angle, int free_angle);
 
-  ~PR2ArmIKSolver() override{};
+  ~PR2ArmIKSolver() override {};
 
   void updateInternalDataStructures() override;
 
