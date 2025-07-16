@@ -1,9 +1,40 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_planners_ompl LANGUAGES CXX)
 
+if(APPLE)
+  # Manually tell CMake how to find OpenMP
+  set(OpenMP_C_FLAGS "-Xclang -fopenmp")
+  set(OpenMP_CXX_FLAGS "-Xclang -fopenmp")
+  set(OpenMP_C_LIB_NAMES "omp")
+  set(OpenMP_CXX_LIB_NAMES "omp")
+  set(OpenMP_omp_LIBRARY "/opt/homebrew/opt/libomp/lib/libomp.dylib")
+
+  find_package(OpenMP REQUIRED)
+
+  if(OpenMP_CXX_FOUND)
+    message(STATUS "OpenMP with Apple Clang enabled")
+    add_compile_options(-Xclang -fopenmp)
+    include_directories(SYSTEM "/opt/homebrew/opt/libomp/include")
+    link_directories("/opt/homebrew/opt/libomp/lib")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lomp")
+  else()
+    message(FATAL_ERROR "OpenMP NOT found")
+  endif()
+endif()
+
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
+
+# MacOS Threads lib fix
+if(APPLE)
+  set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+  set(CMAKE_HAVE_THREADS_LIBRARY 1)
+  set(CMAKE_USE_WIN32_THREADS_INIT 0)
+  set(CMAKE_USE_PTHREADS_INIT 1)
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
+endif()
 
 find_package(
   Boost

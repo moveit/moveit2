@@ -1,6 +1,27 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_ros_perception LANGUAGES CXX)
 
+if(APPLE)
+  # Manually tell CMake how to find OpenMP
+  set(OpenMP_C_FLAGS "-Xclang -fopenmp")
+  set(OpenMP_CXX_FLAGS "-Xclang -fopenmp")
+  set(OpenMP_C_LIB_NAMES "omp")
+  set(OpenMP_CXX_LIB_NAMES "omp")
+  set(OpenMP_omp_LIBRARY "/opt/homebrew/opt/libomp/lib/libomp.dylib")
+
+  find_package(OpenMP REQUIRED)
+
+  if(OpenMP_CXX_FOUND)
+    message(STATUS "OpenMP with Apple Clang enabled")
+    add_compile_options(-Xclang -fopenmp)
+    include_directories(SYSTEM "/opt/homebrew/opt/libomp/include")
+    link_directories("/opt/homebrew/opt/libomp/lib")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lomp")
+  else()
+    message(FATAL_ERROR "OpenMP NOT found")
+  endif()
+endif()
+
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
@@ -17,8 +38,19 @@ if(WITH_OPENGL)
 
   set(GL_LIBS ${GL_LIBS} ${OPENGL_LIBRARIES})
   if(APPLE)
-    find_package(FreeGLUT REQUIRED)
-    set(SYSTEM_GL_LIBRARIES ${GLEW_LIBRARIES} GLEW::GLEW FreeGLUT::freeglut)
+    # Manually set GLEW and GLUT paths for Homebrew on macOS
+    set(GLEW_INCLUDE_DIR "/opt/homebrew/opt/glew/include")
+    set(GLEW_LIBRARY "/opt/homebrew/opt/glew/lib/libGLEW.dylib")
+    set(GLUT_INCLUDE_DIR "/opt/homebrew/opt/freeglut/include")
+    set(GLUT_LIBRARY "/opt/homebrew/lib/libglut.dylib")
+    # find_package(FreeGLUT REQUIRED)
+    set(GLEW_LIBRARIES ${GLEW_LIBRARY})
+    set(GLEW_INCLUDE_DIRS ${GLEW_INCLUDE_DIR})
+    set(GLUT_LIBRARIES ${GLUT_LIBRARY})
+    set(GLUT_INCLUDE_DIRS ${GLUT_INCLUDE_DIR})
+
+    set(SYSTEM_GL_INCLUDE_DIR ${GLEW_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
+    set(SYSTEM_GL_LIBRARIES ${GLEW_LIBRARIES} ${GLUT_LIBRARIES})
   else()
     find_package(GLUT REQUIRED)
     if(WIN32)
@@ -34,6 +66,16 @@ endif()
 
 if(APPLE)
   find_package(X11 REQUIRED)
+endif()
+
+# MacOS Threads lib fix
+if(APPLE)
+  set(CMAKE_THREAD_LIBS_INIT "-lpthread")
+  set(CMAKE_HAVE_THREADS_LIBRARY 1)
+  set(CMAKE_USE_WIN32_THREADS_INIT 0)
+  set(CMAKE_USE_PTHREADS_INIT 1)
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
 endif()
 
 find_package(ament_cmake REQUIRED)
@@ -53,7 +95,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(OpenMP REQUIRED)
 find_package(OpenCV)
 
 # Finds Boost Components
