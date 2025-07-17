@@ -267,7 +267,7 @@ protected:
   bool compareCacheEntryToAllowedCollisionMatrix(const DistanceFieldCacheEntryConstPtr& dfce,
                                                  const collision_detection::AllowedCollisionMatrix& acm) const;
 
-  void updatedPaddingOrScaling(const std::vector<std::string>& /*links*/) override {};
+  void updatedPaddingOrScaling(const std::vector<std::string>& /*links*/) override{};
 
   DistanceFieldCacheEntryWorldPtr generateDistanceFieldCacheEntryWorld();
 

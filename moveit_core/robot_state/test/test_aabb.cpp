@@ -64,7 +64,7 @@
 class TestAABB : public testing::Test
 {
 protected:
-  void SetUp() override {};
+  void SetUp() override{};
 
   moveit::core::RobotState loadModel(const std::string& robot_name)
   {

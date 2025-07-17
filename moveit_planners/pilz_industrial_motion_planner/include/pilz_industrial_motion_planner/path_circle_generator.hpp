@@ -70,7 +70,7 @@ public:
                                                       const KDL::Vector& interim_point, double eqradius);
 
 private:
-  PathCircleGenerator() {};  // no instantiation of this helper class!
+  PathCircleGenerator(){};  // no instantiation of this helper class!
 
   /**
    * @brief law of cosines: returns angle gamma in c² = a²+b²-2ab cos(gamma)

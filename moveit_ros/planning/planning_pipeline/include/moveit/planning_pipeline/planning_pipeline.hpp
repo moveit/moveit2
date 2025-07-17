@@ -131,9 +131,9 @@ public:
   /*
   BEGIN BLOCK OF DEPRECATED FUNCTIONS: TODO(sjahr): Remove after 04/2024 (6 months from merge)
   */
-  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void displayComputedMotionPlans(bool /*flag*/) {};
-  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void publishReceivedRequests(bool /*flag*/) {};
-  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void checkSolutionPaths(bool /*flag*/) {};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void displayComputedMotionPlans(bool /*flag*/){};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void publishReceivedRequests(bool /*flag*/){};
+  [[deprecated("Use generatePlan or ROS parameter API instead.")]] void checkSolutionPaths(bool /*flag*/){};
   [[deprecated("Use generatePlan or ROS parameter API instead.")]] bool getDisplayComputedMotionPlans() const
   {
     return false;

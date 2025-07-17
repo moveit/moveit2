@@ -57,7 +57,7 @@ public:
    *  @param node Node instance used by the adapter
    *  @param parameter_namespace Parameter namespace for adapter
    *  @details The default implementation is empty */
-  virtual void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) {};
+  virtual void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace){};
 
   /** \brief Get a description of this adapter
    *  @return Returns a short string that identifies the planning response adapter

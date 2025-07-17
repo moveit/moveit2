@@ -67,7 +67,7 @@ enum DisabledReason
 struct LinkPairData
 {
   // by default all link pairs are NOT disabled for collision checking
-  LinkPairData() : reason(NOT_DISABLED), disable_check(false) {};
+  LinkPairData() : reason(NOT_DISABLED), disable_check(false){};
   DisabledReason reason;
   bool disable_check;
 };

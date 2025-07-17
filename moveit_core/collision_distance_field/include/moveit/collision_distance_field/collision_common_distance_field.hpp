@@ -57,7 +57,7 @@ struct GroupStateRepresentation
 {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  GroupStateRepresentation() {};
+  GroupStateRepresentation(){};
   GroupStateRepresentation(const GroupStateRepresentation& gsr)
   {
     link_body_decompositions_.resize(gsr.link_body_decompositions_.size());

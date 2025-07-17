@@ -1106,7 +1106,7 @@ bool PlanningScene::loadGeometryFromStream(std::istream& in, const Eigen::Isomet
   {
     std::getline(in, line);
   } while (in.good() && !in.eof() && (line.empty() || line[0] != '*'));  // read * marker
-  std::getline(in, line);  // next line determines format
+  std::getline(in, line);                                                // next line determines format
   boost::algorithm::trim(line);
   // new format: line specifies position of object, with spaces as delimiter -> spaces indicate new format
   // old format: line specifies number of shapes

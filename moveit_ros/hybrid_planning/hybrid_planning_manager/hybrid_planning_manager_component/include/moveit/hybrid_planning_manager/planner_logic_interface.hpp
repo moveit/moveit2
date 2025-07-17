@@ -91,7 +91,7 @@ struct ReactionResult
   };
   ReactionResult(const std::string& event, const std::string& error_msg, const int error_code,
                  const HybridPlanningAction& action = HybridPlanningAction::DO_NOTHING)
-    : event(event), error_message(error_msg), error_code(error_code), action(action) {};
+    : event(event), error_message(error_msg), error_code(error_code), action(action){};
 
   // Event that triggered the reaction
   std::string event;
