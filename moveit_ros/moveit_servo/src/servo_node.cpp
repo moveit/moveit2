@@ -50,7 +50,7 @@
 namespace moveit_servo
 {
 
-rclcpp::Time convert_clock_type(const rclcpp::Time& time, rcl_clock_type_t new_clock_type)
+rclcpp::Time convertClockType(const rclcpp::Time& time, rcl_clock_type_t new_clock_type)
 {
   if (time.get_clock_type() != new_clock_type)
   {
@@ -337,7 +337,7 @@ void ServoNode::servoLoop()
   const auto servo_node_start = node_->now();
 
   while (servo_node_start >
-         convert_clock_type(planning_scene_monitor_->getLastUpdateTime(), servo_node_start.get_clock_type()))
+         convertClockType(planning_scene_monitor_->getLastUpdateTime(), servo_node_start.get_clock_type()))
   {
     RCLCPP_INFO(node_->get_logger(), "Waiting for planning scene monitor to receive robot state update.");
     rclcpp::sleep_for(std::chrono::seconds(1));
