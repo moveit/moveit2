@@ -18,7 +18,11 @@ setup(
     maintainer_email="moveit_releasers@googlegroups.com",
     description="Python library for loading MoveIt config parameters in launch files",
     license="BSD",
-    tests_require=["pytest"],
+    extras_require={
+        'test': [
+            'pytest',
+        ],
+    },
     entry_points={
         "console_scripts": [],
     },
