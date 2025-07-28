@@ -2,6 +2,20 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.0 (2025-06-13)
+-------------------
+
+2.13.2 (2025-04-16)
+-------------------
+
+2.13.1 (2025-04-15)
+-------------------
+* Update ompl_defaults.yaml to not have an invalid AnytimePathShortening configuration (`#3374 <https://github.com/ros-planning/moveit2/issues/3374>`_)
+* Contributors: Stephanie Eng
+
+2.13.0 (2025-02-15)
+-------------------
+
 2.12.0 (2024-11-29)
 -------------------
 * Added joint limits to rviz launch file. (`#3091 <https://github.com/ros-planning/moveit2/issues/3091>`_)

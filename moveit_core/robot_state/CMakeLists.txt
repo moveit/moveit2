@@ -7,8 +7,14 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_robot_state PROPERTIES VERSION
                                                     ${${PROJECT_NAME}_VERSION})
-ament_target_dependencies(moveit_robot_state urdf tf2_geometry_msgs
-                          geometric_shapes urdfdom_headers Boost)
+ament_target_dependencies(
+  moveit_robot_state
+  eigen_stl_containers
+  urdf
+  tf2_geometry_msgs
+  geometric_shapes
+  urdfdom_headers
+  Boost)
 target_link_libraries(moveit_robot_state moveit_robot_model
                       moveit_kinematics_base moveit_transforms)
 
@@ -36,7 +42,7 @@ if(BUILD_TESTING)
   target_link_libraries(test_attached_body moveit_test_utils moveit_utils
                         moveit_exceptions moveit_robot_state)
 
-  ament_add_gtest(test_robot_state test/robot_state_test.cpp
+  ament_add_gmock(test_robot_state test/robot_state_test.cpp
                   APPEND_LIBRARY_DIRS "${APPEND_LIBRARY_DIRS}")
 
   target_link_libraries(test_robot_state moveit_test_utils moveit_utils

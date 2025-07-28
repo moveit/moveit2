@@ -2,6 +2,27 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.0 (2025-06-13)
+-------------------
+
+2.13.2 (2025-04-16)
+-------------------
+
+2.13.1 (2025-04-15)
+-------------------
+* ROS Parameter for service call timeout for ros_control controllers (`#3419 <https://github.com/ros-planning/moveit2/issues/3419>`_)
+* SERVICE_CALL_TIMEOUT = 1 second is harsh 🥵 (`#3382 <https://github.com/ros-planning/moveit2/issues/3382>`_)
+* Contributors: Ashwin Sajith Nambiar, Yoan Mollard
+
+2.13.0 (2025-02-15)
+-------------------
+* Add logic to Ros2ControlManager to match ros2_control (`#3332 <https://github.com/ros-planning/moveit2/issues/3332>`_)
+* Fix Ros2ControlManager chained controller logic (`#3301 <https://github.com/ros-planning/moveit2/issues/3301>`_)
+* Parallel gripper controller (`#3246 <https://github.com/ros-planning/moveit2/issues/3246>`_)
+* Update controller_manager_plugin.cpp (`#3179 <https://github.com/ros-planning/moveit2/issues/3179>`_)
+  Fixing the bug where the namespace is not properly applied when using Ros2ControlMultiManager
+* Contributors: Marq Rasmussen, Paul Gesel, Seohyeon Ryu
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)

@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2012, Willow Garage, Inc.
+ *  Copyright (c) 2022, Shobin Vinod
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Willow Garage nor the names of its
+ *   * Neither the name of the copyright holder nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,34 +32,58 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Ioan Sucan */
+/* Author: Shobin Vinod */
 
-#pragma once
+#include <pybind11/pybind11.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/serialization.hpp>
+#include <rclcpp/duration.hpp>
 
-#include <moveit/move_group/move_group_capability.hpp>
-#include <moveit_msgs/srv/get_state_validity.hpp>
+namespace py = pybind11;
 
-namespace move_group
+namespace pybind11
 {
-class MoveGroupStateValidationService : public MoveGroupCapability
+namespace detail
 {
-public:
-  MoveGroupStateValidationService();
+template <>
+struct type_caster<rclcpp::Time>
+{
+  PYBIND11_TYPE_CASTER(rclcpp::Time, _("rclcpp::Time"));
 
-  void initialize() override;
+  // convert from rclpy::Time to rclcpp::Time
+  bool load(py::handle src, bool)
+  {
+    if (src.is_none())
+      return false;
 
-protected:
-  bool isStateValid(const planning_scene_monitor::LockedPlanningSceneRO& ls, const moveit::core::RobotState& rs,
-                    const std::string& group_name, const moveit_msgs::msg::Constraints& constraints,
-                    std::vector<moveit_msgs::msg::ContactInformation>& contacts,
-                    std::vector<moveit_msgs::msg::CostSource>& cost_sources,
-                    std::vector<moveit_msgs::msg::ConstraintEvalResult>& constraint_result);
+    // check to validate if the object is a rclcpp::Time object
+    if (!py::hasattr(src, "nanoseconds") || !py::hasattr(src, "clock_type"))
+    {
+      return false;
+    }
 
-private:
-  bool computeService(const std::shared_ptr<rmw_request_id_t>& request_header,
-                      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request>& req,
-                      const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Response>& res);
+    // Extract the value for constructing the rclcpp::Time object
+    int64_t nanoseconds = src.attr("nanoseconds").cast<int64_t>();
+    int clock_type = src.attr("clock_type").cast<int>();
 
-  rclcpp::Service<moveit_msgs::srv::GetStateValidity>::SharedPtr validity_service_;
+    // Construct the rclcpp::Time object
+    value = rclcpp::Time(nanoseconds, static_cast<rcl_clock_type_t>(clock_type));
+    return true;
+  }
+
+  // convert from rclcpp::Time to rclpy::Time
+  static py::handle cast(const rclcpp::Time& src, return_value_policy /* policy */, py::handle /* parent */)
+  {
+    py::module rclpy_time = py::module::import("rclpy.time");
+    py::object Time = rclpy_time.attr("Time");
+
+    int64_t nanoseconds = src.nanoseconds();
+    int clock_type = static_cast<int>(src.get_clock_type());
+
+    return Time(py::arg("nanoseconds") = nanoseconds,
+                py::arg("clock_type") = clock_type)
+        .release();  // release the ownership of the object
+  }
 };
-}  // namespace move_group
+}  // namespace detail
+}  // namespace pybind11

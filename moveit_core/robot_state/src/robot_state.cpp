@@ -907,14 +907,41 @@ void RobotState::updateStateWithLinkAt(const LinkModel* link, const Eigen::Isome
   }
 }
 
-const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame) const
+const LinkModel* RobotState::getLinkModelIncludingAttachedBodies(const std::string& frame) const
 {
-  bool found;
-  const LinkModel* link{ nullptr };
-  getFrameInfo(frame, link, found);
-  if (!found)
-    RCLCPP_ERROR(getLogger(), "Unable to find link for frame '%s'", frame.c_str());
-  return getRobotModel()->getRigidlyConnectedParentLinkModel(link);
+  // If the frame is a link, return that link.
+  if (getRobotModel()->hasLinkModel(frame))
+  {
+    return getLinkModel(frame);
+  }
+
+  // If the frame is an attached body, return the link the body is attached to.
+  if (const auto it = attached_body_map_.find(frame); it != attached_body_map_.end())
+  {
+    const auto& body{ it->second };
+    return body->getAttachedLink();
+  }
+
+  // If the frame is a subframe of an attached body, return the link the body is attached to.
+  for (const auto& it : attached_body_map_)
+  {
+    const auto& body{ it.second };
+    if (body->hasSubframeTransform(frame))
+    {
+      return body->getAttachedLink();
+    }
+  }
+
+  // If the frame is none of the above, return nullptr.
+  return nullptr;
+}
+
+const LinkModel* RobotState::getRigidlyConnectedParentLinkModel(const std::string& frame,
+                                                                const moveit::core::JointModelGroup* jmg) const
+{
+  const LinkModel* link = getLinkModelIncludingAttachedBodies(frame);
+
+  return getRobotModel()->getRigidlyConnectedParentLinkModel(link, jmg);
 }
 
 const Eigen::Isometry3d& RobotState::getJointTransform(const JointModel* joint)
@@ -1190,7 +1217,24 @@ void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bo
   attached_bodies.clear();
   attached_bodies.reserve(attached_body_map_.size());
   for (const auto& it : attached_body_map_)
-    attached_bodies.push_back(it.second.get());
+  {
+    if (it.second)
+    {
+      attached_bodies.push_back(it.second.get());
+    }
+  }
+}
+
+void RobotState::getAttachedBodies(std::map<std::string, const AttachedBody*>& attached_bodies) const
+{
+  attached_bodies.clear();
+  for (const auto& it : attached_body_map_)
+  {
+    if (it.second && !it.first.empty())
+    {
+      attached_bodies[it.first] = it.second.get();
+    }
+  }
 }
 
 void RobotState::getAttachedBodies(std::vector<const AttachedBody*>& attached_bodies, const JointModelGroup* group) const

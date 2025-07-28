@@ -2,6 +2,32 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.0 (2025-06-13)
+-------------------
+* Remove gripper_controllers dependency (`#3474 <https://github.com/moveit/moveit2/issues/3474>`_)
+* Contributors: Felix Exner (fexner)
+
+2.13.2 (2025-04-16)
+-------------------
+
+2.13.1 (2025-04-15)
+-------------------
+* Minor typo fix in simulated Panda servo config (`#3444 <https://github.com/ros-planning/moveit2/issues/3444>`_)
+* Fix Servo JointJog Crash (`#3351 <https://github.com/ros-planning/moveit2/issues/3351>`_)
+* Contributors: Gautham Sam, Matthew Foran
+
+2.13.0 (2025-02-15)
+-------------------
+* Update current state even if servo is paused (`#3341 <https://github.com/ros-planning/moveit2/issues/3341>`_)
+* Update robot state if time since last command exceeds timeout (`#3251 <https://github.com/ros-planning/moveit2/issues/3251>`_)
+* Fix docstring for Servo smoothHalt function (`#3298 <https://github.com/ros-planning/moveit2/issues/3298>`_)
+* servo_keyboard_input: Add Windows support (`#3290 <https://github.com/ros-planning/moveit2/issues/3290>`_)
+* Servo Node - pause service: check if request is different than current state. (`#3265 <https://github.com/ros-planning/moveit2/issues/3265>`_)
+* Reduce mutex scope in Servo thread (`#3259 <https://github.com/ros-planning/moveit2/issues/3259>`_)
+* Update includes for generate_parameter_library 0.4.0 (`#3255 <https://github.com/ros-planning/moveit2/issues/3255>`_)
+* Address deprecations of StaticSingleThreadedExecutor and realtime_tools/thread_priority.hpp (`#3139 <https://github.com/ros-planning/moveit2/issues/3139>`_)
+* Contributors: Henning Kayser, Jelmer de Wolde, Kazuya Oguma, Paul Gesel, Sebastian Castro, Silvio Traversaro
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)

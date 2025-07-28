@@ -2,6 +2,29 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.0 (2025-06-13)
+-------------------
+* Adds multi (joint) state validation service (`#3426 <https://github.com/moveit/moveit2/issues/3426>`_)
+  Co-authored-by: Tom Noble <tom@rivelinrobotics.com>
+  Co-authored-by: Mark Johnson <104826595+rr-mark@users.noreply.github.com>
+* Contributors: Lucian
+
+2.13.2 (2025-04-16)
+-------------------
+
+2.13.1 (2025-04-15)
+-------------------
+* Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (`#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_)
+  * Publish planning scene while planning (`#3689 <https://github.com/ros-planning/moveit/issues/3689>`_)
+* Contributors: Mark Johnson
+
+2.13.0 (2025-02-15)
+-------------------
+* Ports moveit `#3676 <https://github.com/ros-planning/moveit2/issues/3676>`_ and `#3682 <https://github.com/ros-planning/moveit2/issues/3682>`_ (`#3283 <https://github.com/ros-planning/moveit2/issues/3283>`_)
+* Remove plugins from export set (`#3227 <https://github.com/ros-planning/moveit2/issues/3227>`_)
+* move TrajectoryExecutionManager::clear() to private (`#3226 <https://github.com/ros-planning/moveit2/issues/3226>`_)
+* Contributors: Dongya Jiang, Mark Johnson, Michael Görner, Robert Haschke, Paul Gesel
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)

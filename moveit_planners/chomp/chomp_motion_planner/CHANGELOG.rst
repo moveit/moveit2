@@ -2,6 +2,21 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.0 (2025-06-13)
+-------------------
+
+2.13.2 (2025-04-16)
+-------------------
+
+2.13.1 (2025-04-15)
+-------------------
+
+2.13.0 (2025-02-15)
+-------------------
+* Use ! in place of not keyword for Pilz and CHOMP planners (`#3217 <https://github.com/ros-planning/moveit2/issues/3217>`_)
+* Update deprecated tf2 imports from .h to .hpp (`#3197 <https://github.com/ros-planning/moveit2/issues/3197>`_)
+* Contributors: Sebastian Castro, Silvio Traversaro
+
 2.12.0 (2024-11-29)
 -------------------
 * Enhancement/use hpp for headers (`#3113 <https://github.com/ros-planning/moveit2/issues/3113>`_)

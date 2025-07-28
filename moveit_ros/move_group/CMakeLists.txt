@@ -52,6 +52,7 @@ add_library(
   src/default_capabilities/query_planners_service_capability.cpp
   src/default_capabilities/save_geometry_to_file_service_capability.cpp
   src/default_capabilities/state_validation_service_capability.cpp
+  src/default_capabilities/multi_state_validation_service_capability.cpp
   src/default_capabilities/tf_publisher_capability.cpp)
 target_include_directories(
   moveit_move_group_default_capabilities
@@ -73,7 +74,7 @@ add_executable(list_move_group_capabilities src/list_capabilities.cpp)
 ament_target_dependencies(list_move_group_capabilities
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(list_move_group_capabilities
-                      moveit_move_group_capabilities_base fmt)
+                      moveit_move_group_capabilities_base fmt::fmt)
 
 install(TARGETS move_group list_move_group_capabilities
         RUNTIME DESTINATION lib/moveit_ros_move_group)
