@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 # Author: Peter David Fagan
-""" PS4 dualshock teleop device implementation. """
+"""PS4 dualshock teleop device implementation."""
 
 import rclpy
 from multiprocessing import Process
