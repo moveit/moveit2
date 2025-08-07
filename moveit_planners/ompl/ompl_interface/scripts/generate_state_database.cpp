@@ -54,8 +54,8 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 static const std::string CONSTRAINT_PARAMETER = "constraints";
 
-static bool getUintParameterOr(const rclcpp::Node::SharedPtr& node, const std::string& param_name,
-                               size_t&& result_value, const size_t default_value)
+static bool get_uint_parameter_or(const rclcpp::Node::SharedPtr& node, const std::string& param_name,
+                                  unsigned int& result_value, const size_t default_value)
 {
   int param_value;
   if (node->get_parameter(param_name, param_value))
@@ -75,6 +75,7 @@ static bool getUintParameterOr(const rclcpp::Node::SharedPtr& node, const std::s
   result_value = default_value;
   return true;
 }
+
 
 struct GenerateStateDatabaseParameters
 {
