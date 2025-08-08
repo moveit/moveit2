@@ -54,7 +54,7 @@ static const std::string ROBOT_DESCRIPTION = "robot_description";
 
 static const std::string CONSTRAINT_PARAMETER = "constraints";
 
-static bool get_uint_parameter_or(const rclcpp::Node::SharedPtr& node, const std::string& param_name,
+static bool getUintParameterOr(const rclcpp::Node::SharedPtr& node, const std::string& param_name,
                                   unsigned int& result_value, const unsigned int default_value)
 {
   int param_value;
