@@ -50,6 +50,9 @@
 namespace moveit_servo
 {
 
+namespace
+{
+// This function is used to convert times in case planning_scene_monitor uses RCL_SYSTEM_TIME
 rclcpp::Time convertClockType(const rclcpp::Time& time, rcl_clock_type_t new_clock_type)
 {
   if (time.get_clock_type() != new_clock_type)
@@ -58,6 +61,7 @@ rclcpp::Time convertClockType(const rclcpp::Time& time, rcl_clock_type_t new_clo
   }
   return time;
 }
+}  // namespace
 
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr ServoNode::get_node_base_interface()
 {
