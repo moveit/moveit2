@@ -91,13 +91,13 @@ InteractiveMarkerDisplay::InteractiveMarkerDisplay()
 
 void InteractiveMarkerDisplay::onInitialize()
 {
-  //  auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
-  //  if (!ros_node_abstraction) {
-  //    return;
-  //  }
-  //
-  //  interactive_marker_namespace_property_->initialize(ros_node_abstraction);
-  //
+  auto ros_node_abstraction = context_->getRosNodeAbstraction().lock();
+  if (!ros_node_abstraction)
+  {
+    return;
+  }
+  interactive_marker_namespace_property_->initialize(ros_node_abstraction);
+
   rclcpp::NodeOptions options;
   options.arguments({ "--ros-args", "-r",
                       "__node:=" + std::string("interactive_marker_display_") +
