@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_setup_core_plugins LANGUAGES CXX)
-
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Core5Compat)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core5Compat)
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
@@ -19,7 +20,7 @@ find_package(urdf REQUIRED)
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt5_wrap_cpp(
+qt_wrap_cpp(
   MOC_FILES include/moveit_setup_core_plugins/start_screen_widget.hpp
   include/moveit_setup_core_plugins/configuration_files_widget.hpp
   include/moveit_setup_core_plugins/author_information_widget.hpp)
@@ -36,15 +37,16 @@ add_library(
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include/moveit_setup_core_plugins>)
-ament_target_dependencies(
+target_link_libraries(
   ${PROJECT_NAME}
-  ament_index_cpp
-  moveit_ros_visualization
-  moveit_setup_framework
-  pluginlib
-  rclcpp
-  srdfdom
-  urdf)
+  PUBLIC ament_index_cpp::ament_index_cpp
+         pluginlib::pluginlib
+         rclcpp::rclcpp
+         srdfdom::srdfdom
+         urdf::urdf
+         Qt${QT_VERSION_MAJOR}::Widgets
+         Qt${QT_VERSION_MAJOR}::Core5Compat
+         moveit_setup_framework::moveit_setup_framework)
 
 install(
   TARGETS moveit_setup_core_plugins
