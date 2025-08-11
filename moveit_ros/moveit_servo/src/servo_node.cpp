@@ -340,6 +340,8 @@ void ServoNode::servoLoop()
 
   const auto servo_node_start = node_->now();
 
+  // convert_clock_type() is used in case planning_scene_monitor uses RCL_SYSTEM_TIME
+  // while Servo uses RCL_ROS_TIME
   while (servo_node_start >
          convertClockType(planning_scene_monitor_->getLastUpdateTime(), servo_node_start.get_clock_type()))
   {
