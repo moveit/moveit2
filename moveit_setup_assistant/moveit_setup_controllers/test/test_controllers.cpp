@@ -37,6 +37,7 @@
 #include <moveit_setup_controllers/ros2_controllers_config.hpp>
 #include <moveit_setup_controllers/moveit_controllers_config.hpp>
 #include <moveit_setup_controllers/ros2_controllers.hpp>
+#include <moveit_setup_framework/generated_time.hpp>
 
 using moveit_setup::expectYamlEquivalence;
 using moveit_setup::getSharePath;
@@ -148,6 +149,27 @@ TEST_F(ControllersTest, AddDefaultControllers)
 
   // Test that addDefaultControllers() did actually add a controller for the new_group
   EXPECT_EQ(ros2_controllers_config->getControllers().size(), group_count);
+
+}
+
+TEST_F(ControllersTest, InjectedDefaultsWhenBlank)
+{
+  ControllerInfo ci;
+  ci.name_   = "dummy";
+  ci.type_   = "FollowJointTrajectory";
+  ci.joints_ = { "joint1" };
+
+  MoveItControllersConfig parent;
+  parent.getControllers().push_back(ci);
+
+  YAML::Emitter out;
+  MoveItControllersConfig::GeneratedControllersConfig writer(std::filesystem::path(), moveit_setup::GeneratedTime(),
+                                                            parent);
+  ASSERT_TRUE(writer.writeYaml(out));
+
+  YAML::Node node = YAML::Load(out.c_str())["moveit_simple_controller_manager"][ci.name_];
+  EXPECT_EQ(node["action_ns"].as<std::string>(), "follow_joint_trajectory");
+  EXPECT_TRUE(node["default"].as<bool>());
 }
 
 int main(int argc, char** argv)
