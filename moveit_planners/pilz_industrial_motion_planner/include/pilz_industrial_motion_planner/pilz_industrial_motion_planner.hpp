@@ -46,6 +46,7 @@
 #include <memory>
 
 #include <pilz_industrial_motion_planner/cartesian_limits_parameters.hpp>
+#include <pilz_industrial_motion_planner/interpolation_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {
@@ -136,6 +137,9 @@ private:
   /// cartesian limit
   std::shared_ptr<cartesian_limits::ParamListener> param_listener_;
   cartesian_limits::Params params_;
+
+  // interpolation params
+  std::shared_ptr<interpolation::ParamListener> interpolation_param_listener_;
 };
 
 MOVEIT_CLASS_FORWARD(CommandPlanner);
