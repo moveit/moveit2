@@ -87,8 +87,8 @@ RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::strin
   RCLCPP_INFO_STREAM(getLogger(), "Loaded robot model in " << (node->now() - start).seconds() << " seconds");
 }
 
-RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string)
-  : urdf_string_(urdf_string), srdf_string_(srdf_string)
+RDFLoader::RDFLoader(const std::string& urdf_string, const std::string& srdf_string, const std::string& ros_name)
+  : ros_name_(ros_name), urdf_string_(urdf_string), srdf_string_(srdf_string)
 {
   if (!loadFromStrings())
   {
