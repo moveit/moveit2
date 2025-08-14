@@ -567,10 +567,10 @@ public:
     dependency_map_reverse_.clear();
     for (auto& controller : result->controller)
     {
-      if (controller.chain_connections.size() > 1)
+      if (isActive(controller) && controller.chain_connections.size() > 1)
       {
-        RCLCPP_ERROR_STREAM(LOGGER, "Controller with name %s chains to more than one controller. Chaining to more than "
-                                    "one controller is not supported.");
+        RCLCPP_ERROR_STREAM(LOGGER, "Controller with name " <<  controller.name << " chains to more than one controller. "
+                                    "Chaining to more than one controller is not supported.");
         return false;
       }
       for (const auto& chained_controller : controller.chain_connections)
