@@ -224,7 +224,7 @@ TEST_F(HybridPlanningFixture, ActionCompletion)
     auto goal_handle_future = hp_action_client_->async_send_goal(goal_action_request_, send_goal_options_);
   });
 
-  rclcpp::Rate rate(10);
+  rclcpp::WallRate rate(10);
   while (!action_complete_)
   {
     executor_.spin_once();
@@ -245,7 +245,7 @@ TEST_F(HybridPlanningFixture, ActionAbortion)
     hp_action_client_->async_cancel_all_goals();
   });
 
-  rclcpp::Rate rate(10);
+  rclcpp::WallRate rate(10);
   while (!action_complete_)
   {
     executor_.spin_once();
