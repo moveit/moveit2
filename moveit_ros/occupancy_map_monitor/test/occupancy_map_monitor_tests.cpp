@@ -38,7 +38,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 
 #include <memory>
 #include <string>

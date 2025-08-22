@@ -50,7 +50,7 @@
 #include <rviz_common/properties/color_property.hpp>
 #include <rviz_common/properties/enum_property.hpp>
 #include <rviz_common/display_context.hpp>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>

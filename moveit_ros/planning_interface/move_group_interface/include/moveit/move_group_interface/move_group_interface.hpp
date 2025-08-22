@@ -56,7 +56,7 @@
 
 #include <memory>
 #include <utility>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 
 #include <moveit_move_group_interface_export.h>
 
