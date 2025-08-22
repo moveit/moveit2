@@ -43,7 +43,7 @@
 #include <moveit/planning_scene_monitor/current_state_monitor.hpp>
 #include <moveit/utils/robot_model_test_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 
 struct MockMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor::MiddlewareHandle
 {

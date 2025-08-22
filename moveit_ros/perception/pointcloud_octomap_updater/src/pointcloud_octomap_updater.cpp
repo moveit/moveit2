@@ -51,7 +51,7 @@
 #endif
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #include <tf2_ros/create_timer_interface.h>
-#include <tf2_ros/create_timer_ros.h>
+#include <tf2_ros/create_timer_ros.hpp>
 #include <moveit/utils/logger.hpp>
 #include <rclcpp/version.h>
 
