@@ -45,7 +45,7 @@
 #include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.hpp>
 #include <moveit/robot_state/robot_state.hpp>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 
 namespace moveit_cpp
 {
