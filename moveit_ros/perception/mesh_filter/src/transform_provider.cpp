@@ -35,8 +35,8 @@
 /* Author: Suat Gedikli */
 
 #include <moveit/mesh_filter/transform_provider.hpp>
-#include <tf2_ros/transform_listener.h>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.hpp>
+#include <tf2_ros/buffer.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
 TransformProvider::TransformProvider(double update_rate) : stop_(true), update_rate_(update_rate)
