@@ -50,7 +50,11 @@
 #include <tf2/LinearMath/Transform.h>
 #endif
 #include <sensor_msgs/point_cloud2_iterator.hpp>
+#if __has_include(<tf2_ros/create_timer_interface.hpp>)
+#include <tf2_ros/create_timer_interface.hpp>
+#else
 #include <tf2_ros/create_timer_interface.h>
+#endif
 #include <tf2_ros/create_timer_ros.hpp>
 #include <moveit/utils/logger.hpp>
 #include <rclcpp/version.h>
