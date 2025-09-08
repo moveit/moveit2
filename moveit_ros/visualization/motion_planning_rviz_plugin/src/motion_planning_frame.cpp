@@ -686,10 +686,16 @@ void MotionPlanningFrame::tabChanged(int index)
   }
 }
 
-void MotionPlanningFrame::updateSceneMarkers(double /*wall_dt*/, double /*ros_dt*/)
+void MotionPlanningFrame::updateSceneMarkers(std::chrono::nanoseconds /*wall_dt*/, std::chrono::nanoseconds /*ros_dt*/)
 {
   if (scene_marker_)
     scene_marker_->update();
+}
+
+void MotionPlanningFrame::updateSceneMarkers(double wall_dt, double ros_dt)
+{
+  updateSceneMarkers(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(wall_dt)),
+                     std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(ros_dt)));
 }
 
 void MotionPlanningFrame::updateExternalCommunication()

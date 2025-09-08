@@ -36,6 +36,9 @@
 
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
+
 #include <rviz_common/display.hpp>
 #include <rviz_common/panel_dock_widget.hpp>
 #include <moveit/planning_scene_rviz_plugin/planning_scene_display.hpp>
@@ -50,12 +53,11 @@
 #include <moveit/kinematics_metrics/kinematics_metrics.hpp>
 #include <moveit/dynamics_solver/dynamics_solver.hpp>
 
-#include <rclcpp/rclcpp.hpp>
-
 #include <std_msgs/msg/string.hpp>
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #endif
 
+#include <chrono>
 #include <memory>
 
 namespace Ogre
@@ -106,7 +108,16 @@ public:
   void load(const rviz_common::Config& config) override;
   void save(rviz_common::Config config) const override;
 
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  void update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt) override;
+  [[deprecated("Use update(std::chrono::nanoseconds, std::chrono::nanoseconds) instead")]] void
+  update(float wall_dt, float ros_dt) override;
+// For Kilted and older
+#else
   void update(float wall_dt, float ros_dt) override;
+#endif
+
   void reset() override;
 
   moveit::core::RobotStateConstPtr getQueryStartState() const
@@ -213,7 +224,15 @@ protected:
   void onRobotModelLoaded() override;
   void onNewPlanningSceneState() override;
   void onSceneMonitorReceivedUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type) override;
+  void updateInternal(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt) override;
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  [[deprecated("Use updateInternal(std::chrono::nanoseconds, std::chrono::nanoseconds) instead")]] void
+  updateInternal(double wall_dt, double ros_dt) override;
+// For Kilted and older
+#else
   void updateInternal(double wall_dt, double ros_dt) override;
+#endif
 
   void renderWorkspaceBox();
   void updateLinkColors();

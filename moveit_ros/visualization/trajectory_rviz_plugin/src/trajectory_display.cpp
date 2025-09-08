@@ -129,11 +129,27 @@ void TrajectoryDisplay::onDisable()
   trajectory_visual_->onDisable();
 }
 
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+void TrajectoryDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt)
+{
+  Display::update(wall_dt, ros_dt);
+  trajectory_visual_->update(wall_dt, ros_dt);
+}
+
+void TrajectoryDisplay::update(float wall_dt, float ros_dt)
+{
+  TrajectoryDisplay::update(std::chrono::nanoseconds(std::lround(wall_dt)),
+                            std::chrono::nanoseconds(std::lround(ros_dt)));
+}
+// For Kilted and older
+#else
 void TrajectoryDisplay::update(float wall_dt, float ros_dt)
 {
   Display::update(wall_dt, ros_dt);
   trajectory_visual_->update(wall_dt, ros_dt);
 }
+#endif
 
 void TrajectoryDisplay::changedRobotDescription()
 {

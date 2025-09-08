@@ -35,8 +35,6 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/version.h>
-
 #include <moveit/common_planning_interface_objects/common_objects.hpp>
 #include <moveit/planning_scene_rviz_plugin/planning_scene_display.hpp>
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.hpp>
@@ -669,7 +667,9 @@ void PlanningSceneDisplay::queueRenderSceneGeometry()
   planning_scene_needs_render_ = true;
 }
 
-void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+void PlanningSceneDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt)
 {
   Display::update(wall_dt, ros_dt);
 
@@ -681,9 +681,29 @@ void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
     updateInternal(wall_dt, ros_dt);
 }
 
-void PlanningSceneDisplay::updateInternal(double wall_dt, double /*ros_dt*/)
+void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
 {
-  current_scene_time_ += wall_dt;
+  PlanningSceneDisplay::update(std::chrono::nanoseconds(std::lround(wall_dt)),
+                               std::chrono::nanoseconds(std::lround(ros_dt)));
+}
+// For Kilted and older
+#else
+void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
+{
+  Display::update(wall_dt, ros_dt);
+
+  executeMainLoopJobs();
+
+  calculateOffsetPosition();
+
+  if (planning_scene_monitor_)
+    updateInternal(wall_dt, ros_dt);
+}
+#endif
+
+void PlanningSceneDisplay::updateInternal(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds /*ros_dt*/)
+{
+  current_scene_time_ += std::chrono::duration_cast<std::chrono::duration<double>>(wall_dt).count();
   if (planning_scene_render_ &&
       ((current_scene_time_ > scene_display_time_property_->getFloat() && robot_state_needs_render_) ||
        planning_scene_needs_render_))
@@ -693,6 +713,12 @@ void PlanningSceneDisplay::updateInternal(double wall_dt, double /*ros_dt*/)
     robot_state_needs_render_ = false;
     planning_scene_needs_render_ = false;
   }
+}
+
+void PlanningSceneDisplay::updateInternal(double wall_dt, double ros_dt)
+{
+  updateInternal(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(wall_dt)),
+                 std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(ros_dt)));
 }
 
 void PlanningSceneDisplay::load(const rviz_common::Config& config)

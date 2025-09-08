@@ -38,6 +38,8 @@
 
 #pragma once
 
+#include <rclcpp/version.h>
+
 #include <rviz_common/display.hpp>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
@@ -47,6 +49,8 @@
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/rdf_loader/rdf_loader.hpp>
 #endif
+
+#include <chrono>
 
 namespace rviz_common
 {
@@ -68,7 +72,17 @@ public:
   void loadRobotModel();
 
   void load(const rviz_common::Config& config) override;
+
+  // For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  void update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt) override;
+  [[deprecated("Use update(std::chrono::nanoseconds, std::chrono::nanoseconds) instead")]] void
+  update(float wall_dt, float ros_dt) override;
+// For Kilted and older
+#else
   void update(float wall_dt, float ros_dt) override;
+#endif
+
   void reset() override;
 
   // overrides from Display
