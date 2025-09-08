@@ -43,7 +43,14 @@
 #include <moveit/planning_scene_monitor/current_state_monitor.hpp>
 #include <moveit/utils/robot_model_test_utils.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/buffer.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/buffer.h>
+#endif
 
 struct MockMiddlewareHandle : public planning_scene_monitor::CurrentStateMonitor::MiddlewareHandle
 {

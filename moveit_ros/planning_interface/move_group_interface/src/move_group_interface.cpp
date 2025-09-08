@@ -39,6 +39,10 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
+
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
+
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/warehouse/constraints_storage.hpp>
 #include <moveit/kinematic_constraints/utils.hpp>
@@ -68,9 +72,13 @@
 #include <tf2/utils.h>
 #endif
 #include <tf2_eigen/tf2_eigen.hpp>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/transform_listener.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
+// For Kilted and older
+#else
+#include <tf2_ros/transform_listener.h>
+#endif
 
 namespace moveit
 {

@@ -35,6 +35,8 @@
 
 /* Author: Ioan Sucan */
 
+#include <rclcpp/version.h>
+
 #include <moveit/common_planning_interface_objects/common_objects.hpp>
 #include <moveit/planning_scene_rviz_plugin/planning_scene_display.hpp>
 #include <moveit/rviz_plugin_render_tools/robot_state_visualization.hpp>
@@ -50,7 +52,13 @@
 #include <rviz_common/properties/color_property.hpp>
 #include <rviz_common/properties/enum_property.hpp>
 #include <rviz_common/display_context.hpp>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/buffer.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/buffer.h>
+#endif
 
 #include <OgreSceneManager.h>
 #include <OgreSceneNode.h>

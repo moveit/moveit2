@@ -34,17 +34,6 @@
 
 /* Author: Ioan Sucan */
 
-#include <moveit/warehouse/planning_scene_storage.hpp>
-#include <moveit/warehouse/constraints_storage.hpp>
-#include <moveit/warehouse/state_storage.hpp>
-#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
-#include <moveit/utils/logger.hpp>
-#include <boost/program_options/cmdline.hpp>
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/parsers.hpp>
-#include <boost/program_options/variables_map.hpp>
-#include <fmt/format.h>
-#include <tf2_ros/transform_listener.hpp>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
 #include <rclcpp/logger.hpp>
@@ -59,6 +48,24 @@
 #endif
 #include <rclcpp/subscription.hpp>
 #include <rclcpp/utilities.hpp>
+
+#include <moveit/warehouse/planning_scene_storage.hpp>
+#include <moveit/warehouse/constraints_storage.hpp>
+#include <moveit/warehouse/state_storage.hpp>
+#include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+#include <moveit/utils/logger.hpp>
+#include <boost/program_options/cmdline.hpp>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/parsers.hpp>
+#include <boost/program_options/variables_map.hpp>
+#include <fmt/format.h>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+#include <tf2_ros/transform_listener.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/transform_listener.h>
+#endif
 
 rclcpp::Logger getLogger()
 {

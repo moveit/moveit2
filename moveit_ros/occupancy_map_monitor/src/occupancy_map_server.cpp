@@ -34,10 +34,18 @@
 
 /* Author: Jon Binney, Ioan Sucan */
 
+#include <rclcpp/version.h>
+
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 
 #include <octomap_msgs/conversions.h>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/transform_listener.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/transform_listener.h>
+#endif
 #include <rclcpp/clock.hpp>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>

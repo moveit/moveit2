@@ -35,10 +35,19 @@
 /* Author: Jonas Tietz */
 
 #include "tf_publisher_capability.hpp"
+
+#include <rclcpp/version.h>
+
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/utils/message_checks.hpp>
 #include <moveit/move_group/capability_names.hpp>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+#include <tf2_ros/transform_broadcaster.hpp>
+// For Kilted and older
+#else
 #include <tf2_ros/transform_broadcaster.h>
+#endif
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/robot_state/attached_body.hpp>

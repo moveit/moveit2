@@ -48,6 +48,7 @@
 #include <moveit_msgs/action/move_group.hpp>
 #include <moveit_msgs/action/execute_trajectory.hpp>
 #include <rclcpp/logger.hpp>
+#include <rclcpp/version.h>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -56,7 +57,13 @@
 
 #include <memory>
 #include <utility>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/buffer.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/buffer.h>
+#endif
 
 #include <moveit_move_group_interface_export.h>
 

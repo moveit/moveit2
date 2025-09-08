@@ -50,8 +50,15 @@
 #include <tf2/LinearMath/Transform.h>
 #endif
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-#include <tf2_ros/create_timer_interface.h>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+#include <tf2_ros/create_timer_interface.hpp>
 #include <tf2_ros/create_timer_ros.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/create_timer_interface.h>
+#include <tf2_ros/create_timer_ros.h>
+#endif
 #include <moveit/utils/logger.hpp>
 #include <rclcpp/version.h>
 

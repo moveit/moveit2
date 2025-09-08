@@ -38,7 +38,14 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <rclcpp/version.h>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/buffer.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/buffer.h>
+#endif
 
 #include <memory>
 #include <string>

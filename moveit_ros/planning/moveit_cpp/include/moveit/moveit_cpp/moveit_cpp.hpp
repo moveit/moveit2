@@ -40,12 +40,19 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
 #include <moveit/controller_manager/controller_manager.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.hpp>
 #include <moveit/robot_state/robot_state.hpp>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/buffer.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/buffer.h>
+#endif
 
 namespace moveit_cpp
 {

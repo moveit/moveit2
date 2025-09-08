@@ -40,6 +40,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
 #include <rclcpp_action/rclcpp_action.hpp>
 
 #include <pluginlib/class_loader.hpp>
@@ -58,8 +59,15 @@
 #include <moveit/local_planner/local_constraint_solver_interface.hpp>
 #include <moveit/local_planner/trajectory_operator_interface.hpp>
 
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/buffer.hpp>
 #include <tf2_ros/transform_listener.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
+#endif
 
 // Forward declaration of parameter class allows users to implement custom parameters
 namespace local_planner_parameters

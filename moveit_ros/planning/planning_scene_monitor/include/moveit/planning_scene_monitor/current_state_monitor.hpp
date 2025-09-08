@@ -45,10 +45,17 @@
 #include <boost/signals2.hpp>
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <tf2_ros/buffer.hpp>
+// For Kilted and older
+#else
+#include <tf2_ros/buffer.h>
+#endif
 
 #include <moveit/robot_state/robot_state.hpp>
 
