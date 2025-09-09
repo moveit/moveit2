@@ -47,7 +47,7 @@
 
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 
 #include <std_srvs/srv/empty.hpp>
 

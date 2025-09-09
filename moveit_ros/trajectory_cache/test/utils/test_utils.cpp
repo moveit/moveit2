@@ -25,7 +25,7 @@
 #include <moveit_msgs/msg/orientation_constraint.hpp>
 #include <moveit_msgs/msg/position_constraint.hpp>
 
-#include <tf2_ros/buffer.h>
+#include <tf2_ros/buffer.hpp>
 
 #include "../fixtures/warehouse_fixture.hpp"
 
