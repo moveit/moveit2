@@ -67,6 +67,8 @@
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
 
+#include <cmath>
+
 namespace moveit_rviz_plugin
 {
 
@@ -694,8 +696,7 @@ void MotionPlanningFrame::updateSceneMarkers(std::chrono::nanoseconds /*wall_dt*
 
 void MotionPlanningFrame::updateSceneMarkers(double wall_dt, double ros_dt)
 {
-  updateSceneMarkers(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(wall_dt)),
-                     std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(ros_dt)));
+  updateSceneMarkers(std::chrono::nanoseconds(std::lround(wall_dt)), std::chrono::nanoseconds(std::lround(ros_dt)));
 }
 
 void MotionPlanningFrame::updateExternalCommunication()

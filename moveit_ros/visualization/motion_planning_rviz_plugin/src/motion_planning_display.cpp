@@ -1373,8 +1373,7 @@ void MotionPlanningDisplay::updateInternal(std::chrono::nanoseconds wall_dt, std
 
 void MotionPlanningDisplay::updateInternal(double wall_dt, double ros_dt)
 {
-  updateInternal(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(wall_dt)),
-                 std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(ros_dt)));
+  updateInternal(std::chrono::nanoseconds(std::lround(wall_dt)), std::chrono::nanoseconds(std::lround(ros_dt)));
 }
 
 void MotionPlanningDisplay::load(const rviz_common::Config& config)

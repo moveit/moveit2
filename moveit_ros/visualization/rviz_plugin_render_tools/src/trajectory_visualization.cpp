@@ -58,6 +58,7 @@
 
 #include <rclcpp/qos.hpp>
 
+#include <cmath>
 #include <string>
 
 using namespace std::placeholders;
@@ -551,8 +552,7 @@ void TrajectoryVisualization::update(std::chrono::nanoseconds wall_dt, std::chro
 
 void TrajectoryVisualization::update(double wall_dt, double sim_dt)
 {
-  update(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(wall_dt)),
-         std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(sim_dt)));
+  update(std::chrono::nanoseconds(std::lround(wall_dt)), std::chrono::nanoseconds(std::lround(sim_dt)));
 }
 
 void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg)
