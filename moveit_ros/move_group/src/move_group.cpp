@@ -39,9 +39,11 @@
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 // For Rolling, L-turtle, and newer
-#if RCLCPP_VERSION_GTE(30, 0, 0)
+
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/transform_listener.hpp>
-// For Kilted and older
+// For Jazzy and older
 #else
 #include <tf2_ros/transform_listener.h>
 #endif
