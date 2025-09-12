@@ -75,9 +75,9 @@ public:
 
   // For Rolling, L-turtle, and newer
 #if RCLCPP_VERSION_GTE(30, 0, 0)
+  using rviz_common::Display::update;
+  // `using` handles update(float, float) deprecation warning and redirect
   void update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt) override;
-  [[deprecated("Use update(std::chrono::nanoseconds, std::chrono::nanoseconds) instead")]] void
-  update(float wall_dt, float ros_dt) override;
 // For Kilted and older
 #else
   void update(float wall_dt, float ros_dt) override;

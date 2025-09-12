@@ -680,12 +680,6 @@ void PlanningSceneDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono:
   if (planning_scene_monitor_)
     updateInternal(wall_dt, ros_dt);
 }
-
-void PlanningSceneDisplay::update(float wall_dt, float ros_dt)
-{
-  PlanningSceneDisplay::update(std::chrono::nanoseconds(std::lround(wall_dt)),
-                               std::chrono::nanoseconds(std::lround(ros_dt)));
-}
 // For Kilted and older
 #else
 void PlanningSceneDisplay::update(float wall_dt, float ros_dt)

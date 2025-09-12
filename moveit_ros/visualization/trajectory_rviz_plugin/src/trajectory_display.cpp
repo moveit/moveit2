@@ -136,12 +136,6 @@ void TrajectoryDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono::na
   Display::update(wall_dt, ros_dt);
   trajectory_visual_->update(wall_dt, ros_dt);
 }
-
-void TrajectoryDisplay::update(float wall_dt, float ros_dt)
-{
-  TrajectoryDisplay::update(std::chrono::nanoseconds(std::lround(wall_dt)),
-                            std::chrono::nanoseconds(std::lround(ros_dt)));
-}
 // For Kilted and older
 #else
 void TrajectoryDisplay::update(float wall_dt, float ros_dt)

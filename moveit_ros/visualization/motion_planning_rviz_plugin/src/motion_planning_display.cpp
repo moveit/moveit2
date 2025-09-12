@@ -1348,22 +1348,6 @@ void MotionPlanningDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono
 
   PlanningSceneDisplay::update(wall_dt, ros_dt);
 }
-
-void MotionPlanningDisplay::update(float wall_dt, float ros_dt)
-{
-  if (int_marker_display_)
-    int_marker_display_->update(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(wall_dt)),
-        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(ros_dt)));
-  if (frame_)
-    frame_->updateSceneMarkers(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(wall_dt)),
-        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(ros_dt)));
-
-  PlanningSceneDisplay::update(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(wall_dt)),
-      std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<float>(ros_dt)));
-}
 // For Kilted and older
 #else
 void MotionPlanningDisplay::update(float wall_dt, float ros_dt)

@@ -472,12 +472,6 @@ void RobotStateDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono::na
     robot_->update(robot_state_);
   }
 }
-
-void RobotStateDisplay::update(float wall_dt, float ros_dt)
-{
-  RobotStateDisplay::update(std::chrono::nanoseconds(std::lround(wall_dt)),
-                            std::chrono::nanoseconds(std::lround(ros_dt)));
-}
 // For Kilted and older
 #else
 void RobotStateDisplay::update(float wall_dt, float ros_dt)
