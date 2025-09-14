@@ -139,9 +139,9 @@ void Servo::setSmoothingPlugin()
   // Load the smoothing plugin
   try
   {
-    pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass> smoothing_loader(
-        "moveit_core", "online_signal_smoothing::SmoothingBaseClass");
-    smoother_ = smoothing_loader.createUniqueInstance(servo_params_.smoothing_filter_plugin_name);
+    smoother_loader_ = std::make_unique<pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass>>(
+      "moveit_core", "online_signal_smoothing::SmoothingBaseClass");
+    smoother_ = smoother_loader_->createUniqueInstance(servo_params_.smoothing_filter_plugin_name);
   }
   catch (pluginlib::PluginlibException& ex)
   {
