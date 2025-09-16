@@ -118,8 +118,11 @@ protected:
     limits.setJointLimits(joint_limits);
     limits.setCartesianLimits(cartesian_limit);
 
-    planning_context_ = std::unique_ptr<typename T::Type_>(
-        new typename T::Type_("TestPlanningContext", planning_group_, robot_model_, limits));
+    auto interpolation_param_listener =
+        std::make_shared<interpolation::ParamListener>(node_, "robot_description_planning.interpolation");
+
+    planning_context_ = std::unique_ptr<typename T::Type_>(new typename T::Type_(
+        "TestPlanningContext", planning_group_, robot_model_, limits, interpolation_param_listener));
 
     // Define and set the current scene
     auto scene = std::make_shared<planning_scene::PlanningScene>(robot_model_);
