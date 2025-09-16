@@ -91,7 +91,6 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
     {
       moveit::core::robotStateMsgToRobotState(req.robot_state, rs);
     }
-    const std::string& default_frame = context_->planning_scene_monitor_->getRobotModel()->getModelFrame();
 
     if (req.pose_stamped_vector.empty() || req.pose_stamped_vector.size() == 1)
     {
@@ -101,16 +100,22 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
                                 (req.ik_link_names.empty() ? "" : req.ik_link_names[0]) :
                                 req.ik_link_name;
 
-      if (performTransform(req_pose, default_frame))
+      bool frame_found = false;
+      const Eigen::Isometry3d& transform = rs.getFrameTransform(req_pose.header.frame_id, &frame_found);
+
+      if (frame_found)
       {
+        Eigen::Isometry3d pose;
+        tf2::fromMsg(req_pose.pose, pose);
+        pose = transform * pose;
         bool result_ik = false;
         if (ik_link.empty())
         {
-          result_ik = rs.setFromIK(jmg, req_pose.pose, req.timeout.sec, constraint);
+          result_ik = rs.setFromIK(jmg, pose, req.timeout.sec, constraint);
         }
         else
         {
-          result_ik = rs.setFromIK(jmg, req_pose.pose, ik_link, req.timeout.sec, constraint);
+          result_ik = rs.setFromIK(jmg, pose, ik_link, req.timeout.sec, constraint);
         }
 
         if (result_ik)
@@ -137,9 +142,12 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
         for (std::size_t k = 0; k < req.pose_stamped_vector.size(); ++k)
         {
           geometry_msgs::msg::PoseStamped msg = req.pose_stamped_vector[k];
-          if (performTransform(msg, default_frame))
+          bool frame_found = false;
+          const Eigen::Isometry3d& transform = rs.getFrameTransform(msg.header.frame_id, &frame_found);
+          if (frame_found)
           {
             tf2::fromMsg(msg.pose, req_poses[k]);
+            req_poses[k] = transform * req_poses[k];
           }
           else
           {
