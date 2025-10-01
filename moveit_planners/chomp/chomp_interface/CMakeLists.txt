@@ -22,13 +22,18 @@ add_library(moveit_chomp_interface SHARED src/chomp_interface.cpp
                                           src/chomp_planning_context.cpp)
 set_target_properties(moveit_chomp_interface
                       PROPERTIES VERSION "${moveit_planners_chomp_VERSION}")
-ament_target_dependencies(moveit_chomp_interface
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  moveit_chomp_interface
+  PUBLIC chomp_motion_planner::chomp_motion_planner
+         moveit_core::moveit_collision_detection pluginlib::pluginlib
+         rclcpp::rclcpp)
 
 add_library(moveit_chomp_planner_plugin SHARED src/chomp_plugin.cpp)
-ament_target_dependencies(moveit_chomp_planner_plugin
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_chomp_planner_plugin moveit_chomp_interface)
+target_link_libraries(
+  moveit_chomp_planner_plugin
+  PUBLIC moveit_chomp_interface chomp_motion_planner::chomp_motion_planner
+         moveit_core::moveit_collision_detection pluginlib::pluginlib
+         rclcpp::rclcpp)
 
 install(
   TARGETS moveit_chomp_interface moveit_chomp_planner_plugin

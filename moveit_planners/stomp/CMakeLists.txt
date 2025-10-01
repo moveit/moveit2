@@ -22,10 +22,15 @@ include_directories(include)
 # Planner Plugin
 add_library(stomp_moveit_plugin SHARED src/stomp_moveit_planner_plugin.cpp
                                        src/stomp_moveit_planning_context.cpp)
-ament_target_dependencies(stomp_moveit_plugin moveit_core std_msgs tf2_eigen
-                          visualization_msgs)
-target_link_libraries(stomp_moveit_plugin stomp::stomp stomp_moveit_parameters
-                      rsl::rsl)
+target_link_libraries(
+  stomp_moveit_plugin
+  PUBLIC stomp::stomp
+         stomp_moveit_parameters
+         rsl::rsl
+         ${std_msgs_TARGETS}
+         ${visualization_msgs_TARGETS}
+         moveit_core::moveit_collision_detection
+         tf2_eigen::tf2_eigen)
 
 pluginlib_export_plugin_description_file(moveit_core
                                          stomp_moveit_plugin_description.xml)

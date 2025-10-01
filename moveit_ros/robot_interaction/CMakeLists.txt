@@ -32,8 +32,13 @@ target_include_directories(
 set_target_properties(
   moveit_robot_interaction PROPERTIES VERSION
                                       "${moveit_ros_robot_interaction_VERSION}")
-ament_target_dependencies(moveit_robot_interaction
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  moveit_robot_interaction
+  PUBLIC interactive_markers::interactive_markers
+         moveit_core::moveit_collision_detection
+         moveit_ros_planning::kinematics_parameters
+         moveit_ros_planning::moveit_collision_plugin_loader
+         tf2_geometry_msgs::tf2_geometry_msgs)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

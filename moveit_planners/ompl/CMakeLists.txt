@@ -21,6 +21,7 @@ find_package(pluginlib REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(ompl REQUIRED)
+find_package(parameter_traits REQUIRED)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wno-overloaded-virtual)

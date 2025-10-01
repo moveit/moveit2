@@ -29,28 +29,25 @@ add_library(moveit_motion_planning_rviz_plugin_core SHARED
 set_target_properties(moveit_motion_planning_rviz_plugin_core
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(
-  moveit_motion_planning_rviz_plugin_core moveit_rviz_plugin_render_tools
-  moveit_planning_scene_rviz_plugin)
-ament_target_dependencies(
   moveit_motion_planning_rviz_plugin_core
-  moveit_ros_robot_interaction
-  moveit_ros_planning_interface
-  moveit_ros_warehouse
-  rviz2
-  rviz_ogre_vendor
-  Qt5
-  pluginlib)
+  PUBLIC moveit_rviz_plugin_render_tools
+         moveit_planning_scene_rviz_plugin
+         moveit_ros_planning_interface::moveit_common_planning_interface_objects
+         pluginlib::pluginlib
+         rviz_ogre_vendor::OgreMain
+         moveit_ros_warehouse::moveit_warehouse
+         moveit_ros_robot_interaction::moveit_robot_interaction
+         moveit_ros_move_group::moveit_move_group_capabilities_base)
 target_include_directories(moveit_motion_planning_rviz_plugin_core
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 add_library(moveit_motion_planning_rviz_plugin SHARED src/plugin_init.cpp)
 set_target_properties(moveit_motion_planning_rviz_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_motion_planning_rviz_plugin
-                      moveit_motion_planning_rviz_plugin_core)
-ament_target_dependencies(
-  moveit_motion_planning_rviz_plugin moveit_ros_robot_interaction
-  moveit_ros_warehouse pluginlib rviz_ogre_vendor)
+target_link_libraries(
+  moveit_motion_planning_rviz_plugin
+  PUBLIC moveit_motion_planning_rviz_plugin_core pluginlib::pluginlib
+         rviz_ogre_vendor::OgreMain)
 target_include_directories(moveit_motion_planning_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 

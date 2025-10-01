@@ -61,7 +61,8 @@ target_link_libraries(
           moveit_core::moveit_utils
           moveit_core::moveit_robot_model
           moveit_core::moveit_robot_state
-          moveit_py_utils)
+          moveit_py_utils
+          pybind11::pybind11)
 configure_build_install_location(core)
 
 pybind11_add_module(
