@@ -85,7 +85,14 @@ void publishSubframes(tf2_ros::TransformBroadcaster& broadcaster, const moveit::
 
 void TfPublisher::publishPlanningSceneFrames()
 {
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  tf2_ros::TransformBroadcaster broadcaster(tf2_ros::TransformBroadcaster::RequiredInterfaces{
+      context_->moveit_cpp_->getNode()->get_node_parameters_interface(),
+      context_->moveit_cpp_->getNode()->get_node_topics_interface() });
+#else
   tf2_ros::TransformBroadcaster broadcaster(context_->moveit_cpp_->getNode());
+#endif
   geometry_msgs::msg::TransformStamped transform;
   rclcpp::Rate rate(rate_);
 

@@ -158,8 +158,19 @@ void PointCloudOctomapUpdater::start()
       new message_filters::Subscriber<sensor_msgs::msg::PointCloud2>(node_, point_cloud_topic_, qos_profile, options);
   if (tf_listener_ && tf_buffer_ && !monitor_->getMapFrame().empty())
   {
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+    using MessageFilterPointCloud2 = tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>;
+
+    MessageFilterPointCloud2::RequiredInterfaces required_interfaces{ node_->get_node_logging_interface(),
+                                                                      node_->get_node_clock_interface() };
+
+    point_cloud_filter_ = new tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>(
+        *point_cloud_subscriber_, *tf_buffer_, monitor_->getMapFrame(), 5, std::move(required_interfaces));
+#else
     point_cloud_filter_ = new tf2_ros::MessageFilter<sensor_msgs::msg::PointCloud2>(
         *point_cloud_subscriber_, *tf_buffer_, monitor_->getMapFrame(), 5, node_);
+#endif
     point_cloud_filter_->registerCallback(
         [this](const sensor_msgs::msg::PointCloud2::ConstSharedPtr& cloud) { cloudMsgCallback(cloud); });
     RCLCPP_INFO(logger_, "Listening to '%s' using message filter with target frame '%s'", point_cloud_topic_.c_str(),
