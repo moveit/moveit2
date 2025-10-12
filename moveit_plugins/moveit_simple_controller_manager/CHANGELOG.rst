@@ -2,6 +2,11 @@
 Changelog for package moveit_simple_controller_manager
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+* Use "&&" instead of "and" (`#3510 <https://github.com/moveit/moveit2/issues/3510>`_)
+* Contributors: Silvio Traversaro
+
 2.14.0 (2025-06-13)
 -------------------
 
