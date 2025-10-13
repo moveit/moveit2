@@ -7,18 +7,18 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_trajectory_execution_manager
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
+target_link_libraries(
   moveit_trajectory_execution_manager
-  moveit_core
-  moveit_ros_occupancy_map_monitor
-  rclcpp
-  pluginlib
-  std_msgs
-  sensor_msgs
-  moveit_msgs
-  tf2_eigen)
-target_link_libraries(moveit_trajectory_execution_manager
-                      moveit_planning_scene_monitor)
+  PUBLIC moveit_planning_scene_monitor
+         ${moveit_msgs_TARGETS}
+         ${sensor_msgs_TARGETS}
+         ${std_msgs_TARGETS}
+         moveit_core::moveit_collision_detection
+         moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+         pluginlib::pluginlib
+         rclcpp::rclcpp
+         sensor_msgs::sensor_msgs_library
+         tf2_eigen::tf2_eigen)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(

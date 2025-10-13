@@ -27,6 +27,7 @@
   <depend>tf2_eigen</depend>
   <depend>tf2_ros</depend>
   <depend>libomp-dev</depend>
+  <depend>parameter_traits</depend>
   <depend version_gte="1.11.2">pluginlib</depend>
 
   <test_depend>moveit_resources_pr2_description</test_depend>

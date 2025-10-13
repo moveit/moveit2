@@ -33,9 +33,11 @@ target_include_directories(
   moveit_setup_app_plugins
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_app_plugins>)
-ament_target_dependencies(
-  moveit_setup_app_plugins ament_index_cpp moveit_ros_visualization
-  moveit_setup_framework pluginlib rclcpp)
+target_link_libraries(
+  moveit_setup_app_plugins
+  PUBLIC ament_index_cpp::ament_index_cpp
+         moveit_setup_framework::moveit_setup_framework pluginlib::pluginlib
+         rclcpp::rclcpp)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

@@ -5,8 +5,6 @@ find_package(ur_kinematics QUIET)
 add_library(moveit_cached_ik_kinematics_base SHARED src/ik_cache.cpp)
 set_target_properties(moveit_cached_ik_kinematics_base
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_cached_ik_kinematics_base PUBLIC rclcpp
-                          moveit_core moveit_msgs)
 
 if(trac_ik_kinematics_plugin_FOUND)
   include_directories(${trac_ik_kinematics_plugin_INCLUDE_DIRS})
@@ -20,19 +18,21 @@ generate_parameter_library(
 )
 
 target_link_libraries(
-  moveit_cached_ik_kinematics_base PUBLIC cached_ik_kinematics_parameters
-                                          kdl_kinematics_parameters)
+  moveit_cached_ik_kinematics_base
+  PUBLIC ${moveit_msgs_TARGETS} cached_ik_kinematics_parameters
+         kdl_kinematics_parameters moveit_core::moveit_collision_detection
+         rclcpp::rclcpp)
 
 add_library(moveit_cached_ik_kinematics_plugin SHARED
             src/cached_ik_kinematics_plugin.cpp)
 set_target_properties(moveit_cached_ik_kinematics_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_cached_ik_kinematics_plugin PUBLIC rclcpp
-                          moveit_core moveit_msgs rsl)
 target_link_libraries(
   moveit_cached_ik_kinematics_plugin
   PRIVATE cached_ik_kinematics_parameters moveit_kdl_kinematics_plugin
-          moveit_srv_kinematics_plugin moveit_cached_ik_kinematics_base)
+          moveit_srv_kinematics_plugin moveit_cached_ik_kinematics_base
+  PUBLIC ${moveit_msgs_TARGETS} moveit_core::moveit_collision_detection
+         rclcpp::rclcpp)
 if(trac_ik_kinematics_plugin_FOUND)
   target_link_libraries(moveit_cached_ik_kinematics_plugin
                         PRIVATE ${trac_ik_kinematics_plugin_LIBRARIES})
