@@ -150,16 +150,7 @@ void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& s
   std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));
 
   // set pilz cartesian limits for each item
-  if (req.max_cartesian_speed > 0.0 && req.cartesian_speed_limited_link != "")
-  {
-    max_cartesian_speed_ = req.max_cartesian_speed;
-    RCLCPP_INFO(getLogger(), "I get into hell with: %f", max_cartesian_speed_);
-  }
-  else
-  {
-    max_cartesian_speed_ = planner_limits_.getCartesianLimits().max_trans_vel;
-    RCLCPP_INFO(getLogger(), "I get into hell with: %f", max_cartesian_speed_);
-  }
+  setMaxCartesianSpeed(req);
   // create velocity profile
   std::unique_ptr<KDL::VelocityProfile> vp(
       cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));

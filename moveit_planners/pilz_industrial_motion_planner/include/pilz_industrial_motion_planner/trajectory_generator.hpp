@@ -139,6 +139,11 @@ protected:
   std::unique_ptr<KDL::VelocityProfile> cartesianTrapVelocityProfile(double max_velocity_scaling_factor,
                                                                      double max_acceleration_scaling_factor,
                                                                      const std::unique_ptr<KDL::Path>& path) const;
+  /**
+   * @brief Set the max cartesian speed from motion request
+   */
+
+  void setMaxCartesianSpeed(const moveit_msgs::msg::MotionPlanRequest& req);
 
 private:
   virtual void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const;

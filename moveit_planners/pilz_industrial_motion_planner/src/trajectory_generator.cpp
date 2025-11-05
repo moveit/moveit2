@@ -380,4 +380,18 @@ TrajectoryGenerator::MotionPlanInfo::MotionPlanInfo(const planning_scene::Planni
   }
 }
 
+void TrajectoryGenerator::setMaxCartesianSpeed(const moveit_msgs::msg::MotionPlanRequest& req)
+{
+  if (req.max_cartesian_speed > 0.0 && req.cartesian_speed_limited_link != "")
+  {
+    max_cartesian_speed_ = req.max_cartesian_speed;
+    RCLCPP_INFO(getLogger(), "received max_cartesian_speed: %f", max_cartesian_speed_);
+  }
+  else
+  {
+    max_cartesian_speed_ = planner_limits_.getCartesianLimits().max_trans_vel;
+    RCLCPP_INFO(getLogger(), "using default max_cartesian_speed: %f", max_cartesian_speed_);
+  }
+}
+
 }  // namespace pilz_industrial_motion_planner
