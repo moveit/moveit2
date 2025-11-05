@@ -121,7 +121,7 @@ int main(int argc, char** argv)
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
 
-  rclcpp::Rate rate(static_cast<int64_t>(delay) * 1000ms);
+  rclcpp::WallRate rate(static_cast<int64_t>(delay) * 1000ms);
 
   // publish the scene
   if (vm.count("scene"))
