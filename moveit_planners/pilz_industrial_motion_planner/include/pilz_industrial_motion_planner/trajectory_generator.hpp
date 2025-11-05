@@ -270,6 +270,7 @@ private:
 protected:
   const moveit::core::RobotModelConstPtr robot_model_;
   const pilz_industrial_motion_planner::LimitsContainer planner_limits_;
+  double max_cartesian_speed_;
   static constexpr double MIN_SCALING_FACTOR{ 0.0001 };
   static constexpr double MAX_SCALING_FACTOR{ 1. };
   static constexpr double VELOCITY_TOLERANCE{ 1e-8 };
