@@ -127,6 +127,15 @@ ament_target_dependencies(planning_context_loader_circ
 target_link_libraries(planning_context_loader_circ planning_context_loader_base
                       joint_limits_common trajectory_generation_common)
 
+add_library(
+  planning_context_loader_free SHARED
+  src/planning_context_loader_free.cpp src/trajectory_generator_free.cpp
+  src/velocity_profile_atrap.cpp)
+ament_target_dependencies(planning_context_loader_free
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(planning_context_loader_free planning_context_loader_base
+                      joint_limits_common trajectory_generation_common)
+
 add_library(sequence_capability SHARED src/move_group_sequence_action.cpp
                                        src/move_group_sequence_service.cpp)
 ament_target_dependencies(sequence_capability ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -153,6 +162,7 @@ install(
           planning_context_loader_ptp
           planning_context_loader_lin
           planning_context_loader_circ
+          planning_context_loader_free
           command_list_manager
           sequence_capability
           trajectory_generation_common

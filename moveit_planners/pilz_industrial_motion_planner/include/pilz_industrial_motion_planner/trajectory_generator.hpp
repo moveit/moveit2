@@ -122,6 +122,7 @@ protected:
     std::string link_name;
     Eigen::Isometry3d start_pose;
     Eigen::Isometry3d goal_pose;
+    std::vector<Eigen::Isometry3d> waypoints;
     std::map<std::string, double> start_joint_position;
     std::map<std::string, double> goal_joint_position;
     std::pair<std::string, Eigen::Vector3d> circ_path_point;
