@@ -345,12 +345,8 @@ void ServoNode::servoLoop()
   while (servo_node_start >
          convertClockType(planning_scene_monitor_->getLastUpdateTime(), servo_node_start.get_clock_type()))
   {
-    RCLCPP_INFO(node_->get_logger(), "Waiting for planning scene monitor to receive robot state update.");
-    rclcpp::sleep_for(std::chrono::seconds(1));
-  }
-  {
     RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
-    // 输出planning_scene_monitor_->getLastUpdateTime() 时间
+    // Output the time of planning_scene_monitor_->getLastUpdateTime()
     RCLCPP_INFO(node_->get_logger(), "Last planning scene update time: %f",
                 planning_scene_monitor_->getLastUpdateTime().seconds());
     // Output the current time
