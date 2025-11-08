@@ -186,7 +186,7 @@ void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& 
 std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Affine3d& start_pose,
                                                                 const std::vector<Eigen::Isometry3d>& waypoints) const
 {
-  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for LIN command.");
+  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for FREE command.");
 
   KDL::Frame kdl_start_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);
@@ -206,7 +206,7 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Aff
   KDL::Path_RoundedComposite* composite_path = new KDL::Path_RoundedComposite(0.002, eqradius, rot_interpo);
   RCLCPP_INFO_STREAM(getLogger(), "RoundedComposite with radius: " << 0.002);
   // make sure the start pose is the same as the first pose in waypoints with tolerance
-  if (dist > 4e-3)
+  if (dist > 1.0e-3)
   {
     composite_path->Add(kdl_start_pose);
   }
@@ -219,6 +219,16 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Aff
     composite_path->Add(kdl_waypoint);
   }
   return std::unique_ptr<KDL::Path>(composite_path);
+}
+
+void TrajectoryGeneratorFree::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const
+{
+  if (req.path_constraints.position_constraints.size() < 2)
+  {
+    std::ostringstream os;
+    os << "waypoints specified in path constraints is less than 2 for FREE motion.";
+    throw NoWaypointsSpecified(os.str());
+  }
 }
 
 }  // namespace pilz_industrial_motion_planner
