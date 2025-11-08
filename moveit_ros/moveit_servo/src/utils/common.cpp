@@ -197,6 +197,20 @@ composeTrajectoryMessage(const servo::Params& servo_params, const std::deque<Kin
     add_point(joint_trajectory, joint_cmd_rolling_window[i]);
   }
 
+  // If it is not empty, add a point with a speed of 0 to ensure that the robot can stop
+
+
+  if(!joint_cmd_rolling_window.empty()){
+    auto& last_state = joint_cmd_rolling_window.back();
+    KinematicState stop_state = last_state;
+    for(long i = 0; i < stop_state.velocities.size(); ++i)
+    {
+      stop_state.velocities[i] = 0.0;
+    }
+    stop_state.time_stamp += rclcpp::Duration(0, 100000); // add 0.1s to ensure stop
+    add_point(joint_trajectory, stop_state);
+  }
+
   return joint_trajectory;
 }
 
@@ -501,7 +515,19 @@ planning_scene_monitor::PlanningSceneMonitorPtr createPlanningSceneMonitor(const
   }
   else
   {
-    planning_scene_monitor->requestPlanningSceneState();
+    int cnt = 0;
+    while(!planning_scene_monitor->requestPlanningSceneState()){
+      RCLCPP_WARN_THROTTLE(
+          node->get_logger(), *node->get_clock(), 5000,
+          "Waiting for planning scene monitor to get the planning scene from the primary planning scene monitor...");
+      rclcpp::sleep_for(std::chrono::milliseconds(100));
+      cnt++;
+      if (cnt > 120) {
+        RCLCPP_ERROR(
+            node->get_logger(), "Failed to get planning scene from primary planning scene monitor after 12 seconds.");
+        break;
+      }
+    }
   }
 
   planning_scene_monitor->setPlanningScenePublishingFrequency(PLANNING_SCENE_PUBLISHING_FREQUENCY);

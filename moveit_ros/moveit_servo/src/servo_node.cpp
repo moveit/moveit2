@@ -331,6 +331,11 @@ void ServoNode::servoLoop()
          servo_node_start > planning_scene_monitor_->getLastUpdateTime())
   {
     RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
+    // 输出planning_scene_monitor_->getLastUpdateTime() 时间
+    RCLCPP_INFO(node_->get_logger(), "Last planning scene update time: %f",
+                planning_scene_monitor_->getLastUpdateTime().seconds());
+    // Output the current time
+    RCLCPP_INFO(node_->get_logger(), "Current time: %f", node_->now().seconds());
     rclcpp::sleep_for(std::chrono::seconds(1));
   }
   KinematicState current_state = servo_->getCurrentRobotState(true /* block for current robot state */);
