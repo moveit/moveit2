@@ -41,7 +41,7 @@
 #include <time.h>
 #include <moveit/robot_state/conversions.hpp>
 #include <kdl/path_line.hpp>
-#include <kdl/path_composite.hpp>
+#include <kdl/path_roundedcomposite.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
 // TODO: Remove conditional include when released to all active distros.
@@ -130,8 +130,10 @@ void TrajectoryGeneratorFree::extractMotionPlanInfo(const planning_scene::Planni
       Eigen::Isometry3d waypoint;
       tf2::fromMsg(pc.constraint_region.primitive_poses.front(), waypoint);
       waypoint = scene->getFrameTransform(frame_id) * waypoint;
+      RCLCPP_INFO_STREAM(getLogger(), "Added waypoint at position: " << waypoint.translation().transpose());
       info.waypoints.push_back(waypoint);
     }
+    info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
     frame_id = robot_model_->getModelFrame();
 
     // check goal pose ik before Cartesian motion plan starts
@@ -196,15 +198,17 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Aff
     tf2::transformEigenToKDL(waypoint, kdl_waypoint);
     kdl_waypoints.push_back(kdl_waypoint);
   }
+
+  RCLCPP_INFO_STREAM(getLogger(), "Transformed waypoints number: " << kdl_waypoints.size());
   double eqradius = max_cartesian_speed_ / planner_limits_.getCartesianLimits().max_rot_vel;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
-  KDL::Path_Composite* composite_path = new KDL::Path_Composite();
-  KDL::Frame previous_pose = kdl_start_pose;
-
+  KDL::Path_RoundedComposite* composite_path = new KDL::Path_RoundedComposite(0.0005, eqradius, rot_interpo);
+  // make sure the start pose is the same as the first pose in waypoints with tolerance
+  if ((kdl_start_pose.p - kdl_waypoints.front().p).Norm() > 1e-3)
+    composite_path->Add(kdl_start_pose);
   for (const auto& kdl_waypoint : kdl_waypoints)
   {
-    composite_path->Add(new KDL::Path_Line(previous_pose, kdl_waypoint, rot_interpo, eqradius, true));
-    previous_pose = kdl_waypoint;
+    composite_path->Add(kdl_waypoint);
   }
   return std::unique_ptr<KDL::Path>(composite_path);
 }
