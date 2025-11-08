@@ -156,11 +156,10 @@ void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& 
                                    const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
                                    double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
-  // create Cartesian path for free
-  std::unique_ptr<KDL::Path> path(setPathFree(plan_info.start_pose, plan_info.waypoints));
-
   // set pilz cartesian limits for each item
   setMaxCartesianSpeed(req);
+  // create Cartesian path for free
+  std::unique_ptr<KDL::Path> path(setPathFree(plan_info.start_pose, plan_info.waypoints));
   // create velocity profile
   std::unique_ptr<KDL::VelocityProfile> vp(
       cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
@@ -198,14 +197,23 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Aff
     tf2::transformEigenToKDL(waypoint, kdl_waypoint);
     kdl_waypoints.push_back(kdl_waypoint);
   }
+  double dist = (kdl_start_pose.p - kdl_waypoints.front().p).Norm();
+  RCLCPP_INFO(getLogger(), "distance: %f", dist);
 
   RCLCPP_INFO_STREAM(getLogger(), "Transformed waypoints number: " << kdl_waypoints.size());
   double eqradius = max_cartesian_speed_ / planner_limits_.getCartesianLimits().max_rot_vel;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
-  KDL::Path_RoundedComposite* composite_path = new KDL::Path_RoundedComposite(0.0005, eqradius, rot_interpo);
+  KDL::Path_RoundedComposite* composite_path = new KDL::Path_RoundedComposite(0.002, eqradius, rot_interpo);
+  RCLCPP_INFO_STREAM(getLogger(), "RoundedComposite with radius: " << 0.002);
   // make sure the start pose is the same as the first pose in waypoints with tolerance
-  if ((kdl_start_pose.p - kdl_waypoints.front().p).Norm() > 1e-3)
+  if (dist > 4e-3)
+  {
     composite_path->Add(kdl_start_pose);
+  }
+  else
+    RCLCPP_WARN_STREAM(getLogger(), "Close start point. start: " << kdl_start_pose.p
+                                                                 << "fisrt_waypoint: " << kdl_waypoints.front().p);
+
   for (const auto& kdl_waypoint : kdl_waypoints)
   {
     composite_path->Add(kdl_waypoint);
