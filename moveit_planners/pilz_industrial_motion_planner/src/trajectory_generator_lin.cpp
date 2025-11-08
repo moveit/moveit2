@@ -146,11 +146,10 @@ void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& s
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
                                   double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
-  // create Cartesian path for lin
-  std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));
-
   // set pilz cartesian limits for each item
   setMaxCartesianSpeed(req);
+  // create Cartesian path for lin
+  std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));
   // create velocity profile
   std::unique_ptr<KDL::VelocityProfile> vp(
       cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
