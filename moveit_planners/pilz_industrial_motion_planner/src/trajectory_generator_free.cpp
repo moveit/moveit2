@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_lin.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_free.hpp>
 
 #include <pilz_industrial_motion_planner/tip_frame_getter.hpp>
 
@@ -183,7 +183,7 @@ void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& 
 }
 
 std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Affine3d& start_pose,
-                                                                const std::vector<Eigen::Affine3d>& waypoints) const
+                                                                const std::vector<Eigen::Isometry3d>& waypoints) const
 {
   RCLCPP_DEBUG(getLogger(), "Set Cartesian path for LIN command.");
 

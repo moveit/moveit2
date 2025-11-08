@@ -41,8 +41,8 @@
 namespace pilz_industrial_motion_planner
 {
 /**
- * @brief Plugin that can generate instances of PlanningContextLIN.
- * Generates instances of PlanningContextLIN.
+ * @brief Plugin that can generate instances of PlanningContextFree.
+ * Generates instances of PlanningContextFree.
  */
 class PlanningContextLoaderFree : public PlanningContextLoader
 {

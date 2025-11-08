@@ -52,14 +52,14 @@ namespace pilz_industrial_motion_planner
 MOVEIT_CLASS_FORWARD(PlanningContext);
 
 /**
- * @brief PlanningContext for obtaining LIN trajectories
+ * @brief PlanningContext for obtaining Free trajectories
  */
-class PlanningContextLIN : public pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorLIN>
+class PlanningContextFree : public pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorFree>
 {
 public:
-  PlanningContextLIN(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
-                     const pilz_industrial_motion_planner::LimitsContainer& limits)
-    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorLIN>(name, group, model, limits)
+  PlanningContextFree(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
+                      const pilz_industrial_motion_planner::LimitsContainer& limits)
+    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorFree>(name, group, model, limits)
   {
   }
 };

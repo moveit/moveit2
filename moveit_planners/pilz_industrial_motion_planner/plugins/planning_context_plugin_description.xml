@@ -20,4 +20,11 @@
       <description>Loader for CIRC Context</description>
     </class>
   </library>
+  <library path="planning_context_loader_free">
+    <class name="pilz_industrial_motion_planner/PlanningContextLoaderFree"
+           type="pilz_industrial_motion_planner::PlanningContextLoaderFree"
+           base_class_type="pilz_industrial_motion_planner::PlanningContextLoader">
+      <description>Loader for Free Context</description>
+    </class>
+  </library>
 </class_libraries>

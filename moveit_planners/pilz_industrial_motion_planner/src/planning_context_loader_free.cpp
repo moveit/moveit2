@@ -32,10 +32,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/planning_context_loader_lin.hpp>
+#include <pilz_industrial_motion_planner/planning_context_loader_free.hpp>
 #include <moveit/planning_scene/planning_scene.hpp>
 #include <pilz_industrial_motion_planner/planning_context_base.hpp>
-#include <pilz_industrial_motion_planner/planning_context_lin.hpp>
+#include <pilz_industrial_motion_planner/planning_context_free.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
@@ -50,7 +50,7 @@ rclcpp::Logger getLogger()
 
 pilz_industrial_motion_planner::PlanningContextLoaderFree::PlanningContextLoaderFree()
 {
-  alg_ = "Free";
+  alg_ = "FREE";
 }
 
 pilz_industrial_motion_planner::PlanningContextLoaderFree::~PlanningContextLoaderFree()
@@ -80,5 +80,5 @@ bool pilz_industrial_motion_planner::PlanningContextLoaderFree::loadContext(
   }
 }
 
-PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderLIN,
+PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderFree,
                        pilz_industrial_motion_planner::PlanningContextLoader)
