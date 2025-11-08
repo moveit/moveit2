@@ -404,9 +404,10 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
   }
 
   // callbacks, if needed
-  for (JointStateUpdateCallback& update_callback : update_callbacks_)
-    update_callback(joint_state);
-
+  if (update){
+    for (JointStateUpdateCallback& update_callback : update_callbacks_)
+      update_callback(joint_state);
+  }
   // notify waitForCurrentState() *after* potential update callbacks
   state_update_condition_.notify_all();
 }
