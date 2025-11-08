@@ -202,9 +202,9 @@ void TrajectoryGeneratorCIRC::plan(const planning_scene::PlanningSceneConstPtr& 
                                    const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
                                    double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
-  std::unique_ptr<KDL::Path> cart_path(setPathCIRC(plan_info));
   // set pilz cartesian limits for each item
   setMaxCartesianSpeed(req);
+  std::unique_ptr<KDL::Path> cart_path(setPathCIRC(plan_info));
   // create velocity profile
   std::unique_ptr<KDL::VelocityProfile> vel_profile(
       cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, cart_path));
