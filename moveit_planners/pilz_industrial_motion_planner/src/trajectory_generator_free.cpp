@@ -210,19 +210,36 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Aff
   double blend_radius = computeBlendRadius(kdl_waypoints, smoothness_level);
   RCLCPP_INFO(getLogger(), "Computed blend radius: %f", blend_radius);
   KDL::Path_RoundedComposite* composite_path = new KDL::Path_RoundedComposite(blend_radius, eqradius, rot_interpo);
-  // make sure the start pose is the same as the first pose in waypoints with tolerance
-  if (dist > 1.0e-3)
-  {
-    composite_path->Add(kdl_start_pose);
-  }
-  else
-    RCLCPP_WARN_STREAM(getLogger(), "Close start point. start: " << kdl_start_pose.p
-                                                                 << "fisrt_waypoint: " << kdl_waypoints.front().p);
 
-  for (const auto& kdl_waypoint : kdl_waypoints)
+  composite_path->Add(kdl_start_pose);
+  // index for the last add point
+  size_t last_added_point_indx = -1;  // -1 for the start_pose
+
+  // to get the last added point in the rounded composite path
+  auto last_point = [&]() {
+    return last_added_point_indx != -1 ? kdl_waypoints[last_added_point_indx].p : kdl_start_pose.p;
+  };
+  // add points and skip the points which are too close to each other
+  for (size_t i = 0; i < kdl_waypoints.size(); ++i)
   {
-    composite_path->Add(kdl_waypoint);
+    dist = (last_point() - kdl_waypoints[i].p).Norm();
+    RCLCPP_INFO(getLogger(), "the last point (x,y,z): (%f, %f, %f)", last_point().x(), last_point().y(),
+                last_point().z());
+    if (dist > 1e-4)
+    {
+      composite_path->Add(kdl_waypoints[i]);
+      ++last_added_point_indx;
+    }
+    else
+      RCLCPP_WARN_STREAM(getLogger(), "Skip close waypoint " << i << " at position: " << kdl_waypoints[i].p);
   }
+  // ensure the last waypoint is added
+  // dist = (last_point() - kdl_waypoints.back().p).Norm();
+  // if (dist > 1.0e-6)
+  // {
+  //   composite_path->Add(kdl_waypoints.back());
+  // }
+  composite_path->Finish();
   return std::unique_ptr<KDL::Path>(composite_path);
 }
 
