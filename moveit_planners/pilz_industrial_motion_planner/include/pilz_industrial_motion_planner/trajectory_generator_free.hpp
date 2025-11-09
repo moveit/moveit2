@@ -71,6 +71,11 @@ public:
 
 private:
   void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const override;
+  /**
+   * @brief set the max possible blend radius
+   *  for rounded composite path with smoothness scaler
+   */
+  double computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness_) const;
 
   void extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
                              const planning_interface::MotionPlanRequest& req, MotionPlanInfo& info) const final;
@@ -84,7 +89,8 @@ private:
    * @return a unique pointer of the path object. null_ptr in case of an error.
    */
   std::unique_ptr<KDL::Path> setPathFree(const Eigen::Affine3d& start_pose,
-                                         const std::vector<Eigen::Isometry3d>& waypoints) const;
+                                         const std::vector<Eigen::Isometry3d>& waypoints,
+                                         double smoothness_level) const;
 };
 
 }  // namespace pilz_industrial_motion_planner

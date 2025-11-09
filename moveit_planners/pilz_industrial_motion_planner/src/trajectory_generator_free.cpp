@@ -159,7 +159,7 @@ void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& 
   // set pilz cartesian limits for each item
   setMaxCartesianSpeed(req);
   // create Cartesian path for free
-  std::unique_ptr<KDL::Path> path(setPathFree(plan_info.start_pose, plan_info.waypoints));
+  std::unique_ptr<KDL::Path> path(setPathFree(plan_info.start_pose, plan_info.waypoints, req.smoothness_level));
   // create velocity profile
   std::unique_ptr<KDL::VelocityProfile> vp(
       cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
@@ -184,12 +184,14 @@ void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& 
 }
 
 std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Affine3d& start_pose,
-                                                                const std::vector<Eigen::Isometry3d>& waypoints) const
+                                                                const std::vector<Eigen::Isometry3d>& waypoints,
+                                                                double smoothness_level) const
 {
   RCLCPP_DEBUG(getLogger(), "Set Cartesian path for FREE command.");
 
   KDL::Frame kdl_start_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);
+  // transform waypoints to KDL frames
   std::vector<KDL::Frame> kdl_waypoints;
   for (const auto& waypoint : waypoints)
   {
@@ -197,14 +199,17 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Aff
     tf2::transformEigenToKDL(waypoint, kdl_waypoint);
     kdl_waypoints.push_back(kdl_waypoint);
   }
+  // distance between start pose and first waypoint
   double dist = (kdl_start_pose.p - kdl_waypoints.front().p).Norm();
   RCLCPP_INFO(getLogger(), "distance: %f", dist);
 
   RCLCPP_INFO_STREAM(getLogger(), "Transformed waypoints number: " << kdl_waypoints.size());
   double eqradius = max_cartesian_speed_ / planner_limits_.getCartesianLimits().max_rot_vel;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
-  KDL::Path_RoundedComposite* composite_path = new KDL::Path_RoundedComposite(0.002, eqradius, rot_interpo);
-  RCLCPP_INFO_STREAM(getLogger(), "RoundedComposite with radius: " << 0.002);
+  // get the largest possible blend radius based on waypoints and smoothness level
+  double blend_radius = computeBlendRadius(kdl_waypoints, smoothness_level);
+  RCLCPP_INFO(getLogger(), "Computed blend radius: %f", blend_radius);
+  KDL::Path_RoundedComposite* composite_path = new KDL::Path_RoundedComposite(blend_radius, eqradius, rot_interpo);
   // make sure the start pose is the same as the first pose in waypoints with tolerance
   if (dist > 1.0e-3)
   {
@@ -231,4 +236,53 @@ void TrajectoryGeneratorFree::cmdSpecificRequestValidation(const planning_interf
   }
 }
 
+double TrajectoryGeneratorFree::computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness) const
+{
+  double max_allowed_radius = std::numeric_limits<double>::infinity();
+
+  auto pose_distance = [](const KDL::Frame& p1, const KDL::Frame& p2) { return (p1.p - p2.p).Norm(); };
+
+  // to calculate the angle between two segments
+  auto segment_angle = [](const KDL::Frame& p1, const KDL::Frame& p2, const KDL::Frame& p3) {
+    KDL::Vector v1 = p2.p - p1.p;
+    KDL::Vector v2 = p2.p - p3.p;
+
+    double norm_product = v1.Norm() * v2.Norm();
+    if (norm_product < 0.25e-6)
+      return 0.0;  // avoid division by zero
+
+    double cos_theta = KDL::dot(v1, v2) / norm_product;
+    cos_theta = std::clamp(cos_theta, -1.0, 1.0);
+
+    return std::acos(cos_theta);
+  };
+
+  for (size_t i = 1; i + 1 < waypoints_.size(); ++i)
+  {
+    double dist1 = pose_distance(waypoints_[i], waypoints_[i - 1]);
+    double dist2 = pose_distance(waypoints_[i + 1], waypoints_[i]);
+
+    if (dist1 < 1e-4 || dist2 < 1e-4)
+    {
+      RCLCPP_WARN(getLogger(), "Waypoint %zu is too close to neighbors (%.6f, %.6f).", i, dist1, dist2);
+      continue;
+    }
+
+    // The maximum feasible radius for this junction
+    double local_max_radius = std::tan(segment_angle(waypoints_[i - 1], waypoints_[i], waypoints_[i + 1]) / 2.0) *
+                              std::min(dist1 / 2.0, dist2 / 2.0);
+
+    // Keep track of the tightest constraint
+    // due to roundedcomposite don't support changing radius
+    if (local_max_radius < max_allowed_radius)
+      max_allowed_radius = local_max_radius;
+  }
+
+  // Apply the smoothness scaling factor
+  double max_radius = max_allowed_radius * std::clamp(smoothness, 0.01, 0.99);
+
+  RCLCPP_DEBUG(getLogger(), "Validated smoothness scaling %.2f → blend radius %.6f", smoothness, max_radius);
+
+  return max_radius;
+}
 }  // namespace pilz_industrial_motion_planner
