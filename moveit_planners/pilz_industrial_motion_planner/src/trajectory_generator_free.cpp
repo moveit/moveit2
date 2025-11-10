@@ -133,7 +133,18 @@ void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& 
   // set pilz cartesian limits for each item
   setMaxCartesianSpeed(req);
   // create Cartesian FREE path
-  std::unique_ptr<KDL::Path> path(setPathFree(plan_info.start_pose, plan_info.waypoints, req.smoothness_level));
+  std::unique_ptr<KDL::Path> path;
+  try
+  {
+    path = setPathFree(plan_info.start_pose, plan_info.waypoints, req.smoothness_level);
+  }
+  catch (const KDL::Error_MotionPlanning& e)
+  {
+    RCLCPP_ERROR(getLogger(), "Motion planning error: %s", e.Description());
+    std::ostringstream os;
+    os << "waypoints specified in path constraints have three consicutive colinear points";
+    throw ConsicutiveColinearWaypoints(os.str());
+  }
   // create velocity profile
   std::unique_ptr<KDL::VelocityProfile> vp(
       cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));

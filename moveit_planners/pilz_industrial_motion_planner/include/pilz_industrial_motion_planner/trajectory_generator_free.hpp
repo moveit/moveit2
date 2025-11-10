@@ -51,6 +51,8 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinTrajectoryConversionFailure, moveit_msgs::
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(JointNumberMismatch, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinInverseForGoalIncalculable, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoWaypointsSpecified, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(ConsicutiveColinearWaypoints,
+                                   moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
 /**
  * @brief This class implements a free trajectory generator in Cartesian

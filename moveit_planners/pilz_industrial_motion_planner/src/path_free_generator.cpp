@@ -94,7 +94,7 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
   {
     double dist1 = pose_distance(waypoints_[i], waypoints_[i - 1]);
     double dist2 = pose_distance(waypoints_[i + 1], waypoints_[i]);
-
+    checkConsecutiveColinearWaypoints(waypoints_[i - 1], waypoints_[i], waypoints_[i + 1]);
     if (dist1 < MAX_SEGMENT_LENGTH || dist2 < MAX_SEGMENT_LENGTH)
     {
       continue;
@@ -114,6 +114,18 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
   double max_radius = max_allowed_radius * std::clamp(smoothness, MIN_SMOOTHNESS, MAX_SMOOTHNESS);
 
   return max_radius;
+}
+void PathFreeGenerator::checkConsecutiveColinearWaypoints(const KDL::Frame& p1, const KDL::Frame& p2,
+                                                          const KDL::Frame& p3)
+{
+  KDL::Vector v1 = p2.p - p1.p;
+  KDL::Vector v2 = p3.p - p2.p;
+
+  KDL::Vector cross_product = v1 * v2;
+  if (cross_product.Norm() < MAX_COLINEAR_NORM)
+  {
+    throw ErrorMotionPlanningColinearConsicutiveWaypoints();
+  }
 }
 
 }  // namespace pilz_industrial_motion_planner

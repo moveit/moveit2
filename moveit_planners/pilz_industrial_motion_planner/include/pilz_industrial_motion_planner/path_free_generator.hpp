@@ -68,6 +68,7 @@ public:
    */
 
   static double computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness);
+  static void checkConsecutiveColinearWaypoints(const KDL::Frame& p1, const KDL::Frame& p2, const KDL::Frame& p3);
 
 private:
   PathFreeGenerator(){};  // no instantiation of this helper class!
@@ -75,6 +76,24 @@ private:
   static constexpr double MAX_SEGMENT_LENGTH{ 0.2e-3 };
   static constexpr double MIN_SMOOTHNESS{ 0.01 };
   static constexpr double MAX_SMOOTHNESS{ 0.99 };
+  static constexpr double MAX_COLINEAR_NORM{ 1e-9 };
+};
+
+class ErrorMotionPlanningColinearConsicutiveWaypoints : public KDL::Error_MotionPlanning
+{
+public:
+  const char* Description() const override
+  {
+    return "Three collinear consecutive waypoints."
+           " A Free Path cannot be created.";
+  }
+  int GetType() const override
+  {
+    return ERROR_CODE_COLINEAR_CONSECUTIVE_WAYPOINTS;
+  }  // LCOV_EXCL_LINE
+
+private:
+  static constexpr int ERROR_CODE_COLINEAR_CONSECUTIVE_WAYPOINTS{ 3104 };
 };
 
 }  // namespace pilz_industrial_motion_planner
