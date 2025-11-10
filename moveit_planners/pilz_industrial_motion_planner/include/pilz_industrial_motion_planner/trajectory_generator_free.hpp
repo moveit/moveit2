@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2025 Aiman Haidar
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -52,7 +53,7 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LinInverseForGoalIncalculable, moveit_msgs::m
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoWaypointsSpecified, moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
 /**
- * @brief This class implements a linear trajectory generator in Cartesian
+ * @brief This class implements a free trajectory generator in Cartesian
  * space.
  * The Cartesian trajetory are based on trapezoid velocity profile.
  */
@@ -80,7 +81,10 @@ private:
             trajectory_msgs::msg::JointTrajectory& joint_trajectory) override;
 
   /**
-   * @brief construct a KDL::Path object for a Cartesian straight line
+   * @brief construct a KDL::Path object for a Cartesian free path
+   * @param start_pose: start pose of the path
+   * @param waypoints: waypoints defining the path
+   * @param smoothness_level: smoothness level for blending the waypoints
    * @return a unique pointer of the path object. null_ptr in case of an error.
    */
   std::unique_ptr<KDL::Path> setPathFree(const Eigen::Affine3d& start_pose,

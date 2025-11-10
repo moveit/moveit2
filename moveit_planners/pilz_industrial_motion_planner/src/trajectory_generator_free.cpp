@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2025 Aiman Haidar
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -41,7 +42,6 @@
 #include <sstream>
 #include <time.h>
 #include <moveit/robot_state/conversions.hpp>
-#include <kdl/path_line.hpp>
 #include <kdl/path_roundedcomposite.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
@@ -64,7 +64,7 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.lin");
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.free");
 }
 }  // namespace
 TrajectoryGeneratorFree::TrajectoryGeneratorFree(const moveit::core::RobotModelConstPtr& robot_model,
@@ -84,67 +84,41 @@ void TrajectoryGeneratorFree::extractMotionPlanInfo(const planning_scene::Planni
   info.group_name = req.group_name;
   moveit::core::RobotState robot_state = scene->getCurrentState();
 
-  // goal given in joint space
-  if (!req.goal_constraints.front().joint_constraints.empty())
+  std::string frame_id;
+
+  info.link_name = req.goal_constraints.front().position_constraints.front().link_name;
+  if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
+      req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
   {
-    info.link_name = getSolverTipFrame(robot_model_->getJointModelGroup(req.group_name));
-
-    if (req.goal_constraints.front().joint_constraints.size() !=
-        robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size())
-    {
-      std::ostringstream os;
-      os << "Number of joints in goal does not match number of joints of group "
-            "(Number joints goal: "
-         << req.goal_constraints.front().joint_constraints.size() << " | Number of joints of group: "
-         << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size() << ')';
-      throw JointNumberMismatch(os.str());
-    }
-
-    for (const auto& joint_item : req.goal_constraints.front().joint_constraints)
-    {
-      info.goal_joint_position[joint_item.joint_name] = joint_item.position;
-    }
-
-    computeLinkFK(robot_state, info.link_name, info.goal_joint_position, info.goal_pose);
+    RCLCPP_WARN(getLogger(), "Frame id is not set in position/orientation constraints of "
+                             "goal. Use model frame as default");
+    frame_id = robot_model_->getModelFrame();
   }
-  // goal given in Cartesian space
   else
   {
-    std::string frame_id;
+    frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
+  }
 
-    info.link_name = req.goal_constraints.front().position_constraints.front().link_name;
-    if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
-        req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
-    {
-      RCLCPP_WARN(getLogger(), "Frame id is not set in position/orientation constraints of "
-                               "goal. Use model frame as default");
-      frame_id = robot_model_->getModelFrame();
-    }
-    else
-    {
-      frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
-    }
+  // Add the path waypoints
+  for (const auto& pc : req.path_constraints.position_constraints)
+  {
+    Eigen::Isometry3d waypoint;
+    tf2::fromMsg(pc.constraint_region.primitive_poses.front(), waypoint);
+    waypoint = scene->getFrameTransform(frame_id) * waypoint;
+    info.waypoints.push_back(waypoint);
+  }
+  // goal constraint is just the final pose
+  info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
+  frame_id = robot_model_->getModelFrame();
 
-    // goal pose with optional offset wrt. the planning frame
-    for (const auto& pc : req.path_constraints.position_constraints)
-    {
-      Eigen::Isometry3d waypoint;
-      tf2::fromMsg(pc.constraint_region.primitive_poses.front(), waypoint);
-      waypoint = scene->getFrameTransform(frame_id) * waypoint;
-      info.waypoints.push_back(waypoint);
-    }
-    info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
-    frame_id = robot_model_->getModelFrame();
-
-    // check goal pose ik before Cartesian motion plan starts
-    std::map<std::string, double> ik_solution;
-    if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
-                       ik_solution))
-    {
-      std::ostringstream os;
-      os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
-      throw LinInverseForGoalIncalculable(os.str());
-    }
+  // check goal pose ik before Cartesian motion plan starts
+  std::map<std::string, double> ik_solution;
+  if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
+                     ik_solution))
+  {
+    std::ostringstream os;
+    os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
+    throw LinInverseForGoalIncalculable(os.str());
   }
 
   // Ignored return value because at this point the function should always

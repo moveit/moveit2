@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2025 Aiman Haidar
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -48,6 +49,8 @@ std::unique_ptr<KDL::Path> PathFreeGenerator::freeFromWaypoints(const KDL::Frame
   // index for the last add point
   size_t last_added_point_indx = -1;  // -1 for the start_pose
 
+  // the following is to remove very close waypoints
+  // to avoid issues in KDL::Path_RoundedComposite like throwing Not_Fesible exceptions
   // to get the last added point in the rounded composite path
   auto last_point = [&]() { return last_added_point_indx != -1 ? waypoints[last_added_point_indx].p : start_pose.p; };
   // distance between start pose and first waypoint
@@ -72,7 +75,7 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
 
   auto pose_distance = [](const KDL::Frame& p1, const KDL::Frame& p2) { return (p1.p - p2.p).Norm(); };
 
-  // to calculate the angle between two segments
+  // to calculate the angle between the two segments of p2
   auto segment_angle = [](const KDL::Frame& p1, const KDL::Frame& p2, const KDL::Frame& p3) {
     KDL::Vector v1 = p2.p - p1.p;
     KDL::Vector v2 = p2.p - p3.p;
@@ -101,8 +104,8 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
     double local_max_radius = std::tan(segment_angle(waypoints_[i - 1], waypoints_[i], waypoints_[i + 1]) / 2.0) *
                               std::min(dist1 / 2.0, dist2 / 2.0);
 
-    // Keep track of the tightest constraint
-    // due to roundedcomposite don't support changing radius
+    // track the tightest constraint
+    // due to KDL::Path_RoundedComposite don't support changing radius
     if (local_max_radius < max_allowed_radius)
       max_allowed_radius = local_max_radius;
   }

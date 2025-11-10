@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2025 Aiman Haidar
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -61,6 +62,9 @@ public:
 
   /**
    * @brief compute the maximum rounding radius from KDL::Path_RoundedComosite
+   * @param waypoints_: waypoints defining the path
+   * @param smoothness: smoothness level [0..1] scaling the maximum blend radius
+   * @return maximum blend radius
    */
 
   static double computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness);
@@ -74,20 +78,3 @@ private:
 };
 
 }  // namespace pilz_industrial_motion_planner
-
-// class ErrorMotionPlanningCenterPointDifferentRadius : public KDL::Error_MotionPlanning
-// {
-// public:
-//   const char* Description() const override
-//   {
-//     return "Distances between start-center and goal-center are different."
-//            " A free cannot be created.";
-//   }
-//   int GetType() const override
-//   {
-//     return ERROR_CODE_CENTER_POINT_DIFFERENT_RADIUS;
-//   }  // LCOV_EXCL_LINE
-
-// private:
-//   static constexpr int ERROR_CODE_CENTER_POINT_DIFFERENT_RADIUS{ 3006 };
-// };
