@@ -130,7 +130,7 @@ target_link_libraries(planning_context_loader_circ planning_context_loader_base
 add_library(
   planning_context_loader_free SHARED
   src/planning_context_loader_free.cpp src/trajectory_generator_free.cpp
-  src/velocity_profile_atrap.cpp)
+  src/velocity_profile_atrap.cpp src/path_free_generator.cpp)
 ament_target_dependencies(planning_context_loader_free
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(planning_context_loader_free planning_context_loader_base

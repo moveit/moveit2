@@ -71,11 +71,6 @@ public:
 
 private:
   void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const override;
-  /**
-   * @brief set the max possible blend radius
-   *  for rounded composite path with smoothness scaler
-   */
-  double computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness_) const;
 
   void extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
                              const planning_interface::MotionPlanRequest& req, MotionPlanInfo& info) const final;

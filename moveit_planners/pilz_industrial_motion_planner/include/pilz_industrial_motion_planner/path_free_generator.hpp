@@ -34,35 +34,60 @@
 
 #pragma once
 
-#include <pilz_industrial_motion_planner/planning_context_loader.hpp>
+#include <kdl/path.hpp>
+#include <kdl/path_roundedcomposite.hpp>
+#include <kdl/rotational_interpolation_sa.hpp>
+#include <kdl/utilities/error.h>
 
-#include <moveit/planning_interface/planning_interface.hpp>
+#include <memory>
 
 namespace pilz_industrial_motion_planner
 {
 /**
- * @brief Plugin that can generate instances of PlanningContextFree.
- * Generates instances of PlanningContextFree.
+ * @brief Generator class for KDL::Path_RoundedComposite from different free path
+ * representations
  */
-class PlanningContextLoaderFree : public PlanningContextLoader
+class PathFreeGenerator
 {
 public:
-  PlanningContextLoaderFree();
-  ~PlanningContextLoaderFree() override;
+  /**
+   * @brief set the path free from waypoints
+   *
+   */
+  static std::unique_ptr<KDL::Path> freeFromWaypoints(const KDL::Frame& start_pose,
+                                                      const std::vector<KDL::Frame>& waypoints,
+                                                      KDL::RotationalInterpolation* rot_interpo, double smoothness,
+                                                      double eqradius);
 
   /**
-   * @brief return a instance of
-   * pilz_industrial_motion_planner::PlanningContextFree
-   * @param planning_context returned context
-   * @param name
-   * @param group
-   * @return true on success, false otherwise
+   * @brief compute the maximum rounding radius from KDL::Path_RoundedComosite
    */
-  bool loadContext(planning_interface::PlanningContextPtr& planning_context, const std::string& name,
-                   const std::string& group) const override;
+
+  static double computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness);
+
+private:
+  PathFreeGenerator(){};  // no instantiation of this helper class!
+
+  static constexpr double MAX_SEGMENT_LENGTH{ 0.2e-3 };
+  static constexpr double MIN_SMOOTHNESS{ 0.01 };
+  static constexpr double MAX_SMOOTHNESS{ 0.99 };
 };
 
-typedef std::shared_ptr<PlanningContextLoaderFree> PlanningContextLoaderFreePtr;
-typedef std::shared_ptr<const PlanningContextLoaderFree> PlanningContextLoaderFreeConstPtr;
-
 }  // namespace pilz_industrial_motion_planner
+
+// class ErrorMotionPlanningCenterPointDifferentRadius : public KDL::Error_MotionPlanning
+// {
+// public:
+//   const char* Description() const override
+//   {
+//     return "Distances between start-center and goal-center are different."
+//            " A free cannot be created.";
+//   }
+//   int GetType() const override
+//   {
+//     return ERROR_CODE_CENTER_POINT_DIFFERENT_RADIUS;
+//   }  // LCOV_EXCL_LINE
+
+// private:
+//   static constexpr int ERROR_CODE_CENTER_POINT_DIFFERENT_RADIUS{ 3006 };
+// };
