@@ -2,6 +2,7 @@
  * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2025 Aiman Haidar
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,7 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_lin.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_free.hpp>
+#include <pilz_industrial_motion_planner/path_free_generator.hpp>
 
 #include <pilz_industrial_motion_planner/tip_frame_getter.hpp>
 
@@ -40,7 +42,7 @@
 #include <sstream>
 #include <time.h>
 #include <moveit/robot_state/conversions.hpp>
-#include <kdl/path_line.hpp>
+#include <kdl/path_roundedcomposite.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
 // TODO: Remove conditional include when released to all active distros.
@@ -62,79 +64,61 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.lin");
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.free");
 }
 }  // namespace
-TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
-                                               const LimitsContainer& planner_limits, const std::string& /*group_name*/)
+TrajectoryGeneratorFree::TrajectoryGeneratorFree(const moveit::core::RobotModelConstPtr& robot_model,
+                                                 const LimitsContainer& planner_limits,
+                                                 const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
   planner_limits_.printCartesianLimits();
 }
 
-void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
-                                                   const planning_interface::MotionPlanRequest& req,
-                                                   TrajectoryGenerator::MotionPlanInfo& info) const
+void TrajectoryGeneratorFree::extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
+                                                    const planning_interface::MotionPlanRequest& req,
+                                                    TrajectoryGenerator::MotionPlanInfo& info) const
 {
   RCLCPP_DEBUG(getLogger(), "Extract necessary information from motion plan request.");
 
   info.group_name = req.group_name;
   moveit::core::RobotState robot_state = scene->getCurrentState();
 
-  // goal given in joint space
-  if (!req.goal_constraints.front().joint_constraints.empty())
+  std::string frame_id;
+
+  info.link_name = req.goal_constraints.front().position_constraints.front().link_name;
+  if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
+      req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
   {
-    info.link_name = getSolverTipFrame(robot_model_->getJointModelGroup(req.group_name));
-
-    if (req.goal_constraints.front().joint_constraints.size() !=
-        robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size())
-    {
-      std::ostringstream os;
-      os << "Number of joints in goal does not match number of joints of group "
-            "(Number joints goal: "
-         << req.goal_constraints.front().joint_constraints.size() << " | Number of joints of group: "
-         << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size() << ')';
-      throw JointNumberMismatch(os.str());
-    }
-
-    for (const auto& joint_item : req.goal_constraints.front().joint_constraints)
-    {
-      info.goal_joint_position[joint_item.joint_name] = joint_item.position;
-    }
-
-    computeLinkFK(robot_state, info.link_name, info.goal_joint_position, info.goal_pose);
+    RCLCPP_WARN(getLogger(), "Frame id is not set in position/orientation constraints of "
+                             "goal. Use model frame as default");
+    frame_id = robot_model_->getModelFrame();
   }
-  // goal given in Cartesian space
   else
   {
-    std::string frame_id;
+    frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
+  }
 
-    info.link_name = req.goal_constraints.front().position_constraints.front().link_name;
-    if (req.goal_constraints.front().position_constraints.front().header.frame_id.empty() ||
-        req.goal_constraints.front().orientation_constraints.front().header.frame_id.empty())
-    {
-      RCLCPP_WARN(getLogger(), "Frame id is not set in position/orientation constraints of "
-                               "goal. Use model frame as default");
-      frame_id = robot_model_->getModelFrame();
-    }
-    else
-    {
-      frame_id = req.goal_constraints.front().position_constraints.front().header.frame_id;
-    }
+  // Add the path waypoints
+  for (const auto& pc : req.path_constraints.position_constraints)
+  {
+    Eigen::Isometry3d waypoint;
+    tf2::fromMsg(pc.constraint_region.primitive_poses.front(), waypoint);
+    waypoint = scene->getFrameTransform(frame_id) * waypoint;
+    info.waypoints.push_back(waypoint);
+  }
+  // goal constraint is just the final pose
+  info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
+  frame_id = robot_model_->getModelFrame();
 
-    // goal pose with optional offset wrt. the planning frame
-    info.goal_pose = scene->getFrameTransform(frame_id) * getConstraintPose(req.goal_constraints.front());
-    frame_id = robot_model_->getModelFrame();
-
-    // check goal pose ik before Cartesian motion plan starts
-    std::map<std::string, double> ik_solution;
-    if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
-                       ik_solution))
-    {
-      std::ostringstream os;
-      os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
-      throw LinInverseForGoalIncalculable(os.str());
-    }
+  // check goal pose ik before Cartesian motion plan starts
+  std::map<std::string, double> ik_solution;
+  if (!computePoseIK(scene, info.group_name, info.link_name, info.goal_pose, frame_id, info.start_joint_position,
+                     ik_solution))
+  {
+    std::ostringstream os;
+    os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
+    throw LinInverseForGoalIncalculable(os.str());
   }
 
   // Ignored return value because at this point the function should always
@@ -142,14 +126,25 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
   computeLinkFK(robot_state, info.link_name, info.start_joint_position, info.start_pose);
 }
 
-void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& scene,
-                                  const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& scene,
+                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
+                                   double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // set pilz cartesian limits for each item
   setMaxCartesianSpeed(req);
-  // create Cartesian path for lin
-  std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));
+  // create Cartesian FREE path
+  std::unique_ptr<KDL::Path> path;
+  try
+  {
+    path = setPathFree(plan_info.start_pose, plan_info.waypoints, req.smoothness_level);
+  }
+  catch (const KDL::Error_MotionPlanning& e)
+  {
+    RCLCPP_ERROR(getLogger(), "Motion planning error: %s", e.Description());
+    std::ostringstream os;
+    os << "waypoints specified in path constraints have three consicutive colinear points";
+    throw ConsicutiveColinearWaypoints(os.str());
+  }
   // create velocity profile
   std::unique_ptr<KDL::VelocityProfile> vp(
       cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
@@ -173,19 +168,38 @@ void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& s
   }
 }
 
-std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affine3d& start_pose,
-                                                              const Eigen::Affine3d& goal_pose) const
+std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Affine3d& start_pose,
+                                                                const std::vector<Eigen::Isometry3d>& waypoints,
+                                                                double smoothness_level) const
 {
-  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for LIN command.");
+  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for FREE command.");
 
-  KDL::Frame kdl_start_pose, kdl_goal_pose;
+  KDL::Frame kdl_start_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);
-  tf2::transformEigenToKDL(goal_pose, kdl_goal_pose);
+  // transform waypoints to KDL frames
+  std::vector<KDL::Frame> kdl_waypoints;
+  for (const auto& waypoint : waypoints)
+  {
+    KDL::Frame kdl_waypoint;
+    tf2::transformEigenToKDL(waypoint, kdl_waypoint);
+    kdl_waypoints.push_back(kdl_waypoint);
+  }
+
+  RCLCPP_INFO_STREAM(getLogger(), "Transformed waypoints number: " << kdl_waypoints.size());
+
   double eqradius = max_cartesian_speed_ / planner_limits_.getCartesianLimits().max_rot_vel;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
-  return std::unique_ptr<KDL::Path>(
-      std::make_unique<KDL::Path_Line>(kdl_start_pose, kdl_goal_pose, rot_interpo, eqradius, true));
+  return PathFreeGenerator::freeFromWaypoints(kdl_start_pose, kdl_waypoints, rot_interpo, smoothness_level, eqradius);
 }
 
+void TrajectoryGeneratorFree::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const
+{
+  if (req.path_constraints.position_constraints.size() < 2)
+  {
+    std::ostringstream os;
+    os << "waypoints specified in path constraints is less than 2 for FREE motion.";
+    throw NoWaypointsSpecified(os.str());
+  }
+}
 }  // namespace pilz_industrial_motion_planner
