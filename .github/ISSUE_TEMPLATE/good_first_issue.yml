@@ -1,0 +1,56 @@
+name: "Good First Issue"
+description: "A small, well-scoped task for new contributors"
+title: "[GFI]: <brief title>"
+labels: ["good first issue", "help wanted"]
+assignees: []
+
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Brief summary
+      description: One or two sentences describing the problem or task.
+      placeholder: "E.g., Simplify docs link in README"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / background
+      description: Why this matters; where it appears (package, file path, links).
+      placeholder: |
+        - Package: moveit_core
+        - File: moveit_core/...
+        - Link: https://github.com/ros-planning/moveit2/...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / change details
+      description: Commands, screenshots, or logs if helpful.
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What must be true for "Done"?
+      placeholder: |
+        - Update <file> to ...
+        - Add/adjust test ...
+        - CI passes
+    validations:
+      required: true
+
+  - type: textarea
+    id: pointers
+    attributes:
+      label: Helpful pointers
+      description: Links to code, docs, examples; suggested approach.
+    validations:
+      required: false
+
