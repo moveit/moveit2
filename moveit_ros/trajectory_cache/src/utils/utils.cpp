@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include <rclcpp/version.h>
+
 #include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
@@ -28,7 +30,13 @@
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/srv/get_cartesian_path.hpp>
 
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/buffer.hpp>
+// For Jazzy and older
+#else
 #include <tf2_ros/buffer.h>
+#endif
 
 #include <warehouse_ros/message_collection.h>
 

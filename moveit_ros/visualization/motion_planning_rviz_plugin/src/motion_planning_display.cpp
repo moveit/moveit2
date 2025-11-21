@@ -1337,6 +1337,19 @@ void MotionPlanningDisplay::onDisable()
 // ******************************************************************************************
 // Update
 // ******************************************************************************************
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+void MotionPlanningDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt)
+{
+  if (int_marker_display_)
+    int_marker_display_->update(wall_dt, ros_dt);
+  if (frame_)
+    frame_->updateSceneMarkers(wall_dt, ros_dt);
+
+  PlanningSceneDisplay::update(wall_dt, ros_dt);
+}
+// For Kilted and older
+#else
 void MotionPlanningDisplay::update(float wall_dt, float ros_dt)
 {
   if (int_marker_display_)
@@ -1346,8 +1359,9 @@ void MotionPlanningDisplay::update(float wall_dt, float ros_dt)
 
   PlanningSceneDisplay::update(wall_dt, ros_dt);
 }
+#endif
 
-void MotionPlanningDisplay::updateInternal(double wall_dt, double ros_dt)
+void MotionPlanningDisplay::updateInternal(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt)
 {
   PlanningSceneDisplay::updateInternal(wall_dt, ros_dt);
 
@@ -1355,6 +1369,11 @@ void MotionPlanningDisplay::updateInternal(double wall_dt, double ros_dt)
   trajectory_visual_->update(wall_dt, ros_dt);
 
   renderWorkspaceBox();
+}
+
+void MotionPlanningDisplay::updateInternal(double wall_dt, double ros_dt)
+{
+  updateInternal(std::chrono::nanoseconds(std::lround(wall_dt)), std::chrono::nanoseconds(std::lround(ros_dt)));
 }
 
 void MotionPlanningDisplay::load(const rviz_common::Config& config)

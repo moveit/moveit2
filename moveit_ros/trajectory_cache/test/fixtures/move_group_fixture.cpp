@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit/warehouse/moveit_message_storage.hpp>
+#include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include "move_group_fixture.hpp"
@@ -60,8 +61,10 @@ void MoveGroupFixture::TearDown()
 
 void MoveGroupFixture::spinNode()
 {
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node_);
   while (is_spinning_ && rclcpp::ok())
   {
-    rclcpp::spin_some(node_);
+    executor.spin_some();
   }
 }
