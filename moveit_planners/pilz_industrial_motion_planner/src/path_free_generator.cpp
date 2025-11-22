@@ -101,8 +101,9 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
     }
 
     // The maximum feasible radius for this junction
-    double local_max_radius = std::tan(segment_angle(waypoints_[i - 1], waypoints_[i], waypoints_[i + 1]) / 2.0) *
-                              std::min(dist1 / 2.0, dist2 / 2.0);
+    double local_max_radius =
+        std::tan((M_PI - segment_angle(waypoints_[i - 1], waypoints_[i], waypoints_[i + 1])) / 2.0) *
+        std::min(dist1 / 2.0, dist2 / 2.0);
 
     // track the tightest constraint
     // due to KDL::Path_RoundedComposite don't support changing radius
