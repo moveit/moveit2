@@ -101,20 +101,26 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
     }
 
     // The maximum feasible radius for this junction
-    double local_max_radius =
-        std::tan((M_PI - segment_angle(waypoints_[i - 1], waypoints_[i], waypoints_[i + 1])) / 2.0) *
-        std::min(dist1 / 2.0, dist2 / 2.0);
+    double theta = segment_angle(waypoints_[i - 1], waypoints_[i], waypoints_[i + 1]);
+    double local_max_radius = std::tan((M_PI - theta) / 2.0) * std::min(dist1 / 2.0, dist2 / 2.0);
 
     // track the tightest constraint
     // due to KDL::Path_RoundedComposite don't support changing radius
     if (local_max_radius < max_allowed_radius)
       max_allowed_radius = local_max_radius;
+    // to ensure Path_RoundedComposite not throw
+    // Error_MotionPlanning_Circle_ToSmall or
+    // Error_MotionPlanning_Circle_No_Plane
+    if (max_allowed_radius * std::sin(M_PI - std::acos(theta)) * std::clamp(smoothness, MIN_SMOOTHNESS, MAX_SMOOTHNESS) <
+        KDL::epsilon)
+    {
+      max_allowed_radius = KDL::epsilon;
+      break;
+    }
   }
+  max_allowed_radius *= std::clamp(smoothness, MIN_SMOOTHNESS, MAX_SMOOTHNESS);
 
-  // Apply the smoothness scaling factor
-  double max_radius = max_allowed_radius * std::clamp(smoothness, MIN_SMOOTHNESS, MAX_SMOOTHNESS);
-
-  return max_radius;
+  return max_allowed_radius;
 }
 void PathFreeGenerator::checkConsecutiveColinearWaypoints(const KDL::Frame& p1, const KDL::Frame& p2,
                                                           const KDL::Frame& p3)
