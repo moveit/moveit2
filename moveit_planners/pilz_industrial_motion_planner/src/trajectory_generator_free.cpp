@@ -149,6 +149,8 @@ void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& 
       os << "waypoints specified in path constraints have three consicutive colinear points";
     else if (code == 3105 || code == 3106)
       os << "rounding circle of a point is bigger than the distance with one of the neighbor points";
+    else if (code == 3001 || code == 3002)
+      os << "the rounding radius is lower than KDL::epsilon. use bigger smoothness or resample your waypoints";
     throw ConsicutiveColinearWaypoints(os.str());
   }
   // create velocity profile

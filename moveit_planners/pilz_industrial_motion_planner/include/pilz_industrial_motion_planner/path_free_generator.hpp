@@ -66,17 +66,17 @@ public:
    * @param smoothness: smoothness level [0..1] scaling the maximum blend radius
    * @return maximum blend radius
    */
-
+  static std::vector<KDL::Frame> filterWaypoints(const KDL::Frame& start_pose, const std::vector<KDL::Frame>& waypoints);
   static double computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness);
   static void checkConsecutiveColinearWaypoints(const KDL::Frame& p1, const KDL::Frame& p2, const KDL::Frame& p3);
 
 private:
   PathFreeGenerator(){};  // no instantiation of this helper class!
 
-  static constexpr double MAX_SEGMENT_LENGTH{ 0.2e-3 };
+  static constexpr double MIN_SEGMENT_LENGTH{ 0.2e-3 };
   static constexpr double MIN_SMOOTHNESS{ 0.01 };
   static constexpr double MAX_SMOOTHNESS{ 0.99 };
-  static constexpr double MAX_COLINEAR_NORM{ 1e-9 };
+  static constexpr double MIN_COLINEAR_NORM{ 1e-9 };
 };
 
 class ErrorMotionPlanningColinearConsicutiveWaypoints : public KDL::Error_MotionPlanning

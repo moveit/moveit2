@@ -42,11 +42,27 @@ std::unique_ptr<KDL::Path> PathFreeGenerator::freeFromWaypoints(const KDL::Frame
                                                                 KDL::RotationalInterpolation* rot_interpo,
                                                                 double smoothness, double eqradius)
 {
-  double blend_radius = computeBlendRadius(waypoints, smoothness);
+  std::vector<KDL::Frame> filtered_waypoints = filterWaypoints(start_pose, waypoints);
+  double blend_radius = computeBlendRadius(filtered_waypoints, smoothness);
+
   KDL::Path_RoundedComposite* composite_path = new KDL::Path_RoundedComposite(blend_radius, eqradius, rot_interpo);
 
-  composite_path->Add(start_pose);
+  for (const auto& waypoint : filtered_waypoints)
+  {
+    composite_path->Add(waypoint);
+  }
+
+  composite_path->Finish();
+  return std::unique_ptr<KDL::Path>(composite_path);
+}
+
+std::vector<KDL::Frame> PathFreeGenerator::filterWaypoints(const KDL::Frame& start_pose,
+                                                           const std::vector<KDL::Frame>& waypoints)
+{
+  std::vector<KDL::Frame> filtered_waypoints = {};
+
   // index for the last add point
+  filtered_waypoints.push_back(start_pose);
   size_t last_added_point_indx = -1;  // -1 for the start_pose
 
   // the following is to remove very close waypoints
@@ -54,20 +70,19 @@ std::unique_ptr<KDL::Path> PathFreeGenerator::freeFromWaypoints(const KDL::Frame
   // to get the last added point in the rounded composite path
   auto last_point = [&]() { return last_added_point_indx != -1 ? waypoints[last_added_point_indx].p : start_pose.p; };
   // distance between start pose and first waypoint
-  double dist = (start_pose.p - waypoints.front().p).Norm();
+  double dist;
 
   // add points and skip the points which are too close to each other
   for (size_t i = 0; i < waypoints.size(); ++i)
   {
     dist = (last_point() - waypoints[i].p).Norm();
-    if (dist > MAX_SEGMENT_LENGTH)
+    if (dist > MIN_SEGMENT_LENGTH)
     {
-      composite_path->Add(waypoints[i]);
+      filtered_waypoints.push_back(waypoints[i]);
       ++last_added_point_indx;
     }
   }
-  composite_path->Finish();
-  return std::unique_ptr<KDL::Path>(composite_path);
+  return filtered_waypoints;
 }
 double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness)
 {
@@ -81,7 +96,7 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
     KDL::Vector v2 = p2.p - p3.p;
 
     double norm_product = v1.Norm() * v2.Norm();
-    if (norm_product < MAX_SEGMENT_LENGTH * MAX_SEGMENT_LENGTH)
+    if (norm_product < MIN_SEGMENT_LENGTH * MIN_SEGMENT_LENGTH)
       return 0.0;  // avoid division by zero
 
     double cos_theta = KDL::dot(v1, v2) / norm_product;
@@ -95,7 +110,7 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
     double dist1 = pose_distance(waypoints_[i], waypoints_[i - 1]);
     double dist2 = pose_distance(waypoints_[i + 1], waypoints_[i]);
     checkConsecutiveColinearWaypoints(waypoints_[i - 1], waypoints_[i], waypoints_[i + 1]);
-    if (dist1 < MAX_SEGMENT_LENGTH || dist2 < MAX_SEGMENT_LENGTH)
+    if (dist1 < MIN_SEGMENT_LENGTH || dist2 < MIN_SEGMENT_LENGTH)
     {
       continue;
     }
@@ -108,16 +123,8 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
     // due to KDL::Path_RoundedComposite don't support changing radius
     if (local_max_radius < max_allowed_radius)
       max_allowed_radius = local_max_radius;
-    // to ensure Path_RoundedComposite not throw
-    // Error_MotionPlanning_Circle_ToSmall or
-    // Error_MotionPlanning_Circle_No_Plane
-    if (max_allowed_radius * std::sin(M_PI - theta) * std::clamp(smoothness, MIN_SMOOTHNESS, MAX_SMOOTHNESS) <
-        KDL::epsilon)
-    {
-      max_allowed_radius = KDL::epsilon;
-      break;
-    }
   }
+
   max_allowed_radius *= std::clamp(smoothness, MIN_SMOOTHNESS, MAX_SMOOTHNESS);
 
   return max_allowed_radius;
@@ -129,7 +136,7 @@ void PathFreeGenerator::checkConsecutiveColinearWaypoints(const KDL::Frame& p1, 
   KDL::Vector v2 = p3.p - p2.p;
 
   KDL::Vector cross_product = v1 * v2;
-  if (cross_product.Norm() < MAX_COLINEAR_NORM)
+  if (cross_product.Norm() < MIN_COLINEAR_NORM)
   {
     throw ErrorMotionPlanningColinearConsicutiveWaypoints();
   }
