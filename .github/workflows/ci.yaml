@@ -67,6 +67,7 @@ jobs:
       CC: ${{ matrix.env.CLANG_TIDY && 'clang' }}
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
       ADDITIONAL_DEBS: lld
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
     name: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.IKFAST_TEST && ' + ikfast' || ''}}${{ matrix.env.CLANG_TIDY && (github.event_name != 'workflow_dispatch' && ' + clang-tidy (delta)' || ' + clang-tidy (all)') || '' }}
     runs-on: ubuntu-latest
@@ -178,10 +179,9 @@ jobs:
           name: clang-tidy
           path: ${{ env.BASEDIR }}/target_ws/src/$(basename $(pwd))
       - name: SonarQube Scan
-        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        # Don't run if SONAR_TOKEN is not set (i.e. PR job from a fork)
+        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0' && env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@v6.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Prepare target_ws for cache
         if: always() && !matrix.env.CCOV
         run: |
