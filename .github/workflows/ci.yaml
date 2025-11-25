@@ -85,7 +85,7 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
 # See: https://github.com/moveit/moveit2/issues/2852
 #       - uses: testspace-com/setup-testspace@v1
