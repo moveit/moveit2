@@ -177,6 +177,16 @@ jobs:
         with:
           name: clang-tidy
           path: ${{ env.BASEDIR }}/target_ws/src/$(basename $(pwd))
+      - name: Install sonar-scanner
+        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        uses: SonarSource/sonarcloud-github-c-cpp@v3
+      - name: Run sonar-scanner
+        if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: sonar-scanner -X --define project.settings=.work/target_ws/src/moveit2/sonar-project.properties
+        working-directory: ${{ github.workspace }}
       - name: Prepare target_ws for cache
         if: always() && !matrix.env.CCOV
         run: |
@@ -190,7 +200,5 @@ jobs:
     uses: ./.github/workflows/docker_lint.yaml
   format:
     uses: ./.github/workflows/format.yaml
-  sonar:
-    uses: ./.github/workflows/sonar.yaml
   tutorial_docker:
     uses: ./.github/workflows/tutorial_docker.yaml
