@@ -86,12 +86,12 @@ jobs:
           sudo rm -rf /usr/local
           df -h
       - uses: actions/checkout@v4
-# NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
-# See: https://github.com/moveit/moveit2/issues/2852
-#       - uses: testspace-com/setup-testspace@v1
-#         if: github.repository == 'moveit/moveit2'
-#         with:
-#           domain: moveit
+      # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
+      # See: https://github.com/moveit/moveit2/issues/2852
+      #       - uses: testspace-com/setup-testspace@v1
+      #         if: github.repository == 'moveit/moveit2'
+      #         with:
+      #           domain: moveit
       - name: Get latest release date for rosdistro
         id: rosdistro_release_date
         uses: JafarAbdi/latest-rosdistro-release-date-action@main
@@ -145,12 +145,12 @@ jobs:
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
         env: ${{ matrix.env }}
-# NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
-# See: https://github.com/moveit/moveit2/issues/2852
-#      - name: Push result to Testspace
-#        if: always() && (github.repository == 'moveit/moveit2')
-#        run: |
-#          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
+      # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
+      # See: https://github.com/moveit/moveit2/issues/2852
+      #      - name: Push result to Testspace
+      #        if: always() && (github.repository == 'moveit/moveit2')
+      #        run: |
+      #          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)
         uses: actions/upload-artifact@v4
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
@@ -184,3 +184,13 @@ jobs:
           sudo find ${{ env.BASEDIR }}/target_ws -wholename '*/test_results/*' -delete
           sudo rm -rf ${{ env.BASEDIR }}/target_ws/src
           du -sh ${{ env.BASEDIR }}/target_ws
+  docker:
+    uses: ./.github/workflows/docker.yaml
+  docker_lint:
+    uses: ./.github/workflows/docker_lint.yaml
+  format:
+    uses: ./.github/workflows/format.yaml
+  sonar:
+    uses: ./.github/workflows/sonar.yaml
+  tutorial_docker:
+    uses: ./.github/workflows/tutorial_docker.yaml

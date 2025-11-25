@@ -2,14 +2,7 @@ name: Docker Lint
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - .docker/**
-      - .github/workflows/docker_lint.yaml
-  pull_request:
-    paths:
-      - .docker/**
-      - .github/workflows/docker_lint.yaml
+  workflow_call:
 
 jobs:
   docker-lint:

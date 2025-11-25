@@ -5,27 +5,23 @@ name: Formatting (pre-commit)
 
 on:
   workflow_dispatch:
-  pull_request:
-  merge_group:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
   pre-commit:
     name: Format
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v6
-      with:
-        python-version: 3.x
-    - name: Install clang-format-14
-      run: sudo apt-get install clang-format-14
-    - uses: pre-commit/action@v3.0.1
-      id: precommit
-    - name: Upload pre-commit changes
-      if: failure() && steps.precommit.outcome == 'failure'
-      uses: rhaschke/upload-git-patch-action@main
-      with:
-        name: pre-commit
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.x
+      - name: Install clang-format-14
+        run: sudo apt-get install clang-format-14
+      - uses: pre-commit/action@v3.0.1
+        id: precommit
+      - name: Upload pre-commit changes
+        if: failure() && steps.precommit.outcome == 'failure'
+        uses: rhaschke/upload-git-patch-action@main
+        with:
+          name: pre-commit
