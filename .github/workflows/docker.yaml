@@ -178,7 +178,7 @@ jobs:
     steps:
       - name: Delete Untagged Images
         if: (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2')
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           github-token: ${{ secrets.DELETE_PACKAGES_TOKEN }}
           script: |

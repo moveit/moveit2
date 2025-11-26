@@ -160,7 +160,7 @@ TEST_F(TestAABB, TestPR2)
   auto pub_aabb =
       node->create_publisher<visualization_msgs::msg::Marker>("/visualization_aabb", rmw_qos_profile_default);
   auto pub_obb = node->create_publisher<visualization_msgs::msg::Marker>("/visualization_obb", rmw_qos_profile_default);
-  rclcpp::Rate loop_rate(10);
+  rclcpp::WallRate loop_rate(10);
 
   // Wait for the publishers to establish connections
   sleep(5);
