@@ -37,6 +37,8 @@
 #include <moveit/depth_image_octomap_updater/depth_image_octomap_updater.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 #include <cmath>
+#include <rclcpp/qos.hpp>
+#include <rclcpp/version.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 // TODO: Remove conditional includes when released to all active distros.
 #if __has_include(<tf2/LinearMath/Vector3.hpp>)
@@ -158,13 +160,26 @@ void DepthImageOctomapUpdater::start()
 
   pub_filtered_label_image_ = filtered_label_transport_->advertiseCamera(prefix + "filtered_label", 1);
 
-  sub_depth_image_ = image_transport::create_camera_subscription(
-      node_.get(), image_topic_,
-      [this](const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
-             const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg) {
-        return depthImageCallback(depth_msg, info_msg);
-      },
-      "raw", rmw_qos_profile_sensor_data);
+  sub_depth_image_ =
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+      image_transport::create_camera_subscription(
+          *node_, image_topic_,
+          [this](const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+                 const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg) {
+            return depthImageCallback(depth_msg, info_msg);
+          },
+          "raw", rclcpp::SensorDataQoS());
+// For Kilted and older
+#else
+      image_transport::create_camera_subscription(
+          node_.get(), image_topic_,
+          [this](const sensor_msgs::msg::Image::ConstSharedPtr& depth_msg,
+                 const sensor_msgs::msg::CameraInfo::ConstSharedPtr& info_msg) {
+            return depthImageCallback(depth_msg, info_msg);
+          },
+          "raw", rmw_qos_profile_sensor_data);
+#endif
 }
 
 void DepthImageOctomapUpdater::stop()
