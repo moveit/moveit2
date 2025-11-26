@@ -53,4 +53,3 @@ body:
       description: Links to code, docs, examples; suggested approach.
     validations:
       required: false
-
