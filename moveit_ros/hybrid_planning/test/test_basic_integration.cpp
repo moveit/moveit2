@@ -41,8 +41,16 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
 #include <rclcpp_action/rclcpp_action.hpp>
+
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/buffer.hpp>
+// For Jazzy and older
+#else
+#include <tf2_ros/buffer.h>
+#endif
 
 #include <moveit_msgs/action/hybrid_planner.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
