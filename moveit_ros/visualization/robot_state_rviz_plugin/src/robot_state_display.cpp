@@ -459,6 +459,21 @@ void RobotStateDisplay::onDisable()
   Display::onDisable();
 }
 
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+void RobotStateDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt)
+{
+  Display::update(wall_dt, ros_dt);
+  calculateOffsetPosition();
+  if (robot_ && update_state_ && robot_state_)
+  {
+    update_state_ = false;
+    robot_state_->update();
+    robot_->update(robot_state_);
+  }
+}
+// For Kilted and older
+#else
 void RobotStateDisplay::update(float wall_dt, float ros_dt)
 {
   Display::update(wall_dt, ros_dt);
@@ -470,6 +485,7 @@ void RobotStateDisplay::update(float wall_dt, float ros_dt)
     robot_->update(robot_state_);
   }
 }
+#endif
 
 // ******************************************************************************************
 // Calculate Offset Position

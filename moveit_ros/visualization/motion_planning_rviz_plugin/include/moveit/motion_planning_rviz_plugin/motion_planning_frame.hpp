@@ -36,6 +36,8 @@
 
 #pragma once
 
+#include <rclcpp/version.h>
+
 #include <QWidget>
 #include <QTreeWidgetItem>
 #include <QListWidgetItem>
@@ -122,7 +124,15 @@ protected:
   void initFromMoveGroupNS();
   void constructPlanningRequest(moveit_msgs::msg::MotionPlanRequest& mreq);
 
+  void updateSceneMarkers(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt);
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  [[deprecated("Use updateSceneMarkers(std::chrono::nanoseconds, std::chrono::nanoseconds) instead")]] void
+  updateSceneMarkers(double wall_dt, double ros_dt);
+// For Kilted and older
+#else
   void updateSceneMarkers(double wall_dt, double ros_dt);
+#endif
 
   void updateExternalCommunication();
 
