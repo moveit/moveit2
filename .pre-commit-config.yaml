@@ -37,15 +37,12 @@ repos:
     hooks:
       - id: black
 
-  - repo: local
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v14.0.6
     hooks:
       - id: clang-format
-        name: clang-format
-        description: Format files with ClangFormat.
-        entry: clang-format-14
-        language: system
-        files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|js|m|proto|vert)$
-        args: ['-fallback-style=none', '-i']
+        types_or: [c++, c, cuda]
+        args: ["-fallback-style=none"]
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.1
     hooks:
