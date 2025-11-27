@@ -3,13 +3,9 @@ name: "Tutorial Docker Images"
 on:
   schedule:
     # 5 PM UTC every Sunday
-    - cron:  '0 17 * * 6'
+    - cron: "0 17 * * 6"
   workflow_dispatch:
-  pull_request:
-  merge_group:
-  push:
-    branches:
-      - main
+  workflow_call:
 
 jobs:
   tutorial-source:
@@ -44,7 +40,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: "Remove .dockerignore"
-        run: rm .dockerignore  # enforce full source context
+        run: rm .dockerignore # enforce full source context
       - name: Cache ccache
         uses: actions/cache@v4
         with:

@@ -3,16 +3,9 @@ name: docker
 on:
   schedule:
     # 5 PM UTC every Sunday
-    - cron:  '0 17 * * 6'
+    - cron: "0 17 * * 6"
   workflow_dispatch:
-  push:
-    branches:
-      - main
-  pull_request:
-    paths:
-      - .docker/**
-      - .github/workflows/docker.yaml
-      - moveit2.repos
+  workflow_call:
 
 jobs:
   release:
@@ -156,7 +149,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: "Remove .dockerignore"
-        run: rm .dockerignore  # enforce full source context
+        run: rm .dockerignore # enforce full source context
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
