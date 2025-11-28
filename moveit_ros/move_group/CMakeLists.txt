@@ -52,6 +52,7 @@ add_library(
   src/default_capabilities/query_planners_service_capability.cpp
   src/default_capabilities/save_geometry_to_file_service_capability.cpp
   src/default_capabilities/state_validation_service_capability.cpp
+  src/default_capabilities/multi_state_validation_service_capability.cpp
   src/default_capabilities/tf_publisher_capability.cpp)
 target_include_directories(
   moveit_move_group_default_capabilities
