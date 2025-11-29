@@ -598,6 +598,80 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   EXPECT_FALSE(density.has_value());
 }
 
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndices)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+  EXPECT_EQ(trajectory->size(), 5);
+  EXPECT_EQ(trajectory->getDuration(), 0.5);
+
+  int before = -1;
+  int after = -1;
+  double blend = -1.0;
+
+  trajectory->findWayPointIndicesForDurationAfterStart(0.15, before, after, blend);
+  EXPECT_EQ(before, 0);
+  EXPECT_EQ(after, 1);
+  EXPECT_NEAR(blend, /*between 0 and 1*/ 0.5, 1e-6);
+
+  trajectory->findWayPointIndicesForDurationAfterStart(0.3, before, after, blend);
+  EXPECT_EQ(before, 1);
+  EXPECT_EQ(after, 2);
+  EXPECT_NEAR(blend, /*exactly at 2*/ 1.0, 1e-6);
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesTotal)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  int before = -1;
+  int after = -1;
+  double blend = -1.0;
+
+  const double total_duration = trajectory->getDuration();
+  trajectory->findWayPointIndicesForDurationAfterStart(total_duration, before, after, blend);
+  EXPECT_EQ(before, 3);
+  EXPECT_EQ(after, 4);
+  EXPECT_DOUBLE_EQ(blend, 1.0);
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesOutOfBounds)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  const double total_duration = trajectory->getDuration();
+  const double outbound_duration = total_duration + 100.0;
+  EXPECT_GT(outbound_duration, total_duration);
+
+  int before = -1;
+  int after = -1;
+  double blend = -1.0;
+  trajectory->findWayPointIndicesForDurationAfterStart(outbound_duration, before, after, blend);
+  EXPECT_EQ(before, 4);
+  EXPECT_EQ(after, 4);
+  EXPECT_DOUBLE_EQ(blend, 1.0);
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesOutOfBoundsEmpty)
+{
+  robot_trajectory::RobotTrajectory empty_traj(robot_model_, arm_jmg_name_);
+  const double total_duration = empty_traj.getDuration();
+  EXPECT_DOUBLE_EQ(total_duration, 0.0);
+
+  const double outbound_duration = 1.0;
+  EXPECT_GT(outbound_duration, total_duration);
+
+  int before = -1;
+  int after = -1;
+  double blend = -1.0;
+  empty_traj.findWayPointIndicesForDurationAfterStart(outbound_duration, before, after, blend);
+  EXPECT_EQ(before, 0);
+  EXPECT_EQ(after, 0);
+  EXPECT_DOUBLE_EQ(blend, 0.0);
+}
+
 TEST_F(OneRobot, Unwind)
 {
   const double epsilon = 1e-4;
