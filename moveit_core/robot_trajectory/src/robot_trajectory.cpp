@@ -522,7 +522,7 @@ void RobotTrajectory::findWayPointIndicesForDurationAfterStart(double duration, 
   double running_duration = 0.0;
   for (; index < num_points; ++index)
   {
-    running_duration += duration_from_previous_[index];
+    running_duration += duration_from_previous_.at(index);
     if (running_duration >= duration)
       break;
   }
@@ -536,8 +536,8 @@ void RobotTrajectory::findWayPointIndicesForDurationAfterStart(double duration, 
   }
   else
   {
-    double before_time = running_duration - duration_from_previous_[index];
-    blend = (duration - before_time) / duration_from_previous_[index];
+    double before_time = running_duration - duration_from_previous_.at(index);
+    blend = (duration - before_time) / duration_from_previous_.at(index);
   }
 }
 

@@ -598,7 +598,7 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryDensity)
   EXPECT_FALSE(density.has_value());
 }
 
-TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndices)
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesBetweenWaypoints)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
@@ -609,18 +609,18 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndices)
   int after = -1;
   double blend = -1.0;
 
-  trajectory->findWayPointIndicesForDurationAfterStart(0.15, before, after, blend);
+  EXPECT_NO_THROW(trajectory->findWayPointIndicesForDurationAfterStart(0.15, before, after, blend));
   EXPECT_EQ(before, 0);
   EXPECT_EQ(after, 1);
   EXPECT_NEAR(blend, /*between 0 and 1*/ 0.5, 1e-6);
 
-  trajectory->findWayPointIndicesForDurationAfterStart(0.3, before, after, blend);
+  EXPECT_NO_THROW(trajectory->findWayPointIndicesForDurationAfterStart(0.3, before, after, blend));
   EXPECT_EQ(before, 1);
   EXPECT_EQ(after, 2);
   EXPECT_NEAR(blend, /*exactly at 2*/ 1.0, 1e-6);
 }
 
-TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesTotal)
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesAtLastOfManyWaypoints)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
@@ -630,13 +630,13 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesTotal)
   double blend = -1.0;
 
   const double total_duration = trajectory->getDuration();
-  trajectory->findWayPointIndicesForDurationAfterStart(total_duration, before, after, blend);
+  EXPECT_NO_THROW(trajectory->findWayPointIndicesForDurationAfterStart(total_duration, before, after, blend));
   EXPECT_EQ(before, 3);
   EXPECT_EQ(after, 4);
   EXPECT_DOUBLE_EQ(blend, 1.0);
 }
 
-TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesOutOfBounds)
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesAfterLastWaypoint)
 {
   robot_trajectory::RobotTrajectoryPtr trajectory;
   initTestTrajectory(trajectory);
@@ -648,13 +648,13 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesOutOfBounds
   int before = -1;
   int after = -1;
   double blend = -1.0;
-  trajectory->findWayPointIndicesForDurationAfterStart(outbound_duration, before, after, blend);
+  EXPECT_NO_THROW(trajectory->findWayPointIndicesForDurationAfterStart(outbound_duration, before, after, blend));
   EXPECT_EQ(before, 4);
   EXPECT_EQ(after, 4);
   EXPECT_DOUBLE_EQ(blend, 1.0);
 }
 
-TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesOutOfBoundsEmpty)
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesEmptyWaypoints)
 {
   robot_trajectory::RobotTrajectory empty_traj(robot_model_, arm_jmg_name_);
   const double total_duration = empty_traj.getDuration();
@@ -666,10 +666,41 @@ TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesOutOfBounds
   int before = -1;
   int after = -1;
   double blend = -1.0;
-  empty_traj.findWayPointIndicesForDurationAfterStart(outbound_duration, before, after, blend);
+  EXPECT_NO_THROW(empty_traj.findWayPointIndicesForDurationAfterStart(outbound_duration, before, after, blend));
   EXPECT_EQ(before, 0);
   EXPECT_EQ(after, 0);
   EXPECT_DOUBLE_EQ(blend, 0.0);
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesBeforeFirstWaypoint)
+{
+  robot_trajectory::RobotTrajectoryPtr trajectory;
+  initTestTrajectory(trajectory);
+
+  int before = -1;
+  int after = -1;
+  double blend = -1.0;
+
+  EXPECT_NO_THROW(trajectory->findWayPointIndicesForDurationAfterStart(-0.1, before, after, blend));
+  EXPECT_EQ(before, 0);
+  EXPECT_EQ(after, 0);
+  EXPECT_DOUBLE_EQ(blend, 0.0);
+}
+
+TEST_F(RobotTrajectoryTestFixture, RobotTrajectoryFindWayPointIndicesAtLastOfSingleWaypoint)
+{
+  robot_trajectory::RobotTrajectory trajectory(robot_model_, arm_jmg_name_);
+  trajectory.addSuffixWayPoint(robot_state_, 0.0);
+
+  int before = -1;
+  int after = -1;
+  double blend = -1.0;
+
+  const double total_duration = trajectory.getDuration();
+  EXPECT_NO_THROW(trajectory.findWayPointIndicesForDurationAfterStart(total_duration, before, after, blend));
+  EXPECT_EQ(before, 0);
+  EXPECT_EQ(after, 0);
+  EXPECT_DOUBLE_EQ(blend, 1.0);
 }
 
 TEST_F(OneRobot, Unwind)
