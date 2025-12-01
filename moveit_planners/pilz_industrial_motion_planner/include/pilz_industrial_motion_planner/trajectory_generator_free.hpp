@@ -55,22 +55,22 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(ConsicutiveColinearWaypoints,
                                    moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
 /**
- * @brief This class implements a free trajectory generator in Cartesian
+ * @brief This class implements a polyline trajectory generator in Cartesian
  * space.
  * The Cartesian trajetory are based on trapezoid velocity profile.
  */
-class TrajectoryGeneratorFree : public TrajectoryGenerator
+class TrajectoryGeneratorPolyline : public TrajectoryGenerator
 {
 public:
   /**
-   * @brief Constructor of Free Trajectory Generator
+   * @brief Constructor of Polyline Trajectory Generator
    * @throw TrajectoryGeneratorInvalidLimitsException
    * @param model: robot model
    * @param planner_limits: limits in joint and Cartesian spaces
    */
-  TrajectoryGeneratorFree(const moveit::core::RobotModelConstPtr& robot_model,
-                          const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
-                          const std::string& group_name);
+  TrajectoryGeneratorPolyline(const moveit::core::RobotModelConstPtr& robot_model,
+                              const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
+                              const std::string& group_name);
 
 private:
   void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const override;
@@ -83,15 +83,15 @@ private:
             trajectory_msgs::msg::JointTrajectory& joint_trajectory) override;
 
   /**
-   * @brief construct a KDL::Path object for a Cartesian free path
+   * @brief construct a KDL::Path object for a Cartesian polyline path
    * @param start_pose: start pose of the path
    * @param waypoints: waypoints defining the path
    * @param smoothness_level: smoothness level for blending the waypoints
    * @return a unique pointer of the path object. null_ptr in case of an error.
    */
-  std::unique_ptr<KDL::Path> setPathFree(const Eigen::Affine3d& start_pose,
-                                         const std::vector<Eigen::Isometry3d>& waypoints,
-                                         double smoothness_level) const;
+  std::unique_ptr<KDL::Path> setPathPolyline(const Eigen::Affine3d& start_pose,
+                                             const std::vector<Eigen::Isometry3d>& waypoints,
+                                             double smoothness_level) const;
 };
 
 }  // namespace pilz_industrial_motion_planner

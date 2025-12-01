@@ -42,18 +42,18 @@
 namespace pilz_industrial_motion_planner
 {
 /**
- * @brief Plugin that can generate instances of PlanningContextFree.
- * Generates instances of PlanningContextFree.
+ * @brief Plugin that can generate instances of PlanningContextPolyline.
+ * Generates instances of PlanningContextPolyline.
  */
-class PlanningContextLoaderFree : public PlanningContextLoader
+class PlanningContextLoaderPolyline : public PlanningContextLoader
 {
 public:
-  PlanningContextLoaderFree();
-  ~PlanningContextLoaderFree() override;
+  PlanningContextLoaderPolyline();
+  ~PlanningContextLoaderPolyline() override;
 
   /**
    * @brief return a instance of
-   * pilz_industrial_motion_planner::PlanningContextFree
+   * pilz_industrial_motion_planner::PlanningContextPolyline
    * @param planning_context returned context
    * @param name
    * @param group
@@ -63,7 +63,7 @@ public:
                    const std::string& group) const override;
 };
 
-typedef std::shared_ptr<PlanningContextLoaderFree> PlanningContextLoaderFreePtr;
-typedef std::shared_ptr<const PlanningContextLoaderFree> PlanningContextLoaderFreeConstPtr;
+typedef std::shared_ptr<PlanningContextLoaderPolyline> PlanningContextLoaderPolylinePtr;
+typedef std::shared_ptr<const PlanningContextLoaderPolyline> PlanningContextLoaderPolylineConstPtr;
 
 }  // namespace pilz_industrial_motion_planner

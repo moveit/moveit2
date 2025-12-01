@@ -46,21 +46,22 @@
 #include <thread>
 
 #include <pilz_industrial_motion_planner/planning_context_base.hpp>
-#include <pilz_industrial_motion_planner/trajectory_generator_free.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_polyline.hpp>
 
 namespace pilz_industrial_motion_planner
 {
 MOVEIT_CLASS_FORWARD(PlanningContext);
 
 /**
- * @brief PlanningContext for obtaining Free trajectories
+ * @brief PlanningContext for obtaining Polyline trajectories
  */
-class PlanningContextFree : public pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorFree>
+class PlanningContextPolyline : public pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorPolyline>
 {
 public:
-  PlanningContextFree(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
-                      const pilz_industrial_motion_planner::LimitsContainer& limits)
-    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorFree>(name, group, model, limits)
+  PlanningContextPolyline(const std::string& name, const std::string& group,
+                          const moveit::core::RobotModelConstPtr& model,
+                          const pilz_industrial_motion_planner::LimitsContainer& limits)
+    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorPolyline>(name, group, model, limits)
   {
   }
 };

@@ -33,10 +33,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/planning_context_loader_free.hpp>
+#include <pilz_industrial_motion_planner/planning_context_loader_polyline.hpp>
 #include <moveit/planning_scene/planning_scene.hpp>
 #include <pilz_industrial_motion_planner/planning_context_base.hpp>
-#include <pilz_industrial_motion_planner/planning_context_free.hpp>
+#include <pilz_industrial_motion_planner/planning_context_polyline.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
@@ -45,25 +45,25 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit.planners.pilz.planning_context_loader.free");
+  return moveit::getLogger("moveit.planners.pilz.planning_context_loader.polyline");
 }
 }  // namespace
 
-pilz_industrial_motion_planner::PlanningContextLoaderFree::PlanningContextLoaderFree()
+pilz_industrial_motion_planner::PlanningContextLoaderPolyline::PlanningContextLoaderPolyline()
 {
-  alg_ = "FREE";
+  alg_ = "POLYLINE";
 }
 
-pilz_industrial_motion_planner::PlanningContextLoaderFree::~PlanningContextLoaderFree()
+pilz_industrial_motion_planner::PlanningContextLoaderPolyline::~PlanningContextLoaderPolyline()
 {
 }
 
-bool pilz_industrial_motion_planner::PlanningContextLoaderFree::loadContext(
+bool pilz_industrial_motion_planner::PlanningContextLoaderPolyline::loadContext(
     planning_interface::PlanningContextPtr& planning_context, const std::string& name, const std::string& group) const
 {
   if (limits_set_ && model_set_)
   {
-    planning_context = std::make_shared<PlanningContextFree>(name, group, model_, limits_);
+    planning_context = std::make_shared<PlanningContextPolyline>(name, group, model_, limits_);
     return true;
   }
   else
@@ -81,5 +81,5 @@ bool pilz_industrial_motion_planner::PlanningContextLoaderFree::loadContext(
   }
 }
 
-PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderFree,
+PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderPolyline,
                        pilz_industrial_motion_planner::PlanningContextLoader)

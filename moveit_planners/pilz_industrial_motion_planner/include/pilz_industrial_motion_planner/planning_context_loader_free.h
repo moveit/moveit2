@@ -47,4 +47,4 @@
 
 #pragma once
 #pragma message(".h header is obsolete. Please use the .hpp header instead.")
-#include <pilz_industrial_motion_planner/planning_context_loader_free.hpp>
+#include <pilz_industrial_motion_planner/planning_context_loader_polyline.hpp>

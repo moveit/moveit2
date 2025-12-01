@@ -47,4 +47,4 @@
 
 #pragma once
 #pragma message(".h header is obsolete. Please use the .hpp header instead.")
-#include <pilz_industrial_motion_planner/path_free_generator.hpp>
+#include <pilz_industrial_motion_planner/path_polyline_generator.hpp>

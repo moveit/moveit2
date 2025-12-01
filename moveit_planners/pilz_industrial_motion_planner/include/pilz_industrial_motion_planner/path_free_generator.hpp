@@ -45,20 +45,20 @@
 namespace pilz_industrial_motion_planner
 {
 /**
- * @brief Generator class for KDL::Path_RoundedComposite from different free path
+ * @brief Generator class for KDL::Path_RoundedComposite from different polyline path
  * representations
  */
-class PathFreeGenerator
+class PathPolylineGenerator
 {
 public:
   /**
-   * @brief set the path free from waypoints
+   * @brief set the path polyline from waypoints
    *
    */
-  static std::unique_ptr<KDL::Path> freeFromWaypoints(const KDL::Frame& start_pose,
-                                                      const std::vector<KDL::Frame>& waypoints,
-                                                      KDL::RotationalInterpolation* rot_interpo, double smoothness,
-                                                      double eqradius);
+  static std::unique_ptr<KDL::Path> polylineFromWaypoints(const KDL::Frame& start_pose,
+                                                          const std::vector<KDL::Frame>& waypoints,
+                                                          KDL::RotationalInterpolation* rot_interpo, double smoothness,
+                                                          double eqradius);
 
   /**
    * @brief compute the maximum rounding radius from KDL::Path_RoundedComosite
@@ -71,7 +71,7 @@ public:
   static void checkConsecutiveColinearWaypoints(const KDL::Frame& p1, const KDL::Frame& p2, const KDL::Frame& p3);
 
 private:
-  PathFreeGenerator(){};  // no instantiation of this helper class!
+  PathPolylineGenerator(){};  // no instantiation of this helper class!
 
   static constexpr double MIN_SEGMENT_LENGTH{ 0.2e-3 };
   static constexpr double MIN_SMOOTHNESS{ 0.01 };
@@ -85,7 +85,7 @@ public:
   const char* Description() const override
   {
     return "Three collinear consecutive waypoints."
-           " A Free Path cannot be created.";
+           " A Polyline Path cannot be created.";
   }
   int GetType() const override
   {

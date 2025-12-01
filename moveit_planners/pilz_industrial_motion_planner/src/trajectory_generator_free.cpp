@@ -33,8 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/trajectory_generator_free.hpp>
-#include <pilz_industrial_motion_planner/path_free_generator.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_polyline.hpp>
+#include <pilz_industrial_motion_planner/path_polyline_generator.hpp>
 
 #include <pilz_industrial_motion_planner/tip_frame_getter.hpp>
 
@@ -64,20 +64,20 @@ namespace
 {
 rclcpp::Logger getLogger()
 {
-  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.free");
+  return moveit::getLogger("moveit.planners.pilz.trajectory_generator.polyline");
 }
 }  // namespace
-TrajectoryGeneratorFree::TrajectoryGeneratorFree(const moveit::core::RobotModelConstPtr& robot_model,
-                                                 const LimitsContainer& planner_limits,
-                                                 const std::string& /*group_name*/)
+TrajectoryGeneratorPolyline::TrajectoryGeneratorPolyline(const moveit::core::RobotModelConstPtr& robot_model,
+                                                         const LimitsContainer& planner_limits,
+                                                         const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
   planner_limits_.printCartesianLimits();
 }
 
-void TrajectoryGeneratorFree::extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
-                                                    const planning_interface::MotionPlanRequest& req,
-                                                    TrajectoryGenerator::MotionPlanInfo& info) const
+void TrajectoryGeneratorPolyline::extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,
+                                                        const planning_interface::MotionPlanRequest& req,
+                                                        TrajectoryGenerator::MotionPlanInfo& info) const
 {
   RCLCPP_DEBUG(getLogger(), "Extract necessary information from motion plan request.");
 
@@ -126,17 +126,18 @@ void TrajectoryGeneratorFree::extractMotionPlanInfo(const planning_scene::Planni
   computeLinkFK(robot_state, info.link_name, info.start_joint_position, info.start_pose);
 }
 
-void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& scene,
-                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                   double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+void TrajectoryGeneratorPolyline::plan(const planning_scene::PlanningSceneConstPtr& scene,
+                                       const planning_interface::MotionPlanRequest& req,
+                                       const MotionPlanInfo& plan_info, double sampling_time,
+                                       trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // set pilz cartesian limits for each item
   setMaxCartesianSpeed(req);
-  // create Cartesian FREE path
+  // create Cartesian POLYLINE path
   std::unique_ptr<KDL::Path> path;
   try
   {
-    path = setPathFree(plan_info.start_pose, plan_info.waypoints, req.smoothness_level);
+    path = setPathPolyline(plan_info.start_pose, plan_info.waypoints, req.smoothness_level);
   }
   catch (const KDL::Error_MotionPlanning& e)
   {
@@ -176,11 +177,11 @@ void TrajectoryGeneratorFree::plan(const planning_scene::PlanningSceneConstPtr& 
   }
 }
 
-std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Affine3d& start_pose,
-                                                                const std::vector<Eigen::Isometry3d>& waypoints,
-                                                                double smoothness_level) const
+std::unique_ptr<KDL::Path> TrajectoryGeneratorPolyline::setPathPolyline(const Eigen::Affine3d& start_pose,
+                                                                        const std::vector<Eigen::Isometry3d>& waypoints,
+                                                                        double smoothness_level) const
 {
-  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for FREE command.");
+  RCLCPP_DEBUG(getLogger(), "Set Cartesian path for POLYLINE command.");
 
   KDL::Frame kdl_start_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);
@@ -198,15 +199,16 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorFree::setPathFree(const Eigen::Aff
   double eqradius = max_cartesian_speed_ / planner_limits_.getCartesianLimits().max_rot_vel;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
-  return PathFreeGenerator::freeFromWaypoints(kdl_start_pose, kdl_waypoints, rot_interpo, smoothness_level, eqradius);
+  return PathPolylineGenerator::polylineFromWaypoints(kdl_start_pose, kdl_waypoints, rot_interpo, smoothness_level,
+                                                      eqradius);
 }
 
-void TrajectoryGeneratorFree::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const
+void TrajectoryGeneratorPolyline::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const
 {
   if (req.path_constraints.position_constraints.size() < 2)
   {
     std::ostringstream os;
-    os << "waypoints specified in path constraints is less than 2 for FREE motion.";
+    os << "waypoints specified in path constraints is less than 2 for POLYLINE motion.";
     throw NoWaypointsSpecified(os.str());
   }
 }

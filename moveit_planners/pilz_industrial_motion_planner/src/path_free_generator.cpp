@@ -33,14 +33,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-#include <pilz_industrial_motion_planner/path_free_generator.hpp>
+#include <pilz_industrial_motion_planner/path_polyline_generator.hpp>
 
 namespace pilz_industrial_motion_planner
 {
-std::unique_ptr<KDL::Path> PathFreeGenerator::freeFromWaypoints(const KDL::Frame& start_pose,
-                                                                const std::vector<KDL::Frame>& waypoints,
-                                                                KDL::RotationalInterpolation* rot_interpo,
-                                                                double smoothness, double eqradius)
+std::unique_ptr<KDL::Path> PathPolylineGenerator::polylineFromWaypoints(const KDL::Frame& start_pose,
+                                                                        const std::vector<KDL::Frame>& waypoints,
+                                                                        KDL::RotationalInterpolation* rot_interpo,
+                                                                        double smoothness, double eqradius)
 {
   std::vector<KDL::Frame> filtered_waypoints = filterWaypoints(start_pose, waypoints);
   double blend_radius = computeBlendRadius(filtered_waypoints, smoothness);
@@ -56,8 +56,8 @@ std::unique_ptr<KDL::Path> PathFreeGenerator::freeFromWaypoints(const KDL::Frame
   return std::unique_ptr<KDL::Path>(composite_path);
 }
 
-std::vector<KDL::Frame> PathFreeGenerator::filterWaypoints(const KDL::Frame& start_pose,
-                                                           const std::vector<KDL::Frame>& waypoints)
+std::vector<KDL::Frame> PathPolylineGenerator::filterWaypoints(const KDL::Frame& start_pose,
+                                                               const std::vector<KDL::Frame>& waypoints)
 {
   std::vector<KDL::Frame> filtered_waypoints = {};
 
@@ -84,7 +84,7 @@ std::vector<KDL::Frame> PathFreeGenerator::filterWaypoints(const KDL::Frame& sta
   }
   return filtered_waypoints;
 }
-double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness)
+double PathPolylineGenerator::computeBlendRadius(const std::vector<KDL::Frame>& waypoints_, double smoothness)
 {
   double max_allowed_radius = std::numeric_limits<double>::infinity();
 
@@ -129,8 +129,8 @@ double PathFreeGenerator::computeBlendRadius(const std::vector<KDL::Frame>& wayp
 
   return max_allowed_radius;
 }
-void PathFreeGenerator::checkConsecutiveColinearWaypoints(const KDL::Frame& p1, const KDL::Frame& p2,
-                                                          const KDL::Frame& p3)
+void PathPolylineGenerator::checkConsecutiveColinearWaypoints(const KDL::Frame& p1, const KDL::Frame& p2,
+                                                              const KDL::Frame& p3)
 {
   KDL::Vector v1 = p2.p - p1.p;
   KDL::Vector v2 = p3.p - p2.p;
