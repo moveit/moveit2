@@ -63,7 +63,7 @@ std::vector<KDL::Frame> PathPolylineGenerator::filterWaypoints(const KDL::Frame&
 
   // index for the last add point
   filtered_waypoints.push_back(start_pose);
-  size_t last_added_point_indx = -1;  // -1 for the start_pose
+  int last_added_point_indx = -1;  // -1 for the start_pose
 
   // the following is to remove very close waypoints
   // to avoid issues in KDL::Path_RoundedComposite like throwing Not_Fesible exceptions
