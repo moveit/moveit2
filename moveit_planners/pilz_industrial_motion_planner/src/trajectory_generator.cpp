@@ -299,7 +299,8 @@ TrajectoryGenerator::cartesianTrapVelocityProfile(double max_velocity_scaling_fa
 
 void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& scene,
                                    const planning_interface::MotionPlanRequest& req,
-                                   planning_interface::MotionPlanResponse& res, double sampling_time)
+                                   planning_interface::MotionPlanResponse& res,
+                                   const interpolation::Params& interpolation_params)
 {
   RCLCPP_INFO_STREAM(getLogger(), "Generating " << req.planner_id << " trajectory...");
   rclcpp::Time planning_begin = clock_->now();
@@ -345,7 +346,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
   try
   {
-    plan(plan_info.start_scene, req, plan_info, sampling_time, joint_trajectory);
+    plan(plan_info.start_scene, req, plan_info, interpolation_params, joint_trajectory);
   }
   catch (const MoveItErrorCodeException& ex)
   {

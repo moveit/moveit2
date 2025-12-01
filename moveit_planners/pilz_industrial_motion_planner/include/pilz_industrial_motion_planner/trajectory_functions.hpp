@@ -113,6 +113,20 @@ bool verifySampleJointLimits(const std::map<std::string, double>& position_last,
                              double duration_current, const JointLimitsContainer& joint_limits);
 
 /**
+ * @brief Interpolates between two poses.
+ *
+ * This function computes an interpolated pose between a start pose and an end pose based on the given interpolation factor.
+ *
+ * @param start_pose The starting pose as an Eigen::Isometry3d.
+ * @param end_pose The ending pose as an Eigen::Isometry3d.
+ * @param interpolation_factor A double value between 0 and 1 that determines the interpolation factor.
+ *                             A value of 0 returns the start_pose, and a value of 1 returns the end_pose.
+ * @param interpolated_pose The resulting interpolated pose as an Eigen::Isometry3d.
+ */
+void interpolate(const Eigen::Isometry3d& start_pose, const Eigen::Isometry3d& end_pose,
+                 const double& interpolation_factor, Eigen::Isometry3d& interpolated_pose);
+
+/**
  * @brief Generate joint trajectory from a KDL Cartesian trajectory
  * @param scene: planning scene
  * @param joint_limits: joint limits

@@ -144,7 +144,8 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_scene::Plannin
 
 void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& scene,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                  const interpolation::Params& interpolation_params,
+                                  trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // create Cartesian path for lin
   std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));
@@ -162,6 +163,13 @@ void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& s
   moveit_msgs::msg::MoveItErrorCodes error_code;
   // sample the Cartesian trajectory and compute joint trajectory using inverse
   // kinematics
+  auto cartesian_limits = planner_limits_.getCartesianLimits();
+  auto sampling_time = std::min({ interpolation_params.max_sample_time,
+                                  interpolation_params.max_translation_interpolation_distance /
+                                      (cartesian_limits.max_trans_vel * req.max_velocity_scaling_factor),
+                                  interpolation_params.max_rotation_interpolation_distance /
+                                      (cartesian_limits.max_rot_vel * req.max_velocity_scaling_factor) });
+  RCLCPP_DEBUG(getLogger(), "Sampling time for LIN command: %f", sampling_time);
   if (!generateJointTrajectory(scene, planner_limits_.getJointLimitContainer(), cart_trajectory, plan_info.group_name,
                                plan_info.link_name, plan_info.start_joint_position, sampling_time, joint_trajectory,
                                error_code))

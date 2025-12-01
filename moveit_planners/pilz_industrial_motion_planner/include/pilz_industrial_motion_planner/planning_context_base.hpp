@@ -58,11 +58,13 @@ class PlanningContextBase : public planning_interface::PlanningContext
 public:
   PlanningContextBase<GeneratorT>(const std::string& name, const std::string& group,
                                   const moveit::core::RobotModelConstPtr& model,
-                                  const pilz_industrial_motion_planner::LimitsContainer& limits)
+                                  const pilz_industrial_motion_planner::LimitsContainer& limits,
+                                  const std::shared_ptr<interpolation::ParamListener>& interpolation_param_listener)
     : planning_interface::PlanningContext(name, group)
     , terminated_(false)
     , model_(model)
     , limits_(limits)
+    , interpolation_param_listener_(interpolation_param_listener)
     , generator_(model, limits_, group)
   {
   }
@@ -112,6 +114,9 @@ public:
   /// Joint limits to be used during planning
   pilz_industrial_motion_planner::LimitsContainer limits_;
 
+  /// Listener for interpolation parameters
+  std::shared_ptr<interpolation::ParamListener> interpolation_param_listener_;
+
 protected:
   GeneratorT generator_;
 };
@@ -126,7 +131,7 @@ void pilz_industrial_motion_planner::PlanningContextBase<GeneratorT>::solve(plan
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
     return;
   }
-  generator_.generate(getPlanningScene(), request_, res);
+  generator_.generate(getPlanningScene(), request_, res, interpolation_param_listener_->get_params());
 }
 
 template <typename GeneratorT>

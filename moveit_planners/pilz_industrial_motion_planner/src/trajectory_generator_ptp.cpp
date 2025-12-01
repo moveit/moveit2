@@ -265,11 +265,12 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_scene::Plannin
 
 void TrajectoryGeneratorPTP::plan(const planning_scene::PlanningSceneConstPtr& /*scene*/,
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
-                                  double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
+                                  const interpolation::Params& interpolation_params,
+                                  trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
   // plan the ptp trajectory
   planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory,
-          req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, sampling_time);
+          req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, interpolation_params.max_sample_time);
 }
 
 }  // namespace pilz_industrial_motion_planner
