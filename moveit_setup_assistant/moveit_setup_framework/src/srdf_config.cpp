@@ -300,21 +300,7 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
 
     // Output property
     emitter << YAML::Key << "max_velocity";
-
-    // To Solve Putting integer Values like 100 as 100.0 in YAML
-    double val = std::min(fabs(b.max_velocity_), fabs(b.min_velocity_));
-
-    // Check if val is a full integer (within floating-point tolerance)
-    bool is_integer = std::fabs(val - std::round(val)) < 1e-9;
-
-    // Format value as string
-    std::ostringstream oss;
-    if (is_integer)
-      oss << std::fixed << std::setprecision(1) << val;  // e.g. 100.0
-    else
-      oss << val;  // e.g. 99.75
-
-    emitter << YAML::Value << oss.str();
+    emitter << YAML::Value << static_cast<double>(std::min(fabs(b.max_velocity_), fabs(b.min_velocity_)));
 
     // Output property
     emitter << YAML::Key << "has_acceleration_limits";
@@ -329,21 +315,7 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
 
     // Output property
     emitter << YAML::Key << "max_acceleration";
-
-    // To Solve Putting integer Values like 100 as 100.0 in YAML
-    val = std::min(fabs(b.max_acceleration_), fabs(b.min_acceleration_));
-
-    // Check if val is a full integer (within floating-point tolerance)
-    is_integer = std::fabs(val - std::round(val)) < 1e-9;
-
-    // Format value as string
-    oss.str("");  // Clear the stringstream
-    if (is_integer)
-      oss << std::fixed << std::setprecision(1) << val;  // e.g. 100.0
-    else
-      oss << val;  // e.g. 99.75
-
-    emitter << YAML::Value << oss.str();
+    emitter << YAML::Value << static_cast<double>(std::min(fabs(b.max_acceleration_), fabs(b.min_acceleration_)));
 
     emitter << YAML::EndMap;
   }
