@@ -73,12 +73,12 @@ std::vector<KDL::Frame> PathPolylineGenerator::filterWaypoints(const KDL::Frame&
   double dist;
 
   // add points and skip the points which are too close to each other
-  for (size_t i = 0; i < waypoints.size(); ++i)
+  for (const auto& waypoint : waypoints)
   {
-    dist = (last_point() - waypoints[i].p).Norm();
+    dist = (last_point() - waypoint.p).Norm();
     if (dist > MIN_SEGMENT_LENGTH)
     {
-      filtered_waypoints.push_back(waypoints[i]);
+      filtered_waypoints.push_back(waypoint);
       ++last_added_point_indx;
     }
   }

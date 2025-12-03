@@ -145,13 +145,21 @@ void TrajectoryGeneratorPolyline::plan(const planning_scene::PlanningSceneConstP
     int code = e.GetType();
     std::ostringstream os;
     if (code == 3102 || code == 3103)
+    {
       os << "zero distance between two points";
+    }
     else if (code == 3104)
+    {
       os << "waypoints specified in path constraints have three consicutive colinear points";
+    }
     else if (code == 3105 || code == 3106)
+    {
       os << "rounding circle of a point is bigger than the distance with one of the neighbor points";
+    }
     else if (code == 3001 || code == 3002)
+    {
       os << "the rounding radius is lower than KDL::epsilon. use bigger smoothness or resample your waypoints";
+    }
     throw ConsicutiveColinearWaypoints(os.str());
   }
   // create velocity profile

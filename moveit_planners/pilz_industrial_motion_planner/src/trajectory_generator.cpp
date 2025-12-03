@@ -382,7 +382,7 @@ TrajectoryGenerator::MotionPlanInfo::MotionPlanInfo(const planning_scene::Planni
 
 void TrajectoryGenerator::setMaxCartesianSpeed(const moveit_msgs::msg::MotionPlanRequest& req)
 {
-  if (req.max_cartesian_speed > 0.0 && req.cartesian_speed_limited_link != "")
+  if (req.max_cartesian_speed > 0.0 && !req.cartesian_speed_limited_link.empty())
   {
     max_cartesian_speed_ = req.max_cartesian_speed;
     RCLCPP_INFO(getLogger(), "received max_cartesian_speed: %f", max_cartesian_speed_);
