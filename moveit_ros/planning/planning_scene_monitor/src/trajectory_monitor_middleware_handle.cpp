@@ -48,7 +48,7 @@ void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::setRate(double s
 {
   if (sampling_frequency > std::numeric_limits<double>::epsilon())
   {
-    rate_ = std::make_unique<rclcpp::Rate>(sampling_frequency);
+    rate_ = std::make_unique<rclcpp::WallRate>(sampling_frequency);
   }
 }
 
