@@ -15,8 +15,6 @@ ament_target_dependencies(
   Eigen3
   Boost)
 
-target_link_libraries(moveit_semantic_world PRIVATE
-  ${OpenCV_LIBRARIES}
-)
+target_link_libraries(moveit_semantic_world PRIVATE ${OpenCV_LIBRARIES})
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)
