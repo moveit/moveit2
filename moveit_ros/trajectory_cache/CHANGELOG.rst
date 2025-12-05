@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_trajectory_cache
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.4 (2025-12-05)
+-------------------
+
 2.12.3 (2025-04-15)
 -------------------
 * Fuzzy-matching Trajectory Cache Injectable Traits refactor 🔥🔥 (`#2941 <https://github.com/ros-planning/moveit2/issues/2941>`_) (`#3408 <https://github.com/ros-planning/moveit2/issues/3408>`_)

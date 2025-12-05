@@ -2,6 +2,10 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.4 (2025-12-05)
+-------------------
+* Fix severe warning from class loader in servo (`#3577 <https://github.com/moveit/moveit2/issues/3577>`_) (`#3598 <https://github.com/moveit/moveit2/issues/3598>`_)
+
 2.12.3 (2025-04-15)
 -------------------
 * Minor typo fix in simulated Panda servo config (`#3444 <https://github.com/ros-planning/moveit2/issues/3444>`_) (`#3445 <https://github.com/ros-planning/moveit2/issues/3445>`_)

@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.4 (2025-12-05)
+-------------------
+* PSM: finish thread on rclcpp::shutdown (`#3484 <https://github.com/moveit/moveit2/issues/3484>`_) (`#3486 <https://github.com/moveit/moveit2/issues/3486>`_)
+* Fix seg fault with attached objects during motion execution (`#3466 <https://github.com/moveit/moveit2/issues/3466>`_) (`#3470 <https://github.com/moveit/moveit2/issues/3470>`_)
+
 2.12.3 (2025-04-15)
 -------------------
 * Make the destructors of the base classes of planning adapters virtual and close move_group gracefully (`#3435 <https://github.com/ros-planning/moveit2/issues/3435>`_) (`#3443 <https://github.com/ros-planning/moveit2/issues/3443>`_)

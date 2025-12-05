@@ -2,6 +2,9 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.4 (2025-12-05)
+-------------------
+
 2.12.3 (2025-04-15)
 -------------------
 * Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (`#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_) (`#3365 <https://github.com/ros-planning/moveit/issues/3365>`_)
