@@ -103,7 +103,8 @@ void TrajectoryGeneratorPolyline::extractMotionPlanInfo(const planning_scene::Pl
   for (const auto& pc : req.path_constraints.position_constraints)
   {
     Eigen::Isometry3d waypoint;
-    tf2::fromMsg(pc.constraint_region.primitive_poses.front(), waypoint);
+    waypoint = getConstraintPose(pc.constraint_region.primitive_poses.front().position,
+                                 pc.constraint_region.primitive_poses.front().orientation, pc.target_point_offset);
     waypoint = scene->getFrameTransform(frame_id) * waypoint;
     info.waypoints.push_back(waypoint);
   }
