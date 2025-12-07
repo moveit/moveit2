@@ -1,7 +1,8 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik, Inc.
+ *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2025 Aiman Haidar
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +15,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik nor the names of its
+ *   * Neither the name of Pilz GmbH & Co. KG nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,31 +33,53 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Abishalini Sivaraman */
+#include <pilz_industrial_motion_planner/planning_context_loader_polyline.hpp>
+#include <moveit/planning_scene/planning_scene.hpp>
+#include <pilz_industrial_motion_planner/planning_context_base.hpp>
+#include <pilz_industrial_motion_planner/planning_context_polyline.hpp>
+#include <moveit/utils/logger.hpp>
 
-#include <moveit/planning_scene_monitor/trajectory_monitor_middleware_handle.hpp>
-#include <limits>
+#include <pluginlib/class_list_macros.hpp>
 
-namespace planning_scene_monitor
+namespace
 {
-planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(double sampling_frequency)
+rclcpp::Logger getLogger()
 {
-  setRate(sampling_frequency);
+  return moveit::getLogger("moveit.planners.pilz.planning_context_loader.polyline");
+}
+}  // namespace
+
+pilz_industrial_motion_planner::PlanningContextLoaderPolyline::PlanningContextLoaderPolyline()
+{
+  alg_ = "POLYLINE";
 }
 
-void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::setRate(double sampling_frequency)
+pilz_industrial_motion_planner::PlanningContextLoaderPolyline::~PlanningContextLoaderPolyline()
 {
-  if (sampling_frequency > std::numeric_limits<double>::epsilon())
+}
+
+bool pilz_industrial_motion_planner::PlanningContextLoaderPolyline::loadContext(
+    planning_interface::PlanningContextPtr& planning_context, const std::string& name, const std::string& group) const
+{
+  if (limits_set_ && model_set_)
   {
-    rate_ = std::make_unique<rclcpp::WallRate>(sampling_frequency);
+    planning_context = std::make_shared<PlanningContextPolyline>(name, group, model_, limits_);
+    return true;
+  }
+  else
+  {
+    if (!limits_set_)
+    {
+      RCLCPP_ERROR_STREAM(getLogger(),
+                          "Limits are not defined. Cannot load planning context. Call setLimits loadContext");
+    }
+    if (!model_set_)
+    {
+      RCLCPP_ERROR_STREAM(getLogger(), "Robot model was not set");
+    }
+    return false;
   }
 }
 
-void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::sleep()
-{
-  if (rate_)
-  {
-    rate_->sleep();
-  }
-}
-}  // namespace planning_scene_monitor
+PLUGINLIB_EXPORT_CLASS(pilz_industrial_motion_planner::PlanningContextLoaderPolyline,
+                       pilz_industrial_motion_planner::PlanningContextLoader)

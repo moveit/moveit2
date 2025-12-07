@@ -128,7 +128,7 @@ TEST_F(CommandPlannerTest, ObtainLoadedPlanningAlgorithms)
   // Check for the algorithms
   std::vector<std::string> algs;
   planner_instance_->getPlanningAlgorithms(algs);
-  ASSERT_EQ(3u, algs.size()) << "Found more or less planning algorithms as expected! Found:"
+  ASSERT_EQ(4u, algs.size()) << "Found more or less planning algorithms as expected! Found:"
                              << ::testing::PrintToString(algs);
 
   // Collect the algorithms, check for uniqueness
@@ -141,6 +141,7 @@ TEST_F(CommandPlannerTest, ObtainLoadedPlanningAlgorithms)
   ASSERT_TRUE(algs_set.find("LIN") != algs_set.end());
   ASSERT_TRUE(algs_set.find("PTP") != algs_set.end());
   ASSERT_TRUE(algs_set.find("CIRC") != algs_set.end());
+  ASSERT_TRUE(algs_set.find("POLYLINE") != algs_set.end());
 }
 
 /**

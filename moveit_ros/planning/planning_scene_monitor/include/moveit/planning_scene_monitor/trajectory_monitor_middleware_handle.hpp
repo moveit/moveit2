@@ -66,6 +66,6 @@ public:
   void sleep() override;
 
 private:
-  std::unique_ptr<rclcpp::Rate> rate_;
+  std::unique_ptr<rclcpp::WallRate> rate_;
 };
 }  // namespace planning_scene_monitor

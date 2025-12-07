@@ -135,11 +135,17 @@ void updateSlidingWindow(KinematicState& next_joint_state, std::deque<KinematicS
                          double max_expected_latency, const rclcpp::Time& cur_time);
 
 /**
- * \brief Create a Float64MultiArray message from given joint state
- * @param servo_params The configuration used by servo, required for selecting position vs velocity.
- * @param joint_state The joint state to be added into the Float64MultiArray.
- * @return The Float64MultiArray message.
+ * \brief Create a Float64MultiArray message from the given joint state.
+ *
+ * This function converts the joint state into a std_msgs::msg::Float64MultiArray message
+ * based on the configuration in the Servo parameters. It supports both position and
+ * velocity command modes, depending on the controller configuration.
+ *
+ * @param servo_params Configuration parameters used by Servo (e.g., command type: position or velocity).
+ * @param joint_state The current joint state to be converted into a Float64MultiArray message.
+ * @return The resulting Float64MultiArray message containing joint commands.
  */
+
 std_msgs::msg::Float64MultiArray composeMultiArrayMessage(const servo::Params& servo_params,
                                                           const KinematicState& joint_state);
 
