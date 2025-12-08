@@ -355,7 +355,8 @@ void PlanarJointModel::computeVariablePositions(const Eigen::Isometry3d& transf,
 
   ASSERT_ISOMETRY(transf)  // unsanitized input, could contain a non-isometry
   Eigen::Quaterniond q(transf.linear());
-  if (q.w() < 0.0) {
+  if (q.w() < 0.0)
+  {
     q.coeffs() *= -1.0;
   }
   // taken from Bullet

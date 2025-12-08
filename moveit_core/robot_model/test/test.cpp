@@ -178,7 +178,7 @@ TEST(PlanarJointTest, ComputeVariablePositionsNormalizeYaw)
   moveit::core::PlanarJointModel pjm("joint", 0, 0);
 
   // Test various angles for normalization
-  std::vector<double> test_angles = {0.0, M_PI/2, -M_PI/2, M_PI, -M_PI, 3.0, -3.0,4.1, -4.1};
+  std::vector<double> test_angles = { 0.0, M_PI / 2, -M_PI / 2, M_PI, -M_PI, 3.0, -3.0, 4.1, -4.1 };
   for (double angle : test_angles)
   {
     // Create a transform with the given yaw angle
@@ -196,8 +196,10 @@ TEST(PlanarJointTest, ComputeVariablePositionsNormalizeYaw)
 
     // The yaw value should be normalized to the range [-pi, pi]
     double normalized_angle = angle;
-    while (normalized_angle > M_PI) normalized_angle -= 2.0 * M_PI;
-    while (normalized_angle < -M_PI) normalized_angle += 2.0 * M_PI;
+    while (normalized_angle > M_PI)
+      normalized_angle -= 2.0 * M_PI;
+    while (normalized_angle < -M_PI)
+      normalized_angle += 2.0 * M_PI;
     EXPECT_NEAR(joint_values[2], normalized_angle, 1e-6);
   }
 }
