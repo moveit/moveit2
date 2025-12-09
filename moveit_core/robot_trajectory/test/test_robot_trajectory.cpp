@@ -38,6 +38,7 @@
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <moveit/utils/robot_model_test_utils.hpp>
+#include "moveit_msgs/msg/robot_trajectory.hpp"
 #include <urdf_parser/urdf_parser.h>
 #include <gtest/gtest.h>
 
@@ -666,6 +667,41 @@ TEST_F(OneRobot, MultiDofTrajectoryToJointStates)
   EXPECT_EQ(traj.points.at(1).positions.size(), joint_variable_count);
 }
 
+TEST_F(OneRobot, SetMultiDofTrajectory)
+{
+  // GIVEN a RobotTrajectory message with a multi-dof joint trajectory including velocities and accelerations
+  robot_trajectory::RobotTrajectory trajectory(robot_model_);
+  moveit_msgs::msg::RobotTrajectory trajectory_msg;
+
+  trajectory_msg.multi_dof_joint_trajectory.joint_names = { "base_joint" };
+
+  trajectory_msg.multi_dof_joint_trajectory.points.resize(1);
+  trajectory_msg.multi_dof_joint_trajectory.points[0].transforms.resize(1);
+  trajectory_msg.multi_dof_joint_trajectory.points[0].transforms[0].translation.x = 0.01;
+
+  trajectory_msg.multi_dof_joint_trajectory.points[0].velocities.resize(1);
+  trajectory_msg.multi_dof_joint_trajectory.points[0].velocities[0].linear.x = 0.02;
+  trajectory_msg.multi_dof_joint_trajectory.points[0].velocities[0].linear.y = 0.03;
+
+  trajectory_msg.multi_dof_joint_trajectory.points[0].accelerations.resize(1);
+  trajectory_msg.multi_dof_joint_trajectory.points[0].accelerations[0].linear.x = 0.04;
+  trajectory_msg.multi_dof_joint_trajectory.points[0].accelerations[0].linear.y = 0.05;
+
+  // WHEN setting that RobotTrajectory message for a RobotTrajectory
+  trajectory.setRobotTrajectoryMsg(*robot_state_, trajectory_msg);
+
+  // THEN positions should be set correctly in the RobotTrajectory waypoints
+  const auto wp = trajectory.getWayPoint(0);
+  EXPECT_EQ(wp.getVariablePosition("base_joint/x"), 0.01);
+
+  // THEN velocities should be set correctly in the RobotTrajectory waypoints
+  EXPECT_EQ(wp.getVariableVelocity("base_joint/x"), 0.02);
+  EXPECT_EQ(wp.getVariableVelocity("base_joint/y"), 0.03);
+
+  // THEN accelerations should be set correctly in the RobotTrajectory waypoints
+  EXPECT_EQ(wp.getVariableAcceleration("base_joint/x"), 0.04);
+  EXPECT_EQ(wp.getVariableAcceleration("base_joint/y"), 0.05);
+}
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
