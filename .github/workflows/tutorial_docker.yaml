@@ -53,8 +53,10 @@ jobs:
       - name: inject ccache into docker
         uses: reproducible-containers/buildkit-cache-dance@v3.3.0
         with:
-          cache-source: .ccache
-          cache-target: /root/.ccache/
+           cache-map: |
+              {
+                ".ccache": "/root/.ccache/"
+              }
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
