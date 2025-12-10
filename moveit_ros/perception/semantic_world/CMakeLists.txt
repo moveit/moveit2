@@ -13,8 +13,7 @@ ament_target_dependencies(
   moveit_msgs
   tf2_eigen
   Eigen3
-  Boost)
-
-target_link_libraries(moveit_semantic_world PRIVATE ${OpenCV_LIBRARIES})
+  Boost
+  OpenCV)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

@@ -9,7 +9,7 @@ set_target_properties(moveit_py_utils PROPERTIES VERSION
 ament_target_dependencies(moveit_py_utils rclcpp moveit_msgs geometry_msgs
                           pybind11)
 
-target_link_libraries(moveit_py_utils Python3::Python)
+target_link_libraries(moveit_py_utils Python3::Module)
 
 install(
   TARGETS moveit_py_utils
