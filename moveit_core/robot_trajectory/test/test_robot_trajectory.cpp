@@ -38,7 +38,7 @@
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <moveit/utils/robot_model_test_utils.hpp>
-#include "moveit_msgs/msg/robot_trajectory.hpp"
+#include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <urdf_parser/urdf_parser.h>
 #include <gtest/gtest.h>
 
