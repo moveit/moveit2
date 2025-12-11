@@ -337,7 +337,7 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
       {
         continue;
       }
-      
+
       const moveit::core::JointModel* jm = robot_model_->getJointModel(joint_state->name[i]);
       if (!jm)
         continue;
