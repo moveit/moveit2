@@ -63,11 +63,6 @@ generate_parameter_library(
   src/cartesian_limits_parameters.yaml # path to input yaml file
 )
 
-add_library(planning_context_loader_base SHARED src/planning_context_loader.cpp)
-target_link_libraries(planning_context_loader_base cartesian_limits_parameters)
-ament_target_dependencies(planning_context_loader_base
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
 add_library(
   joint_limits_common SHARED
   src/joint_limits_aggregator.cpp src/joint_limits_container.cpp
@@ -75,11 +70,18 @@ add_library(
 target_link_libraries(joint_limits_common cartesian_limits_parameters)
 ament_target_dependencies(joint_limits_common ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
+add_library(planning_context_loader_base SHARED src/planning_context_loader.cpp)
+target_link_libraries(planning_context_loader_base cartesian_limits_parameters
+                      joint_limits_common)
+ament_target_dependencies(planning_context_loader_base
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
 add_library(
   trajectory_generation_common SHARED
   src/trajectory_functions.cpp src/trajectory_generator.cpp
   src/trajectory_blender_transition_window.cpp)
-target_link_libraries(trajectory_generation_common cartesian_limits_parameters)
+target_link_libraries(trajectory_generation_common cartesian_limits_parameters
+                      joint_limits_common)
 ament_target_dependencies(trajectory_generation_common
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
