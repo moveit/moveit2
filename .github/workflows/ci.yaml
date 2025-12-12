@@ -178,10 +178,17 @@ jobs:
         with:
           name: clang-tidy
           path: ${{ env.BASEDIR }}/target_ws/src/$(basename $(pwd))
+      - name: chown the target_ws because it came out of root-owned Docker container filesystem
+        run: sudo chown -R "$USER:$USER" ${{ env.BASEDIR }}/target_ws
+      - name: move sonar-project.properties from checkout into ICI output
+        run: mv sonar-project.properties ${{ env.BASEDIR }}/target_ws
       - name: SonarQube Scan
         # Don't run if SONAR_TOKEN is not set (i.e. PR job from a fork)
         if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0' && env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@v6.0.0
+        with:
+          projectBaseDir: ${{ env.BASEDIR }}/target_ws
+
       - name: Prepare target_ws for cache
         if: always() && !matrix.env.CCOV
         run: |
