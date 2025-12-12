@@ -34,7 +34,6 @@ jobs:
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unknown-warning-option
       CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
-      DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: >
         moveit2.repos
         $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
@@ -71,21 +70,8 @@ jobs:
 
     name: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.IKFAST_TEST && ' + ikfast' || ''}}${{ matrix.env.CLANG_TIDY && (github.event_name != 'workflow_dispatch' && ' + clang-tidy (delta)' || ' + clang-tidy (all)') || '' }}
     runs-on: ubuntu-latest
+    container: moveit/moveit2:${{ matrix.env.IMAGE }}
     steps:
-      - name: "Free up disk space"
-        if: matrix.env.CCOV
-        run: |
-          sudo apt-get -qq purge "ghc*"
-          sudo apt-get clean
-          # cleanup docker images not used by us
-          docker system prune -af
-          # shift ccache folder to /mnt on a separate disk
-          sudo mkdir /mnt/ccache
-          mkdir ${{ env.CCACHE_DIR }}
-          sudo mount --bind ${{ env.CCACHE_DIR }} /mnt/ccache
-          # free up a lot of stuff from /usr/local
-          sudo rm -rf /usr/local
-          df -h
       - uses: actions/checkout@v6
       # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
       # See: https://github.com/moveit/moveit2/issues/2852
@@ -145,7 +131,10 @@ jobs:
       - id: ici
         name: Run industrial_ci
         uses: ros-industrial/industrial_ci@master
-        env: ${{ matrix.env }}
+        env:
+          CCOV: ${{ matrix.env.CCOV }}
+          CLANG_TIDY: ${{ matrix.env.CLANG_TIDY }}
+          ROS_DISTRO: ${{ matrix.env.ROS_DISTRO }}
       # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
       # See: https://github.com/moveit/moveit2/issues/2852
       #      - name: Push result to Testspace
@@ -163,7 +152,6 @@ jobs:
         uses: rhaschke/lcov-action@main
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
         with:
-          docker: $DOCKER_IMAGE
           workdir: ${{ env.BASEDIR }}/target_ws
           lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
@@ -178,10 +166,6 @@ jobs:
         with:
           name: clang-tidy
           path: ${{ env.BASEDIR }}/target_ws/src/$(basename $(pwd))
-      - name: chown the target_ws because it came out of root-owned Docker container filesystem
-        run: sudo chown -R "$USER:$USER" ${{ env.BASEDIR }}/target_ws
-      - name: move sonar-project.properties from checkout into ICI output
-        run: mv sonar-project.properties ${{ env.BASEDIR }}/target_ws
       - name: SonarQube Scan
         # Don't run if SONAR_TOKEN is not set (i.e. PR job from a fork)
         if: matrix.env.CCOV && steps.ici.outputs.target_test_results == '0' && env.SONAR_TOKEN != ''
