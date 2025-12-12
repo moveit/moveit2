@@ -332,6 +332,12 @@ void CurrentStateMonitor::jointStateCallback(const sensor_msgs::msg::JointState:
     current_state_time_ = joint_state->header.stamp;
     for (std::size_t i = 0; i < n; ++i)
     {
+      // Skip joints that don't belong to the RobotModel
+      if (!robot_model_->hasJointModel(joint_state->name[i]))
+      {
+        continue;
+      }
+
       const moveit::core::JointModel* jm = robot_model_->getJointModel(joint_state->name[i]);
       if (!jm)
         continue;
