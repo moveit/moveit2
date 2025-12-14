@@ -31,7 +31,6 @@
   <depend>libboost-dev</depend>
   <depend>libboost-chrono-dev</depend>
   <depend>libboost-date-time-dev</depend>
-  <depend>libboost-filesystem-dev</depend>
   <depend>libboost-iostreams-dev</depend>
   <depend>libboost-program-options-dev</depend>
   <depend>libboost-regex-dev</depend>
