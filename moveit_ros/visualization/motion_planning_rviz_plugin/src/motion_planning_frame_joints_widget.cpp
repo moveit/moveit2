@@ -435,38 +435,39 @@ void ProgressBarDelegate::paint(QPainter* painter, const QStyleOptionViewItem& o
       opt.textVisible = true;
 
 #ifndef __APPLE__
-       style->drawControl(QStyle::CE_ProgressBar, &opt, painter);
-#else 
+      style->drawControl(QStyle::CE_ProgressBar, &opt, painter);
+#else
       // Use Manual Drawing Fix for known delegate bug
       const double progress_fraction = (value - min) / (max - min);
       const int bar_width = static_cast<int>(option.rect.width() * progress_fraction);
-      
+
       // Color Definitions
       const QColor TRACK_COLOR = QColor(50, 50, 50);
       const QColor CHUNK_COLOR = QColor(38, 166, 154);
       const QColor BORDER_COLOR = QColor(100, 100, 100);
 
       const QRect inner_rect = option.rect.adjusted(1, 1, -1, -1);
-      
+
       // Empty Track (Background)
       painter->fillRect(inner_rect, TRACK_COLOR);
 
       // Filled Progress Chunk
-      if (bar_width > 0) {
-          QRect progress_rect = inner_rect;
-          progress_rect.setWidth(bar_width - 1); 
-          painter->fillRect(progress_rect, CHUNK_COLOR);
+      if (bar_width > 0)
+      {
+        QRect progress_rect = inner_rect;
+        progress_rect.setWidth(bar_width - 1);
+        painter->fillRect(progress_rect, CHUNK_COLOR);
       }
-      
+
       // Border
       painter->setPen(QPen(BORDER_COLOR, 1));
       painter->drawRect(option.rect);
-      
+
       // Text Label
-      painter->setPen(Qt::white); 
+      painter->setPen(Qt::white);
       painter->drawText(option.rect, style_option.displayAlignment, style_option.text);
-#endif // __APPLE__
-    return;
+#endif  // __APPLE__
+      return;
     }
   }
 
