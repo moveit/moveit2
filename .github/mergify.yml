@@ -8,15 +8,6 @@ pull_request_rules:
         branches:
           - humble
 
-  - name: backport to iron at reviewers discretion
-    conditions:
-      - base=main
-      - "label=backport-iron"
-    actions:
-      backport:
-        branches:
-          - iron
-
   - name: backport to jazzy at reviewers discretion
     conditions:
       - base=main
@@ -25,6 +16,15 @@ pull_request_rules:
       backport:
         branches:
           - jazzy
+
+  - name: backport to kilted at reviewers discretion
+    conditions:
+      - base=main
+      - "label=backport-kilted"
+    actions:
+      backport:
+        branches:
+          - kilted
 
   - name: ask to resolve conflict
     conditions:
