@@ -77,7 +77,8 @@ public:
             bool default_continuous_value = false, double default_timeout = 10.0);
 
   /** @brief Initialize the robot model from a string representation of the URDF and SRDF documents */
-  RDFLoader(const std::string& urdf_string, const std::string& srdf_string);
+  RDFLoader(const std::string& urdf_string, const std::string& srdf_string,
+            const std::string& ros_name = "robot_description");
 
   /** @brief Get the resolved parameter name for the robot description */
   const std::string& getRobotDescription() const
