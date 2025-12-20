@@ -739,10 +739,13 @@ public:
       Collisions are avoided if \e avoid_collisions is set to true. If collisions cannot be avoided, the function fails.
       Return a value that is between 0.0 and 1.0 indicating the fraction of the path achieved as described by the
      waypoints.
-      Return -1.0 in case of error. */
+     Time optimization is performed if \e time_optimize is set to true. Else the trajectory will be returned
+     unoptimized.
+     Return -1.0 in case of error. */
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
                               double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
-                              bool avoid_collisions = true, moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
+                              bool avoid_collisions = true, bool time_optimize = true,
+                              moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
 
   /** \brief Compute a Cartesian path that follows specified waypoints with a step size of at most \e eef_step meters
       between end effector configurations of consecutive points in the result \e trajectory. The reference frame for the
@@ -755,11 +758,13 @@ public:
      met, the function fails.
       Return a value that is between 0.0 and 1.0 indicating the fraction of the path achieved as described by the
      waypoints.
+    Time optimization is performed if \e time_optimize is set to true. Else the trajectory will be returned
+     unoptimized.
       Return -1.0 in case of error. */
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double eef_step,
                               double jump_threshold, moveit_msgs::msg::RobotTrajectory& trajectory,
                               const moveit_msgs::msg::Constraints& path_constraints, bool avoid_collisions = true,
-                              moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
+                              bool time_optimize = true, moveit_msgs::msg::MoveItErrorCodes* error_code = nullptr);
 
   /** \brief Stop any trajectory execution, if one is active */
   void stop();
