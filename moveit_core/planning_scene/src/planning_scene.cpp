@@ -1852,9 +1852,21 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
     shapes.emplace_back(shapes::ShapeConstPtr(s));
   };
 
-  auto treat_shape_vectors = [&append](const auto& shape_vector,        // the shape_msgs of each type
-                                       const auto& shape_poses_vector,  // std::vector<const geometry_msgs::Pose>
-                                       const std::string& shape_type) {
+  auto is_shape_valid = [](const auto& shape_msg,
+                           const std::string& shape_type) {
+    if(shape_type == "primitive_poses") {
+      for(const auto& dimension : shape_msg.dimensions)
+      {
+        if(dimension <= 0) { return false; }
+      }
+    }
+
+    return true;
+  };
+
+  auto treat_shape_vectors = [&append, &is_shape_valid](const auto& shape_vector,        // the shape_msgs of each type
+                                                        const auto& shape_poses_vector,  // std::vector<const geometry_msgs::Pose>
+                                                        const std::string& shape_type) {
     if (shape_vector.size() > shape_poses_vector.size())
     {
       RCLCPP_DEBUG_STREAM(getLogger(), "Number of " << shape_type
@@ -1862,6 +1874,13 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
                                                        "in collision object message. Assuming identity.");
       for (std::size_t i = 0; i < shape_vector.size(); ++i)
       {
+        if(!is_shape_valid(shape_vector.at(i)))
+        {
+          RCLCPP_ERROR_STREAM(LOGGER, "Shape type " << shape_type 
+                                                        << " is invalid.");
+          return false;
+        }
+
         if (i >= shape_poses_vector.size())
         {
           append(shapes::constructShapeFromMsg(shape_vector[i]),
@@ -1876,12 +1895,13 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
       for (std::size_t i = 0; i < shape_vector.size(); ++i)
         append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
     }
+
+    return true;
   };
 
-  treat_shape_vectors(object.primitives, object.primitive_poses, std::string("primitive_poses"));
-  treat_shape_vectors(object.meshes, object.mesh_poses, std::string("meshes"));
-  treat_shape_vectors(object.planes, object.plane_poses, std::string("planes"));
-  return true;
+  return treat_shape_vectors(object.primitives, object.primitive_poses, std::string("primitive_poses")) &&
+         treat_shape_vectors(object.meshes, object.mesh_poses, std::string("meshes")) &&
+         treat_shape_vectors(object.planes, object.plane_poses, std::string("planes"));
 }
 
 bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object)
