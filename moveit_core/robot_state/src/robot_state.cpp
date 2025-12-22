@@ -1335,6 +1335,34 @@ const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& frame_
   return result;
 }
 
+Eigen::Isometry3d RobotState::getFrameTransform(const std::string& destination_frame_id,
+                                                const std::string& source_frame_id, bool* frames_found)
+{
+  updateLinkTransforms();
+  return static_cast<const RobotState*>(this)->getFrameTransform(destination_frame_id, source_frame_id, frames_found);
+}
+
+Eigen::Isometry3d RobotState::getFrameTransform(const std::string& destination_frame_id,
+                                                const std::string& source_frame_id, bool* frames_found) const
+{
+  bool found;
+  const Eigen::Isometry3d& destination_transform = getFrameTransform(destination_frame_id, &found);
+  if (!found)
+  {
+    if (frames_found)
+      *frames_found = false;
+    return destination_transform;  // Will be the identity.
+  }
+  const Eigen::Isometry3d& source_transform = getFrameTransform(source_frame_id, &found);
+  if (!found)
+  {
+    if (frames_found)
+      *frames_found = false;
+    return source_transform;  // Will be the identity.
+  }
+  return destination_transform.inverse() * source_transform;
+}
+
 const Eigen::Isometry3d& RobotState::getFrameInfo(const std::string& frame_id, const LinkModel*& robot_link,
                                                   bool& frame_found) const
 {
@@ -1927,18 +1955,17 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
           RCLCPP_ERROR_STREAM(getLogger(), "The following Pose Frame does not exist: " << pose_frame);
           return false;
         }
-        Eigen::Isometry3d pose_parent_to_frame = getFrameTransform(pose_frame);
         auto* tip_parent = getRigidlyConnectedParentLinkModel(solver_tip_frame);
         if (!tip_parent)
         {
           RCLCPP_ERROR_STREAM(getLogger(), "The following Solver Tip Frame does not exist: " << solver_tip_frame);
           return false;
         }
-        Eigen::Isometry3d tip_parent_to_tip = getFrameTransform(solver_tip_frame);
         if (pose_parent == tip_parent)
         {
           // transform goal pose as target for solver_tip_frame (instead of pose_frame)
-          pose = pose * pose_parent_to_frame.inverse() * tip_parent_to_tip;
+          Eigen::Isometry3d pose_frame_from_solver_tip_frame = getFrameTransform(pose_frame, solver_tip_frame);
+          pose = pose * pose_frame_from_solver_tip_frame;
           found_valid_frame = true;
           break;
         }
