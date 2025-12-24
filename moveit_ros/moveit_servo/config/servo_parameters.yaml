@@ -42,6 +42,13 @@ servo:
                   must be passed to the node during launch time."
   }
 
+  end_effector_frame: {
+    type: string,
+    default_value: "",
+    description: "The end effector frame for the active planning group. \
+                  If not set, it will be overridden by command-frame of incoming commands"
+  }
+
   active_subgroup: {
     type: string,
     default_value: "",

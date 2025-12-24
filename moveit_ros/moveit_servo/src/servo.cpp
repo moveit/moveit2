@@ -79,6 +79,8 @@ Servo::Servo(const rclcpp::Node::SharedPtr& node, std::shared_ptr<const servo::P
 
   moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
 
+  end_effector_frame_ = servo_params_.end_effector_frame;
+
   // Create the collision checker and start collision checking.
   collision_monitor_ =
       std::make_unique<CollisionMonitor>(planning_scene_monitor_, servo_params_, std::ref(collision_velocity_scale_));
@@ -576,54 +578,64 @@ std::optional<TwistCommand> Servo::toPlanningFrame(const TwistCommand& command, 
 {
   Eigen::VectorXd transformed_twist = command.velocities;
 
-  if (command.frame_id != planning_frame)
+  // Look up the transform between the planning and command frames.
+  const auto planning_to_command_tf_maybe = getPlanningToCommandFrameTransform(command.frame_id, planning_frame);
+  if (!planning_to_command_tf_maybe.has_value())
   {
-    // Look up the transform between the planning and command frames.
-    const auto planning_to_command_tf_maybe = getPlanningToCommandFrameTransform(command.frame_id, planning_frame);
-    if (!planning_to_command_tf_maybe.has_value())
+    return std::nullopt;
+  }
+  const auto& planning_to_command_tf = *planning_to_command_tf_maybe;
+
+  if (servo_params_.apply_twist_commands_about_ee_frame)
+  {
+
+    const auto planning_to_ee_frame_maybe = getPlanningToCommandFrameTransform(
+      (end_effector_frame_.empty() ? command.frame_id : end_effector_frame_),
+      planning_frame);
+    if (!planning_to_ee_frame_maybe.has_value())
     {
       return std::nullopt;
     }
-    const auto& planning_to_command_tf = *planning_to_command_tf_maybe;
+    const auto& planning_to_ee_frame = *planning_to_ee_frame_maybe;
+    RCLCPP_DEBUG(logger_, "Applying twist about end effector frame: %s",
+                  (end_effector_frame_.empty() ? command.frame_id.c_str() : end_effector_frame_.c_str()));
 
-    if (servo_params_.apply_twist_commands_about_ee_frame)
-    {
-      // If the twist command is applied about the end effector frame, simply apply the rotation of the transform.
-      const auto planning_to_command_rotation = planning_to_command_tf.linear();
-      const Eigen::Vector3d translation_vector =
-          planning_to_command_rotation *
-          Eigen::Vector3d(command.velocities[0], command.velocities[1], command.velocities[2]);
-      const Eigen::Vector3d angular_vector =
-          planning_to_command_rotation *
-          Eigen::Vector3d(command.velocities[3], command.velocities[4], command.velocities[5]);
+    // If the twist command is applied about the end effector frame, simply apply the rotation of the transform.
+    const auto planning_to_command_rotation = planning_to_command_tf.linear();
+    const auto planning_to_ee_frame_rotation = planning_to_ee_frame.linear();
+    const Eigen::Vector3d translation_vector =
+        planning_to_command_rotation *
+        Eigen::Vector3d(command.velocities[0], command.velocities[1], command.velocities[2]);
+    const Eigen::Vector3d angular_vector =
+        planning_to_ee_frame_rotation *
+        Eigen::Vector3d(command.velocities[3], command.velocities[4], command.velocities[5]);
 
-      // Update the values of the original command message to reflect the change in frame
-      transformed_twist.head<3>() = translation_vector;
-      transformed_twist.tail<3>() = angular_vector;
-    }
-    else
-    {
-      // If the twist command is applied about the planning frame, the spatial twist is calculated
-      // as shown in Equation 3.83 in http://hades.mech.northwestern.edu/images/7/7f/MR.pdf.
-      // The above equation defines twist as [angular; linear], but in our convention it is
-      // [linear; angular] so the adjoint matrix is also reordered accordingly.
-      Eigen::MatrixXd adjoint(6, 6);
+    // Update the values of the original command message to reflect the change in frame
+    transformed_twist.head<3>() = translation_vector;
+    transformed_twist.tail<3>() = angular_vector;
+  }
+  else
+  {
+    // If the twist command is applied about the planning frame, the spatial twist is calculated
+    // as shown in Equation 3.83 in http://hades.mech.northwestern.edu/images/7/7f/MR.pdf.
+    // The above equation defines twist as [angular; linear], but in our convention it is
+    // [linear; angular] so the adjoint matrix is also reordered accordingly.
+    Eigen::MatrixXd adjoint(6, 6);
 
-      const Eigen::Matrix3d& rotation = planning_to_command_tf.rotation();
-      const Eigen::Vector3d& translation = planning_to_command_tf.translation();
+    const Eigen::Matrix3d& rotation = planning_to_command_tf.rotation();
+    const Eigen::Vector3d& translation = planning_to_command_tf.translation();
 
-      Eigen::Matrix3d skew_translation;
-      skew_translation.row(0) << 0, -translation(2), translation(1);
-      skew_translation.row(1) << translation(2), 0, -translation(0);
-      skew_translation.row(2) << -translation(1), translation(0), 0;
+    Eigen::Matrix3d skew_translation;
+    skew_translation.row(0) << 0, -translation(2), translation(1);
+    skew_translation.row(1) << translation(2), 0, -translation(0);
+    skew_translation.row(2) << -translation(1), translation(0), 0;
 
-      adjoint.topLeftCorner(3, 3) = skew_translation * rotation;
-      adjoint.topRightCorner(3, 3) = rotation;
-      adjoint.bottomLeftCorner(3, 3) = rotation;
-      adjoint.bottomRightCorner(3, 3).setZero();
+    adjoint.topLeftCorner(3, 3) = skew_translation * rotation;
+    adjoint.topRightCorner(3, 3) = rotation;
+    adjoint.bottomLeftCorner(3, 3) = rotation;
+    adjoint.bottomRightCorner(3, 3).setZero();
 
-      transformed_twist = adjoint * transformed_twist;
-    }
+    transformed_twist = adjoint * transformed_twist;
   }
 
   return TwistCommand{ planning_frame, transformed_twist };

@@ -223,6 +223,9 @@ private:
 
   // Variables
 
+  // The end effector frame for the active planning group.
+  std::string end_effector_frame_;
+
   StatusCode servo_status_;
   // This needs to be threadsafe so it can be updated in realtime.
   std::atomic<CommandType> expected_command_type_;
