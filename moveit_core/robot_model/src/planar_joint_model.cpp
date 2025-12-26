@@ -245,6 +245,14 @@ void PlanarJointModel::interpolate(const double* from, const double* to, const d
 
     double total_d = initial_d + drive_d + final_d;
 
+    if (total_d <= std::numeric_limits<double>::epsilon())
+    {
+      state[0] = to[0];
+      state[1] = to[1];
+      state[2] = to[2];
+      return;
+    }
+
     double initial_frac = initial_d / total_d;
     double drive_frac = drive_d / total_d;
     double final_frac = final_d / total_d;
