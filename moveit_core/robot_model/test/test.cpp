@@ -237,11 +237,14 @@ TEST(PlanarJointTest, InterpolateDiffDriveNoNan)
   // Test interpolation for each case and check for NaN values
   for (const auto& test_case : test_cases)
   {
-    double state[3];
-    pjm.interpolate(test_case.from, test_case.to, 0.1, state);
-    EXPECT_TRUE(std::isfinite(state[0])) << "Failed at test case: " << test_case.name;
-    EXPECT_TRUE(std::isfinite(state[1])) << "Failed at test case: " << test_case.name;
-    EXPECT_TRUE(std::isfinite(state[2])) << "Failed at test case: " << test_case.name;
+    for (double t : { 0.0, 0.5, 1.0 })
+    {
+      double state[3];
+      pjm.interpolate(test_case.from, test_case.to, t, state);
+      EXPECT_TRUE(std::isfinite(state[0])) << "Failed at test case: " << test_case.name << " at t=" << t;
+      EXPECT_TRUE(std::isfinite(state[1])) << "Failed at test case: " << test_case.name << " at t=" << t;
+      EXPECT_TRUE(std::isfinite(state[2])) << "Failed at test case: " << test_case.name << " at t=" << t;
+    }
   }
 }
 

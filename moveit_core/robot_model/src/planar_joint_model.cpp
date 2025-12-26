@@ -236,6 +236,14 @@ void PlanarJointModel::interpolate(const double* from, const double* to, const d
   }
   else if (motion_model_ == DIFF_DRIVE)
   {
+    if (t <= 0.0)
+    {
+      state[0] = from[0];
+      state[1] = from[1];
+      state[2] = from[2];
+      return;
+    }
+
     double dx, dy, initial_turn, drive_angle, final_turn;
     computeTurnDriveTurnGeometry(from, to, min_translational_distance_, dx, dy, initial_turn, drive_angle, final_turn);
 
