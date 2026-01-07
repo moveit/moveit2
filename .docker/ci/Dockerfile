@@ -37,9 +37,9 @@ RUN \
     if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
     #
     # Download all dependencies of MoveIt
-    rosdep update && \
-    DEBIAN_FRONTEND=noninteractive \
+    DEBIAN_FRONTEND=noninteractive &&\
     rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+    rosdep update && \
     # Remove the source code from this container
     rm -rf src && \
     #
