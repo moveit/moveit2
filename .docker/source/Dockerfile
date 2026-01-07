@@ -1,5 +1,4 @@
-# syntax = docker/dockerfile:1.3
-
+# syntax = docker/dockerfile:1.20
 # ghcr.io/moveit/moveit2:${ROS_DISTRO}-source
 # Downloads the moveit source code and install remaining debian dependencies
 
