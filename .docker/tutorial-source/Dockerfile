@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1.3
+# syntax = docker/dockerfile:1.20
 
 # ghcr.io/moveit/moveit2:main-${ROS_DISTRO}-tutorial-source
 # Source build of the repos file from the tutorial site
