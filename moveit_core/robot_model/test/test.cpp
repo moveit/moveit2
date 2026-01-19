@@ -210,11 +210,11 @@ TEST(PlanarJointTest, InterpolateNormalizesYaw)
   moveit::core::PlanarJointModel pjm("joint", 0, 0);
 
   // Test for normalization
-  const double from[3] = {0.0, 0.0, -2.9};
-  const double to[3] = {0.0, 0.0, 3.0};
+  const double from[3] = { 0.0, 0.0, -2.9 };
+  const double to[3] = { 0.0, 0.0, 3.0 };
 
   // Check that yaw value is normalized between [-pi, pi]
-  for (auto model : {moveit::core::PlanarJointModel::HOLONOMIC, moveit::core::PlanarJointModel::DIFF_DRIVE})
+  for (auto model : { moveit::core::PlanarJointModel::HOLONOMIC, moveit::core::PlanarJointModel::DIFF_DRIVE })
   {
     pjm.setMotionModel(model);
     double state[3];
