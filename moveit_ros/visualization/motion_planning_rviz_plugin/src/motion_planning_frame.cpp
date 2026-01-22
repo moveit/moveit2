@@ -36,6 +36,8 @@
 
 #include <functional>
 
+#include <rclcpp/version.h>
+
 #include <moveit/common_planning_interface_objects/common_objects.hpp>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.hpp>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.hpp>
@@ -47,7 +49,13 @@
 
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/buffer.hpp>
+// For Jazzy and older
+#else
 #include <tf2_ros/buffer.h>
+#endif
 
 #include <std_srvs/srv/empty.hpp>
 
@@ -58,6 +66,8 @@
 #include <QShortcut>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
+
+#include <cmath>
 
 namespace moveit_rviz_plugin
 {
@@ -678,10 +688,15 @@ void MotionPlanningFrame::tabChanged(int index)
   }
 }
 
-void MotionPlanningFrame::updateSceneMarkers(double /*wall_dt*/, double /*ros_dt*/)
+void MotionPlanningFrame::updateSceneMarkers(std::chrono::nanoseconds /*wall_dt*/, std::chrono::nanoseconds /*ros_dt*/)
 {
   if (scene_marker_)
     scene_marker_->update();
+}
+
+void MotionPlanningFrame::updateSceneMarkers(double wall_dt, double ros_dt)
+{
+  updateSceneMarkers(std::chrono::nanoseconds(std::lround(wall_dt)), std::chrono::nanoseconds(std::lround(ros_dt)));
 }
 
 void MotionPlanningFrame::updateExternalCommunication()

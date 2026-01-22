@@ -1,7 +1,8 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2021, PickNik, Inc.
+ *  Copyright (c) 2018 Pilz GmbH & Co. KG
+ *  Copyright (c) 2025 Aiman Haidar
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,7 +15,7 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of PickNik nor the names of its
+ *   * Neither the name of Pilz GmbH & Co. KG nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
@@ -32,31 +33,37 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Abishalini Sivaraman */
+#pragma once
 
-#include <moveit/planning_scene_monitor/trajectory_monitor_middleware_handle.hpp>
-#include <limits>
+#include <pilz_industrial_motion_planner/limits_container.hpp>
 
-namespace planning_scene_monitor
-{
-planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::TrajectoryMonitorMiddlewareHandle(double sampling_frequency)
-{
-  setRate(sampling_frequency);
-}
+#include <rclcpp/rclcpp.hpp>
 
-void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::setRate(double sampling_frequency)
+#include <moveit/planning_interface/planning_interface.hpp>
+#include <moveit/planning_interface/planning_response.hpp>
+
+#include <atomic>
+#include <thread>
+
+#include <pilz_industrial_motion_planner/planning_context_base.hpp>
+#include <pilz_industrial_motion_planner/trajectory_generator_polyline.hpp>
+
+namespace pilz_industrial_motion_planner
 {
-  if (sampling_frequency > std::numeric_limits<double>::epsilon())
+MOVEIT_CLASS_FORWARD(PlanningContext);
+
+/**
+ * @brief PlanningContext for obtaining Polyline trajectories
+ */
+class PlanningContextPolyline : public pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorPolyline>
+{
+public:
+  PlanningContextPolyline(const std::string& name, const std::string& group,
+                          const moveit::core::RobotModelConstPtr& model,
+                          const pilz_industrial_motion_planner::LimitsContainer& limits)
+    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorPolyline>(name, group, model, limits)
   {
-    rate_ = std::make_unique<rclcpp::WallRate>(sampling_frequency);
   }
-}
+};
 
-void planning_scene_monitor::TrajectoryMonitorMiddlewareHandle::sleep()
-{
-  if (rate_)
-  {
-    rate_->sleep();
-  }
-}
-}  // namespace planning_scene_monitor
+}  // namespace pilz_industrial_motion_planner
