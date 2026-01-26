@@ -8,7 +8,7 @@
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
   <maintainer email="rhaschke@techfak.uni-bielefeld.de">Robert Haschke</maintainer>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
-  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
+  <maintainer email="david@metrorobots.com">David V. Lu!!</maintainer>
 
   <license>BSD-3-Clause</license>
 
@@ -16,7 +16,7 @@
   <url type="bugtracker">https://github.com/moveit/moveit2/issues</url>
   <url type="repository">https://github.com/moveit/moveit2</url>
 
-  <author email="davidvlu@gmail.com">David V. Lu!!</author>
+  <author email="david@metrorobots.com">David V. Lu!!</author>
   <author email="dave@picknik.ai">Dave Coleman</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
