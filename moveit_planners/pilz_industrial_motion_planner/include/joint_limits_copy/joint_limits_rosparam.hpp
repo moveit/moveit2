@@ -99,7 +99,7 @@ inline bool declare_parameters(const std::string& joint_name, const rclcpp::Node
  *     max_velocity: 4.0
  * \endcode
  *
- * This specification is similar to the one used by <a href="http://moveit.ros.org/wiki/MoveIt!">MoveIt!</a>,
+ * This specification is similar to the one used by <a href="http://moveit.ai/wiki/MoveIt!">MoveIt!</a>,
  * but additionally supports jerk and effort limits.
  *
  * \param[in] joint_name Name of joint whose limits are to be fetched.
