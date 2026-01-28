@@ -1,4 +1,4 @@
-<img src="https://moveit.ros.org/assets/logo/moveit2/moveit_logo-black.png" alt="MoveIt 2 Logo" width="200"/>
+<img src="https://moveit.ai/assets/logo/moveit2/moveit_logo-black.png" alt="MoveIt 2 Logo" width="200"/>
 
 The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](https://github.com/ros-planning/moveit).
 
@@ -12,20 +12,20 @@ The MoveIt Motion Planning Framework for **ROS 2**. For ROS 1, see [MoveIt 1](ht
 
 ## General MoveIt Documentation
 
-- [MoveIt Website](http://moveit.ros.org)
+- [MoveIt Website](http://moveit.ai)
 - [Tutorials and Documentation](https://ros-planning.github.io/moveit_tutorials/)
-- [How to Get Involved](http://moveit.ros.org/about/get_involved/)
-- [Future Release Dates](https://moveit.ros.org/#release-versions)
+- [How to Get Involved](http://moveit.ai/about/get_involved/)
+- [Future Release Dates](https://moveit.ai/#release-versions)
 
 ## MoveIt 2 Specific Documentation
 
 - [MoveIt 2 Migration Progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing)
 - [MoveIt 2 Migration Guidelines](doc/MIGRATION_GUIDE.md)
-- [MoveIt 2 Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/)
+- [MoveIt 2 Development Roadmap](https://moveit.ai/documentation/contributing/roadmap/)
 
 ## Source Build
 
-See [MoveIt 2 Source Build - Linux](https://moveit.ros.org/install-moveit2/source/)
+See [MoveIt 2 Source Build - Linux](https://moveit.ai/install-moveit2/source/)
 
 ## Getting Started
 
@@ -40,7 +40,7 @@ See [How To Generate API Doxygen Reference Locally](https://moveit.picknik.ai/ma
 
 ## Supporters
 
-This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ros.org/about/). Special thanks to contributor from Intel and Open Robotics.
+This open source project is maintained by supporters from around the world — see [MoveIt maintainers](https://moveit.ai/about/). Special thanks to contributor from Intel and Open Robotics.
 
 <a href="https://picknik.ai/">
   <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
