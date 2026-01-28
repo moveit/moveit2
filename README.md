@@ -1,6 +1,6 @@
-<img src="https://moveit.ros.org/assets/logo/moveit_logo-black.png" alt="MoveIt Logo" width="200"/>
+<img src="https://moveit.ai/assets/logo/moveit_logo-black.png" alt="MoveIt Logo" width="200"/>
 
-The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ros.org). For the ROS 1 repository see [MoveIt 1](https://github.com/ros-planning/moveit).
+The [MoveIt Motion Planning Framework for ROS 2](http://moveit.ai). For the ROS 1 repository see [MoveIt 1](https://github.com/ros-planning/moveit).
 
 *Easy-to-use open source robotics manipulation platform for developing commercial applications, prototyping designs, and benchmarking algorithms.*
 
@@ -16,20 +16,20 @@ See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/).
 
 ## Install
 
-- [Binary Install](https://moveit.ros.org/install-moveit2/binary/)
-- [Source Build](https://moveit.ros.org/install-moveit2/source/)
+- [Binary Install](https://moveit.ai/install-moveit2/binary/)
+- [Source Build](https://moveit.ai/install-moveit2/source/)
 
 ## More Info
 
-- [How to Get Involved](http://moveit.ros.org/about/get_involved/)
-- [Development Roadmap](https://moveit.ros.org/documentation/contributing/roadmap/)
-- [Future Release Dates](https://moveit.ros.org/#release-versions)
+- [How to Get Involved](http://moveit.ai/about/get_involved/)
+- [Development Roadmap](https://moveit.ai/documentation/contributing/roadmap/)
+- [Future Release Dates](https://moveit.ai/#release-versions)
 - [MoveIt 2 Migration Guidelines](doc/MIGRATION_GUIDE.md)
 - [MoveIt 2 Migration Progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing)
 
 ## Supporters
 
-This open source project is maintained by supporters from around the world — see our [MoveIt Maintainers and Core Contributors](https://moveit.ros.org/about/).
+This open source project is maintained by supporters from around the world — see our [MoveIt Maintainers and Core Contributors](https://moveit.ai/about/).
 
 <a href="https://picknik.ai/">
   <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
