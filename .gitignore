@@ -28,6 +28,9 @@ msg/_.*\.py$
 /cfg/cpp/
 /cfg/.*\.py$
 
+# Kdevelop
+*.kdev4
+
 # Ignore generated docs
 .dox$
 .wikidoc$
