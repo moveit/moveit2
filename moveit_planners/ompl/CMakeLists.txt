@@ -16,6 +16,7 @@ find_package(
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(tf2_eigen REQUIRED)

@@ -29,6 +29,7 @@ else()
 endif()
 find_package(moveit_ros_visualization REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 

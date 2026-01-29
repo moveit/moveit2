@@ -26,6 +26,7 @@ else()
   set(QT_VERSION_MAJOR 5)
 endif()
 find_package(moveit_setup_framework REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 

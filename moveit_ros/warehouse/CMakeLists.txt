@@ -11,6 +11,8 @@ find_package(rclcpp REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(warehouse_ros REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
 
@@ -18,16 +20,6 @@ find_package(tf2_ros REQUIRED)
 include(ConfigExtras.cmake)
 
 include_directories(include)
-
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-    fmt
-    Boost
-    moveit_core
-    rclcpp
-    warehouse_ros
-    moveit_ros_planning
-    tf2_eigen
-    tf2_ros)
 
 # Libraries
 add_library(
@@ -45,13 +37,102 @@ target_include_directories(
   moveit_warehouse PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_warehouse
                       PROPERTIES VERSION "${moveit_ros_warehouse_VERSION}")
-ament_target_dependencies(moveit_warehouse ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_warehouse PUBLIC
+      moveit_core::moveit_collision_detection
+      moveit_core::moveit_collision_detection_bullet
+      moveit_core::moveit_collision_detection_fcl
+      moveit_core::moveit_collision_distance_field
+      moveit_core::moveit_constraint_samplers
+      moveit_core::moveit_distance_field
+      moveit_core::moveit_dynamics_solver
+      moveit_core::moveit_exceptions
+      moveit_core::moveit_kinematic_constraints
+      moveit_core::moveit_kinematics_base
+      moveit_core::moveit_kinematics_metrics
+      moveit_core::moveit_macros
+      moveit_core::moveit_planning_interface
+      moveit_core::moveit_planning_scene
+      moveit_core::moveit_robot_model
+      moveit_core::moveit_robot_state
+      moveit_core::moveit_robot_trajectory
+      moveit_core::moveit_smoothing_base
+      moveit_core::moveit_test_utils
+      moveit_core::moveit_trajectory_processing
+      moveit_core::moveit_transforms
+      moveit_core::moveit_utils
+      moveit_ros_planning::default_request_adapter_parameters
+      moveit_ros_planning::default_response_adapter_parameters
+      moveit_ros_planning::kinematics_parameters
+      moveit_ros_planning::moveit_collision_plugin_loader
+      moveit_ros_planning::moveit_constraint_sampler_manager_loader
+      moveit_ros_planning::moveit_cpp
+      moveit_ros_planning::moveit_kinematics_plugin_loader
+      moveit_ros_planning::moveit_plan_execution
+      moveit_ros_planning::moveit_planning_pipeline
+      moveit_ros_planning::moveit_planning_pipeline_interfaces
+      moveit_ros_planning::moveit_planning_scene_monitor
+      moveit_ros_planning::moveit_rdf_loader
+      moveit_ros_planning::moveit_robot_model_loader
+      moveit_ros_planning::moveit_trajectory_execution_manager
+      moveit_ros_planning::planning_pipeline_parameters
+      moveit_ros_planning::srdf_publisher_node
+      rclcpp::rclcpp
+      tf2_eigen::tf2_eigen
+      tf2_ros::static_transform_broadcaster_node
+      tf2_ros::tf2_ros
+      warehouse_ros::warehouse_ros
+    )
 
 # Executables
 add_executable(moveit_warehouse_broadcast src/broadcast.cpp)
-ament_target_dependencies(moveit_warehouse_broadcast
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_warehouse_broadcast moveit_warehouse)
+target_link_libraries(moveit_warehouse_broadcast
+      PRIVATE
+      moveit_warehouse
+      PUBLIC
+      moveit_core::moveit_collision_detection
+      moveit_core::moveit_collision_detection_bullet
+      moveit_core::moveit_collision_detection_fcl
+      moveit_core::moveit_collision_distance_field
+      moveit_core::moveit_constraint_samplers
+      moveit_core::moveit_distance_field
+      moveit_core::moveit_dynamics_solver
+      moveit_core::moveit_exceptions
+      moveit_core::moveit_kinematic_constraints
+      moveit_core::moveit_kinematics_base
+      moveit_core::moveit_kinematics_metrics
+      moveit_core::moveit_macros
+      moveit_core::moveit_planning_interface
+      moveit_core::moveit_planning_scene
+      moveit_core::moveit_robot_model
+      moveit_core::moveit_robot_state
+      moveit_core::moveit_robot_trajectory
+      moveit_core::moveit_smoothing_base
+      moveit_core::moveit_test_utils
+      moveit_core::moveit_trajectory_processing
+      moveit_core::moveit_transforms
+      moveit_core::moveit_utils
+      moveit_ros_planning::default_request_adapter_parameters
+      moveit_ros_planning::default_response_adapter_parameters
+      moveit_ros_planning::kinematics_parameters
+      moveit_ros_planning::moveit_collision_plugin_loader
+      moveit_ros_planning::moveit_constraint_sampler_manager_loader
+      moveit_ros_planning::moveit_cpp
+      moveit_ros_planning::moveit_kinematics_plugin_loader
+      moveit_ros_planning::moveit_plan_execution
+      moveit_ros_planning::moveit_planning_pipeline
+      moveit_ros_planning::moveit_planning_pipeline_interfaces
+      moveit_ros_planning::moveit_planning_scene_monitor
+      moveit_ros_planning::moveit_rdf_loader
+      moveit_ros_planning::moveit_robot_model_loader
+      moveit_ros_planning::moveit_trajectory_execution_manager
+      moveit_ros_planning::planning_pipeline_parameters
+      moveit_ros_planning::srdf_publisher_node
+      rclcpp::rclcpp
+      tf2_eigen::tf2_eigen
+      tf2_ros::static_transform_broadcaster_node
+      tf2_ros::tf2_ros
+      warehouse_ros::warehouse_ros
+    )
 
 add_executable(moveit_save_to_warehouse src/save_to_warehouse.cpp)
 ament_target_dependencies(moveit_save_to_warehouse
@@ -96,7 +177,6 @@ install(
   INCLUDES
   DESTINATION include/moveit_ros_warehouse)
 
-ament_export_targets(moveit_ros_warehouseTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_targets(moveit_ros_warehouseTargets)
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

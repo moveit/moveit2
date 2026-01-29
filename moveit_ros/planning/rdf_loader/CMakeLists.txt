@@ -2,8 +2,34 @@ add_library(moveit_rdf_loader SHARED src/rdf_loader.cpp
                                      src/synchronized_string_parameter.cpp)
 set_target_properties(moveit_rdf_loader PROPERTIES VERSION
                                                    "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_rdf_loader rclcpp ament_index_cpp urdf srdfdom
-                          moveit_core)
+      target_link_libraries(moveit_rdf_loader PUBLIC
+        ament_index_cpp::ament_index_cpp
+        moveit_core::moveit_collision_detection
+        moveit_core::moveit_collision_detection_bullet
+        moveit_core::moveit_collision_detection_fcl
+        moveit_core::moveit_collision_distance_field
+        moveit_core::moveit_constraint_samplers
+        moveit_core::moveit_distance_field
+        moveit_core::moveit_dynamics_solver
+        moveit_core::moveit_exceptions
+        moveit_core::moveit_kinematic_constraints
+        moveit_core::moveit_kinematics_base
+        moveit_core::moveit_kinematics_metrics
+        moveit_core::moveit_macros
+        moveit_core::moveit_planning_interface
+        moveit_core::moveit_planning_scene
+        moveit_core::moveit_robot_model
+        moveit_core::moveit_robot_state
+        moveit_core::moveit_robot_trajectory
+        moveit_core::moveit_smoothing_base
+        moveit_core::moveit_test_utils
+        moveit_core::moveit_trajectory_processing
+        moveit_core::moveit_transforms
+        moveit_core::moveit_utils
+        rclcpp::rclcpp
+        srdfdom::srdfdom
+        urdf::urdf
+      )
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(DIRECTORY test/data test/launch
