@@ -29,15 +29,34 @@ add_library(
   src/robotconfiguration.cpp src/sequence.cpp src/xml_testdata_loader.cpp)
 
 # Specify libraries to link a library or executable target against
-ament_target_dependencies(
-  pilz_industrial_motion_planner_testutils
-  Boost
-  Eigen3
-  eigen3_cmake_module
-  rclcpp
-  moveit_core
-  moveit_msgs
-  tf2_eigen)
+target_link_libraries(pilz_industrial_motion_planner_testutils PUBLIC
+      ${moveit_msgs_TARGETS}
+      moveit_core::moveit_collision_detection
+      moveit_core::moveit_collision_detection_bullet
+      moveit_core::moveit_collision_detection_fcl
+      moveit_core::moveit_collision_distance_field
+      moveit_core::moveit_constraint_samplers
+      moveit_core::moveit_distance_field
+      moveit_core::moveit_dynamics_solver
+      moveit_core::moveit_exceptions
+      moveit_core::moveit_kinematic_constraints
+      moveit_core::moveit_kinematics_base
+      moveit_core::moveit_kinematics_metrics
+      moveit_core::moveit_macros
+      moveit_core::moveit_planning_interface
+      moveit_core::moveit_planning_scene
+      moveit_core::moveit_robot_model
+      moveit_core::moveit_robot_state
+      moveit_core::moveit_robot_trajectory
+      moveit_core::moveit_smoothing_base
+      moveit_core::moveit_test_utils
+      moveit_core::moveit_trajectory_processing
+      moveit_core::moveit_transforms
+      moveit_core::moveit_utils
+      rclcpp::rclcpp
+      tf2_eigen::tf2_eigen
+    )
+
 
 # ##############################################################################
 # Install ##
@@ -58,5 +77,3 @@ install(DIRECTORY include/
 ament_export_targets(pilz_industrial_motion_planner_testutilsTargets
                      HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp moveit_core moveit_msgs tf2_eigen)
-
-ament_package()

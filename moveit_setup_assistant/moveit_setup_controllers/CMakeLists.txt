@@ -14,6 +14,7 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 

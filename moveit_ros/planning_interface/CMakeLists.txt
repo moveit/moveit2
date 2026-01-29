@@ -11,6 +11,7 @@ find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_warehouse REQUIRED)
 find_package(moveit_ros_move_group REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
@@ -18,7 +19,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
-
+find_package(warehouse_ros REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
@@ -42,6 +43,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     tf2_ros
     rclcpp
     rclcpp_action
+    warehouse_ros
     Eigen3)
 
 include_directories(${THIS_PACKAGE_INCLUDE_DIRS})

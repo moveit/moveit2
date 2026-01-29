@@ -15,8 +15,9 @@ endforeach()
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-# Finds Boost Components
-include(ConfigExtras.cmake)
+
+include_directories(include)
+
 
 add_library(moveit_ros_control_interface_plugin SHARED
             src/controller_manager_plugin.cpp)
@@ -24,8 +25,35 @@ set_target_properties(
   moveit_ros_control_interface_plugin
   PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_plugin PRIVATE include)
-ament_target_dependencies(moveit_ros_control_interface_plugin
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+target_link_libraries(moveit_ros_control_interface_plugin PUBLIC
+      ${controller_manager_msgs_TARGETS}
+      ${trajectory_msgs_TARGETS}
+      moveit_core::moveit_collision_detection
+      moveit_core::moveit_collision_detection_bullet
+      moveit_core::moveit_collision_detection_fcl
+      moveit_core::moveit_collision_distance_field
+      moveit_core::moveit_constraint_samplers
+      moveit_core::moveit_distance_field
+      moveit_core::moveit_dynamics_solver
+      moveit_core::moveit_exceptions
+      moveit_core::moveit_kinematic_constraints
+      moveit_core::moveit_kinematics_base
+      moveit_core::moveit_kinematics_metrics
+      moveit_core::moveit_macros
+      moveit_core::moveit_planning_interface
+      moveit_core::moveit_planning_scene
+      moveit_core::moveit_robot_model
+      moveit_core::moveit_robot_state
+      moveit_core::moveit_robot_trajectory
+      moveit_core::moveit_smoothing_base
+      moveit_core::moveit_test_utils
+      moveit_core::moveit_trajectory_processing
+      moveit_core::moveit_transforms
+      moveit_core::moveit_utils
+      moveit_simple_controller_manager::moveit_simple_controller_manager
+      pluginlib::pluginlib
+      rclcpp_action::rclcpp_action
+    )
 
 add_library(moveit_ros_control_interface_trajectory_plugin SHARED
             src/joint_trajectory_controller_plugin.cpp)
@@ -100,6 +128,6 @@ pluginlib_export_plugin_description_file(
   moveit_ros_control_interface moveit_ros_control_interface_plugins.xml)
 
 ament_export_targets(moveit_ros_control_interfaceTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
-ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
+ament_package(CONFIG_EXTRAS)

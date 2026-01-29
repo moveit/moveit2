@@ -2,6 +2,7 @@ if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_pytest REQUIRED)
   find_package(launch_testing_ament_cmake REQUIRED)
+  find_package(OpenSSL REQUIRED)
   find_package(ros_testing REQUIRED)
   find_package(warehouse_ros_sqlite REQUIRED)
 

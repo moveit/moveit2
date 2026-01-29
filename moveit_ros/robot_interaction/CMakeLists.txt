@@ -14,9 +14,6 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS moveit_core moveit_ros_planning
-                                 interactive_markers tf2_geometry_msgs)
-
 include_directories(include)
 
 add_library(
@@ -32,13 +29,19 @@ target_include_directories(
 set_target_properties(
   moveit_robot_interaction PROPERTIES VERSION
                                       "${moveit_ros_robot_interaction_VERSION}")
-ament_target_dependencies(moveit_robot_interaction
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
-if(BUILD_TESTING)
+target_link_libraries(moveit_robot_interaction
+                        ${visualization_msgs_TARGETS}
+                        tf2_geometry_msgs::tf2_geometry_msgs
+                        interactive_markers::interactive_markers
+                        moveit_core::moveit_kinematics_base
+                        tf2_eigen::tf2_eigen
+                        rclcpp::rclcpp)
+if(0)#BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(locked_robot_state_test test/locked_robot_state_test.cpp)
-  target_link_libraries(locked_robot_state_test moveit_robot_interaction)
+  target_link_libraries(locked_robot_state_test moveit_robot_interaction
+                          rclcpp::rclcpp
+                          )
 endif()
 
 install(
@@ -55,8 +58,6 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_robot_interaction_export.h
         DESTINATION include/moveit_ros_robot_interaction)
 
 install(DIRECTORY resources DESTINATION share/moveit_ros_robot_interaction)
-
-ament_export_targets(moveit_ros_robot_interactionTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_targets(moveit_ros_robot_interactionTargets)
 
 ament_package()

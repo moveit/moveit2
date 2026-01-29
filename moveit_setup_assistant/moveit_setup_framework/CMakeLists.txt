@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_setup_framework LANGUAGES CXX)
+find_package(OpenSSL REQUIRED)
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 if(${QT_VERSION_MAJOR} GREATER "5")
   find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core
@@ -26,6 +27,7 @@ find_package(rviz_common REQUIRED)
 find_package(rviz_rendering REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(urdf REQUIRED)
+find_package(warehouse_ros REQUIRED)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

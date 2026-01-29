@@ -12,6 +12,7 @@ find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
@@ -35,20 +36,6 @@ set(LIBRARIES
     # Parameters
     local_planner_parameters
     hp_manager_parameters)
-
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-    moveit_core
-    moveit_msgs
-    moveit_ros_planning
-    moveit_ros_planning_interface
-    pluginlib
-    rclcpp
-    rclcpp_action
-    rclcpp_components
-    std_msgs
-    std_srvs
-    tf2_ros
-    trajectory_msgs)
 
 set(THIS_PACKAGE_INCLUDE_DIRS
     global_planner/global_planner_component/include/
@@ -109,7 +96,7 @@ pluginlib_export_plugin_description_file(
 pluginlib_export_plugin_description_file(moveit_hybrid_planning
                                          forward_trajectory_plugin.xml)
 
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
-ament_export_targets(moveit_hybrid_planningTargets HAS_LIBRARY_TARGET)
+#ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_targets(moveit_hybrid_planningTargets)
 
 ament_package()
