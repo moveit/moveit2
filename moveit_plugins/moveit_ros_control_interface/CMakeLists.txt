@@ -24,8 +24,6 @@ set_target_properties(
   moveit_ros_control_interface_plugin
   PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_plugin PRIVATE include)
-ament_target_dependencies(moveit_ros_control_interface_plugin
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
 add_library(moveit_ros_control_interface_trajectory_plugin SHARED
             src/joint_trajectory_controller_plugin.cpp)
@@ -34,8 +32,6 @@ set_target_properties(
   PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_trajectory_plugin
                            PRIVATE include)
-ament_target_dependencies(moveit_ros_control_interface_trajectory_plugin
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
 add_library(moveit_ros_control_interface_gripper_plugin SHARED
             src/gripper_command_controller_plugin.cpp)
@@ -44,8 +40,6 @@ set_target_properties(
   PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_gripper_plugin
                            PRIVATE include)
-ament_target_dependencies(moveit_ros_control_interface_gripper_plugin
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
 add_library(moveit_ros_control_interface_parallel_gripper_plugin SHARED
             src/parallel_gripper_command_controller_plugin.cpp)
@@ -54,8 +48,6 @@ set_target_properties(
   PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_parallel_gripper_plugin
                            PRIVATE include)
-ament_target_dependencies(moveit_ros_control_interface_parallel_gripper_plugin
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
 
 add_library(moveit_ros_control_interface_empty_plugin SHARED
             src/empty_controller_plugin.cpp)
@@ -64,8 +56,25 @@ set_target_properties(
   PROPERTIES VERSION "${moveit_ros_control_interface_VERSION}")
 target_include_directories(moveit_ros_control_interface_empty_plugin
                            PRIVATE include)
-ament_target_dependencies(moveit_ros_control_interface_empty_plugin
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+
+set(TARGET_LIBRARIES
+    moveit_ros_control_interface_plugin
+    moveit_ros_control_interface_trajectory_plugin
+    moveit_ros_control_interface_gripper_plugin
+    moveit_ros_control_interface_parallel_gripper_plugin
+    moveit_ros_control_interface_empty_plugin)
+
+foreach(target ${TARGET_LIBRARIES})
+  target_link_libraries(
+    ${target}
+    PUBLIC moveit_core::moveit_core
+           ${moveit_simple_controller_manager_TARGETS}
+           pluginlib::pluginlib
+           rclcpp_action::rclcpp_action
+           ${controller_manager_msgs_TARGETS}
+           ${trajectory_msgs_TARGETS}
+           ${Boost_LIBRARIES})
+endforeach()
 
 if(BUILD_TESTING)
   add_subdirectory(test)
@@ -74,13 +83,6 @@ endif()
 # ##############################################################################
 # Install ##
 # ##############################################################################
-
-set(TARGET_LIBRARIES
-    moveit_ros_control_interface_plugin
-    moveit_ros_control_interface_trajectory_plugin
-    moveit_ros_control_interface_gripper_plugin
-    moveit_ros_control_interface_parallel_gripper_plugin
-    moveit_ros_control_interface_empty_plugin)
 
 # Mark executables and/or libraries for installation
 install(
