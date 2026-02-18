@@ -246,6 +246,14 @@ public:
 
   void swap(robot_trajectory::RobotTrajectory& other);
 
+  // from here: https://github.com/moveit/moveit2/commit/00f6c6fa6aad0000f279f25901660ccbf82482d1
+  RobotTrajectory& removeWayPoint(std::size_t index)
+  {
+    waypoints_.erase(waypoints_.begin() + index);
+    duration_from_previous_.erase(duration_from_previous_.begin() + index);
+    return *this;
+  }
+
   RobotTrajectory& clear()
   {
     waypoints_.clear();
