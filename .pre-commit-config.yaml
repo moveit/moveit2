@@ -15,7 +15,11 @@
 repos:
   # Standard hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
+<<<<<<< HEAD
     rev: v3.4.0
+=======
+    rev: v5.0.0
+>>>>>>> 130a7ecb8 (Update pre-commit-config (#2805))
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -33,7 +37,11 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
+<<<<<<< HEAD
     rev: 22.3.0
+=======
+    rev: 25.1.0
+>>>>>>> 130a7ecb8 (Update pre-commit-config (#2805))
     hooks:
       - id: black
 
@@ -47,8 +55,25 @@ repos:
         files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|js|m|proto|vert)$
         args: ['-fallback-style=none', '-i']
   - repo: https://github.com/codespell-project/codespell
+<<<<<<< HEAD
     rev: v2.0.0
+=======
+    rev: v2.4.1
+>>>>>>> 130a7ecb8 (Update pre-commit-config (#2805))
     hooks:
       - id: codespell
         args: ['--write-changes', '--ignore-words=.codespell_words']
         exclude: CHANGELOG.rst
+<<<<<<< HEAD
+=======
+
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+      - id: cmake-lint
+        args: [--line-width  220,
+               --disabled-codes=C0307,
+               --suppress-decorations
+              ]
+>>>>>>> 130a7ecb8 (Update pre-commit-config (#2805))
