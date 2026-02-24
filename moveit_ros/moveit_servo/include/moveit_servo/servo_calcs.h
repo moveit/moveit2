@@ -40,7 +40,9 @@
 
 // C++
 #include <condition_variable>
+#include <deque>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <atomic>
 
@@ -176,6 +178,19 @@ protected:
   void composeJointTrajMessage(const sensor_msgs::msg::JointState& joint_state,
                                trajectory_msgs::msg::JointTrajectory& joint_trajectory);
 
+  /**
+   * Add a joint state to the rolling command window, evicting stale entries and applying
+   * velocity smoothing to prevent trajectory overshoot.
+   * @param joint_state The new joint state to append (positions and velocities must be set)
+   */
+  void updateSlidingWindow(const sensor_msgs::msg::JointState& joint_state);
+
+  /**
+   * Build a multi-point JointTrajectory from the rolling window for smooth command delivery.
+   * Returns empty optional if fewer than MIN_POINTS_FOR_TRAJ_MSG entries are available.
+   */
+  std::optional<trajectory_msgs::msg::JointTrajectory> composeRollingWindowTrajectory() const;
+
   /** \brief Set the filters to the specified values */
   void resetLowPassFilters(const sensor_msgs::msg::JointState& joint_state);
 
@@ -297,6 +312,20 @@ protected:
   std::shared_ptr<online_signal_smoothing::SmoothingBaseClass> smoother_;
 
   trajectory_msgs::msg::JointTrajectory::SharedPtr last_sent_command_;
+
+  // Minimum number of trajectory points required to publish a rolling-window trajectory message.
+  static constexpr int MIN_POINTS_FOR_TRAJ_MSG = 3;
+
+  // A timestamped joint state entry for the rolling command window.
+  struct TimestampedJointState
+  {
+    sensor_msgs::msg::JointState state;
+    rclcpp::Time time_stamp;
+  };
+
+  // Rolling window of future joint commands used to compose multi-point trajectory messages.
+  // Spans [now - max_expected_latency, now + max_expected_latency].
+  std::deque<TimestampedJointState> joint_cmd_rolling_window_;
 
   // ROS
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_state_sub_;

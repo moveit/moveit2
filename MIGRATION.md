@@ -17,6 +17,20 @@ API changes in MoveIt releases
 - Static member variable interface of the CollisionDetectorAllocatorTemplate for the string NAME was replaced with a virtual method `getName`.
 - Enhance `RDFLoader` to load from string parameter OR string topic (and add the ability to publish a string topic).
 
+## ROS Humble
+
+### MoveIt Servo — rolling command window (`moveit_servo`)
+A new parameter `max_expected_latency` (default `0.1` s) has been added to `ServoParameters`.
+When `command_out_type` is `trajectory_msgs/JointTrajectory`, Servo now publishes **multi-point rolling-window trajectories** instead of single-point messages. This improves motion smoothness and reduces latency-induced overshoot.
+
+**Required config change:** Add the following to your servo YAML configuration:
+```yaml
+max_expected_latency: 0.1  # seconds; tune to your network/hardware latency
+```
+The recommended `publish_period` has also changed from `0.034` to `0.01` s so the rolling window contains enough points. A validation warning is emitted if `publish_period > max_expected_latency / 3`.
+
+`std_msgs/Float64MultiArray` output is unaffected by this change.
+
 ## ROS Noetic
 - RobotModel no longer overrides empty URDF collision geometry by matching the visual geometry of the link.
 - Planned trajectories are *slow* by default.

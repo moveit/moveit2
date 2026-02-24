@@ -464,33 +464,40 @@ void ServoCalcs::calculateSingleIteration()
 
   if (ok_to_publish_ && !paused_)
   {
-    // Clear out position commands if user did not request them (can cause interpolation issues)
-    if (!parameters_->publish_joint_positions)
-    {
-      joint_trajectory->points[0].positions.clear();
-    }
-    // Likewise for velocity and acceleration
-    if (!parameters_->publish_joint_velocities)
-    {
-      joint_trajectory->points[0].velocities.clear();
-    }
-    if (!parameters_->publish_joint_accelerations)
-    {
-      joint_trajectory->points[0].accelerations.clear();
-    }
-
-    // Put the outgoing msg in the right format
-    // (trajectory_msgs/JointTrajectory or std_msgs/Float64MultiArray).
     if (parameters_->command_out_type == "trajectory_msgs/JointTrajectory")
     {
-      // When a joint_trajectory_controller receives a new command, a stamp of 0 indicates "begin immediately"
-      // See http://wiki.ros.org/joint_trajectory_controller#Trajectory_replacement
+      // Update the rolling window with the current servo command.
+      // internal_joint_state_ always holds full positions and velocities.
+      updateSlidingWindow(internal_joint_state_);
+
+      // Try to compose and publish a multi-point rolling-window trajectory.
+      const auto rolling_traj = composeRollingWindowTrajectory();
+      if (rolling_traj)
+      {
+        trajectory_outgoing_cmd_pub_->publish(rolling_traj.value());
+      }
+
+      // Keep last_sent_command_ as a single-point message (stamp=0 means "begin immediately").
+      // This is used by the halt path to know the last commanded positions.
+      if (!parameters_->publish_joint_positions)
+        joint_trajectory->points[0].positions.clear();
+      if (!parameters_->publish_joint_velocities)
+        joint_trajectory->points[0].velocities.clear();
+      if (!parameters_->publish_joint_accelerations)
+        joint_trajectory->points[0].accelerations.clear();
       joint_trajectory->header.stamp = rclcpp::Time(0);
       *last_sent_command_ = *joint_trajectory;
-      trajectory_outgoing_cmd_pub_->publish(std::move(joint_trajectory));
     }
     else if (parameters_->command_out_type == "std_msgs/Float64MultiArray")
     {
+      // Float64MultiArray output is unaffected by the rolling window — keep original behavior.
+      if (!parameters_->publish_joint_positions)
+        joint_trajectory->points[0].positions.clear();
+      if (!parameters_->publish_joint_velocities)
+        joint_trajectory->points[0].velocities.clear();
+      if (!parameters_->publish_joint_accelerations)
+        joint_trajectory->points[0].accelerations.clear();
+
       auto joints = std::make_unique<std_msgs::msg::Float64MultiArray>();
       if (parameters_->publish_joint_positions && !joint_trajectory->points.empty())
         joints->data = joint_trajectory->points[0].positions;
@@ -499,6 +506,11 @@ void ServoCalcs::calculateSingleIteration()
       *last_sent_command_ = *joint_trajectory;
       multiarray_outgoing_cmd_pub_->publish(std::move(joints));
     }
+  }
+  else
+  {
+    // Not publishing — clear the rolling window so stale future commands don't linger.
+    joint_cmd_rolling_window_.clear();
   }
 
   // Update the filters if we haven't yet
@@ -812,6 +824,95 @@ void ServoCalcs::composeJointTrajMessage(const sensor_msgs::msg::JointState& joi
     point.accelerations = acceleration;
   }
   joint_trajectory.points.push_back(point);
+}
+
+void ServoCalcs::updateSlidingWindow(const sensor_msgs::msg::JointState& joint_state)
+{
+  const rclcpp::Time cur_time = node_->now();
+
+  TimestampedJointState next_stamped;
+  next_stamped.state = joint_state;
+  next_stamped.time_stamp = cur_time + rclcpp::Duration::from_seconds(parameters_->max_expected_latency);
+
+  const rclcpp::Duration active_window = rclcpp::Duration::from_seconds(parameters_->max_expected_latency);
+
+  // Evict entries older than (current_time - max_expected_latency).
+  while (!joint_cmd_rolling_window_.empty() && joint_cmd_rolling_window_.front().time_stamp < (cur_time - active_window))
+  {
+    joint_cmd_rolling_window_.pop_front();
+  }
+
+  // Drop any trailing entries that share the same timestamp as the new command.
+  while (!joint_cmd_rolling_window_.empty() && next_stamped.time_stamp == joint_cmd_rolling_window_.back().time_stamp)
+  {
+    joint_cmd_rolling_window_.pop_back();
+  }
+
+  // Smooth velocity of the last stored entry to prevent trajectory overshoot.
+  // If the motion direction reverses, zero the velocity. Otherwise use the
+  // minimum of the forward and backward finite-difference velocities.
+  if (joint_cmd_rolling_window_.size() >= 2)
+  {
+    const size_t n = joint_cmd_rolling_window_.size();
+    auto& last = joint_cmd_rolling_window_[n - 1];
+    const auto& second_last = joint_cmd_rolling_window_[n - 2];
+
+    for (size_t i = 0; i < joint_state.position.size(); ++i)
+    {
+      const double dir1 = second_last.state.position[i] - last.state.position[i];
+      const double dir2 = next_stamped.state.position[i] - last.state.position[i];
+
+      // A sign product <= 0 means the direction changed (v-shape in position).
+      if (dir1 * dir2 <= 0.0)
+      {
+        last.state.velocity[i] = 0.0;
+      }
+      else
+      {
+        const double dt1 = (next_stamped.time_stamp - last.time_stamp).seconds();
+        const double dt2 = (last.time_stamp - second_last.time_stamp).seconds();
+        const double vel_fwd = (next_stamped.state.position[i] - last.state.position[i]) / dt1;
+        const double vel_bwd = (last.state.position[i] - second_last.state.position[i]) / dt2;
+        last.state.velocity[i] = (std::abs(vel_fwd) < std::abs(vel_bwd)) ? vel_fwd : vel_bwd;
+      }
+      next_stamped.state.velocity[i] = last.state.velocity[i];
+    }
+  }
+
+  joint_cmd_rolling_window_.push_back(next_stamped);
+}
+
+std::optional<trajectory_msgs::msg::JointTrajectory> ServoCalcs::composeRollingWindowTrajectory() const
+{
+  if (static_cast<int>(joint_cmd_rolling_window_.size()) < MIN_POINTS_FOR_TRAJ_MSG)
+  {
+    return std::nullopt;
+  }
+
+  trajectory_msgs::msg::JointTrajectory traj;
+  traj.header.frame_id = parameters_->planning_frame;
+  traj.header.stamp = joint_cmd_rolling_window_.front().time_stamp;
+  traj.joint_names = joint_cmd_rolling_window_.front().state.name;
+
+  // Publish all points except the last — its velocity is still being updated
+  // by the next call to updateSlidingWindow.
+  for (size_t i = 0; i < joint_cmd_rolling_window_.size() - 1; ++i)
+  {
+    const auto& stamped = joint_cmd_rolling_window_[i];
+    trajectory_msgs::msg::JointTrajectoryPoint point;
+    point.time_from_start = stamped.time_stamp - traj.header.stamp;
+
+    if (parameters_->publish_joint_positions)
+      point.positions = stamped.state.position;
+    if (parameters_->publish_joint_velocities)
+      point.velocities = stamped.state.velocity;
+    if (parameters_->publish_joint_accelerations)
+      point.accelerations = std::vector<double>(stamped.state.name.size(), 0.0);
+
+    traj.points.push_back(point);
+  }
+
+  return traj;
 }
 
 std::vector<const moveit::core::JointModel*>
