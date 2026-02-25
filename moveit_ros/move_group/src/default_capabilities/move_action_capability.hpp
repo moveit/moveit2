@@ -54,7 +54,7 @@ public:
   void initialize() override;
 
 private:
-  void executeMoveCallback(const std::shared_ptr<MGActionGoal>& goal);
+  void executeMoveCallback();
   void executeMoveCallbackPlanAndExecute(const std::shared_ptr<MGActionGoal>& goal,
                                          std::shared_ptr<MGAction::Result>& action_res);
   void executeMoveCallbackPlanOnly(const std::shared_ptr<MGActionGoal>& goal,
@@ -73,5 +73,12 @@ private:
   MoveGroupState move_state_;
   bool preempt_requested_;
   std::shared_ptr<MGActionGoal> goal_;
+
+  std::mutex queued_goal_mutex_;
+  std::shared_ptr<MGActionGoal> queued_goal_;
+
+  void setQueuedGoal(const std::shared_ptr<MGActionGoal>& goal);
+  std::shared_ptr<MGActionGoal> getQueuedGoal();
+  void executeQueuedGoals();
 };
 }  // namespace move_group
