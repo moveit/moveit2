@@ -86,17 +86,17 @@ void MoveGroupMoveAction::setQueuedGoal(const std::shared_ptr<MGActionGoal>& goa
   queued_goal_ = goal;
 }
 
-std::shared_ptr<MGActionGoal> MoveGroupMoveAction::getQueuedGoal()
+std::shared_ptr<MGActionGoal> MoveGroupMoveAction::fetchQueuedGoal()
 {
   std::scoped_lock lock(queued_goal_mutex_);
-  return queued_goal_;
+  return std::move(queued_goal_);
 }
 
 void MoveGroupMoveAction::executeQueuedGoals()
 {
   while (true)
   {
-    goal_ = getQueuedGoal();
+    goal_ = fetchQueuedGoal();
     executeMoveCallback();
   }
 }

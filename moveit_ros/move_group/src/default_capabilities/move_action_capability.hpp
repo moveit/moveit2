@@ -78,7 +78,7 @@ private:
   std::shared_ptr<MGActionGoal> queued_goal_;
 
   void setQueuedGoal(const std::shared_ptr<MGActionGoal>& goal);
-  std::shared_ptr<MGActionGoal> getQueuedGoal();
+  std::shared_ptr<MGActionGoal> fetchQueuedGoal();
   void executeQueuedGoals();
 };
 }  // namespace move_group
