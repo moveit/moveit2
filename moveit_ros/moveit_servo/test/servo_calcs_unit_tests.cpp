@@ -168,6 +168,45 @@ TEST_F(ServoCalcsUnitTests, SingularityScaling)
   EXPECT_EQ(scaling_factor, 0);
 }
 
+// ---------------------------------------------------------------------------
+// ServoParameters validation tests for the rolling-window (PR #2594) fields
+// ---------------------------------------------------------------------------
+
+TEST(ServoParameterValidation, MaxExpectedLatencyZeroFails)
+{
+  moveit_servo::ServoParameters params;
+  params.max_expected_latency = 0.0;
+  EXPECT_FALSE(moveit_servo::ServoParameters::validate(params).has_value())
+      << "max_expected_latency = 0 should fail validation";
+}
+
+TEST(ServoParameterValidation, MaxExpectedLatencyNegativeFails)
+{
+  moveit_servo::ServoParameters params;
+  params.max_expected_latency = -0.05;
+  EXPECT_FALSE(moveit_servo::ServoParameters::validate(params).has_value())
+      << "Negative max_expected_latency should fail validation";
+}
+
+TEST(ServoParameterValidation, MaxExpectedLatencyPositivePasses)
+{
+  moveit_servo::ServoParameters params;
+  params.max_expected_latency = 0.1;
+  params.publish_period = 0.01;  // satisfies the window-density check
+  EXPECT_TRUE(moveit_servo::ServoParameters::validate(params).has_value())
+      << "Valid max_expected_latency and publish_period should pass validation";
+}
+
+TEST(ServoParameterValidation, WindowDensityWarningDoesNotFail)
+{
+  // publish_period > max_expected_latency / 3 should only warn, not fail.
+  moveit_servo::ServoParameters params;
+  params.max_expected_latency = 0.1;
+  params.publish_period = 0.05;  // 0.05 > 0.1/3 ≈ 0.033 → triggers the density warning
+  EXPECT_TRUE(moveit_servo::ServoParameters::validate(params).has_value())
+      << "Density warning condition should not cause validation failure";
+}
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);

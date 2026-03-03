@@ -184,6 +184,45 @@ TEST_F(ServoFixture, DynamicParameterTest)
   ASSERT_FALSE(set_parameter_response->results[1].successful)
       << "`not_set_parameter` is not a parameter and should fail to be set";
 }
+TEST_F(ServoFixture, RollingWindowMultiPointTest)
+{
+  // Verify that the rolling-window feature (PR #2594) produces JointTrajectory
+  // messages with more than one waypoint once the window is populated.
+  // This test fails without the rolling-window changes because the legacy code
+  // always published single-point trajectories.
+  if (servo_parameters_->command_out_type != "trajectory_msgs/JointTrajectory")
+  {
+    GTEST_SKIP() << "Rolling window test only applies to trajectory_msgs/JointTrajectory output";
+  }
+
+  ASSERT_TRUE(setupStartClient());
+  ASSERT_TRUE(setupCommandSub(servo_parameters_->command_out_type));
+
+  ASSERT_TRUE(start());
+  EXPECT_EQ(latest_status_, moveit_servo::StatusCode::NO_WARNING);
+
+  // Publish twist commands long enough for the rolling window to fill.
+  // With publish_period=0.01 and max_expected_latency=0.1, the window holds
+  // ~20 entries and needs >=3 before publishing (MIN_POINTS_FOR_TRAJ_MSG).
+  const double warmup_seconds = 3.0 * servo_parameters_->max_expected_latency;
+  rclcpp::WallRate loop_rate(1.0 / servo_parameters_->publish_period);
+  const auto time_stop = node_->now() + rclcpp::Duration::from_seconds(warmup_seconds);
+
+  while (node_->now() < time_stop && rclcpp::ok())
+  {
+    auto msg = std::make_unique<geometry_msgs::msg::TwistStamped>();
+    msg->header.stamp = node_->now();
+    msg->twist.linear.x = 0.01;
+    pub_twist_cmd_->publish(std::move(msg));
+    loop_rate.sleep();
+  }
+
+  // After warmup, the last received trajectory should have >1 points.
+  const auto traj = getLatestTrajCommand();
+  EXPECT_GT(traj.points.size(), 1u) << "Rolling window should produce multi-point trajectories; got "
+                                    << traj.points.size() << " point(s)";
+}
+
 }  // namespace moveit_servo
 
 int main(int argc, char** argv)

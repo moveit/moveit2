@@ -154,6 +154,12 @@ void ServoParameters::declare(const std::string& ns,
       ns + ".publish_period", ParameterValue{ parameters.publish_period },
       ParameterDescriptorBuilder{}.type(PARAMETER_DOUBLE).description("1/Nominal publish rate [seconds]"));
   node_parameters->declare_parameter(
+      ns + ".max_expected_latency", ParameterValue{ parameters.max_expected_latency },
+      ParameterDescriptorBuilder{}
+          .type(PARAMETER_DOUBLE)
+          .description("Maximum expected latency between generating a servo command and the controller receiving it "
+                       "[seconds]. Used to build a rolling trajectory window for smooth command delivery."));
+  node_parameters->declare_parameter(
       ns + ".command_out_type", ParameterValue{ parameters.command_out_type },
       ParameterDescriptorBuilder{}
           .type(PARAMETER_STRING)
@@ -290,6 +296,7 @@ ServoParameters ServoParameters::get(const std::string& ns,
   // Properties of outgoing commands
   parameters.command_out_topic = node_parameters->get_parameter(ns + ".command_out_topic").as_string();
   parameters.publish_period = node_parameters->get_parameter(ns + ".publish_period").as_double();
+  parameters.max_expected_latency = node_parameters->get_parameter(ns + ".max_expected_latency").as_double();
   parameters.command_out_type = node_parameters->get_parameter(ns + ".command_out_type").as_string();
   parameters.publish_joint_positions = node_parameters->get_parameter(ns + ".publish_joint_positions").as_bool();
   parameters.publish_joint_velocities = node_parameters->get_parameter(ns + ".publish_joint_velocities").as_bool();
@@ -359,6 +366,21 @@ std::optional<ServoParameters> ServoParameters::validate(ServoParameters paramet
     RCLCPP_WARN(LOGGER, "Parameter 'publish_period' should be "
                         "greater than zero. Check yaml file.");
     return std::nullopt;
+  }
+  if (parameters.max_expected_latency <= 0.)
+  {
+    RCLCPP_WARN(LOGGER, "Parameter 'max_expected_latency' should be greater than zero. Check yaml file.");
+    return std::nullopt;
+  }
+  // For smooth rolling-window delivery we need at least 3 points, so warn if the ratio is too small.
+  static constexpr int MIN_POINTS_FOR_TRAJ_MSG = 3;
+  if (parameters.max_expected_latency / MIN_POINTS_FOR_TRAJ_MSG < parameters.publish_period)
+  {
+    RCLCPP_WARN(LOGGER,
+                "For smooth servo delivery, 'publish_period' (%.4f s) should be less than 1/%d of "
+                "'max_expected_latency' (%.4f s). Consider setting 'publish_period: 0.01' and "
+                "'max_expected_latency: 0.1' in your servo config.",
+                parameters.publish_period, MIN_POINTS_FOR_TRAJ_MSG, parameters.max_expected_latency);
   }
   if (parameters.num_outgoing_halt_msgs_to_publish < 0)
   {
