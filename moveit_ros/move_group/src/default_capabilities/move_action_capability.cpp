@@ -218,7 +218,17 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
     if (!planning_pipeline->generatePlan(scene, goal->get_goal()->request, res, context_->debug_))
     {
       RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed.");
-      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      if (res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS ||
+          res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNDEFINED)
+      {
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      }
+      else
+      {
+        RCLCPP_ERROR(
+            getLogger(), "Preserving planner-specific failure code %d for /move_action",
+            res.error_code.val);
+      }
     }
   }
   catch (std::exception& ex)
