@@ -43,18 +43,16 @@ if(NOT WIN32)
   target_compile_options(prbt_manipulator_moveit_ikfast_plugin
                          PRIVATE -Wno-unused-variable)
 endif()
-ament_target_dependencies(
+target_link_libraries(
   prbt_manipulator_moveit_ikfast_plugin
-  moveit_core
-  pluginlib
-  rclcpp
-  tf2_kdl
-  tf2_eigen
-  tf2_eigen_kdl
-  tf2_geometry_msgs)
-
-target_link_libraries(prbt_manipulator_moveit_ikfast_plugin
-                      prbt_ikfast_kinematics_parameters)
+  prbt_ikfast_kinematics_parameters
+  moveit_core::moveit_core
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  tf2_kdl::tf2_kdl
+  tf2_eigen::tf2_eigen
+  tf2_eigen_kdl::tf2_eigen_kdl
+  ${tf2_geometry_msgs_TARGETS})
 
 pluginlib_export_plugin_description_file(
   moveit_core prbt_manipulator_moveit_ikfast_plugin_description.xml)

@@ -31,8 +31,14 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 add_subdirectory(ompl_interface)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_planners_ompl::moveit_planners_ompl to link all libraries at once.
+add_library(moveit_planners_ompl INTERFACE)
+target_link_libraries(moveit_planners_ompl INTERFACE moveit_ompl_interface
+                                                     moveit_ompl_planner_plugin)
+
 install(
-  TARGETS moveit_ompl_interface moveit_ompl_planner_plugin
+  TARGETS moveit_planners_ompl moveit_ompl_interface moveit_ompl_planner_plugin
   EXPORT moveit_planners_omplTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

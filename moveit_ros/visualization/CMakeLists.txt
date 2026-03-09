@@ -27,23 +27,31 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(rviz2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(Eigen3 REQUIRED)
+
+# Qt/rviz - find Qt6 before rviz so transitive dependencies resolve
+find_package(Qt6 QUIET COMPONENTS Core Widgets)
+if(Qt6_FOUND)
+  set(QT_LIBRARIES Qt6::Widgets)
+  macro(QT_WRAP_UI)
+    qt6_wrap_ui(${ARGN})
+  endmacro()
+else()
+  find_package(Qt5 REQUIRED Core Widgets)
+  set(QT_LIBRARIES Qt5::Widgets)
+  macro(QT_WRAP_UI)
+    qt5_wrap_ui(${ARGN})
+  endmacro()
+endif()
+
+find_package(rviz2 REQUIRED)
 find_package(rviz_common REQUIRED)
 find_package(rviz_default_plugins REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
-
-# Qt Stuff
-find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
-set(QT_LIBRARIES Qt5::Widgets)
-# Delegate to QT5 macro
-macro(QT_WRAP_UI)
-  qt5_wrap_ui(${ARGN})
-endmacro()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -106,8 +114,15 @@ pluginlib_export_plugin_description_file(
 pluginlib_export_plugin_description_file(
   rviz_common robot_state_rviz_plugin_description.xml)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_ros_visualization::moveit_ros_visualization to link all libraries at
+# once.
+add_library(moveit_ros_visualization INTERFACE)
+target_link_libraries(moveit_ros_visualization
+                      INTERFACE ${THIS_PACKAGE_LIBRARIES})
+
 install(
-  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  TARGETS moveit_ros_visualization ${THIS_PACKAGE_LIBRARIES}
   EXPORT moveit_ros_visualizationTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

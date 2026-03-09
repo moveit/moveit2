@@ -34,11 +34,18 @@ set_target_properties(moveit_ros_benchmarks
 if(WIN32)
   set(EXTRA_LIB ws2_32.lib)
 endif()
-ament_target_dependencies(moveit_ros_benchmarks ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_ros_benchmarks ${EXTRA_LIB})
+target_link_libraries(
+  moveit_ros_benchmarks
+  rclcpp::rclcpp
+  Boost::headers
+  tf2_eigen::tf2_eigen
+  moveit_core::moveit_core
+  moveit_ros_planning::moveit_ros_planning
+  moveit_ros_warehouse::moveit_ros_warehouse
+  pluginlib::pluginlib
+  ${EXTRA_LIB})
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
-ament_target_dependencies(moveit_run_benchmark ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_run_benchmark moveit_ros_benchmarks)
 
 install(

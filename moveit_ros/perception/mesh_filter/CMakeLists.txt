@@ -8,10 +8,14 @@ target_include_directories(
   moveit_mesh_filter PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_mesh_filter
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_mesh_filter rclcpp moveit_core
-                          geometric_shapes Eigen3)
-
-target_link_libraries(moveit_mesh_filter ${GL_LIBS} ${SYSTEM_GL_LIBRARIES})
+target_link_libraries(
+  moveit_mesh_filter
+  ${GL_LIBS}
+  ${SYSTEM_GL_LIBRARIES}
+  rclcpp::rclcpp
+  moveit_core::moveit_core
+  geometric_shapes::geometric_shapes
+  Eigen3::Eigen)
 
 # TODO: Port to ROS2 add_library(moveit_depth_self_filter SHARED
 # src/depth_self_filter_nodelet.cpp src/transform_provider.cpp )
