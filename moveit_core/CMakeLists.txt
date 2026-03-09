@@ -13,6 +13,7 @@ find_package(eigen_stl_containers REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(fcl REQUIRED)
+find_package(fmt REQUIRED)
 find_package(generate_parameter_library REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
@@ -22,10 +23,12 @@ find_package(moveit_msgs REQUIRED)
 # https://github.com/moveit/moveit2/issues/2862
 find_package(octomap 1.9.7...<1.10.0 REQUIRED)
 find_package(octomap_msgs REQUIRED)
+find_package(orocos_kdl REQUIRED)
 find_package(osqp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(random_numbers REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rmw_implementation REQUIRED)
 find_package(rsl REQUIRED)
 find_package(ruckig REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -68,8 +71,37 @@ add_subdirectory(transforms)
 add_subdirectory(utils)
 add_subdirectory(version)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_core::moveit_core to link all moveit_core libraries at once.
+add_library(moveit_core INTERFACE)
+target_link_libraries(
+  moveit_core
+  INTERFACE moveit_collision_detection
+            moveit_collision_detection_bullet
+            moveit_collision_detection_fcl
+            moveit_collision_distance_field
+            moveit_constraint_samplers
+            moveit_distance_field
+            moveit_dynamics_solver
+            moveit_exceptions
+            moveit_kinematic_constraints
+            moveit_kinematics_base
+            moveit_kinematics_metrics
+            moveit_macros
+            moveit_planning_interface
+            moveit_planning_scene
+            moveit_robot_model
+            moveit_robot_state
+            moveit_robot_trajectory
+            moveit_smoothing_base
+            moveit_test_utils
+            moveit_trajectory_processing
+            moveit_transforms
+            moveit_utils)
+
 install(
-  TARGETS moveit_collision_detection
+  TARGETS moveit_core
+          moveit_collision_detection
           moveit_collision_detection_bullet
           moveit_collision_detection_fcl
           moveit_collision_distance_field
@@ -119,6 +151,7 @@ ament_export_dependencies(
   Eigen3
   eigen3_cmake_module
   fcl
+  fmt
   generate_parameter_library
   geometric_shapes
   geometry_msgs
@@ -126,10 +159,12 @@ ament_export_dependencies(
   moveit_msgs
   octomap
   octomap_msgs
+  orocos_kdl
   osqp
   pluginlib
   random_numbers
   rclcpp
+  rmw_implementation
   rsl
   ruckig
   sensor_msgs

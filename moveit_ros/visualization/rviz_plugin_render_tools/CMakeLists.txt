@@ -28,13 +28,15 @@ target_link_libraries(moveit_rviz_plugin_render_tools ${QT_LIBRARIES})
 
 ament_target_dependencies(
   moveit_rviz_plugin_render_tools
-  rclcpp
-  moveit_core
-  Boost
-  octomap_msgs
-  rviz_ogre_vendor
-  rviz_common
-  rviz_default_plugins)
+  ${QT_LIBRARIES}
+  rclcpp::rclcpp
+  moveit_core::moveit_core
+  Boost::headers
+  ${octomap_msgs_TARGETS}
+  rviz_ogre_vendor::OgreMain
+  rviz_ogre_vendor::OgreOverlay
+  rviz_common::rviz_common
+  rviz_default_plugins::rviz_default_plugins)
 target_include_directories(moveit_rviz_plugin_render_tools
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 

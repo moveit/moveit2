@@ -6,19 +6,18 @@ generate_parameter_library(
 add_library(moveit_kdl_kinematics_plugin SHARED
             src/kdl_kinematics_plugin.cpp src/chainiksolver_vel_mimic_svd.cpp)
 
-ament_target_dependencies(
+target_link_libraries(
   moveit_kdl_kinematics_plugin
-  rclcpp
-  random_numbers
-  pluginlib
-  moveit_core
-  moveit_msgs
-  orocos_kdl
-  kdl_parser
-  tf2_kdl
-  EIGEN3)
-
-target_link_libraries(moveit_kdl_kinematics_plugin kdl_kinematics_parameters)
+  kdl_kinematics_parameters
+  rclcpp::rclcpp
+  random_numbers::random_numbers
+  pluginlib::pluginlib
+  moveit_core::moveit_core
+  ${moveit_msgs_TARGETS}
+  ${orocos_kdl_LIBRARIES}
+  kdl_parser::kdl_parser
+  tf2_kdl::tf2_kdl
+  Eigen3::Eigen)
 
 # prevent pluginlib from using boost
 target_compile_definitions(moveit_kdl_kinematics_plugin

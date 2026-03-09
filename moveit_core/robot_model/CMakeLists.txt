@@ -28,25 +28,26 @@ target_include_directories(
     $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_robot_model
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
+target_link_libraries(
   moveit_robot_model
-  angles
-  moveit_msgs
-  Eigen3
-  eigen_stl_containers
-  geometric_shapes
-  urdf
-  urdfdom_headers
-  srdfdom
-  visualization_msgs)
-target_link_libraries(moveit_robot_model moveit_exceptions moveit_macros
-                      moveit_utils)
+  moveit_exceptions
+  moveit_macros
+  moveit_utils
+  angles::angles
+  ${moveit_msgs_TARGETS}
+  Eigen3::Eigen
+  eigen_stl_containers::eigen_stl_containers
+  geometric_shapes::geometric_shapes
+  urdf::urdf
+  urdfdom_headers::urdfdom_headers
+  srdfdom::srdfdom
+  ${visualization_msgs_TARGETS})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_robot_model test/test.cpp)
-  ament_target_dependencies(test_robot_model rclcpp)
-  target_link_libraries(test_robot_model moveit_test_utils moveit_robot_model)
+  target_link_libraries(test_robot_model moveit_test_utils moveit_robot_model
+                        rclcpp::rclcpp)
 endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
