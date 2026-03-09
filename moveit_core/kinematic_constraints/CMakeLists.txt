@@ -16,19 +16,20 @@ target_include_directories(
 set_target_properties(moveit_kinematic_constraints
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-ament_target_dependencies(
-  moveit_kinematic_constraints
-  urdf
-  urdfdom
-  urdfdom_headers
-  tf2_geometry_msgs
-  geometry_msgs
-  visualization_msgs
-  tf2_eigen)
-
 target_link_libraries(
-  moveit_kinematic_constraints moveit_collision_detection_fcl
-  moveit_kinematics_base moveit_robot_state moveit_robot_model moveit_utils)
+  moveit_kinematic_constraints
+  moveit_collision_detection_fcl
+  moveit_kinematics_base
+  moveit_robot_state
+  moveit_robot_model
+  moveit_utils
+  urdf::urdf
+  urdfdom::urdf_parser
+  urdfdom_headers::urdfdom_headers
+  ${tf2_geometry_msgs_TARGETS}
+  ${geometry_msgs_TARGETS}
+  ${visualization_msgs_TARGETS}
+  tf2_eigen::tf2_eigen)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 

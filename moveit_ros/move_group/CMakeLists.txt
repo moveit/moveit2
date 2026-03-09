@@ -34,8 +34,19 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_ros_move_group>)
 set_target_properties(moveit_move_group_capabilities_base
                       PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
-ament_target_dependencies(moveit_move_group_capabilities_base
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  moveit_move_group_capabilities_base
+  fmt::fmt
+  moveit_core::moveit_core
+  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  moveit_ros_planning::moveit_ros_planning
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  ${std_srvs_TARGETS}
+  tf2::tf2
+  ${tf2_geometry_msgs_TARGETS}
+  tf2_ros::tf2_ros)
 
 add_library(
   moveit_move_group_default_capabilities SHARED
@@ -60,27 +71,66 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_ros_move_group>)
 set_target_properties(moveit_move_group_default_capabilities
                       PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
-ament_target_dependencies(moveit_move_group_default_capabilities
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_move_group_default_capabilities
-                      moveit_move_group_capabilities_base)
+target_link_libraries(
+  moveit_move_group_default_capabilities
+  moveit_move_group_capabilities_base
+  fmt::fmt
+  moveit_core::moveit_core
+  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  moveit_ros_planning::moveit_ros_planning
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  ${std_srvs_TARGETS}
+  tf2::tf2
+  ${tf2_geometry_msgs_TARGETS}
+  tf2_ros::tf2_ros)
 
 add_executable(move_group src/move_group.cpp)
 target_include_directories(move_group PUBLIC include)
-ament_target_dependencies(move_group ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
-target_link_libraries(move_group moveit_move_group_capabilities_base)
+target_link_libraries(
+  move_group
+  moveit_move_group_capabilities_base
+  fmt::fmt
+  moveit_core::moveit_core
+  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  moveit_ros_planning::moveit_ros_planning
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  ${std_srvs_TARGETS}
+  tf2::tf2
+  ${tf2_geometry_msgs_TARGETS}
+  tf2_ros::tf2_ros
+  Boost::headers)
 
 add_executable(list_move_group_capabilities src/list_capabilities.cpp)
-ament_target_dependencies(list_move_group_capabilities
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(list_move_group_capabilities
-                      moveit_move_group_capabilities_base fmt::fmt)
+target_link_libraries(
+  list_move_group_capabilities
+  moveit_move_group_capabilities_base
+  fmt::fmt
+  moveit_core::moveit_core
+  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  moveit_ros_planning::moveit_ros_planning
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  ${std_srvs_TARGETS}
+  tf2::tf2
+  ${tf2_geometry_msgs_TARGETS}
+  tf2_ros::tf2_ros)
 
 install(TARGETS move_group list_move_group_capabilities
         RUNTIME DESTINATION lib/moveit_ros_move_group)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_ros_move_group::moveit_ros_move_group to link all libraries at once.
+add_library(moveit_ros_move_group INTERFACE)
+target_link_libraries(moveit_ros_move_group
+                      INTERFACE moveit_move_group_capabilities_base)
+
 install(
-  TARGETS moveit_move_group_capabilities_base
+  TARGETS moveit_ros_move_group moveit_move_group_capabilities_base
   EXPORT moveit_ros_move_groupTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

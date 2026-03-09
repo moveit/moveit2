@@ -11,6 +11,7 @@ find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_warehouse REQUIRED)
 find_package(moveit_ros_move_group REQUIRED)
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
@@ -36,6 +37,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     moveit_ros_planning
     moveit_ros_warehouse
     moveit_ros_move_group
+    moveit_ros_occupancy_map_monitor
     tf2
     tf2_eigen
     tf2_geometry_msgs
@@ -74,8 +76,15 @@ if(BUILD_TESTING)
 
 endif()
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_ros_planning_interface::moveit_ros_planning_interface to link all
+# libraries at once.
+add_library(moveit_ros_planning_interface INTERFACE)
+target_link_libraries(moveit_ros_planning_interface
+                      INTERFACE ${THIS_PACKAGE_LIBRARIES})
+
 install(
-  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  TARGETS moveit_ros_planning_interface ${THIS_PACKAGE_LIBRARIES}
   EXPORT moveit_ros_planning_interfaceTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

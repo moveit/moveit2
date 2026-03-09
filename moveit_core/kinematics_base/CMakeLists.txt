@@ -11,16 +11,15 @@ target_include_directories(
   moveit_kinematics_base PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )# for this library
 
-# This line ensures that messages are built before the library is built
-ament_target_dependencies(
+target_link_libraries(
   moveit_kinematics_base
-  rclcpp
-  urdf
-  urdfdom_headers
-  srdfdom
-  moveit_msgs
-  geometric_shapes
-  geometry_msgs)
+  rclcpp::rclcpp
+  urdf::urdf
+  urdfdom_headers::urdfdom_headers
+  srdfdom::srdfdom
+  ${moveit_msgs_TARGETS}
+  geometric_shapes::geometric_shapes
+  ${geometry_msgs_TARGETS})
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_kinematics_base_export.h

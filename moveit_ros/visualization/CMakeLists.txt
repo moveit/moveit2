@@ -27,7 +27,6 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(rviz2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(Eigen3 REQUIRED)
 
@@ -113,8 +112,15 @@ pluginlib_export_plugin_description_file(
 pluginlib_export_plugin_description_file(
   rviz_common robot_state_rviz_plugin_description.xml)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_ros_visualization::moveit_ros_visualization to link all libraries at
+# once.
+add_library(moveit_ros_visualization INTERFACE)
+target_link_libraries(moveit_ros_visualization
+                      INTERFACE ${THIS_PACKAGE_LIBRARIES})
+
 install(
-  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  TARGETS moveit_ros_visualization ${THIS_PACKAGE_LIBRARIES}
   EXPORT moveit_ros_visualizationTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

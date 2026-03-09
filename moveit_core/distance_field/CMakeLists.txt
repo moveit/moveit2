@@ -6,19 +6,21 @@ target_include_directories(
   moveit_distance_field
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_core>)
-target_link_libraries(moveit_distance_field moveit_macros moveit_utils)
+target_link_libraries(
+  moveit_distance_field
+  moveit_macros
+  moveit_utils
+  Boost::headers
+  Boost::iostreams
+  eigen_stl_containers::eigen_stl_containers
+  urdfdom::urdf_parser
+  urdfdom_headers::urdfdom_headers
+  ${visualization_msgs_TARGETS}
+  geometric_shapes::geometric_shapes
+  tf2_eigen::tf2_eigen
+  octomap)
 set_target_properties(moveit_distance_field
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_distance_field
-  Boost
-  eigen_stl_containers
-  urdfdom
-  urdfdom_headers
-  visualization_msgs
-  geometric_shapes
-  tf2_eigen
-  octomap)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
