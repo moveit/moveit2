@@ -40,6 +40,7 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <moveit_msgs/action/move_group.hpp>
 #include <memory>
+#include <condition_variable>
 
 namespace move_group
 {
@@ -75,10 +76,11 @@ private:
   std::shared_ptr<MGActionGoal> goal_;
 
   std::mutex queued_goal_mutex_;
+  std::condition_variable queued_goal_cvar_;
   std::shared_ptr<MGActionGoal> queued_goal_;
 
   void setQueuedGoal(const std::shared_ptr<MGActionGoal>& goal);
-  std::shared_ptr<MGActionGoal> fetchQueuedGoal();
+  std::shared_ptr<MGActionGoal> awaitQueuedGoal();
   void executeQueuedGoals();
 };
 }  // namespace move_group

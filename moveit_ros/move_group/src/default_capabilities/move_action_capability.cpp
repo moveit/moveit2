@@ -82,13 +82,17 @@ void MoveGroupMoveAction::initialize()
 
 void MoveGroupMoveAction::setQueuedGoal(const std::shared_ptr<MGActionGoal>& goal)
 {
-  std::scoped_lock lock(queued_goal_mutex_);
-  queued_goal_ = goal;
+  {
+    std::scoped_lock lock(queued_goal_mutex_);
+    queued_goal_ = goal;
+  }
+  queued_lock_cvar_.notify_one();
 }
 
-std::shared_ptr<MGActionGoal> MoveGroupMoveAction::fetchQueuedGoal()
+std::shared_ptr<MGActionGoal> MoveGroupMoveAction::awaitQueuedGoal()
 {
   std::scoped_lock lock(queued_goal_mutex_);
+  queued_lock_cvar_.wait(lock, [this]() { return queued_goal_ != nullptr;})
   return std::move(queued_goal_);
 }
 
@@ -96,18 +100,13 @@ void MoveGroupMoveAction::executeQueuedGoals()
 {
   while (true)
   {
-    goal_ = fetchQueuedGoal();
+    goal_ = awaitQueuedGoal();
     executeMoveCallback();
   }
 }
 
 void MoveGroupMoveAction::executeMoveCallback()
 {
-  if (not goal_)
-  {
-    return;
-  }
-
   RCLCPP_INFO(getLogger(), "executing..");
   setMoveState(PLANNING, goal_);
   // before we start planning, ensure that we have the latest robot state received...
