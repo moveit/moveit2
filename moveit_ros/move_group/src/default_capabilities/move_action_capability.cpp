@@ -101,6 +101,7 @@ void MoveGroupMoveAction::executeQueuedGoals()
   {
     goal_ = awaitQueuedGoal();
     executeMoveCallback();
+    goal_.reset();
   }
 }
 
