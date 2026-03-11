@@ -86,13 +86,13 @@ void MoveGroupMoveAction::setQueuedGoal(const std::shared_ptr<MGActionGoal>& goa
     std::scoped_lock lock(queued_goal_mutex_);
     queued_goal_ = goal;
   }
-  queued_lock_cvar_.notify_one();
+  queued_goal_cvar_.notify_one();
 }
 
 std::shared_ptr<MGActionGoal> MoveGroupMoveAction::awaitQueuedGoal()
 {
   std::scoped_lock lock(queued_goal_mutex_);
-  queued_lock_cvar_.wait(lock, [this]() { return queued_goal_ != nullptr;})
+  queued_goal_cvar_.wait(lock, [this]() { return queued_goal_ != nullptr;});
   return std::move(queued_goal_);
 }
 
