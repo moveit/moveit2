@@ -127,6 +127,8 @@ public:
    */
   const std::vector<std::string>& getVariableNames() const;
 
+  bool supportsGroup(const moveit::core::JointModelGroup* jmg, std::string* error_text_out = nullptr) const override;
+
 protected:
   bool setRedundantJoints(const std::vector<unsigned int>& redundant_joint_indices) override;
 
