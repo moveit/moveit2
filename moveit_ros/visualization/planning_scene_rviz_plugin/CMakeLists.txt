@@ -27,7 +27,7 @@ add_library(moveit_planning_scene_rviz_plugin SHARED src/plugin_init.cpp)
 set_target_properties(moveit_planning_scene_rviz_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(moveit_planning_scene_rviz_plugin
-                      moveit_planning_scene_rviz_plugin_core Qt5::Widgets)
+                      moveit_planning_scene_rviz_plugin_core Qt6::Widgets)
 ament_target_dependencies(moveit_planning_scene_rviz_plugin pluginlib
                           rviz_ogre_vendor)
 target_include_directories(moveit_planning_scene_rviz_plugin

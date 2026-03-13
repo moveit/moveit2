@@ -10,6 +10,13 @@ moveit_package()
 add_definitions(-DBOOST_MATH_DISABLE_FLOAT128)
 
 find_package(ament_cmake REQUIRED)
+
+find_package(Qt6 REQUIRED Core Widgets)
+set(QT_LIBRARIES Qt6::Widgets)
+macro(QT_WRAP_UI)
+  qt6_wrap_ui(${ARGN})
+endmacro()
+
 find_package(class_loader REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(interactive_markers REQUIRED)
@@ -38,13 +45,6 @@ find_package(rviz_ogre_vendor REQUIRED)
 include(ConfigExtras.cmake)
 
 # Qt Stuff
-find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
-set(QT_LIBRARIES Qt5::Widgets)
-# Delegate to QT5 macro
-macro(QT_WRAP_UI)
-  qt5_wrap_ui(${ARGN})
-endmacro()
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
