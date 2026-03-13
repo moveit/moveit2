@@ -217,10 +217,10 @@ bool RDFLoader::loadXmlFileToString(std::string& buffer, const std::string& path
 bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& package_name,
                                     const std::string& relative_path, const std::vector<std::string>& xacro_args)
 {
-  std::string package_path;
+  std::filesystem::path path;
   try
   {
-    package_path = ament_index_cpp::get_package_share_directory(package_name);
+    ament_index_cpp::get_package_share_directory(package_name, path);
   }
   catch (const ament_index_cpp::PackageNotFoundError& e)
   {
@@ -228,7 +228,6 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
     return false;
   }
 
-  std::filesystem::path path(package_path);
   path = path / relative_path;
 
   return loadXmlFileToString(buffer, path.string(), xacro_args);
