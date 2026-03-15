@@ -34,7 +34,14 @@
 
 /* Author: Bryce Willey */
 
+#include <rclcpp/version.h>
+
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <ament_index_cpp/get_package_share_path.hpp>
+#else
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 #include <boost/algorithm/string_regex.hpp>
 #include <filesystem>
 #include <geometry_msgs/msg/pose.hpp>

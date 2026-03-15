@@ -36,8 +36,15 @@
 
 #pragma once
 
+#include <rclcpp/version.h>
+
 #include <ament_index_cpp/get_package_prefix.hpp>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
 #include <ament_index_cpp/get_package_share_path.hpp>
+#else
+#include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 #include <filesystem>
 #include <string>
 #include <tinyxml2.h>
