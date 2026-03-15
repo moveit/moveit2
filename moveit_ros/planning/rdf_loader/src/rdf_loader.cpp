@@ -38,7 +38,7 @@
 #include <moveit/rdf_loader/rdf_loader.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <ament_index_cpp/get_package_prefix.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <ament_index_cpp/get_package_share_path.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <rclcpp/duration.hpp>
@@ -220,7 +220,7 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
   std::filesystem::path path;
   try
   {
-    ament_index_cpp::get_package_share_directory(package_name, path);
+    path = ament_index_cpp::get_package_share_path(package_name);
   }
   catch (const ament_index_cpp::PackageNotFoundError& e)
   {

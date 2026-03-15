@@ -37,7 +37,7 @@
 #pragma once
 
 #include <ament_index_cpp/get_package_prefix.hpp>
-#include <ament_index_cpp/get_package_share_directory.hpp>
+#include <ament_index_cpp/get_package_share_path.hpp>
 #include <filesystem>
 #include <string>
 #include <tinyxml2.h>
@@ -52,9 +52,7 @@ inline std::filesystem::path getSharePath(const std::string& package_name)
 {
   try
   {
-    std::filesystem::path path;
-    ament_index_cpp::get_package_share_directory(package_name, path);
-    return path;
+    return ament_index_cpp::get_package_share_path(package_name);
   }
   catch (const std::runtime_error& e)
   {

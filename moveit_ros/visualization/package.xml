@@ -25,7 +25,8 @@
 
   <build_depend>class_loader</build_depend>
   <build_depend>eigen</build_depend>
-  <build_depend>qt6-base-dev</build_depend>
+  <build_depend>libqt5-opengl-dev</build_depend>
+  <build_depend>qtbase5-dev</build_depend>
 
   <depend>geometric_shapes</depend>
   <depend>interactive_markers</depend>
