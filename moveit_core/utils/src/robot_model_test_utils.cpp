@@ -34,7 +34,14 @@
 
 /* Author: Bryce Willey */
 
+#include <rclcpp/version.h>
+
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+#include <ament_index_cpp/get_package_share_path.hpp>
+#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 #include <boost/algorithm/string_regex.hpp>
 #include <filesystem>
 #include <geometry_msgs/msg/pose.hpp>
@@ -64,10 +71,8 @@ moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& package_nam
                                                   const std::string& urdf_relative_path,
                                                   const std::string& srdf_relative_path)
 {
-  const auto urdf_path =
-      std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name)) / urdf_relative_path;
-  const auto srdf_path =
-      std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name)) / srdf_relative_path;
+  const auto urdf_path = ament_index_cpp::get_package_share_path(package_name) / urdf_relative_path;
+  const auto srdf_path = ament_index_cpp::get_package_share_path(package_name) / srdf_relative_path;
 
   urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDFFile(urdf_path.string());
   if (urdf_model == nullptr)
@@ -95,7 +100,7 @@ moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& robot_name)
 urdf::ModelInterfaceSharedPtr loadModelInterface(const std::string& robot_name)
 {
   const std::string package_name = "moveit_resources_" + robot_name + "_description";
-  std::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
+  std::filesystem::path res_path = ament_index_cpp::get_package_share_path(package_name);
   std::string urdf_path;
   if (robot_name == "pr2")
   {
@@ -123,13 +128,13 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
   if (robot_name == "pr2")
   {
     const std::string package_name = "moveit_resources_" + robot_name + "_description";
-    std::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
+    std::filesystem::path res_path = ament_index_cpp::get_package_share_path(package_name);
     srdf_path = (res_path / "srdf/robot.xml").string();
   }
   else
   {
     const std::string package_name = "moveit_resources_" + robot_name + "_moveit_config";
-    std::filesystem::path res_path(ament_index_cpp::get_package_share_directory(package_name));
+    std::filesystem::path res_path = ament_index_cpp::get_package_share_path(package_name);
     srdf_path = (res_path / "config" / (robot_name + ".srdf")).string();
   }
   srdf_model->initFile(*urdf_model, srdf_path);

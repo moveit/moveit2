@@ -34,11 +34,18 @@
 
 /* Author: Ioan Sucan, Mathias Lüdtke, Dave Coleman */
 
+#include <rclcpp/version.h>
+
 // MoveIt
 #include <moveit/rdf_loader/rdf_loader.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <ament_index_cpp/get_package_prefix.hpp>
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+#include <ament_index_cpp/get_package_share_path.hpp>
+#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 #include <moveit/utils/logger.hpp>
 
 #include <rclcpp/duration.hpp>
@@ -217,10 +224,10 @@ bool RDFLoader::loadXmlFileToString(std::string& buffer, const std::string& path
 bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& package_name,
                                     const std::string& relative_path, const std::vector<std::string>& xacro_args)
 {
-  std::string package_path;
+  std::filesystem::path path;
   try
   {
-    package_path = ament_index_cpp::get_package_share_directory(package_name);
+    path = ament_index_cpp::get_package_share_path(package_name);
   }
   catch (const ament_index_cpp::PackageNotFoundError& e)
   {
@@ -228,7 +235,6 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
     return false;
   }
 
-  std::filesystem::path path(package_path);
   path = path / relative_path;
 
   return loadXmlFileToString(buffer, path.string(), xacro_args);
