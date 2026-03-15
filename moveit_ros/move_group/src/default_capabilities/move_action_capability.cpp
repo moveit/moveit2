@@ -225,9 +225,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
       }
       else
       {
-        RCLCPP_ERROR(
-            getLogger(), "Preserving planner-specific failure code %d for /move_action",
-            res.error_code.val);
+        RCLCPP_ERROR(getLogger(), "Preserving planner-specific failure code %d for /move_action", res.error_code.val);
       }
     }
   }
