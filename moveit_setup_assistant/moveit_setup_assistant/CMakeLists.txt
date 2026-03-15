@@ -40,7 +40,7 @@ add_definitions(-DQT_NO_KEYWORDS)
 
 add_executable(
   moveit_setup_assistant src/main.cpp src/setup_assistant_widget.cpp
-                         src/navigation_widget.cpp)
+                         src/navigation_widget.cpp ${HEADERS})
 target_include_directories(
   moveit_setup_assistant
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -64,6 +64,7 @@ target_include_directories(
 
 target_link_libraries(
   moveit_setup_assistant_updater
+  ${Boost_LIBRARIES}
   ament_index_cpp::ament_index_cpp
   moveit_setup_framework::moveit_setup_framework
   moveit_setup_srdf_plugins::moveit_setup_srdf_plugins

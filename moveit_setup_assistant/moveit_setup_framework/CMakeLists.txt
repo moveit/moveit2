@@ -9,14 +9,14 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(fmt REQUIRED)
-find_package(moveit_core REQUIRED)
-find_package(moveit_ros_planning REQUIRED)
-# Find Qt before packages that transitively depend on it (rviz, visualization)
+# Find Qt6 before packages that transitively depend on it
 find_package(Qt6 QUIET COMPONENTS Core Widgets)
 if(NOT Qt6_FOUND)
   find_package(Qt5Core REQUIRED)
   find_package(Qt5Widgets REQUIRED)
 endif()
+find_package(moveit_core REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_visualization REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -25,14 +25,18 @@ find_package(rviz_rendering REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(urdf REQUIRED)
 
+if(Qt6_FOUND)
+  set(QT_CORE Qt6::Core)
+  set(QT_WIDGETS Qt6::Widgets)
+  set(QT_VERSION_NAME Qt6)
+else()
+  set(QT_CORE Qt5::Core)
+  set(QT_WIDGETS Qt5::Widgets)
+  set(QT_VERSION_NAME Qt5)
+endif()
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
-
-set(MOC_HEADERS
-    include/moveit_setup_framework/qt/helper_widgets.hpp
-    include/moveit_setup_framework/qt/setup_step_widget.hpp
-    include/moveit_setup_framework/qt/rviz_panel.hpp
-    include/moveit_setup_framework/qt/double_list_widget.hpp)
 
 add_library(
   moveit_setup_framework
@@ -45,42 +49,30 @@ add_library(
   src/data_warehouse.cpp
   src/templates.cpp
   src/utilities.cpp
-  src/xml_syntax_highlighter.cpp)
+  src/xml_syntax_highlighter.cpp
+  include/moveit_setup_framework/qt/helper_widgets.hpp
+  include/moveit_setup_framework/qt/setup_step_widget.hpp
+  include/moveit_setup_framework/qt/rviz_panel.hpp
+  include/moveit_setup_framework/qt/double_list_widget.hpp)
 target_include_directories(
   moveit_setup_framework
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_framework>)
-if(Qt6_FOUND)
-  target_link_libraries(
-    moveit_setup_framework
-    ament_index_cpp::ament_index_cpp
-    moveit_core::moveit_core
-    moveit_ros_planning::moveit_ros_planning
-    moveit_ros_visualization::moveit_ros_visualization
-    pluginlib::pluginlib
-    Qt6::Core
-    Qt6::Widgets
-    rclcpp::rclcpp
-    rviz_common::rviz_common
-    rviz_rendering::rviz_rendering
-    srdfdom::srdfdom
-    urdf::urdf)
-else()
-  target_link_libraries(
-    moveit_setup_framework
-    ament_index_cpp::ament_index_cpp
-    moveit_core::moveit_core
-    moveit_ros_planning::moveit_ros_planning
-    moveit_ros_visualization::moveit_ros_visualization
-    pluginlib::pluginlib
-    Qt5::Core
-    Qt5::Widgets
-    rclcpp::rclcpp
-    rviz_common::rviz_common
-    rviz_rendering::rviz_rendering
-    srdfdom::srdfdom
-    urdf::urdf)
-endif()
+target_link_libraries(
+  moveit_setup_framework
+  PUBLIC ament_index_cpp::ament_index_cpp
+         fmt::fmt
+         moveit_core::moveit_core
+         moveit_ros_planning::moveit_ros_planning
+         moveit_ros_visualization::moveit_ros_visualization
+         pluginlib::pluginlib
+         ${QT_CORE}
+         ${QT_WIDGETS}
+         rclcpp::rclcpp
+         rviz_common::rviz_common
+         rviz_rendering::rviz_rendering
+         srdfdom::srdfdom
+         urdf::urdf)
 
 install(DIRECTORY include/ DESTINATION include/moveit_setup_framework)
 install(FILES moveit_setup_framework_plugins.xml
@@ -100,13 +92,7 @@ install(
 
 ament_export_dependencies(fmt)
 ament_export_dependencies(rclcpp)
-if(Qt6_FOUND)
-  ament_export_dependencies(Qt6Core)
-  ament_export_dependencies(Qt6Widgets)
-else()
-  ament_export_dependencies(Qt5Core)
-  ament_export_dependencies(Qt5Widgets)
-endif()
+ament_export_dependencies(${QT_VERSION_NAME})
 ament_export_dependencies(moveit_common)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(moveit_ros_planning)

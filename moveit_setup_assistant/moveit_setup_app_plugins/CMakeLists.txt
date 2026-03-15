@@ -8,6 +8,12 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+# Find Qt6 before packages that transitively depend on it
+find_package(Qt6 QUIET COMPONENTS Core Widgets)
+if(NOT Qt6_FOUND)
+  find_package(Qt5Core REQUIRED)
+  find_package(Qt5Widgets REQUIRED)
+endif()
 find_package(moveit_ros_visualization REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
 find_package(pluginlib REQUIRED)
@@ -17,9 +23,6 @@ find_package(rclcpp REQUIRED)
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt5_wrap_cpp(MOC_FILES include/moveit_setup_app_plugins/launches_widget.hpp
-             include/moveit_setup_app_plugins/perception_widget.hpp)
-
 add_library(
   moveit_setup_app_plugins
   src/launches.cpp
@@ -28,7 +31,8 @@ add_library(
   src/perception_config.cpp
   src/perception.cpp
   src/perception_widget.cpp
-  ${MOC_FILES})
+  include/moveit_setup_app_plugins/launches_widget.hpp
+  include/moveit_setup_app_plugins/perception_widget.hpp)
 target_include_directories(
   moveit_setup_app_plugins
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

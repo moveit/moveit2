@@ -39,6 +39,7 @@
 
 #include <QItemSelection>
 #include <QPainter>
+#include <QRegularExpression>
 #include <cmath>
 namespace moveit_setup
 {
@@ -264,8 +265,8 @@ bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& s
       m->data(m->index(source_row, 2), Qt::CheckStateRole) != Qt::Checked)
     return false;  // not accepted due to check state
 
-  const QRegExp regexp = filterRegExp();
-  if (regexp.isEmpty())
+  const QRegularExpression regexp = filterRegularExpression();
+  if (regexp.pattern().isEmpty())
     return true;
 
   return m->data(m->index(source_row, 0, source_parent), Qt::DisplayRole).toString().contains(regexp) ||
