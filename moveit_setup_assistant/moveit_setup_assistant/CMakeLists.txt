@@ -9,20 +9,32 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(Boost REQUIRED program_options)
+# Find Qt before packages that transitively depend on it
+find_package(Qt6 QUIET COMPONENTS Core Widgets)
+if(NOT Qt6_FOUND)
+  find_package(Qt5Core REQUIRED)
+  find_package(Qt5Widgets REQUIRED)
+endif()
 find_package(moveit_setup_framework REQUIRED)
 find_package(moveit_setup_srdf_plugins REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
 find_package(rclcpp REQUIRED)
+
+if(Qt6_FOUND)
+  set(QT_CORE Qt6Core)
+  set(QT_WIDGETS Qt6Widgets)
+else()
+  set(QT_CORE Qt5Core)
+  set(QT_WIDGETS Qt5Widgets)
+endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     ament_index_cpp
     moveit_setup_framework
     moveit_setup_srdf_plugins
     pluginlib
-    Qt5Core
-    Qt5Widgets
+    ${QT_CORE}
+    ${QT_WIDGETS}
     rclcpp)
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
@@ -32,11 +44,9 @@ set(HEADERS include/moveit_setup_assistant/navigation_widget.hpp
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt5_wrap_cpp(MOC_FILES ${HEADERS})
-
 add_executable(
   moveit_setup_assistant src/main.cpp src/setup_assistant_widget.cpp
-                         src/navigation_widget.cpp ${MOC_FILES})
+                         src/navigation_widget.cpp ${HEADERS})
 target_include_directories(
   moveit_setup_assistant
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -53,6 +63,7 @@ target_include_directories(
 
 ament_target_dependencies(moveit_setup_assistant_updater
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_setup_assistant_updater ${Boost_LIBRARIES})
 
 set_target_properties(moveit_setup_assistant_updater
                       PROPERTIES OUTPUT_NAME collisions_updater PREFIX "")

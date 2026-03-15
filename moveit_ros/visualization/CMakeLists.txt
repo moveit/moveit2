@@ -30,20 +30,30 @@ find_package(rclpy REQUIRED)
 find_package(rviz2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(Eigen3 REQUIRED)
+
+# Find Qt6 before rviz so transitive dependencies resolve
+find_package(Qt6 QUIET COMPONENTS Core Widgets)
+if(Qt6_FOUND)
+  set(QT_LIBRARIES Qt6::Widgets)
+  set(QT_VERSION_NAME Qt6)
+  macro(QT_WRAP_UI)
+    qt6_wrap_ui(${ARGN})
+  endmacro()
+else()
+  find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
+  set(QT_LIBRARIES Qt5::Widgets)
+  set(QT_VERSION_NAME Qt5)
+  macro(QT_WRAP_UI)
+    qt5_wrap_ui(${ARGN})
+  endmacro()
+endif()
+
 find_package(rviz_common REQUIRED)
 find_package(rviz_default_plugins REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
-
-# Qt Stuff
-find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
-set(QT_LIBRARIES Qt5::Widgets)
-# Delegate to QT5 macro
-macro(QT_WRAP_UI)
-  qt5_wrap_ui(${ARGN})
-endmacro()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)

@@ -8,6 +8,12 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+# Find Qt6 before packages that transitively depend on it
+find_package(Qt6 QUIET COMPONENTS Core Widgets)
+if(NOT Qt6_FOUND)
+  find_package(Qt5Core REQUIRED)
+  find_package(Qt5Widgets REQUIRED)
+endif()
 find_package(moveit_ros_visualization REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
 find_package(pluginlib REQUIRED)
@@ -19,11 +25,6 @@ find_package(urdf REQUIRED)
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt5_wrap_cpp(
-  MOC_FILES include/moveit_setup_core_plugins/start_screen_widget.hpp
-  include/moveit_setup_core_plugins/configuration_files_widget.hpp
-  include/moveit_setup_core_plugins/author_information_widget.hpp)
-
 add_library(
   ${PROJECT_NAME}
   src/start_screen.cpp
@@ -32,7 +33,9 @@ add_library(
   src/configuration_files_widget.cpp
   src/author_information.cpp
   src/author_information_widget.cpp
-  ${MOC_FILES})
+  include/moveit_setup_core_plugins/start_screen_widget.hpp
+  include/moveit_setup_core_plugins/configuration_files_widget.hpp
+  include/moveit_setup_core_plugins/author_information_widget.hpp)
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include/moveit_setup_core_plugins>)
