@@ -34,6 +34,8 @@
 
 /* Author: Ioan Sucan, Mathias Lüdtke, Dave Coleman */
 
+#include <rclcpp/version.h>
+
 // MoveIt
 #include <moveit/rdf_loader/rdf_loader.hpp>
 #include <std_msgs/msg/string.hpp>
@@ -220,7 +222,12 @@ bool RDFLoader::loadPkgFileToString(std::string& buffer, const std::string& pack
   std::filesystem::path path;
   try
   {
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
     ament_index_cpp::get_package_share_directory(package_name, path);
+#else
+    path = ament_index_cpp::get_package_share_directory(package_name);
+#endif
   }
   catch (const ament_index_cpp::PackageNotFoundError& e)
   {
