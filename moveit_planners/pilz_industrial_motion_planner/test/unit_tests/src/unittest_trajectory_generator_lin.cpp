@@ -431,6 +431,59 @@ TEST_F(TrajectoryGeneratorLINTest, cartGoalFrameIdBothConstraints)
   EXPECT_TRUE(checkLinResponse(lin_cart_req, res));
 }
 
+/**
+ * @brief Set a proper max cartesian speed and check that trajectory is generated
+ */
+TEST_F(TrajectoryGeneratorLINTest, cartesianSpeedLimitProper)
+{
+  // set max cartesian speed to a positive value
+  moveit_msgs::msg::MotionPlanRequest lin_cart_req{ tdp_->getLinCart("lin2").toRequest() };
+  lin_cart_req.max_cartesian_speed = 0.5;
+  lin_cart_req.cartesian_speed_limited_link = "test_link";
+
+  // generate lin trajectory
+  planning_interface::MotionPlanResponse res;
+  lin_->generate(planning_scene_, lin_cart_req, res);
+  EXPECT_TRUE(res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  EXPECT_TRUE(checkLinResponse(lin_cart_req, res));
+}
+
+/**
+ * @brief Set a cartesian speed limit to less than or equal zero or send request
+ * without setting any speed limit
+ *
+ * Expected Results:
+ *   1. Use the default max_trans_vel from limits container
+ */
+TEST_F(TrajectoryGeneratorLINTest, cartesianSpeedLimitLessEqualZero)
+{
+  // construct motion plan request
+  moveit_msgs::msg::MotionPlanRequest lin_cart_req{ tdp_->getLinCart("lin2").toRequest() };
+  // Case 1: don't set any max cartesian speed (set to zero)
+  // generate lin trajectory
+  planning_interface::MotionPlanResponse res1;
+  lin_->generate(this->planning_scene_, lin_cart_req, res1);
+  EXPECT_TRUE(res1.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  EXPECT_TRUE(checkLinResponse(lin_cart_req, res1));
+
+  // Case 2: set max cartesian speed to negative value
+  lin_cart_req.max_cartesian_speed = -1.0;
+
+  // generate lin trajectory
+  planning_interface::MotionPlanResponse res2;
+  lin_->generate(this->planning_scene_, lin_cart_req, res2);
+  EXPECT_TRUE(res2.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  EXPECT_TRUE(checkLinResponse(lin_cart_req, res2));
+  // Case 3: set max cartesian speed to zero
+  lin_cart_req.max_cartesian_speed = 0.0;
+
+  // generate lin trajectory
+  planning_interface::MotionPlanResponse res3;
+  lin_->generate(this->planning_scene_, lin_cart_req, res3);
+  EXPECT_TRUE(res3.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  EXPECT_TRUE(checkLinResponse(lin_cart_req, res3));
+}
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);

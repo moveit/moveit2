@@ -63,11 +63,6 @@ generate_parameter_library(
   src/cartesian_limits_parameters.yaml # path to input yaml file
 )
 
-add_library(planning_context_loader_base SHARED src/planning_context_loader.cpp)
-target_link_libraries(planning_context_loader_base cartesian_limits_parameters)
-ament_target_dependencies(planning_context_loader_base
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
 add_library(
   joint_limits_common SHARED
   src/joint_limits_aggregator.cpp src/joint_limits_container.cpp
@@ -75,11 +70,18 @@ add_library(
 target_link_libraries(joint_limits_common cartesian_limits_parameters)
 ament_target_dependencies(joint_limits_common ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
+add_library(planning_context_loader_base SHARED src/planning_context_loader.cpp)
+target_link_libraries(planning_context_loader_base cartesian_limits_parameters
+                      joint_limits_common)
+ament_target_dependencies(planning_context_loader_base
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+
 add_library(
   trajectory_generation_common SHARED
   src/trajectory_functions.cpp src/trajectory_generator.cpp
   src/trajectory_blender_transition_window.cpp)
-target_link_libraries(trajectory_generation_common cartesian_limits_parameters)
+target_link_libraries(trajectory_generation_common cartesian_limits_parameters
+                      joint_limits_common)
 ament_target_dependencies(trajectory_generation_common
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
@@ -127,6 +129,17 @@ ament_target_dependencies(planning_context_loader_circ
 target_link_libraries(planning_context_loader_circ planning_context_loader_base
                       joint_limits_common trajectory_generation_common)
 
+add_library(
+  planning_context_loader_polyline SHARED
+  src/planning_context_loader_polyline.cpp
+  src/trajectory_generator_polyline.cpp src/velocity_profile_atrap.cpp
+  src/path_polyline_generator.cpp)
+ament_target_dependencies(planning_context_loader_polyline
+                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  planning_context_loader_polyline planning_context_loader_base
+  joint_limits_common trajectory_generation_common)
+
 add_library(sequence_capability SHARED src/move_group_sequence_action.cpp
                                        src/move_group_sequence_service.cpp)
 ament_target_dependencies(sequence_capability ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -153,6 +166,7 @@ install(
           planning_context_loader_ptp
           planning_context_loader_lin
           planning_context_loader_circ
+          planning_context_loader_polyline
           command_list_manager
           sequence_capability
           trajectory_generation_common

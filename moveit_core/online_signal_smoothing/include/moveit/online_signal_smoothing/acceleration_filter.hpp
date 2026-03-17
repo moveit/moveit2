@@ -81,7 +81,7 @@ c --------x--- v   |
 #include <moveit_core/moveit_acceleration_filter_parameters.hpp>
 
 #include <osqp.h>
-#include <types.h>
+#include <cstddef>  // for size_t
 #include <Eigen/Sparse>
 
 namespace online_signal_smoothing

@@ -94,7 +94,7 @@ void TfPublisher::publishPlanningSceneFrames()
   tf2_ros::TransformBroadcaster broadcaster(context_->moveit_cpp_->getNode());
 #endif
   geometry_msgs::msg::TransformStamped transform;
-  rclcpp::Rate rate(rate_);
+  rclcpp::WallRate rate(rate_);
 
   while (keep_running_)
   {
