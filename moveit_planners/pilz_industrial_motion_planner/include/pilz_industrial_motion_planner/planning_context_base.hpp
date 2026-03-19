@@ -58,12 +58,14 @@ class PlanningContextBase : public planning_interface::PlanningContext
 public:
   PlanningContextBase<GeneratorT>(const std::string& name, const std::string& group,
                                   const moveit::core::RobotModelConstPtr& model,
-                                  const pilz_industrial_motion_planner::LimitsContainer& limits)
+                                  const pilz_industrial_motion_planner::LimitsContainer& limits,
+                                  const pilz_sampling::Params& sampling)
     : planning_interface::PlanningContext(name, group)
     , terminated_(false)
     , model_(model)
     , limits_(limits)
-    , generator_(model, limits_, group)
+    , sampling_(sampling)
+    , generator_(model, limits_, sampling_, group)
   {
   }
 
@@ -111,6 +113,9 @@ public:
 
   /// Joint limits to be used during planning
   pilz_industrial_motion_planner::LimitsContainer limits_;
+
+  /// Settings to be used when sampling the output trajectory
+  pilz_sampling::Params sampling_;
 
 protected:
   GeneratorT generator_;

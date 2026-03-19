@@ -93,8 +93,9 @@ class TrajectoryGenerator
 {
 public:
   TrajectoryGenerator(const moveit::core::RobotModelConstPtr& robot_model,
-                      const pilz_industrial_motion_planner::LimitsContainer& planner_limits)
-    : robot_model_(robot_model), planner_limits_(planner_limits), clock_(std::make_unique<rclcpp::Clock>())
+                      const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
+                      const sampling_parameters::Params& sampling)
+    : robot_model_(robot_model), planner_limits_(planner_limits), sampling_(sampling), clock_(std::make_unique<rclcpp::Clock>())
   {
   }
 
@@ -107,7 +108,7 @@ public:
    * @param sampling_time: sampling time of the generate trajectory
    */
   void generate(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req,
-                planning_interface::MotionPlanResponse& res, double sampling_time = 0.1);
+                planning_interface::MotionPlanResponse& res);
 
 protected:
   /**
@@ -276,6 +277,7 @@ private:
 protected:
   const moveit::core::RobotModelConstPtr robot_model_;
   const pilz_industrial_motion_planner::LimitsContainer planner_limits_;
+  const sampling_parameters::Params sampling_;
   double max_cartesian_speed_;
   static constexpr double MIN_SCALING_FACTOR{ 0.0001 };
   static constexpr double MAX_SCALING_FACTOR{ 1. };

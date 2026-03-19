@@ -63,9 +63,11 @@ public:
    * @throw TrajectoryGeneratorInvalidLimitsException
    * @param model: robot model
    * @param planner_limits: limits in joint and Cartesian spaces
+   * @param sampling: sampling parameters
    */
   TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
                          const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
+                         const sampling_parameters::Params& sampling,
                          const std::string& group_name);
 
 private:
