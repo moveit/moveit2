@@ -121,7 +121,7 @@ protected:
     // use the default sampling time
     sampling_.max_seconds = 0.1;
 
-    // initialize the LIN trajectory generator
+    // initialize the CIRC trajectory generator
     circ_ = std::make_unique<TrajectoryGeneratorCIRC>(robot_model_, planner_limits_, sampling_, planning_group_);
     ASSERT_NE(nullptr, circ_) << "failed to create CIRC trajectory generator";
   }

@@ -134,8 +134,12 @@ protected:
     planner_limits.setJointLimits(joint_limits);
     planner_limits.setCartesianLimits(cart_limits);
 
+    pilz_sampling::Params sampling;
+    sampling.max_seconds = 0.1;
+
     // create planner instance
-    trajectory_generator_ = std::make_unique<typename T::Type_>(robot_model_, planner_limits, planning_group_);
+    trajectory_generator_ =
+        std::make_unique<typename T::Type_>(robot_model_, planner_limits, sampling, planning_group_);
     ASSERT_NE(nullptr, trajectory_generator_) << "failed to create trajectory generator";
 
     // create a valid motion plan request with goal in joint space as basis for

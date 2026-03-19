@@ -262,7 +262,7 @@ TEST_F(TrajectoryGeneratorPTPTest, missingDecelerationimits)
   }
 
   planner_limits.setJointLimits(joint_limits);
-  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, planning_group_),
+  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, sampling_, planning_group_),
                TrajectoryGeneratorInvalidLimitsException);
 }
 
