@@ -345,8 +345,8 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
   try
   {
-    auto sampling_time =
-        sampling_.max_seconds plan(plan_info.start_scene, req, plan_info, sampling_time, joint_trajectory);
+    auto sampling_time = sampling_.max_seconds;
+    plan(plan_info.start_scene, req, plan_info, sampling_time, joint_trajectory);
   }
   catch (const MoveItErrorCodeException& ex)
   {
