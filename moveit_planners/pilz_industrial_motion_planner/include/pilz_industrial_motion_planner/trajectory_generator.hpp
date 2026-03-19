@@ -123,6 +123,11 @@ protected:
   public:
     MotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req);
 
+    /**
+     * @brief Set the sampling time
+     */
+    void setSamplingTime(double sampling_time);
+
     std::string group_name;
     std::string link_name;
     Eigen::Isometry3d start_pose;
@@ -150,11 +155,6 @@ protected:
    */
 
   void setMaxCartesianSpeed(const moveit_msgs::msg::MotionPlanRequest& req);
-
-  /**
-   * @brief Set the sampling time
-   */
-  void setSamplingTime(double sampling_time);
 
 private:
   virtual void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const;
