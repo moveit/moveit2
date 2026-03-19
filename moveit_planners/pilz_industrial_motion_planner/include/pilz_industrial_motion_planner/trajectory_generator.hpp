@@ -150,7 +150,7 @@ protected:
    */
 
   void setMaxCartesianSpeed(const moveit_msgs::msg::MotionPlanRequest& req);
-  
+
   /**
    * @brief Set the sampling time
    */
