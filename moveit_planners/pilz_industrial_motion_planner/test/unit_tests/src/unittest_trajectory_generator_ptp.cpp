@@ -112,9 +112,12 @@ protected:
       }
     }
 
+    // use the default sampling time
+    sampling_.max_seconds = 0.1;
+
     // create the trajectory generator
     planner_limits_.setJointLimits(joint_limits);
-    ptp_ = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, planner_limits_, planning_group_);
+    ptp_ = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, planner_limits_, sampling_, planning_group_);
     ASSERT_NE(nullptr, ptp_);
   }
 
@@ -153,6 +156,7 @@ protected:
 
   // test parameters from parameter server
   LimitsContainer planner_limits_;
+  pilz_sampling::Params sampling_;
   std::string planning_group_, target_link_;
   double joint_position_tolerance_, joint_velocity_tolerance_, joint_acceleration_tolerance_, pose_norm_tolerance_;
 };
@@ -301,8 +305,8 @@ TEST_F(TrajectoryGeneratorPTPTest, testInsufficientLimit)
 
   EXPECT_THROW(
       {
-        auto ptp_error =
-            std::make_unique<TrajectoryGeneratorPTP>(robot_model_, insufficient_planner_limits, planning_group_);
+        auto ptp_error = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, insufficient_planner_limits, sampling_,
+                                                                  planning_group_);
       },
       TrajectoryGeneratorInvalidLimitsException);
 
@@ -341,7 +345,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testInsufficientLimit)
 
   EXPECT_NO_THROW({
     auto ptp_no_error =
-        std::make_unique<TrajectoryGeneratorPTP>(robot_model_, sufficient_planner_limits, planning_group_);
+        std::make_unique<TrajectoryGeneratorPTP>(robot_model_, sufficient_planner_limits, sampling_, planning_group_);
   });
 }
 
@@ -532,7 +536,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testScalingFactor)
   planner_limits.setJointLimits(joint_limits);
 
   // create the generator with new limits
-  ptp_ = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, planner_limits, planning_group_);
+  ptp_ = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, planner_limits, sampling_, planning_group_);
 
   planning_interface::MotionPlanResponse res;
   planning_interface::MotionPlanRequest req;

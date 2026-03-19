@@ -118,8 +118,12 @@ protected:
     planner_limits_.setJointLimits(joint_limits);
     planner_limits_.setCartesianLimits(cart_limits);
 
+    // use the default sampling time
+    sampling_.max_seconds = 0.1;
+
     // initialize trajectory generators and blender
-    lin_generator_ = std::make_unique<TrajectoryGeneratorLIN>(robot_model_, planner_limits_, planning_group_);
+    lin_generator_ =
+        std::make_unique<TrajectoryGeneratorLIN>(robot_model_, planner_limits_, sampling_, planning_group_);
     ASSERT_NE(nullptr, lin_generator_) << "failed to create LIN trajectory generator";
     blender_ = std::make_unique<TrajectoryBlenderTransitionWindow>(planner_limits_);
     ASSERT_NE(nullptr, blender_) << "failed to create trajectory blender";
@@ -172,7 +176,7 @@ protected:
   double cartesian_velocity_tolerance_, cartesian_angular_velocity_tolerance_, joint_velocity_tolerance_,
       joint_acceleration_tolerance_, sampling_time_;
   LimitsContainer planner_limits_;
-
+  pilz_sampling::Params sampling_;
   std::string test_data_file_name_;
   XmlTestDataLoaderUPtr data_loader_;
 };

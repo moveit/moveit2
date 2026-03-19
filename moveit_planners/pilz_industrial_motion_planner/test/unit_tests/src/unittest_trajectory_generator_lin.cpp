@@ -128,8 +128,11 @@ protected:
     planner_limits_.setJointLimits(joint_limits);
     planner_limits_.setCartesianLimits(cart_limits);
 
+    // use the default sampling time
+    sampling_.max_seconds = 0.1;
+
     // initialize the LIN trajectory generator
-    lin_ = std::make_unique<TrajectoryGeneratorLIN>(robot_model_, planner_limits_, planning_group_);
+    lin_ = std::make_unique<TrajectoryGeneratorLIN>(robot_model_, planner_limits_, sampling_, planning_group_);
     ASSERT_NE(nullptr, lin_) << "Failed to create LIN trajectory generator.";
   }
 
@@ -180,6 +183,7 @@ protected:
   double joint_position_tolerance_, joint_velocity_tolerance_, pose_norm_tolerance_, rot_axis_norm_tolerance_,
       velocity_scaling_factor_, other_tolerance_;
   LimitsContainer planner_limits_;
+  pilz_sampling::Params sampling_;
 };
 
 /**
