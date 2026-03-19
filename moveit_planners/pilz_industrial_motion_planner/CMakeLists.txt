@@ -65,7 +65,7 @@ generate_parameter_library(
 
 generate_parameter_library(
   pilz_sampling_parameters # cmake target name for the parameter library
-  src/sampling_parameters.yaml # path to input yaml file
+  src/pilz_sampling_parameters.yaml # path to input yaml file
 )
 
 add_library(

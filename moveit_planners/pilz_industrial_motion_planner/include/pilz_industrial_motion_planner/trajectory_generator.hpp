@@ -46,6 +46,7 @@
 
 #include <pilz_industrial_motion_planner/joint_limits_extension.hpp>
 #include <pilz_industrial_motion_planner/limits_container.hpp>
+#include <pilz_industrial_motion_planner/pilz_sampling_parameters.hpp>
 #include <pilz_industrial_motion_planner/trajectory_functions.hpp>
 #include <pilz_industrial_motion_planner/trajectory_generation_exceptions.hpp>
 
