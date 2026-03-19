@@ -395,4 +395,15 @@ void TrajectoryGenerator::setMaxCartesianSpeed(const moveit_msgs::msg::MotionPla
   }
 }
 
+void TrajectoryGenerator::setSamplingTime(double sampling_time)
+{
+  if (sampling_time > 0.0)
+  {
+    sampling_.max_seconds = sampling_time;
+    RCLCPP_INFO(getLogger(), "received sampling_time: %f", sampling_time);
+  }
+  else
+  {
+    RCLCPP_INFO(getLogger(), "using default sampling_time: %f", sampling_.max_seconds);
+  }
 }  // namespace pilz_industrial_motion_planner

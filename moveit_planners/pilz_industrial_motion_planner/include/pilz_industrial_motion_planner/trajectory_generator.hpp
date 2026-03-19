@@ -150,6 +150,11 @@ protected:
    */
 
   void setMaxCartesianSpeed(const moveit_msgs::msg::MotionPlanRequest& req);
+  
+  /**
+   * @brief Set the sampling time
+   */
+  void setSamplingTime(double sampling_time);
 
 private:
   virtual void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const;
