@@ -57,8 +57,7 @@ bool pilz_industrial_motion_planner::PlanningContextLoader::setLimits(
   return true;
 }
 
-bool pilz_industrial_motion_planner::PlanningContextLoader::setSampling(
-    const sampling_parameters::Params& sampling)
+bool pilz_industrial_motion_planner::PlanningContextLoader::setSampling(const sampling_parameters::Params& sampling)
 {
   sampling_ = sampling;
   return true;

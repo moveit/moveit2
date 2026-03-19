@@ -141,7 +141,6 @@ private:
   /// sampling parameters
   std::shared_ptr<pilz_sampling::ParamListener> sampling_param_listener_;
   pilz_sampling::Params sampling_params_;
-
 };
 
 MOVEIT_CLASS_FORWARD(CommandPlanner);

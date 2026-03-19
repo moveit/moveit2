@@ -114,7 +114,7 @@ protected:
 
   /// Limits to be used during planning
   pilz_industrial_motion_planner::LimitsContainer limits_;
-  
+
   /// Settings to be used when sampling the output trajectory
   sampling_parameters::Params sampling_;
 

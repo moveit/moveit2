@@ -112,7 +112,7 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
     loader_pointer->setLimits(limits);
     loader_pointer->setModel(model_);
     loader_pointer->setSampling(sampling_params_);
-  
+
     registerContextLoader(loader_pointer);
   }
 

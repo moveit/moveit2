@@ -95,7 +95,10 @@ public:
   TrajectoryGenerator(const moveit::core::RobotModelConstPtr& robot_model,
                       const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
                       const sampling_parameters::Params& sampling)
-    : robot_model_(robot_model), planner_limits_(planner_limits), sampling_(sampling), clock_(std::make_unique<rclcpp::Clock>())
+    : robot_model_(robot_model)
+    , planner_limits_(planner_limits)
+    , sampling_(sampling)
+    , clock_(std::make_unique<rclcpp::Clock>())
   {
   }
 

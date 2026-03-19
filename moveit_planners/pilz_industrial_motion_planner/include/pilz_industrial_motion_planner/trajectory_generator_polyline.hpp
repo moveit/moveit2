@@ -71,8 +71,7 @@ public:
    */
   TrajectoryGeneratorPolyline(const moveit::core::RobotModelConstPtr& robot_model,
                               const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
-                              const sampling_parameters::Params& sampling,
-                              const std::string& group_name);
+                              const sampling_parameters::Params& sampling, const std::string& group_name);
 
 private:
   void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const override;
