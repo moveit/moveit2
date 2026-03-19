@@ -406,4 +406,5 @@ void TrajectoryGenerator::setSamplingTime(double sampling_time)
   {
     RCLCPP_INFO(getLogger(), "using default sampling_time: %f", sampling_.max_seconds);
   }
+}
 }  // namespace pilz_industrial_motion_planner
