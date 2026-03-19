@@ -35,7 +35,7 @@
 #pragma once
 
 #include <pilz_industrial_motion_planner/limits_container.hpp>
-#include <pilz_industrial_motion_planner/sampling_parameters.hpp>
+#include <pilz_industrial_motion_planner/pilz_sampling_parameters.hpp>
 
 #include <memory>
 #include <vector>
@@ -116,7 +116,7 @@ protected:
   pilz_industrial_motion_planner::LimitsContainer limits_;
 
   /// Settings to be used when sampling the output trajectory
-  sampling_parameters::Params sampling_;
+  pilz_sampling::Params sampling_;
 
   /// True if model is set
   bool model_set_;

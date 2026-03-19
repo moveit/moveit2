@@ -82,7 +82,7 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
 
   // Obtain sampling parameters
   sampling_param_listener_ =
-      std::make_shared<sampling_parameters::ParamListener>(node, PARAMETER_NAMESPACE + ".pilz_sampling");
+      std::make_shared<pilz_sampling::ParamListener>(node, PARAMETER_NAMESPACE + ".pilz_sampling");
   sampling_params_ = sampling_param_listener_->get_params();
 
   // Load the planning context loader

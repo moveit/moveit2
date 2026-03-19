@@ -59,7 +59,7 @@ class PlanningContextCIRC : public pilz_industrial_motion_planner::PlanningConte
 public:
   PlanningContextCIRC(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
                       const pilz_industrial_motion_planner::LimitsContainer& limits,
-                      const sampling_parameters::Params& sampling)
+                      const pilz_sampling::Params& sampling)
     : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorCIRC>(name, group, model, limits, sampling)
   {
   }

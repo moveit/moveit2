@@ -46,7 +46,7 @@
 #include <memory>
 
 #include <pilz_industrial_motion_planner/cartesian_limits_parameters.hpp>
-#include <pilz_industrial_motion_planner/sampling_parameters.hpp>
+#include <pilz_industrial_motion_planner/pilz_sampling_parameters.hpp>
 
 namespace pilz_industrial_motion_planner
 {

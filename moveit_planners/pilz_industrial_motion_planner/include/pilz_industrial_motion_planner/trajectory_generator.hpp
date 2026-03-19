@@ -94,7 +94,7 @@ class TrajectoryGenerator
 public:
   TrajectoryGenerator(const moveit::core::RobotModelConstPtr& robot_model,
                       const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
-                      const sampling_parameters::Params& sampling)
+                      const pilz_sampling::Params& sampling)
     : robot_model_(robot_model)
     , planner_limits_(planner_limits)
     , sampling_(sampling)
@@ -280,7 +280,7 @@ private:
 protected:
   const moveit::core::RobotModelConstPtr robot_model_;
   const pilz_industrial_motion_planner::LimitsContainer planner_limits_;
-  const sampling_parameters::Params sampling_;
+  const pilz_sampling::Params sampling_;
   double max_cartesian_speed_;
   static constexpr double MIN_SCALING_FACTOR{ 0.0001 };
   static constexpr double MAX_SCALING_FACTOR{ 1. };

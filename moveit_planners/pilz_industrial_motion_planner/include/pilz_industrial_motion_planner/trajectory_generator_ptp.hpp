@@ -64,7 +64,7 @@ public:
    */
   TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
                          const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
-                         const sampling_parameters::Params& sampling, const std::string& group_name);
+                         const pilz_sampling::Params& sampling, const std::string& group_name);
 
 private:
   void extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,

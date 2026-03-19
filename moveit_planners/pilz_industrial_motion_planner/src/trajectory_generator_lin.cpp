@@ -67,7 +67,7 @@ rclcpp::Logger getLogger()
 }  // namespace
 TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelConstPtr& robot_model,
                                                const LimitsContainer& planner_limits,
-                                               const sampling_parameters::Params& sampling,
+                                               const pilz_sampling::Params& sampling,
                                                const std::string& /*group_name*/)
   : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits, sampling)
 {
