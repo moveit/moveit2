@@ -63,15 +63,20 @@ generate_parameter_library(
   src/cartesian_limits_parameters.yaml # path to input yaml file
 )
 
+generate_parameter_library(
+  sampling_parameters # cmake target name for the parameter library
+  src/sampling_parameters.yaml # path to input yaml file
+)
+
 add_library(
   joint_limits_common SHARED
   src/joint_limits_aggregator.cpp src/joint_limits_container.cpp
   src/joint_limits_validator.cpp src/limits_container.cpp)
-target_link_libraries(joint_limits_common cartesian_limits_parameters)
+target_link_libraries(joint_limits_common cartesian_limits_parameters sampling_parameters)
 ament_target_dependencies(joint_limits_common ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 add_library(planning_context_loader_base SHARED src/planning_context_loader.cpp)
-target_link_libraries(planning_context_loader_base cartesian_limits_parameters
+target_link_libraries(planning_context_loader_base cartesian_limits_parameters sampling_parameters
                       joint_limits_common)
 ament_target_dependencies(planning_context_loader_base
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -80,7 +85,7 @@ add_library(
   trajectory_generation_common SHARED
   src/trajectory_functions.cpp src/trajectory_generator.cpp
   src/trajectory_blender_transition_window.cpp)
-target_link_libraries(trajectory_generation_common cartesian_limits_parameters
+target_link_libraries(trajectory_generation_common cartesian_limits_parameters sampling_parameters
                       joint_limits_common)
 ament_target_dependencies(trajectory_generation_common
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -161,6 +166,7 @@ pluginlib_export_plugin_description_file(
 install(
   TARGETS pilz_industrial_motion_planner
           cartesian_limits_parameters
+          sampling_parameters
           joint_limits_common
           planning_context_loader_base
           planning_context_loader_ptp

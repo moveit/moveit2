@@ -69,8 +69,9 @@ rclcpp::Logger getLogger()
 }  // namespace
 TrajectoryGeneratorPolyline::TrajectoryGeneratorPolyline(const moveit::core::RobotModelConstPtr& robot_model,
                                                          const LimitsContainer& planner_limits,
+                                                         const sampling_parameters::Params& sampling,
                                                          const std::string& /*group_name*/)
-  : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
+  : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits, sampling)
 {
   planner_limits_.printCartesianLimits();
 }
