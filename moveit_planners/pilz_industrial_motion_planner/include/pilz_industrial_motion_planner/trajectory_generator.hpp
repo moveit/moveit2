@@ -103,6 +103,11 @@ public:
   {
   }
 
+  /**
+   * @brief Set the sampling time
+   */
+  void setSamplingTime(double sampling_time);
+
   virtual ~TrajectoryGenerator() = default;
 
   /**
@@ -122,11 +127,6 @@ protected:
   {
   public:
     MotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene, const planning_interface::MotionPlanRequest& req);
-
-    /**
-     * @brief Set the sampling time
-     */
-    void setSamplingTime(double sampling_time);
 
     std::string group_name;
     std::string link_name;
