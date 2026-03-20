@@ -151,7 +151,7 @@ protected:
         moveit::core::robotStateToRobotStateMsg(responses[index - 1].trajectory->getLastWayPoint(), req.start_state);
       }
       // generate trajectory
-      lin_generator_->setSamplingTime(sampling_time_.max_seconds);
+      lin_generator_->setSamplingTime(sampling_time_);
       planning_interface::MotionPlanResponse resp;
       lin_generator_->generate(planning_scene_, req, resp);
       if (resp.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
