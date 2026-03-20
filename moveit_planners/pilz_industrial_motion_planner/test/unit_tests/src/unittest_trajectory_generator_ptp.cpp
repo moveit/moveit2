@@ -537,7 +537,7 @@ TEST_F(TrajectoryGeneratorPTPTest, testScalingFactor)
   planner_limits.setJointLimits(joint_limits);
 
   // create the generator with new limits
-  ptp_ = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, planner_limits, sampling_, planning_group_);
+  ptp_ = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, planner_limits, default_sampling_, planning_group_);
 
   planning_interface::MotionPlanResponse res;
   planning_interface::MotionPlanRequest req;
