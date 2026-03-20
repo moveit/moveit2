@@ -119,11 +119,11 @@ protected:
     planner_limits_.setCartesianLimits(cart_limits);
 
     // use the default sampling time
-    sampling_.max_seconds = 0.1;
+    default_sampling_.max_seconds = 0.1;
 
     // initialize trajectory generators and blender
     lin_generator_ =
-        std::make_unique<TrajectoryGeneratorLIN>(robot_model_, planner_limits_, sampling_, planning_group_);
+        std::make_unique<TrajectoryGeneratorLIN>(robot_model_, planner_limits_, default_sampling_, planning_group_);
     ASSERT_NE(nullptr, lin_generator_) << "failed to create LIN trajectory generator";
     blender_ = std::make_unique<TrajectoryBlenderTransitionWindow>(planner_limits_);
     ASSERT_NE(nullptr, blender_) << "failed to create trajectory blender";
@@ -132,6 +132,7 @@ protected:
   void TearDown() override
   {
     robot_model_.reset();
+    lin_generator_->setSamplingTime(default_sampling_.max_seconds);
   }
 
   /**
@@ -150,8 +151,9 @@ protected:
         moveit::core::robotStateToRobotStateMsg(responses[index - 1].trajectory->getLastWayPoint(), req.start_state);
       }
       // generate trajectory
+      lin_generator_->setSamplingTime(sampling_time_.max_seconds);
       planning_interface::MotionPlanResponse resp;
-      lin_generator_->generate(planning_scene_, req, resp, sampling_time_);
+      lin_generator_->generate(planning_scene_, req, resp);
       if (resp.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
       {
         std::runtime_error("Failed to generate trajectory.");
@@ -176,7 +178,7 @@ protected:
   double cartesian_velocity_tolerance_, cartesian_angular_velocity_tolerance_, joint_velocity_tolerance_,
       joint_acceleration_tolerance_, sampling_time_;
   LimitsContainer planner_limits_;
-  pilz_sampling::Params sampling_;
+  pilz_sampling::Params default_sampling_;
   std::string test_data_file_name_;
   XmlTestDataLoaderUPtr data_loader_;
 };
@@ -329,8 +331,9 @@ TEST_F(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
       sampling_time_ *= 2;
     }
     // generate trajectory
+    lin_generator_->setSamplingTime(sampling_time_);
     planning_interface::MotionPlanResponse resp;
-    lin_generator_->generate(planning_scene_, req, resp, sampling_time_);
+    lin_generator_->generate(planning_scene_, req, resp);
     if (resp.error_code.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
     {
       std::runtime_error("Failed to generate trajectory.");

@@ -129,16 +129,17 @@ protected:
     planner_limits_.setCartesianLimits(cart_limits);
 
     // use the default sampling time
-    sampling_.max_seconds = 0.1;
+    default_sampling_.max_seconds = 0.1;
 
     // initialize the LIN trajectory generator
-    lin_ = std::make_unique<TrajectoryGeneratorLIN>(robot_model_, planner_limits_, sampling_, planning_group_);
+    lin_ = std::make_unique<TrajectoryGeneratorLIN>(robot_model_, planner_limits_, default_sampling_, planning_group_);
     ASSERT_NE(nullptr, lin_) << "Failed to create LIN trajectory generator.";
   }
 
   void TearDown() override
   {
     robot_model_.reset();
+    lin_->setSamplingTime(default_sampling_.max_seconds);
   }
 
   bool checkLinResponse(const planning_interface::MotionPlanRequest& req,
@@ -183,7 +184,7 @@ protected:
   double joint_position_tolerance_, joint_velocity_tolerance_, pose_norm_tolerance_, rot_axis_norm_tolerance_,
       velocity_scaling_factor_, other_tolerance_;
   LimitsContainer planner_limits_;
-  pilz_sampling::Params sampling_;
+  pilz_sampling::Params default_sampling_;
 };
 
 /**
@@ -295,8 +296,9 @@ TEST_F(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
   /// +++++++++++++++++++++++
   /// + plan LIN trajectory +
   /// +++++++++++++++++++++++
+  lin_->setSamplingTime(0.01);
   planning_interface::MotionPlanResponse res;
-  lin_->generate(planning_scene_, lin_joint_req, res, 0.01);
+  lin_->generate(planning_scene_, lin_joint_req, res);
   EXPECT_EQ(res.error_code.val, moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
 
   ASSERT_TRUE(testutils::checkCartesianTranslationalPath(res.trajectory, target_link_hcd_));

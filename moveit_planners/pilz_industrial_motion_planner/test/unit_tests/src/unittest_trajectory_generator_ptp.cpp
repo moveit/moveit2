@@ -113,17 +113,18 @@ protected:
     }
 
     // use the default sampling time
-    sampling_.max_seconds = 0.1;
+    default_sampling_.max_seconds = 0.1;
 
     // create the trajectory generator
     planner_limits_.setJointLimits(joint_limits);
-    ptp_ = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, planner_limits_, sampling_, planning_group_);
+    ptp_ = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, planner_limits_, default_sampling_, planning_group_);
     ASSERT_NE(nullptr, ptp_);
   }
 
   void TearDown() override
   {
     robot_model_.reset();
+    ptp_->setSamplingTime(default_sampling_.max_seconds);
   }
 
   /**
@@ -156,7 +157,7 @@ protected:
 
   // test parameters from parameter server
   LimitsContainer planner_limits_;
-  pilz_sampling::Params sampling_;
+  pilz_sampling::Params default_sampling_;
   std::string planning_group_, target_link_;
   double joint_position_tolerance_, joint_velocity_tolerance_, joint_acceleration_tolerance_, pose_norm_tolerance_;
 };
@@ -184,7 +185,7 @@ TEST_F(TrajectoryGeneratorPTPTest, TestExceptionErrorCodeMapping)
 TEST_F(TrajectoryGeneratorPTPTest, noLimits)
 {
   LimitsContainer planner_limits;
-  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, planning_group_),
+  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, default_sampling_, planning_group_),
                TrajectoryGeneratorInvalidLimitsException);
 }
 
@@ -238,7 +239,7 @@ TEST_F(TrajectoryGeneratorPTPTest, missingVelocityLimits)
   }
 
   planner_limits.setJointLimits(joint_limits);
-  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, planning_group_),
+  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, default_sampling_, planning_group_),
                TrajectoryGeneratorInvalidLimitsException);
 }
 
@@ -262,7 +263,7 @@ TEST_F(TrajectoryGeneratorPTPTest, missingDecelerationimits)
   }
 
   planner_limits.setJointLimits(joint_limits);
-  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, sampling_, planning_group_),
+  EXPECT_THROW(TrajectoryGeneratorPTP(this->robot_model_, planner_limits, default_sampling_, planning_group_),
                TrajectoryGeneratorInvalidLimitsException);
 }
 
@@ -305,8 +306,8 @@ TEST_F(TrajectoryGeneratorPTPTest, testInsufficientLimit)
 
   EXPECT_THROW(
       {
-        auto ptp_error = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, insufficient_planner_limits, sampling_,
-                                                                  planning_group_);
+        auto ptp_error = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, insufficient_planner_limits,
+                                                                  default_sampling_, planning_group_);
       },
       TrajectoryGeneratorInvalidLimitsException);
 
@@ -344,8 +345,8 @@ TEST_F(TrajectoryGeneratorPTPTest, testInsufficientLimit)
   sufficient_planner_limits.setJointLimits(sufficient_joint_limits);
 
   EXPECT_NO_THROW({
-    auto ptp_no_error =
-        std::make_unique<TrajectoryGeneratorPTP>(robot_model_, sufficient_planner_limits, sampling_, planning_group_);
+    auto ptp_no_error = std::make_unique<TrajectoryGeneratorPTP>(robot_model_, sufficient_planner_limits,
+                                                                 default_sampling_, planning_group_);
   });
 }
 
