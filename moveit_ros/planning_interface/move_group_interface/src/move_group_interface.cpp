@@ -165,6 +165,16 @@ public:
     execute_action_client_ = rclcpp_action::create_client<moveit_msgs::action::ExecuteTrajectory>(
         node_, rclcpp::names::append(opt_.move_group_namespace_, move_group::EXECUTE_ACTION_NAME), callback_group_);
     execute_action_client_->wait_for_action_server(wait_for_servers.to_chrono<std::chrono::duration<double>>());
+    
+    // Function to check if the service server is available
+    auto wait_for_service = [this](auto& client, const std::string& service_name) {
+        if (!client->wait_for_service(std::chrono::seconds(10)))
+        {
+            throw std::runtime_error("Service server not available for service: " + service_name + 
+                                    ". Is move_group running?");
+        }
+        RCLCPP_INFO(node_->get_logger(), "Service '%s' found.", service_name.c_str());
+    };
 
     query_service_ = node_->create_client<moveit_msgs::srv::QueryPlannerInterfaces>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::QUERY_PLANNERS_SERVICE_NAME),
@@ -179,6 +189,12 @@ public:
     cartesian_path_service_ = node_->create_client<moveit_msgs::srv::GetCartesianPath>(
         rclcpp::names::append(opt_.move_group_namespace_, move_group::CARTESIAN_PATH_SERVICE_NAME),
         rmw_qos_profile_services_default, callback_group_);
+    
+    // Check if service servers are available for all the clients
+    wait_for_service(query_service_, move_group::QUERY_PLANNERS_SERVICE_NAME);
+    wait_for_service(get_params_service_, move_group::GET_PLANNER_PARAMS_SERVICE_NAME);
+    wait_for_service(set_params_service_, move_group::SET_PLANNER_PARAMS_SERVICE_NAME);
+    wait_for_service(cartesian_path_service_, move_group::CARTESIAN_PATH_SERVICE_NAME);
 
     // plan_grasps_service_ = pnode_->create_client<moveit_msgs::srv::GraspPlanning>(GRASP_PLANNING_SERVICE_NAME);
 
