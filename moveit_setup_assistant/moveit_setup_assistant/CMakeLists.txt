@@ -9,32 +9,20 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(Boost REQUIRED program_options)
-# Find Qt before packages that transitively depend on it
-find_package(Qt6 QUIET COMPONENTS Core Widgets)
-if(NOT Qt6_FOUND)
-  find_package(Qt5Core REQUIRED)
-  find_package(Qt5Widgets REQUIRED)
-endif()
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
 find_package(moveit_setup_framework REQUIRED)
 find_package(moveit_setup_srdf_plugins REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
-
-if(Qt6_FOUND)
-  set(QT_CORE Qt6Core)
-  set(QT_WIDGETS Qt6Widgets)
-else()
-  set(QT_CORE Qt5Core)
-  set(QT_WIDGETS Qt5Widgets)
-endif()
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     ament_index_cpp
     moveit_setup_framework
     moveit_setup_srdf_plugins
     pluginlib
-    ${QT_CORE}
-    ${QT_WIDGETS}
+    Qt${QT_VERSION_MAJOR}Core
+    Qt${QT_VERSION_MAJOR}Widgets
     rclcpp)
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:

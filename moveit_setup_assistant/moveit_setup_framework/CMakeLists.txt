@@ -9,12 +9,8 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(fmt REQUIRED)
-# Find Qt6 before packages that transitively depend on it
-find_package(Qt6 QUIET COMPONENTS Core Widgets)
-if(NOT Qt6_FOUND)
-  find_package(Qt5Core REQUIRED)
-  find_package(Qt5Widgets REQUIRED)
-endif()
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_visualization REQUIRED)
@@ -24,16 +20,6 @@ find_package(rviz_common REQUIRED)
 find_package(rviz_rendering REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(urdf REQUIRED)
-
-if(Qt6_FOUND)
-  set(QT_CORE Qt6Core)
-  set(QT_WIDGETS Qt6Widgets)
-  set(QT_VERSION_NAME Qt6)
-else()
-  set(QT_CORE Qt5Core)
-  set(QT_WIDGETS Qt5Widgets)
-  set(QT_VERSION_NAME Qt5)
-endif()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -65,8 +51,8 @@ ament_target_dependencies(
   moveit_ros_planning
   moveit_ros_visualization
   pluginlib
-  ${QT_CORE}
-  ${QT_WIDGETS}
+  Qt${QT_VERSION_MAJOR}Core
+  Qt${QT_VERSION_MAJOR}Widgets
   rclcpp
   rviz_common
   rviz_rendering
@@ -91,7 +77,7 @@ install(
 
 ament_export_dependencies(fmt)
 ament_export_dependencies(rclcpp)
-ament_export_dependencies(${QT_VERSION_NAME})
+ament_export_dependencies(Qt${QT_VERSION_MAJOR})
 ament_export_dependencies(moveit_common)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(moveit_ros_planning)
