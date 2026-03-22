@@ -9,11 +9,10 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(fmt REQUIRED)
-# Try Qt6 first, fall back to Qt5. Avoid find_package(QT NAMES Qt6 Qt5 ...):
-# CMake's ascending path resolution finds Qt5 before Qt6 when both are
-# installed.
-find_package(Qt6 QUIET COMPONENTS Core Widgets)
-if(Qt6_FOUND)
+# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+find_package(rviz2 QUIET)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+  find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
   set(QT_VERSION_MAJOR 6)
 else()
   find_package(Qt5 REQUIRED COMPONENTS Core Widgets)

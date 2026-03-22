@@ -31,11 +31,9 @@ find_package(rviz2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-# Qt Stuff - try Qt6 first, fall back to Qt5. Avoid find_package(QT NAMES Qt6
-# Qt5 ...): CMake's ascending path resolution finds Qt5 before Qt6 when both are
-# installed.
-find_package(Qt6 QUIET COMPONENTS Widgets)
-if(Qt6_FOUND)
+# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+  find_package(Qt6 REQUIRED COMPONENTS Widgets)
   set(QT_VERSION_MAJOR 6)
 else()
   find_package(Qt5 REQUIRED COMPONENTS Widgets)
