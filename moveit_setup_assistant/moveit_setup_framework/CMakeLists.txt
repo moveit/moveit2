@@ -9,8 +9,16 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(fmt REQUIRED)
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
+# Try Qt6 first, fall back to Qt5. Avoid find_package(QT NAMES Qt6 Qt5 ...):
+# CMake's ascending path resolution finds Qt5 before Qt6 when both are
+# installed.
+find_package(Qt6 QUIET COMPONENTS Core Widgets)
+if(Qt6_FOUND)
+  set(QT_VERSION_MAJOR 6)
+else()
+  find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 5)
+endif()
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_visualization REQUIRED)
