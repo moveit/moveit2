@@ -4,8 +4,8 @@ set(HEADERS
     include/moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.hpp
     include/moveit/motion_planning_rviz_plugin/motion_planning_param_widget.hpp
     include/moveit/motion_planning_rviz_plugin/interactive_marker_display.hpp)
-qt5_wrap_ui(UIC_FILES src/ui/motion_planning_rviz_plugin_frame.ui
-            src/ui/motion_planning_rviz_plugin_frame_joints.ui)
+qt_wrap_ui(UIC_FILES src/ui/motion_planning_rviz_plugin_frame.ui
+           src/ui/motion_planning_rviz_plugin_frame_joints.ui)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -38,7 +38,7 @@ ament_target_dependencies(
   moveit_ros_warehouse
   rviz2
   rviz_ogre_vendor
-  Qt5
+  ${QT_VERSION_NAME}
   pluginlib)
 target_include_directories(moveit_motion_planning_rviz_plugin_core
                            PRIVATE "${OGRE_PREFIX_DIR}/include")

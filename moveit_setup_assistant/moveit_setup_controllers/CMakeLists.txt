@@ -8,6 +8,18 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+find_package(rviz2 QUIET)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+  find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 6)
+  # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
+  # may incorrectly resolve to Qt5 due to CMake's ascending path order
+  set(QT_DIR "${Qt6_DIR}")
+else()
+  find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 5)
+endif()
 find_package(moveit_setup_framework REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -15,11 +27,6 @@ find_package(rclcpp REQUIRED)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
-
-qt5_wrap_cpp(
-  MOC_FILES include/moveit_setup_controllers/controller_edit_widget.hpp
-  include/moveit_setup_controllers/controllers_widget.hpp
-  include/moveit_setup_controllers/urdf_modifications_widget.hpp)
 
 add_library(
   moveit_setup_controllers
@@ -35,7 +42,9 @@ add_library(
   src/ros2_controllers_widget.cpp
   src/urdf_modifications.cpp
   src/urdf_modifications_widget.cpp
-  ${MOC_FILES})
+  include/moveit_setup_controllers/controller_edit_widget.hpp
+  include/moveit_setup_controllers/controllers_widget.hpp
+  include/moveit_setup_controllers/urdf_modifications_widget.hpp)
 target_include_directories(
   moveit_setup_controllers
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
