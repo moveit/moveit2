@@ -36,6 +36,8 @@
 
 #pragma once
 
+#include <rclcpp/version.h>
+
 #include <ament_index_cpp/get_package_prefix.hpp>
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <filesystem>
@@ -52,7 +54,14 @@ inline std::filesystem::path getSharePath(const std::string& package_name)
 {
   try
   {
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+    std::filesystem::path path;
+    ament_index_cpp::get_package_share_directory(package_name, path);
+    return path;
+#else
     return std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name));
+#endif
   }
   catch (const std::runtime_error& e)
   {
