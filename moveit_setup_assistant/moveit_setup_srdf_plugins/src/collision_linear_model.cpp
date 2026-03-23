@@ -276,7 +276,7 @@ bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& s
 // define a fallback comparison operator for QVariants
 bool compareVariants(const QVariant& left, const QVariant& right)
 {
-  if (left.userType() == QVariant::Type::Int)
+  if (left.userType() == QMetaType::Int)
   {
     return left.toInt() < right.toInt();
   }
