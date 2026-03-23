@@ -30,13 +30,15 @@ set_target_properties(moveit_motion_planning_rviz_plugin_core
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(
   moveit_motion_planning_rviz_plugin_core
-  moveit_ros_robot_interaction
-  moveit_ros_planning_interface
-  moveit_ros_warehouse
-  rviz2
-  rviz_ogre_vendor
-  ${QT_VERSION_NAME}
-  pluginlib)
+  moveit_rviz_plugin_render_tools
+  moveit_planning_scene_rviz_plugin
+  moveit_ros_robot_interaction::moveit_ros_robot_interaction
+  moveit_ros_planning_interface::moveit_ros_planning_interface
+  moveit_ros_warehouse::moveit_ros_warehouse
+  rviz_ogre_vendor::OgreMain
+  rviz_ogre_vendor::OgreOverlay
+  ${QT_LIBRARIES}
+  pluginlib::pluginlib)
 target_include_directories(moveit_motion_planning_rviz_plugin_core
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 

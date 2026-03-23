@@ -26,14 +26,8 @@ find_package(moveit_setup_srdf_plugins REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-    ament_index_cpp
-    moveit_setup_framework
-    moveit_setup_srdf_plugins
-    pluginlib
-    Qt${QT_VERSION_MAJOR}Core
-    Qt${QT_VERSION_MAJOR}Widgets
-    rclcpp)
+set(THIS_PACKAGE_INCLUDE_DEPENDS ament_index_cpp moveit_setup_framework
+                                 moveit_setup_srdf_plugins pluginlib rclcpp)
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
 set(HEADERS include/moveit_setup_assistant/navigation_widget.hpp
@@ -66,9 +60,16 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_assistant>)
 
-ament_target_dependencies(moveit_setup_assistant_updater
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_setup_assistant_updater ${Boost_LIBRARIES})
+target_link_libraries(
+  moveit_setup_assistant_updater
+  ${Boost_LIBRARIES}
+  ament_index_cpp::ament_index_cpp
+  moveit_setup_framework::moveit_setup_framework
+  moveit_setup_srdf_plugins::moveit_setup_srdf_plugins
+  pluginlib::pluginlib
+  ${QT_CORE}
+  ${QT_WIDGETS}
+  rclcpp::rclcpp)
 
 set_target_properties(moveit_setup_assistant_updater
                       PROPERTIES OUTPUT_NAME collisions_updater PREFIX "")
