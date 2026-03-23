@@ -12,6 +12,9 @@ find_package(rviz2 QUIET)
 if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
   find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
   set(QT_VERSION_MAJOR 6)
+  # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
+  # may incorrectly resolve to Qt5 due to CMake's ascending path order
+  set(QT_DIR "${Qt6_DIR}")
 else()
   find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
   set(QT_VERSION_MAJOR 5)
