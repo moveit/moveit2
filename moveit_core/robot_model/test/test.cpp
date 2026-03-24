@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan */
 
+#include <limits>
 #include <moveit/robot_model/robot_model.hpp>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
@@ -201,6 +202,49 @@ TEST(PlanarJointTest, ComputeVariablePositionsNormalizeYaw)
     while (normalized_angle < -M_PI)
       normalized_angle += 2.0 * M_PI;
     EXPECT_NEAR(joint_values[2], normalized_angle, 1e-6);
+  }
+}
+
+TEST(PlanarJointTest, InterpolateDiffDriveNoNan)
+{
+  // Create a simple planar joint model with some dummy parameters
+  moveit::core::PlanarJointModel pjm("joint", 0, 0);
+
+  // Set the motion model to DIFF_DRIVE
+  pjm.setMotionModel(moveit::core::PlanarJointModel::DIFF_DRIVE);
+
+  // Define a struct to hold test cases
+  struct FromToCase
+  {
+    std::string name;
+    double from[3];
+    double to[3];
+  };
+
+  // Define some test cases
+  const std::vector<FromToCase> test_cases = {
+    { "No movement", { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } },
+    { "Exact equal", { 0.5, -0.5, 0.2 }, { 0.5, -0.5, 0.2 } },
+    { "Small Delta", { 1.0, 1.0, 0.0 }, { 1.0 + 1e-10, 1.0 + 1e-10, 1e-10 } },
+    { "Straight line along X", { 0.0, 0.0, 0.0 }, { 0.1, 0.0, 0.0 } },
+    { "Straight line along Y", { 0.0, 0.0, M_PI / 2 }, { 0.0, 0.1, M_PI / 2 } },
+    { "180 degree turn in place", { 0.0, 0.0, 0.0 }, { 0.0, 0.0, M_PI } },
+    { "360 degree turn in place", { 0.0, 0.0, -M_PI }, { 0.0, 0.0, M_PI } },
+    { "Diagonal movement", { 0.0, 0.0, -M_PI / 4 }, { 0.1, -0.1, -M_PI / 4 } },
+    { "Complex move", { 0.5, 1.0, -M_PI / 2 }, { -0.7, -1.0, M_PI / 3 } }
+  };
+
+  // Test interpolation for each case and check for NaN values
+  for (const auto& test_case : test_cases)
+  {
+    for (double t : { 0.0, 0.5, 1.0 })
+    {
+      double state[3];
+      pjm.interpolate(test_case.from, test_case.to, t, state);
+      EXPECT_TRUE(std::isfinite(state[0])) << "Failed at test case: " << test_case.name << " at t=" << t;
+      EXPECT_TRUE(std::isfinite(state[1])) << "Failed at test case: " << test_case.name << " at t=" << t;
+      EXPECT_TRUE(std::isfinite(state[2])) << "Failed at test case: " << test_case.name << " at t=" << t;
+    }
   }
 }
 
