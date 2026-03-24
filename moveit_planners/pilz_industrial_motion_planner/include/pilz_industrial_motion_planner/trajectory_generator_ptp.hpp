@@ -59,10 +59,12 @@ public:
    * @brief Constructor of PTP Trajectory Generator
    * @throw TrajectoryGeneratorInvalidLimitsException
    * @param model: a map of joint limits information
+   * @param planner_limits: limits in joint and Cartesian spaces
+   * @param sampling: sampling parameters
    */
   TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
                          const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
-                         const std::string& group_name);
+                         const pilz_sampling::Params& sampling, const std::string& group_name);
 
 private:
   void extractMotionPlanInfo(const planning_scene::PlanningSceneConstPtr& scene,

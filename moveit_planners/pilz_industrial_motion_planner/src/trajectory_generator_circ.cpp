@@ -61,8 +61,9 @@ rclcpp::Logger getLogger()
 }  // namespace
 TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,
                                                  const LimitsContainer& planner_limits,
+                                                 const pilz_sampling::Params& sampling,
                                                  const std::string& /*group_name*/)
-  : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
+  : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits, sampling)
 {
   planner_limits_.printCartesianLimits();
 }
