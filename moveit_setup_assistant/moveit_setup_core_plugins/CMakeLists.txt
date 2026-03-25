@@ -8,6 +8,18 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
+# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+find_package(rviz2 QUIET)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+  find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 6)
+  # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
+  # may incorrectly resolve to Qt5 due to CMake's ascending path order
+  set(QT_DIR "${Qt6_DIR}")
+else()
+  find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 5)
+endif()
 find_package(moveit_ros_visualization REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
 find_package(pluginlib REQUIRED)
@@ -19,11 +31,6 @@ find_package(urdf REQUIRED)
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt5_wrap_cpp(
-  MOC_FILES include/moveit_setup_core_plugins/start_screen_widget.hpp
-  include/moveit_setup_core_plugins/configuration_files_widget.hpp
-  include/moveit_setup_core_plugins/author_information_widget.hpp)
-
 add_library(
   ${PROJECT_NAME}
   src/start_screen.cpp
@@ -32,7 +39,9 @@ add_library(
   src/configuration_files_widget.cpp
   src/author_information.cpp
   src/author_information_widget.cpp
-  ${MOC_FILES})
+  include/moveit_setup_core_plugins/start_screen_widget.hpp
+  include/moveit_setup_core_plugins/configuration_files_widget.hpp
+  include/moveit_setup_core_plugins/author_information_widget.hpp)
 target_include_directories(
   ${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                          $<INSTALL_INTERFACE:include/moveit_setup_core_plugins>)
