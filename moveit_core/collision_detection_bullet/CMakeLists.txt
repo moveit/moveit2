@@ -18,35 +18,39 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_collision_detection_bullet
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_collision_detection_bullet SYSTEM BULLET)
-ament_target_dependencies(
+target_include_directories(moveit_collision_detection_bullet SYSTEM
+                           PUBLIC ${BULLET_INCLUDE_DIRS})
+target_link_libraries(
   moveit_collision_detection_bullet
-  rclcpp
-  rmw_implementation
-  urdf
-  urdfdom
-  urdfdom_headers
-  visualization_msgs
-  octomap_msgs)
-target_link_libraries(moveit_collision_detection_bullet
-                      moveit_collision_detection moveit_utils)
+  moveit_collision_detection
+  moveit_utils
+  ${BULLET_LIBRARIES}
+  rclcpp::rclcpp
+  rmw_implementation::rmw_implementation
+  urdf::urdf
+  urdfdom::urdf_parser
+  urdfdom_headers::urdfdom_headers
+  ${visualization_msgs_TARGETS}
+  ${octomap_msgs_TARGETS})
 
 add_library(collision_detector_bullet_plugin SHARED
             src/collision_detector_bullet_plugin_loader.cpp)
 set_target_properties(collision_detector_bullet_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(collision_detector_bullet_plugin SYSTEM BULLET)
-ament_target_dependencies(
-  collision_detector_bullet_plugin
-  rclcpp
-  urdf
-  visualization_msgs
-  pluginlib
-  rmw_implementation
-  octomap_msgs)
+target_include_directories(collision_detector_bullet_plugin SYSTEM
+                           PUBLIC ${BULLET_INCLUDE_DIRS})
 target_link_libraries(
-  collision_detector_bullet_plugin moveit_collision_detection_bullet
-  moveit_planning_scene moveit_utils)
+  collision_detector_bullet_plugin
+  moveit_collision_detection_bullet
+  moveit_planning_scene
+  moveit_utils
+  ${BULLET_LIBRARIES}
+  rclcpp::rclcpp
+  urdf::urdf
+  ${visualization_msgs_TARGETS}
+  pluginlib::pluginlib
+  rmw_implementation::rmw_implementation
+  ${octomap_msgs_TARGETS})
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(

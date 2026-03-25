@@ -29,8 +29,14 @@ set_target_properties(
   moveit_simple_controller_manager
   PROPERTIES VERSION "${moveit_simple_controller_manager_VERSION}")
 
-ament_target_dependencies(moveit_simple_controller_manager
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS} Boost)
+target_link_libraries(
+  moveit_simple_controller_manager
+  ${control_msgs_TARGETS}
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  moveit_core::moveit_core
+  pluginlib::pluginlib
+  Boost::headers)
 
 install(
   TARGETS moveit_simple_controller_manager

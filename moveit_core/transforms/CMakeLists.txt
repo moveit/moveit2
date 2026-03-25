@@ -3,18 +3,19 @@ target_include_directories(
   moveit_transforms
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_core>)
-target_link_libraries(moveit_transforms moveit_macros moveit_utils)
+target_link_libraries(
+  moveit_transforms
+  moveit_macros
+  moveit_utils
+  geometric_shapes::geometric_shapes
+  tf2_eigen::tf2_eigen
+  rclcpp::rclcpp
+  rmw_implementation::rmw_implementation
+  urdfdom::urdf_parser
+  urdfdom_headers::urdfdom_headers
+  Boost::headers)
 set_target_properties(moveit_transforms PROPERTIES VERSION
                                                    "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_transforms
-  geometric_shapes
-  tf2_eigen
-  rclcpp
-  rmw_implementation
-  urdfdom
-  urdfdom_headers
-  Boost)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 

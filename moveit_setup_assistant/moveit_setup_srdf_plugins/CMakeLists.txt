@@ -60,8 +60,9 @@ target_include_directories(
   moveit_setup_srdf_plugins
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_srdf_plugins>)
-ament_target_dependencies(moveit_setup_srdf_plugins moveit_setup_framework
-                          pluginlib)
+target_link_libraries(
+  moveit_setup_srdf_plugins moveit_setup_framework::moveit_setup_framework
+  pluginlib::pluginlib)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

@@ -29,15 +29,14 @@ add_library(
   src/robotconfiguration.cpp src/sequence.cpp src/xml_testdata_loader.cpp)
 
 # Specify libraries to link a library or executable target against
-ament_target_dependencies(
+target_link_libraries(
   pilz_industrial_motion_planner_testutils
-  Boost
-  Eigen3
-  eigen3_cmake_module
-  rclcpp
-  moveit_core
-  moveit_msgs
-  tf2_eigen)
+  Boost::headers
+  Eigen3::Eigen
+  rclcpp::rclcpp
+  moveit_core::moveit_core
+  ${moveit_msgs_TARGETS}
+  tf2_eigen::tf2_eigen)
 
 # ##############################################################################
 # Install ##

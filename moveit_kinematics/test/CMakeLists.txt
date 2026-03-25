@@ -8,9 +8,9 @@ if(BUILD_TESTING)
   find_package(moveit_ros_planning REQUIRED)
 
   ament_add_gtest_executable(test_kinematics_plugin test_kinematics_plugin.cpp)
-  ament_target_dependencies(test_kinematics_plugin moveit_ros_planning
-                            pluginlib)
-  target_link_libraries(test_kinematics_plugin moveit_kdl_kinematics_plugin)
+  target_link_libraries(
+    test_kinematics_plugin moveit_kdl_kinematics_plugin
+    moveit_ros_planning::moveit_ros_planning pluginlib::pluginlib)
 
   if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(test_kinematics_plugin
@@ -44,8 +44,10 @@ if(BUILD_TESTING)
 
   # Benchmarking program for cached_ik_kinematics
   add_executable(benchmark_ik benchmark_ik.cpp)
-  ament_target_dependencies(benchmark_ik rclcpp moveit_core moveit_ros_planning
-                            Boost)
+  target_link_libraries(
+    benchmark_ik rclcpp::rclcpp moveit_core::moveit_core
+    moveit_ros_planning::moveit_ros_planning Boost::headers
+    Boost::program_options)
 
   install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
   install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})

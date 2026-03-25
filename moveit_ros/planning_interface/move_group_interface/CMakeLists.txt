@@ -7,16 +7,16 @@ target_include_directories(
 set_target_properties(moveit_move_group_interface
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(
-  moveit_move_group_interface moveit_common_planning_interface_objects
-  moveit_planning_scene_interface ${Boost_THREAD_LIBRARY})
-ament_target_dependencies(
   moveit_move_group_interface
-  moveit_core
-  moveit_msgs
-  moveit_ros_move_group
-  moveit_ros_occupancy_map_monitor
-  moveit_ros_planning
-  moveit_ros_warehouse)
+  moveit_common_planning_interface_objects
+  moveit_planning_scene_interface
+  ${Boost_THREAD_LIBRARY}
+  moveit_core::moveit_core
+  ${moveit_msgs_TARGETS}
+  moveit_ros_move_group::moveit_ros_move_group
+  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  moveit_ros_planning::moveit_ros_planning
+  moveit_ros_warehouse::moveit_ros_warehouse)
 
 # TODO (ddengster) : port wrap_python_move_group
 # add_library(moveit_move_group_interface_python src/wrap_python_move_group.cpp)

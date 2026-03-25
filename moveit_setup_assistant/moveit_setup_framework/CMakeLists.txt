@@ -23,6 +23,12 @@ else()
 endif()
 find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
+# Find Qt before packages that transitively depend on it (rviz, visualization)
+find_package(Qt6 QUIET COMPONENTS Core Widgets)
+if(NOT Qt6_FOUND)
+  find_package(Qt5Core REQUIRED)
+  find_package(Qt5Widgets REQUIRED)
+endif()
 find_package(moveit_ros_visualization REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -54,20 +60,21 @@ target_include_directories(
   moveit_setup_framework
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_framework>)
-ament_target_dependencies(
+target_link_libraries(
   moveit_setup_framework
-  ament_index_cpp
-  moveit_core
-  moveit_ros_planning
-  moveit_ros_visualization
-  pluginlib
-  Qt${QT_VERSION_MAJOR}Core
-  Qt${QT_VERSION_MAJOR}Widgets
-  rclcpp
-  rviz_common
-  rviz_rendering
-  srdfdom
-  urdf)
+  PUBLIC ament_index_cpp::ament_index_cpp
+         fmt::fmt
+         moveit_core::moveit_core
+         moveit_ros_planning::moveit_ros_planning
+         moveit_ros_visualization::moveit_ros_visualization
+         pluginlib::pluginlib
+         ${QT_CORE}
+         ${QT_WIDGETS}
+         rclcpp::rclcpp
+         rviz_common::rviz_common
+         rviz_rendering::rviz_rendering
+         srdfdom::srdfdom
+         urdf::urdf)
 
 install(DIRECTORY include/ DESTINATION include/moveit_setup_framework)
 install(FILES moveit_setup_framework_plugins.xml

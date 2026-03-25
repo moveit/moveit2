@@ -11,26 +11,32 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_collision_detection_fcl
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
+target_link_libraries(
   moveit_collision_detection_fcl
-  rclcpp
-  rmw_implementation
-  urdf
-  urdfdom
-  urdfdom_headers
-  visualization_msgs)
-target_link_libraries(moveit_collision_detection_fcl moveit_collision_detection
-                      moveit_utils fcl)
+  moveit_collision_detection
+  moveit_utils
+  fcl
+  rclcpp::rclcpp
+  rmw_implementation::rmw_implementation
+  urdf::urdf
+  urdfdom::urdf_parser
+  urdfdom_headers::urdfdom_headers
+  ${visualization_msgs_TARGETS})
 
 add_library(collision_detector_fcl_plugin SHARED
             src/collision_detector_fcl_plugin_loader.cpp)
 set_target_properties(collision_detector_fcl_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(collision_detector_fcl_plugin rclcpp urdf
-                          visualization_msgs pluginlib rmw_implementation)
 target_link_libraries(
-  collision_detector_fcl_plugin moveit_collision_detection_fcl
-  moveit_planning_scene moveit_utils)
+  collision_detector_fcl_plugin
+  moveit_collision_detection_fcl
+  moveit_planning_scene
+  moveit_utils
+  rclcpp::rclcpp
+  urdf::urdf
+  ${visualization_msgs_TARGETS}
+  pluginlib::pluginlib
+  rmw_implementation::rmw_implementation)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(
