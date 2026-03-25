@@ -30,20 +30,27 @@ find_package(rclpy REQUIRED)
 find_package(rviz2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(Eigen3 REQUIRED)
+
+# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+  find_package(Qt6 REQUIRED COMPONENTS Widgets)
+  set(QT_VERSION_MAJOR 6)
+  # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
+  # may incorrectly resolve to Qt5 due to CMake's ascending path order
+  set(QT_DIR "${Qt6_DIR}")
+else()
+  find_package(Qt5 REQUIRED COMPONENTS Widgets)
+  set(QT_VERSION_MAJOR 5)
+endif()
+set(QT_LIBRARIES Qt${QT_VERSION_MAJOR}::Widgets)
+set(QT_VERSION_NAME Qt${QT_VERSION_MAJOR})
+
 find_package(rviz_common REQUIRED)
 find_package(rviz_default_plugins REQUIRED)
 find_package(rviz_ogre_vendor REQUIRED)
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
-
-# Qt Stuff
-find_package(Qt5 ${rviz_QT_VERSION} REQUIRED Core Widgets)
-set(QT_LIBRARIES Qt5::Widgets)
-# Delegate to QT5 macro
-macro(QT_WRAP_UI)
-  qt5_wrap_ui(${ARGN})
-endmacro()
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
