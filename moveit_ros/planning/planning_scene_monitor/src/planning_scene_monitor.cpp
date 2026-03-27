@@ -828,8 +828,22 @@ bool PlanningSceneMonitor::processCollisionObjectMsg(const moveit_msgs::msg::Col
   {
     std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
     last_update_time_ = rclcpp::Clock().now();
-    if (!scene_->processCollisionObjectMsg(*object))
+    if (scene_->processCollisionObjectMsg(*object))
+    {
+      if (octomap_monitor_)
+      {
+        auto obj = scene_->getWorld()->getObject(object->id);
+        if (obj)
+        {
+          // clear the voxels for each shape coincide with the collision object
+          for (std::size_t i = 0; i < obj->shapes_.size(); ++i)
+            octomap_monitor_->clearShape(obj->shapes_[i], obj->global_shape_poses_[i]);
+        }
+      }
+    }
+    else
       return false;
+
     if (color_msg.has_value())
       scene_->setObjectColor(color_msg.value().id, color_msg.value().color);
   }
@@ -850,7 +864,20 @@ bool PlanningSceneMonitor::processAttachedCollisionObjectMsg(
   {
     std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
     last_update_time_ = rclcpp::Clock().now();
-    if (!scene_->processAttachedCollisionObjectMsg(*object))
+    if (scene_->processAttachedCollisionObjectMsg(*object))
+    {
+      if (octomap_monitor_)
+      {
+        const moveit::core::AttachedBody* ab = scene_->getCurrentState().getAttachedBody(object->link_name);
+        if (ab)
+        {
+          // clear the voxels for each shape coincide with the object attached to body
+          for (std::size_t i = 0; i < ab->getShapes().size(); ++i)
+            octomap_monitor_->clearShape(ab->getShapes()[i], ab->getGlobalCollisionBodyTransforms()[i]);
+        }
+      }
+    }
+    else
       return false;
   }
   triggerSceneUpdateEvent(UPDATE_GEOMETRY);
