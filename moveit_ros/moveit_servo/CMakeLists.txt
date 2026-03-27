@@ -45,14 +45,18 @@ add_library(
                               src/utils/common.cpp src/utils/command.cpp)
 set_target_properties(moveit_servo_lib_cpp PROPERTIES VERSION
                                                       "${moveit_servo_VERSION}")
-target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters)
-ament_target_dependencies(moveit_servo_lib_cpp ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters
+  tf2_eigen::tf2_eigen
+  moveit_ros_planning::moveit_planning_scene_monitor
+  realtime_tools::thread_priority)
 
 add_library(moveit_servo_lib_ros SHARED src/servo_node.cpp)
 set_target_properties(moveit_servo_lib_ros PROPERTIES VERSION
-                                                      "${moveit_servo_VERSION}")
-target_link_libraries(moveit_servo_lib_ros moveit_servo_lib_cpp)
-ament_target_dependencies(moveit_servo_lib_ros ${THIS_PACKAGE_INCLUDE_DEPENDS})
+                                          "${moveit_servo_VERSION}")
+target_link_libraries(moveit_servo_lib_ros moveit_servo_lib_cpp
+  ${control_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  rclcpp_components::component_manager)
 
 # ##############################################################################
 # Components ##
@@ -68,23 +72,26 @@ rclcpp_components_register_node(moveit_servo_lib_ros PLUGIN
 # Executable node for the joint jog demo
 add_executable(demo_joint_jog demos/cpp_interface/demo_joint_jog.cpp)
 target_link_libraries(demo_joint_jog moveit_servo_lib_cpp)
-ament_target_dependencies(demo_joint_jog ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Executable node for the twist demo
 add_executable(demo_twist demos/cpp_interface/demo_twist.cpp)
 target_link_libraries(demo_twist moveit_servo_lib_cpp)
-ament_target_dependencies(demo_twist ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Executable node for the pose demo
 add_executable(demo_pose demos/cpp_interface/demo_pose.cpp)
 target_link_libraries(demo_pose moveit_servo_lib_cpp)
-ament_target_dependencies(demo_pose ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 # Keyboard control example for servo
 add_executable(servo_keyboard_input demos/servo_keyboard_input.cpp)
-target_include_directories(servo_keyboard_input PUBLIC include)
-ament_target_dependencies(servo_keyboard_input ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
+
+#
+target_link_libraries(servo_keyboard_input PUBLIC
+        ${rosidl_generator_cpp_TARGETS}
+        ${control_msgs_TARGETS}
+        ${moveit_msgs_TARGETS}
+        rclcpp::rclcpp
+      )
 # ##############################################################################
 # Install ##
 # ##############################################################################
@@ -120,26 +127,26 @@ if(BUILD_TESTING)
   find_package(ros_testing REQUIRED)
 
   ament_add_gtest_executable(moveit_servo_utils_test tests/test_utils.cpp)
-  target_link_libraries(moveit_servo_utils_test moveit_servo_lib_cpp)
-  ament_target_dependencies(moveit_servo_utils_test
-                            ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  target_link_libraries(moveit_servo_utils_test moveit_servo_lib_cpp  ${geometry_msgs_INCLUDE_DIRS})
+
   add_ros_test(tests/launch/servo_utils.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
   ament_add_gtest_executable(
     moveit_servo_cpp_integration_test tests/test_integration.cpp
     tests/servo_cpp_fixture.hpp)
-  target_link_libraries(moveit_servo_cpp_integration_test moveit_servo_lib_cpp)
-  ament_target_dependencies(moveit_servo_cpp_integration_test
-                            ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  target_link_libraries(moveit_servo_cpp_integration_test moveit_servo_lib_cpp  ${moveit_msgs_TARGETS})
+
   add_ros_test(tests/launch/servo_cpp_integration.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
   ament_add_gtest_executable(
     moveit_servo_ros_integration_test tests/test_ros_integration.cpp
     tests/servo_ros_fixture.hpp)
-  ament_target_dependencies(moveit_servo_ros_integration_test
-                            ${THIS_PACKAGE_INCLUDE_DEPENDS})
+  target_link_libraries(moveit_servo_ros_integration_test moveit_servo_lib_cpp
+    ${moveit_msgs_TARGETS}
+    ${control_msgs_TARGETS})
+
   add_ros_test(tests/launch/servo_ros_integration.test.py TIMEOUT 120 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 

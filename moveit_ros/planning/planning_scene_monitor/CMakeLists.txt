@@ -1,3 +1,4 @@
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 add_library(
   moveit_planning_scene_monitor SHARED
   src/planning_scene_monitor.cpp src/current_state_monitor.cpp
@@ -10,28 +11,12 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_planning_scene_monitor
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
-  moveit_planning_scene_monitor
-  moveit_ros_occupancy_map_monitor
-  message_filters
-  urdf
-  pluginlib
-  rclcpp
-  fmt
-  moveit_msgs)
+
 target_link_libraries(moveit_planning_scene_monitor moveit_robot_model_loader
-                      moveit_collision_plugin_loader)
+                      moveit_collision_plugin_loader moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor)
 
 add_executable(demo_scene demos/demo_scene.cpp)
-ament_target_dependencies(
-  demo_scene
-  PUBLIC
-  rclcpp
-  fmt
-  moveit_msgs
-  urdf
-  message_filters
-  pluginlib)
+
 target_link_libraries(demo_scene PRIVATE moveit_planning_scene_monitor)
 
 install(TARGETS demo_scene DESTINATION lib/${PROJECT_NAME})
@@ -56,10 +41,8 @@ if(BUILD_TESTING)
   ament_add_gtest_executable(planning_scene_monitor_test
                              test/planning_scene_monitor_test.cpp)
   target_link_libraries(planning_scene_monitor_test
-                        moveit_planning_scene_monitor)
-  ament_target_dependencies(planning_scene_monitor_test moveit_core rclcpp
-                            moveit_msgs)
-
+                        moveit_planning_scene_monitor
+                        rclcpp::rclcpp)
   add_ros_test(test/launch/planning_scene_monitor.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()

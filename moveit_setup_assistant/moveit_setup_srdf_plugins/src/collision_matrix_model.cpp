@@ -36,6 +36,7 @@
 
 #include <moveit_setup_srdf_plugins/collision_matrix_model.hpp>
 #include <boost/assign.hpp>
+#include <QRegularExpression>
 #include <QVector>
 #include <QBrush>
 #include <QColor>

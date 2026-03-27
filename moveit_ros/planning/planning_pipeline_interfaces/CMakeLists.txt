@@ -13,9 +13,6 @@ set_target_properties(moveit_planning_pipeline_interfaces
 target_link_libraries(moveit_planning_pipeline_interfaces
                       moveit_planning_pipeline)
 
-ament_target_dependencies(moveit_planning_pipeline_interfaces moveit_core
-                          moveit_msgs rclcpp)
-
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_pipeline_interfaces_export.h

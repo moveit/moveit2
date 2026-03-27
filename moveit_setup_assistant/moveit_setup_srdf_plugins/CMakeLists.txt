@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.22)
 project(moveit_setup_srdf_plugins LANGUAGES CXX)
-
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+if(${QT_VERSION_MAJOR} GREATER "5")
+  find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Test Widgets
+                                                         Core5Compat)
+else()
+  find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Test Widgets)
+endif()
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
 moveit_package()
@@ -20,9 +26,22 @@ else()
   set(QT_VERSION_MAJOR 5)
 endif()
 find_package(moveit_setup_framework REQUIRED)
+find_package(OpenSSL REQUIRED)
 find_package(pluginlib REQUIRED)
 
-set(CMAKE_AUTOMOC ON)
+qt_wrap_cpp(
+  MOC_FILES
+  include/moveit_setup_srdf_plugins/collision_linear_model.hpp
+  include/moveit_setup_srdf_plugins/collision_matrix_model.hpp
+  include/moveit_setup_srdf_plugins/default_collisions_widget.hpp
+  include/moveit_setup_srdf_plugins/end_effectors_widget.hpp
+  include/moveit_setup_srdf_plugins/group_edit_widget.hpp
+  include/moveit_setup_srdf_plugins/kinematic_chain_widget.hpp
+  include/moveit_setup_srdf_plugins/passive_joints_widget.hpp
+  include/moveit_setup_srdf_plugins/planning_groups_widget.hpp
+  include/moveit_setup_srdf_plugins/robot_poses_widget.hpp
+  include/moveit_setup_srdf_plugins/rotated_header_view.hpp
+  include/moveit_setup_srdf_plugins/virtual_joints_widget.hpp)
 
 add_library(
   moveit_setup_srdf_plugins
@@ -45,23 +64,26 @@ add_library(
   src/rotated_header_view.cpp
   src/virtual_joints.cpp
   src/virtual_joints_widget.cpp
-  include/moveit_setup_srdf_plugins/collision_linear_model.hpp
-  include/moveit_setup_srdf_plugins/collision_matrix_model.hpp
-  include/moveit_setup_srdf_plugins/default_collisions_widget.hpp
-  include/moveit_setup_srdf_plugins/end_effectors_widget.hpp
-  include/moveit_setup_srdf_plugins/group_edit_widget.hpp
-  include/moveit_setup_srdf_plugins/kinematic_chain_widget.hpp
-  include/moveit_setup_srdf_plugins/passive_joints_widget.hpp
-  include/moveit_setup_srdf_plugins/planning_groups_widget.hpp
-  include/moveit_setup_srdf_plugins/robot_poses_widget.hpp
-  include/moveit_setup_srdf_plugins/rotated_header_view.hpp
-  include/moveit_setup_srdf_plugins/virtual_joints_widget.hpp)
+  ${MOC_FILES})
+
 target_include_directories(
   moveit_setup_srdf_plugins
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_srdf_plugins>)
-ament_target_dependencies(moveit_setup_srdf_plugins moveit_setup_framework
-                          pluginlib)
+
+if(${QT_VERSION_MAJOR} GREATER "5")
+  target_link_libraries(
+    moveit_setup_srdf_plugins
+    PUBLIC Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Core5Compat
+           pluginlib::pluginlib moveit_core::moveit_macros
+           moveit_setup_framework::moveit_setup_framework)
+else()
+  target_link_libraries(
+    moveit_setup_srdf_plugins
+    PUBLIC Qt${QT_VERSION_MAJOR}::Widgets pluginlib::pluginlib
+           moveit_core::moveit_macros
+           moveit_setup_framework::moveit_setup_framework)
+endif()
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

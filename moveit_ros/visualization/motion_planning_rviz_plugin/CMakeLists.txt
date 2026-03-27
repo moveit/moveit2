@@ -1,3 +1,6 @@
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+
 set(HEADERS
     include/moveit/motion_planning_rviz_plugin/motion_planning_display.hpp
     include/moveit/motion_planning_rviz_plugin/motion_planning_frame.hpp
@@ -29,28 +32,30 @@ add_library(moveit_motion_planning_rviz_plugin_core SHARED
 set_target_properties(moveit_motion_planning_rviz_plugin_core
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(
-  moveit_motion_planning_rviz_plugin_core moveit_rviz_plugin_render_tools
-  moveit_planning_scene_rviz_plugin)
-ament_target_dependencies(
-  moveit_motion_planning_rviz_plugin_core
-  moveit_ros_robot_interaction
-  moveit_ros_planning_interface
-  moveit_ros_warehouse
-  rviz2
-  rviz_ogre_vendor
-  ${QT_VERSION_NAME}
-  pluginlib)
+  moveit_motion_planning_rviz_plugin_core PUBLIC moveit_rviz_plugin_render_tools
+  moveit_planning_scene_rviz_plugin
+  moveit_ros_planning_interface::moveit_common_planning_interface_objects
+      moveit_ros_planning_interface::moveit_move_group_interface
+      moveit_ros_planning_interface::moveit_planning_scene_interface
+      moveit_ros_robot_interaction::moveit_robot_interaction
+      moveit_ros_warehouse::moveit_warehouse
+      pluginlib::pluginlib
+    )
+
+
 target_include_directories(moveit_motion_planning_rviz_plugin_core
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 add_library(moveit_motion_planning_rviz_plugin SHARED src/plugin_init.cpp)
 set_target_properties(moveit_motion_planning_rviz_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_motion_planning_rviz_plugin
-                      moveit_motion_planning_rviz_plugin_core)
-ament_target_dependencies(
-  moveit_motion_planning_rviz_plugin moveit_ros_robot_interaction
-  moveit_ros_warehouse pluginlib rviz_ogre_vendor)
+target_link_libraries(moveit_motion_planning_rviz_plugin PUBLIC
+                      moveit_motion_planning_rviz_plugin_core
+      moveit_ros_robot_interaction::moveit_robot_interaction
+      moveit_ros_warehouse::moveit_warehouse
+      pluginlib::pluginlib
+    )
+
 target_include_directories(moveit_motion_planning_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 

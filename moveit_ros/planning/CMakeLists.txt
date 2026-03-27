@@ -16,6 +16,7 @@ find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(std_msgs REQUIRED)
@@ -25,7 +26,17 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(urdf REQUIRED)
-# find_package(moveit_ros_perception REQUIRED)
+find_package(Bullet)
+
+if(Bullet_FOUND AND NOT TARGET Bullet::Bullet)
+  add_library(Bullet::Bullet INTERFACE IMPORTED)
+  set_target_properties(
+    Bullet::Bullet
+    PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${BULLET_INCLUDE_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${BULLET_LIBRARIES}"
+  )
+endif()
 
 # Finds Boost Components
 include(ConfigExtras.cmake)
@@ -119,8 +130,7 @@ install(
   INCLUDES
   DESTINATION include/moveit_ros_planning)
 
-ament_export_targets(moveit_ros_planningTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_targets(moveit_ros_planningTargets)
 
 rclcpp_components_register_node(
   srdf_publisher_node PLUGIN "moveit_ros_planning::SrdfPublisher" EXECUTABLE
