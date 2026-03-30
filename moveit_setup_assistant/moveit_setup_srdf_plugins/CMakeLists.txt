@@ -7,22 +7,22 @@ moveit_package()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
+# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+find_package(rviz2 QUIET)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+  find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 6)
+  # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
+  # may incorrectly resolve to Qt5 due to CMake's ascending path order
+  set(QT_DIR "${Qt6_DIR}")
+else()
+  find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 5)
+endif()
 find_package(moveit_setup_framework REQUIRED)
 find_package(pluginlib REQUIRED)
 
-qt5_wrap_cpp(
-  MOC_FILES
-  include/moveit_setup_srdf_plugins/collision_linear_model.hpp
-  include/moveit_setup_srdf_plugins/collision_matrix_model.hpp
-  include/moveit_setup_srdf_plugins/default_collisions_widget.hpp
-  include/moveit_setup_srdf_plugins/end_effectors_widget.hpp
-  include/moveit_setup_srdf_plugins/group_edit_widget.hpp
-  include/moveit_setup_srdf_plugins/kinematic_chain_widget.hpp
-  include/moveit_setup_srdf_plugins/passive_joints_widget.hpp
-  include/moveit_setup_srdf_plugins/planning_groups_widget.hpp
-  include/moveit_setup_srdf_plugins/robot_poses_widget.hpp
-  include/moveit_setup_srdf_plugins/rotated_header_view.hpp
-  include/moveit_setup_srdf_plugins/virtual_joints_widget.hpp)
+set(CMAKE_AUTOMOC ON)
 
 add_library(
   moveit_setup_srdf_plugins
@@ -45,7 +45,17 @@ add_library(
   src/rotated_header_view.cpp
   src/virtual_joints.cpp
   src/virtual_joints_widget.cpp
-  ${MOC_FILES})
+  include/moveit_setup_srdf_plugins/collision_linear_model.hpp
+  include/moveit_setup_srdf_plugins/collision_matrix_model.hpp
+  include/moveit_setup_srdf_plugins/default_collisions_widget.hpp
+  include/moveit_setup_srdf_plugins/end_effectors_widget.hpp
+  include/moveit_setup_srdf_plugins/group_edit_widget.hpp
+  include/moveit_setup_srdf_plugins/kinematic_chain_widget.hpp
+  include/moveit_setup_srdf_plugins/passive_joints_widget.hpp
+  include/moveit_setup_srdf_plugins/planning_groups_widget.hpp
+  include/moveit_setup_srdf_plugins/robot_poses_widget.hpp
+  include/moveit_setup_srdf_plugins/rotated_header_view.hpp
+  include/moveit_setup_srdf_plugins/virtual_joints_widget.hpp)
 target_include_directories(
   moveit_setup_srdf_plugins
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
