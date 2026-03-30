@@ -35,6 +35,7 @@
 #include <moveit_setup_framework/data_warehouse.hpp>
 #include <moveit_setup_framework/utilities.hpp>
 #include <moveit/rdf_loader/rdf_loader.hpp>
+#include <sstream>
 
 namespace moveit_setup
 {
@@ -235,6 +236,17 @@ struct JointModelCompare
 
 bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
 {
+  // yaml-cpp serializes whole-number doubles (e.g. 1.0) as integers ("1"), which ROS 2 parameter
+  // loading rejects with "expected [double] got [integer]". Format them explicitly with a decimal point.
+  auto toDoubleString = [](double val) -> std::string {
+    std::ostringstream ss;
+    ss << val;
+    std::string s = ss.str();
+    if (s.find('.') == std::string::npos)
+      s += ".0";
+    return s;
+  };
+
   emitter << YAML::Comment("joint_limits.yaml allows the dynamics properties specified in the URDF "
                            "to be overwritten or augmented as needed");
   emitter << YAML::Newline;
@@ -300,7 +312,7 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
 
     // Output property
     emitter << YAML::Key << "max_velocity";
-    emitter << YAML::Value << static_cast<double>(std::min(fabs(b.max_velocity_), fabs(b.min_velocity_)));
+    emitter << YAML::Value << toDoubleString(std::min(fabs(b.max_velocity_), fabs(b.min_velocity_)));
 
     // Output property
     emitter << YAML::Key << "has_acceleration_limits";
@@ -315,7 +327,7 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
 
     // Output property
     emitter << YAML::Key << "max_acceleration";
-    emitter << YAML::Value << static_cast<double>(std::min(fabs(b.max_acceleration_), fabs(b.min_acceleration_)));
+    emitter << YAML::Value << toDoubleString(std::min(fabs(b.max_acceleration_), fabs(b.min_acceleration_)));
 
     emitter << YAML::EndMap;
   }
