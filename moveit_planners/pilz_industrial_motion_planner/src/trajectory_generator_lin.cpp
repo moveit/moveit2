@@ -146,9 +146,10 @@ void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& s
                                   const planning_interface::MotionPlanRequest& req, const MotionPlanInfo& plan_info,
                                   double sampling_time, trajectory_msgs::msg::JointTrajectory& joint_trajectory)
 {
+  // set pilz cartesian limits for each item
+  setMaxCartesianSpeed(req);
   // create Cartesian path for lin
   std::unique_ptr<KDL::Path> path(setPathLIN(plan_info.start_pose, plan_info.goal_pose));
-
   // create velocity profile
   std::unique_ptr<KDL::VelocityProfile> vp(
       cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
@@ -180,8 +181,7 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affin
   KDL::Frame kdl_start_pose, kdl_goal_pose;
   tf2::transformEigenToKDL(start_pose, kdl_start_pose);
   tf2::transformEigenToKDL(goal_pose, kdl_goal_pose);
-  double eqradius =
-      planner_limits_.getCartesianLimits().max_trans_vel / planner_limits_.getCartesianLimits().max_rot_vel;
+  double eqradius = max_cartesian_speed_ / planner_limits_.getCartesianLimits().max_rot_vel;
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
   return std::unique_ptr<KDL::Path>(

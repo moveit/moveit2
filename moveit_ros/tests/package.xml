@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_ros_tests</name>
-  <version>2.14.0</version>
+  <version>2.14.1</version>
   <description>Integration tests for moveit_ros</description>
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
 

@@ -43,6 +43,7 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/utils/logger.hpp>
 
+#include <regex>
 #include <boost/regex.hpp>
 
 #if __has_include(<boost/timer/progress_display.hpp>)

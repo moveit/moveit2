@@ -39,6 +39,7 @@
 #include <memory>
 #include <functional>
 #include <pluginlib/class_loader.hpp>
+#include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
 
@@ -403,7 +404,9 @@ TEST_F(KinematicsTest, randomWalkIK)
     auto pub = node_->create_publisher<moveit_msgs::msg::DisplayTrajectory>("display_random_walk", 1);
     traj.getRobotTrajectoryMsg(msg.trajectory[0]);
     pub->publish(msg);
-    rclcpp::spin_some(node_);
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node_);
+    executor.spin_some();
   }
 }
 

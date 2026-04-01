@@ -41,8 +41,16 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
 #include <rclcpp_action/rclcpp_action.hpp>
+
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/buffer.hpp>
+// For Jazzy and older
+#else
+#include <tf2_ros/buffer.h>
+#endif
 
 #include <moveit_msgs/action/hybrid_planner.hpp>
 #include <moveit_msgs/msg/display_robot_state.hpp>
@@ -211,7 +219,7 @@ TEST_F(HybridPlanningFixture, ActionCompletion)
     auto goal_handle_future = hp_action_client_->async_send_goal(goal_action_request_, send_goal_options_);
   });
 
-  rclcpp::Rate rate(10);
+  rclcpp::WallRate rate(10);
   while (!action_complete_)
   {
     executor_.spin_once();
@@ -233,7 +241,7 @@ TEST_F(HybridPlanningFixture, ActionCompletion)
     hp_action_client_->async_cancel_all_goals();
   });
 
-  rclcpp::Rate rate(10);
+  rclcpp::WallRate rate(10);
   while (!action_complete_)
   {
     executor_.spin_once();

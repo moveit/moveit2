@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_warehouse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+* Fix link to fmt::fmt imported target (`#3507 <https://github.com/moveit/moveit2/issues/3507>`_)
+* Contributors: Silvio Traversaro
+
 2.14.0 (2025-06-13)
 -------------------
 

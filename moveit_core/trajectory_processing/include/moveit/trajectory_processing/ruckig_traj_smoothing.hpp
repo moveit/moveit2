@@ -159,8 +159,8 @@ private:
                                        robot_trajectory::RobotTrajectory& trajectory);
 
   /** \brief Check if a trajectory out of Ruckig overshoots the target state */
-  static bool checkOvershoot(ruckig::Trajectory<ruckig::DynamicDOFs, ruckig::StandardVector>& ruckig_trajectory,
-                             const size_t num_dof, ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
+  static bool checkOvershoot(ruckig::Trajectory<ruckig::DynamicDOFs>& ruckig_trajectory, const size_t num_dof,
+                             ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
                              const double overshoot_threshold);
 };
 }  // namespace trajectory_processing

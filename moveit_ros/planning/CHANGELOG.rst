@@ -2,6 +2,9 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+
 2.14.0 (2025-06-13)
 -------------------
 * PSM: finish thread on rclcpp::shutdown (`#3484 <https://github.com/moveit/moveit2/issues/3484>`_)

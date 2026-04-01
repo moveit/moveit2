@@ -20,10 +20,17 @@ jobs:
           - IMAGE: rolling-ci
             CCOV: true
             ROS_DISTRO: rolling
+            # Ignore deprecation errors from upstream packages on rolling
+            SUPPRESS_DEPRECATION_ERROR: true
           - IMAGE: rolling-ci
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
+            SUPPRESS_DEPRECATION_ERROR: true
+          - IMAGE: rolling-ci
+            ROS_DISTRO: rolling
+            # Non-blocking job to surface deprecation warnings
+            DEPRECATION_CHECK: true
           - IMAGE: humble-ci
             ROS_DISTRO: humble
           - IMAGE: jazzy-ci
@@ -33,7 +40,6 @@ jobs:
       # https://stackoverflow.com/a/41673702
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unknown-warning-option
-      CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
       DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: >
         moveit2.repos
@@ -52,7 +58,7 @@ jobs:
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
-        -DCMAKE_CXX_FLAGS="-Werror $CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer' || ''}}"
+        -DCMAKE_CXX_FLAGS="-Werror ${{ matrix.env.SUPPRESS_DEPRECATION_ERROR && '-Wno-error=deprecated-declarations ' || ''}}$CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer' || ''}}"
       UPSTREAM_CMAKE_ARGS: "-DCMAKE_CXX_FLAGS=''"
       DOWNSTREAM_CMAKE_ARGS: -DCMAKE_CXX_FLAGS="-Wall -Wextra"
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -68,8 +74,9 @@ jobs:
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
       ADDITIONAL_DEBS: lld
 
-    name: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.IKFAST_TEST && ' + ikfast' || ''}}${{ matrix.env.CLANG_TIDY && (github.event_name != 'workflow_dispatch' && ' + clang-tidy (delta)' || ' + clang-tidy (all)') || '' }}
+    name: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.IKFAST_TEST && ' + ikfast' || ''}}${{ matrix.env.CLANG_TIDY && (github.event_name != 'workflow_dispatch' && ' + clang-tidy (delta)' || ' + clang-tidy (all)') || '' }}${{ matrix.env.DEPRECATION_CHECK && ' + deprecation check' || '' }}
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.env.DEPRECATION_CHECK || false }}
     steps:
       - name: "Free up disk space"
         if: matrix.env.CCOV
@@ -85,7 +92,7 @@ jobs:
           # free up a lot of stuff from /usr/local
           sudo rm -rf /usr/local
           df -h
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
 # See: https://github.com/moveit/moveit2/issues/2852
 #       - uses: testspace-com/setup-testspace@v1
@@ -143,7 +150,7 @@ jobs:
         run: moveit_kinematics/test/test_ikfast_plugins.sh
       - id: ici
         name: Run industrial_ci
-        uses: ros-industrial/industrial_ci@master
+        uses: ros-industrial/industrial_ci@ba2a3d0f830f8051b356711a8df2fedfc5d256cf
         env: ${{ matrix.env }}
 # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
 # See: https://github.com/moveit/moveit2/issues/2852
@@ -152,7 +159,7 @@ jobs:
 #        run: |
 #          testspace "[ ${{ matrix.env.IMAGE }} ]${{ env.BASEDIR }}/target_ws/**/test_results/**/*.xml"
       - name: Upload test artifacts (on failure)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: failure() && (steps.ici.outputs.run_target_test || steps.ici.outputs.target_test_results)
         with:
           name: test-results-${{ matrix.env.IMAGE }}

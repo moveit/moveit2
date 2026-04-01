@@ -31,7 +31,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 # Author: Peter David Fagan
-""" Definition of an abstract base class for device teleoperation. """
+"""Definition of an abstract base class for device teleoperation."""
 
 import rclpy
 

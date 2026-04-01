@@ -36,6 +36,8 @@
 
 #pragma once
 
+#include <rclcpp/version.h>
+
 #include <rviz_common/display.hpp>
 #include <rviz_default_plugins/robot/robot.hpp>
 #include <rviz_common/properties/string_property.hpp>
@@ -48,6 +50,8 @@
 #endif
 
 #include <moveit_planning_scene_rviz_plugin_core_export.h>
+
+#include <chrono>
 
 namespace Ogre
 {
@@ -79,7 +83,16 @@ public:
   void load(const rviz_common::Config& config) override;
   void save(rviz_common::Config config) const override;
 
+  // For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  using rviz_common::Display::update;
+  // `using` handles update(float, float) deprecation warning and redirect
+  void update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt) override;
+// For Kilted and older
+#else
   void update(float wall_dt, float ros_dt) override;
+#endif
+
   void reset() override;
 
   void setLinkColor(const std::string& link_name, const QColor& color);
@@ -178,7 +191,15 @@ protected:
   void fixedFrameChanged() override;
 
   // new virtual functions added by this plugin
+  virtual void updateInternal(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt);
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  [[deprecated("Use updateInternal(std::chrono::nanoseconds, std::chrono::nanoseconds) instead")]] virtual void
+  updateInternal(double wall_dt, double ros_dt);
+// For Kilted and older
+#else
   virtual void updateInternal(double wall_dt, double ros_dt);
+#endif
   virtual void onSceneMonitorReceivedUpdate(planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType update_type);
 
   planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;

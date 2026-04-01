@@ -2,6 +2,11 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+* Update pre-commit-config (`#2805 <https://github.com/moveit/moveit2/issues/2805>`_)
+* Contributors: mosfet80
+
 2.14.0 (2025-06-13)
 -------------------
 * Fix arg name in PlanningScene stub file (`#3489 <https://github.com/moveit/moveit2/issues/3489>`_)

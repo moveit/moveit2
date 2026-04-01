@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_ros_visualization</name>
-  <version>2.14.0</version>
+  <version>2.14.1</version>
   <description>Components of MoveIt that offer visualization</description>
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
   <maintainer email="tyler@picknik.ai">Tyler Weaver</maintainer>
@@ -25,8 +25,9 @@
 
   <build_depend>class_loader</build_depend>
   <build_depend>eigen</build_depend>
-  <build_depend>libqt5-opengl-dev</build_depend>
-  <build_depend>qtbase5-dev</build_depend>
+  <build_depend condition="$ROS_DISTRO == humble or $ROS_DISTRO == jazzy or $ROS_DISTRO == kilted">qtbase5-dev</build_depend>
+  <build_depend condition="$ROS_DISTRO == humble or $ROS_DISTRO == jazzy or $ROS_DISTRO == kilted">libqt5-opengl-dev</build_depend>
+  <build_depend condition="$ROS_DISTRO != humble and $ROS_DISTRO != jazzy and $ROS_DISTRO != kilted">qt6-base-dev</build_depend>
 
   <depend>geometric_shapes</depend>
   <depend>interactive_markers</depend>

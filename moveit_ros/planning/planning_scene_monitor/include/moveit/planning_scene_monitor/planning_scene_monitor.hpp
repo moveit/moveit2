@@ -37,8 +37,16 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/buffer.hpp>
+#include <tf2_ros/transform_listener.hpp>
+// For Jazzy and older
+#else
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
+#endif
 #include <moveit/macros/class_forward.hpp>
 #include <moveit/planning_scene/planning_scene.hpp>
 #include <moveit/robot_model_loader/robot_model_loader.hpp>

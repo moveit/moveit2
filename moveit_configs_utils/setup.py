@@ -5,7 +5,7 @@ package_name = "moveit_configs_utils"
 
 setup(
     name=package_name,
-    version="2.14.0",
+    version="2.14.1",
     packages=find_packages(),
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
@@ -18,7 +18,11 @@ setup(
     maintainer_email="moveit_releasers@googlegroups.com",
     description="Python library for loading MoveIt config parameters in launch files",
     license="BSD",
-    tests_require=["pytest"],
+    extras_require={
+        "test": [
+            "pytest",
+        ],
+    },
     entry_points={
         "console_scripts": [],
     },
