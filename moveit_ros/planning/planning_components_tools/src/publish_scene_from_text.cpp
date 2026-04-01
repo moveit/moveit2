@@ -35,6 +35,9 @@
 /* Author: Ioan Sucan */
 
 #include <chrono>
+#include <fstream>
+#include <string>
+#include <vector>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <rclcpp/executors/multi_threaded_executor.hpp>
 #include <rclcpp/logger.hpp>
@@ -60,6 +63,12 @@ int main(int argc, char** argv)
   auto node = rclcpp::Node::make_shared("publish_planning_scene");
   moveit::setNodeLoggerName(node->get_name());
 
+  std::vector<std::string> non_ros_args = rclcpp::remove_ros_arguments(argc, argv);
+  if (!non_ros_args.empty())
+  {
+    non_ros_args.erase(non_ros_args.begin());
+  }
+
   bool publish_scene = false;  // Set by --scene flag
   bool publish_world = false;  // Set by --world flag, or the default if no flags specified
   std::string filename;
@@ -73,7 +82,7 @@ int main(int argc, char** argv)
 
   boost::program_options::variables_map vm;
   boost::program_options::parsed_options po =
-      boost::program_options::command_line_parser(argc, argv).options(desc).positional(p).run();
+      boost::program_options::command_line_parser(non_ros_args).options(desc).positional(p).run();
   boost::program_options::store(po, vm);
   boost::program_options::notify(vm);
 
@@ -97,6 +106,7 @@ int main(int argc, char** argv)
     RCLCPP_WARN(node->get_logger(),
                 "A filename was expected as argument. That file should be a text representation of the geometry in a "
                 "planning scene.");
+    rclcpp::shutdown();
     return 1;
   }
 
@@ -143,6 +153,7 @@ int main(int argc, char** argv)
       rclcpp::sleep_for(500ms);
     }
 
+    // Publish
     if (publish_scene)
     {
       pub_scene->publish(ps_msg);
@@ -157,6 +168,7 @@ int main(int argc, char** argv)
   else
   {
     RCLCPP_ERROR(node->get_logger(), "Failed to load geometry from file '%s'", filename.c_str());
+    rclcpp::shutdown();
     return 1;
   }
 
