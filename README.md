@@ -34,7 +34,7 @@ See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/).
 This open source project is maintained by supporters from around the world — see our [MoveIt Maintainers and Core Contributors](https://moveit.ros.org/about/).
 
 <a href="https://picknik.ai/">
-  <img src="https://picknik.ai/assets/images/logo.jpg" width="168">
+  <img src="https://picknik.ai/assets/images/logo/picknik-logo_dark.png" width="168">
 </a>
 
 [PickNik Inc](https://picknik.ai/) is leading the development of MoveIt.
