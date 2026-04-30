@@ -149,14 +149,13 @@ TEST_F(ControllersTest, AddDefaultControllers)
 
   // Test that addDefaultControllers() did actually add a controller for the new_group
   EXPECT_EQ(ros2_controllers_config->getControllers().size(), group_count);
-
 }
 
 TEST_F(ControllersTest, InjectedDefaultsWhenBlank)
 {
   ControllerInfo ci;
-  ci.name_   = "dummy";
-  ci.type_   = "FollowJointTrajectory";
+  ci.name_ = "dummy";
+  ci.type_ = "FollowJointTrajectory";
   ci.joints_ = { "joint1" };
 
   MoveItControllersConfig config;
