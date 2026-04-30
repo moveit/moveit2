@@ -482,7 +482,7 @@ void PlanningSceneMonitor::scenePublishingThread()
     moveit_msgs::msg::PlanningScene msg;
     bool publish_msg = false;
     bool is_full = false;
-    rclcpp::Rate rate(publish_planning_scene_frequency_);
+    rclcpp::WallRate rate(publish_planning_scene_frequency_);
     {
       std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
       while (new_scene_update_ == UPDATE_NONE && publish_planning_scene_)

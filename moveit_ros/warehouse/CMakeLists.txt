@@ -56,7 +56,7 @@ target_link_libraries(moveit_warehouse_broadcast moveit_warehouse)
 add_executable(moveit_save_to_warehouse src/save_to_warehouse.cpp)
 ament_target_dependencies(moveit_save_to_warehouse
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_save_to_warehouse moveit_warehouse fmt)
+target_link_libraries(moveit_save_to_warehouse moveit_warehouse fmt::fmt)
 
 add_executable(moveit_warehouse_import_from_text src/import_from_text.cpp)
 ament_target_dependencies(moveit_warehouse_import_from_text

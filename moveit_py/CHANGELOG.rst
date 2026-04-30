@@ -2,6 +2,19 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+* Update pre-commit-config (`#2805 <https://github.com/moveit/moveit2/issues/2805>`_)
+* Contributors: mosfet80
+
+2.14.0 (2025-06-13)
+-------------------
+* Fix arg name in PlanningScene stub file (`#3489 <https://github.com/moveit/moveit2/issues/3489>`_)
+* Python PlanningScene API: add set_current_state() (`#3481 <https://github.com/moveit/moveit2/issues/3481>`_)
+* Allow conversion rclpy.Time <-> rclcpp::Time (`#3453 <https://github.com/moveit/moveit2/issues/3453>`_)
+  Co-authored-by: Robert Haschke <rhaschke@users.noreply.github.com>
+* Contributors: Samuele Sandrini, Shobin vinod, matthias88
+
 2.13.2 (2025-04-16)
 -------------------
 

@@ -24,7 +24,7 @@ add_library(
 set_target_properties(moveit_rviz_plugin_render_tools
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
-target_link_libraries(moveit_rviz_plugin_render_tools Qt5::Widgets)
+target_link_libraries(moveit_rviz_plugin_render_tools ${QT_LIBRARIES})
 
 ament_target_dependencies(
   moveit_rviz_plugin_render_tools

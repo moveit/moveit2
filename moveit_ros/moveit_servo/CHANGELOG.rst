@@ -2,6 +2,14 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+
+2.14.0 (2025-06-13)
+-------------------
+* Remove gripper_controllers dependency (`#3474 <https://github.com/moveit/moveit2/issues/3474>`_)
+* Contributors: Felix Exner (fexner)
+
 2.13.2 (2025-04-16)
 -------------------
 

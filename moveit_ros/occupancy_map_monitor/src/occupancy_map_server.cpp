@@ -34,10 +34,18 @@
 
 /* Author: Jon Binney, Ioan Sucan */
 
+#include <rclcpp/version.h>
+
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 
 #include <octomap_msgs/conversions.h>
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/transform_listener.hpp>
+// For Jazzy and older
+#else
 #include <tf2_ros/transform_listener.h>
+#endif
 #include <rclcpp/clock.hpp>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
@@ -99,7 +107,17 @@ int main(int argc, char** argv)
       node->create_publisher<octomap_msgs::msg::Octomap>("octomap_binary", RMW_QOS_POLICY_HISTORY_KEEP_LAST);
   auto clock_ptr = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
   std::shared_ptr<tf2_ros::Buffer> buffer = std::make_shared<tf2_ros::Buffer>(clock_ptr, tf2::durationFromSec(5.0));
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  tf2_ros::TransformListener listener(*buffer,
+                                      tf2_ros::TransformListener::RequiredInterfaces{
+                                          node->get_node_base_interface(), node->get_node_logging_interface(),
+                                          node->get_node_parameters_interface(), node->get_node_topics_interface() },
+                                      false  // spin_thread
+  );
+#else
   tf2_ros::TransformListener listener(*buffer, node, false /* spin_thread - disables executor */);
+#endif
   occupancy_map_monitor::OccupancyMapMonitor server(node, buffer);
   server.setUpdateCallback(
       [&octree_binary_pub, &server, logger = node->get_logger()] { return publishOctomap(octree_binary_pub, server); });

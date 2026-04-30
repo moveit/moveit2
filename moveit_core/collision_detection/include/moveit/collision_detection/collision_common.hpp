@@ -307,7 +307,7 @@ struct DistanceResultsData  // NOLINT(readability-identifier-naming) - suppress 
 };
 
 /** \brief Mapping between the names of the collision objects and the DistanceResultData. */
-using DistanceMap = std::map<const std::pair<std::string, std::string>, std::vector<DistanceResultsData> >;
+using DistanceMap = std::map<std::pair<std::string, std::string>, std::vector<DistanceResultsData> >;
 
 /** \brief Result of a distance request. */
 struct DistanceResult

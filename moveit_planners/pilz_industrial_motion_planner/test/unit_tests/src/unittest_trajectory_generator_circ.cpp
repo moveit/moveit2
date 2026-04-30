@@ -734,6 +734,59 @@ TEST_F(TrajectoryGeneratorCIRCTest, InterimPointPoseGoal)
   checkCircResult(req, res);
 }
 
+/**
+ * @brief Set a proper max cartesian speed and check that trajectory is generated
+ */
+TEST_F(TrajectoryGeneratorCIRCTest, cartesianSpeedLimitProper)
+{
+  // set max cartesian speed to a positive value
+  moveit_msgs::msg::MotionPlanRequest circ_req{ tdp_->getCircJointInterimCart("circ3_interim").toRequest() };
+  circ_req.max_cartesian_speed = 0.5;
+  circ_req.cartesian_speed_limited_link = "test_link";
+
+  // generate circ trajectory
+  planning_interface::MotionPlanResponse res;
+  circ_->generate(planning_scene_, circ_req, res);
+  EXPECT_TRUE(res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  // checkCircResult(circ_req, res);
+}
+
+/**
+ * @brief Set a cartesian speed limit to less than or equal zero or send request
+ * without setting any speed limit
+ *
+ * Expected Results:
+ *   1. Use the default max_trans_vel from limits container
+ */
+TEST_F(TrajectoryGeneratorCIRCTest, cartesianSpeedLimitLessEqualZero)
+{
+  // construct motion plan request
+  moveit_msgs::msg::MotionPlanRequest circ_req{ tdp_->getCircJointInterimCart("circ3_interim").toRequest() };
+  // Case 1: don't set any max cartesian speed (set to zero)
+  // generate circ trajectory
+  planning_interface::MotionPlanResponse res1;
+  circ_->generate(this->planning_scene_, circ_req, res1);
+  EXPECT_TRUE(res1.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  // checkCircResult(circ_req, res1);
+
+  // Case 2: set max cartesian speed to negative value
+  circ_req.max_cartesian_speed = -1.0;
+
+  // generate circ trajectory
+  planning_interface::MotionPlanResponse res2;
+  circ_->generate(this->planning_scene_, circ_req, res2);
+  EXPECT_TRUE(res2.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  // checkCircResult(circ_req, res2);
+  //  Case 3: set max cartesian speed to zero
+  circ_req.max_cartesian_speed = 0.0;
+
+  // generate circ trajectory
+  planning_interface::MotionPlanResponse res3;
+  circ_->generate(this->planning_scene_, circ_req, res3);
+  EXPECT_TRUE(res3.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  // checkCircResult(circ_req, res3);
+}
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);

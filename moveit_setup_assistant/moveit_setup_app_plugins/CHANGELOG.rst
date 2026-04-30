@@ -2,6 +2,12 @@
 Changelog for package moveit_setup_app_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+
+2.14.0 (2025-06-13)
+-------------------
+
 2.13.2 (2025-04-16)
 -------------------
 * Fix one more buildtool_depend tag in moveit_setup_app_plugins (`#3450 <https://github.com/ros-planning/moveit2/issues/3450>`_)

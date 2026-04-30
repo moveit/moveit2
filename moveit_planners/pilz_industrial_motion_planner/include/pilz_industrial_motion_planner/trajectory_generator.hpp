@@ -122,6 +122,7 @@ protected:
     std::string link_name;
     Eigen::Isometry3d start_pose;
     Eigen::Isometry3d goal_pose;
+    std::vector<Eigen::Isometry3d> waypoints;
     std::map<std::string, double> start_joint_position;
     std::map<std::string, double> goal_joint_position;
     std::pair<std::string, Eigen::Vector3d> circ_path_point;
@@ -139,6 +140,11 @@ protected:
   std::unique_ptr<KDL::VelocityProfile> cartesianTrapVelocityProfile(double max_velocity_scaling_factor,
                                                                      double max_acceleration_scaling_factor,
                                                                      const std::unique_ptr<KDL::Path>& path) const;
+  /**
+   * @brief Set the max cartesian speed from motion request
+   */
+
+  void setMaxCartesianSpeed(const moveit_msgs::msg::MotionPlanRequest& req);
 
 private:
   virtual void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const;
@@ -270,6 +276,7 @@ private:
 protected:
   const moveit::core::RobotModelConstPtr robot_model_;
   const pilz_industrial_motion_planner::LimitsContainer planner_limits_;
+  double max_cartesian_speed_;
   static constexpr double MIN_SCALING_FACTOR{ 0.0001 };
   static constexpr double MAX_SCALING_FACTOR{ 1. };
   static constexpr double VELOCITY_TOLERANCE{ 1e-8 };

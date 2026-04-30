@@ -2,6 +2,14 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+* Update pre-commit-config (`#2805 <https://github.com/moveit/moveit2/issues/2805>`_)
+* Contributors: mosfet80
+
+2.14.0 (2025-06-13)
+-------------------
+
 2.13.2 (2025-04-16)
 -------------------
 

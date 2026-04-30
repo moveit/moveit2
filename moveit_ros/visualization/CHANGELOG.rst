@@ -2,6 +2,17 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.14.1 (2025-09-09)
+-------------------
+* Initialize the namespace property for custom iMarkers in rviz (`#3547 <https://github.com/moveit/moveit2/issues/3547>`_)
+* Include mutex header for usage of scoped_lock (`#3532 <https://github.com/moveit/moveit2/issues/3532>`_)
+  Since std::scoped_lock is used in the implementations, the header
+  defining this should be included.
+* Contributors: Erik Holum, Felix Exner (fexner)
+
+2.14.0 (2025-06-13)
+-------------------
+
 2.13.2 (2025-04-16)
 -------------------
 
