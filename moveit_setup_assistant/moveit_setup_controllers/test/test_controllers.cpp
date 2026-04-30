@@ -159,12 +159,12 @@ TEST_F(ControllersTest, InjectedDefaultsWhenBlank)
   ci.type_   = "FollowJointTrajectory";
   ci.joints_ = { "joint1" };
 
-  MoveItControllersConfig parent;
-  parent.getControllers().push_back(ci);
+  MoveItControllersConfig config;
+  config.addController(ci);
 
   YAML::Emitter out;
   MoveItControllersConfig::GeneratedControllersConfig writer(std::filesystem::path(), moveit_setup::GeneratedTime(),
-                                                            parent);
+                                                             config);
   ASSERT_TRUE(writer.writeYaml(out));
 
   YAML::Node node = YAML::Load(out.c_str())["moveit_simple_controller_manager"][ci.name_];
