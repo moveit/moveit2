@@ -9,11 +9,21 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(Boost REQUIRED program_options)
+# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+find_package(rviz2 QUIET)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+  find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 6)
+  # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
+  # may incorrectly resolve to Qt5 due to CMake's ascending path order
+  set(QT_DIR "${Qt6_DIR}")
+else()
+  find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+  set(QT_VERSION_MAJOR 5)
+endif()
 find_package(moveit_setup_framework REQUIRED)
 find_package(moveit_setup_srdf_plugins REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(Qt5Core REQUIRED)
-find_package(Qt5Widgets REQUIRED)
 find_package(rclcpp REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
@@ -21,8 +31,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     moveit_setup_framework
     moveit_setup_srdf_plugins
     pluginlib
-    Qt5Core
-    Qt5Widgets
+    Qt${QT_VERSION_MAJOR}Core
+    Qt${QT_VERSION_MAJOR}Widgets
     rclcpp)
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
@@ -32,11 +42,9 @@ set(HEADERS include/moveit_setup_assistant/navigation_widget.hpp
 set(CMAKE_AUTOMOC ON)
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt5_wrap_cpp(MOC_FILES ${HEADERS})
-
 add_executable(
   moveit_setup_assistant src/main.cpp src/setup_assistant_widget.cpp
-                         src/navigation_widget.cpp ${MOC_FILES})
+                         src/navigation_widget.cpp ${HEADERS})
 target_include_directories(
   moveit_setup_assistant
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -53,6 +61,7 @@ target_include_directories(
 
 ament_target_dependencies(moveit_setup_assistant_updater
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(moveit_setup_assistant_updater ${Boost_LIBRARIES})
 
 set_target_properties(moveit_setup_assistant_updater
                       PROPERTIES OUTPUT_NAME collisions_updater PREFIX "")

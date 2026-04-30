@@ -23,7 +23,8 @@
 
   <depend>ament_index_cpp</depend>
   <depend>pluginlib</depend>
-  <depend>qtbase5-dev</depend>
+  <depend condition="$ROS_DISTRO == humble or $ROS_DISTRO == jazzy or $ROS_DISTRO == kilted">qtbase5-dev</depend>
+  <depend condition="$ROS_DISTRO != humble and $ROS_DISTRO != jazzy and $ROS_DISTRO != kilted">qt6-base-dev</depend>
   <depend>rclcpp</depend>
   <depend>moveit_setup_framework</depend>
   <depend>moveit_setup_srdf_plugins</depend> <!-- For collision_updater executable -->

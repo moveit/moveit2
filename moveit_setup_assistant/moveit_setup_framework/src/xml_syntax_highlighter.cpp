@@ -64,7 +64,7 @@ void XmlSyntaxHighlighter::addTag(const QString& tag, const QTextCharFormat& for
 }
 
 XmlSyntaxHighlighter::Rules::const_iterator
-XmlSyntaxHighlighter::highlight(Rules::const_iterator active, QStringRef text, int start, bool search_end, int& end)
+XmlSyntaxHighlighter::highlight(Rules::const_iterator active, QStringView text, int start, bool search_end, int& end)
 {
   int offset = end;    // when passed, end indicates the end of the opening expression
   auto next = active;  // return value: active rule at end of text
@@ -121,7 +121,7 @@ void XmlSyntaxHighlighter::highlightBlock(const QString& text)
 {
   Rules::const_iterator active = previousBlockState() < 0 ? rules_.end() : rules_.find(previousBlockState());
   int unused = 0;
-  active = highlight(active, QStringRef(&text, 0, text.size()), 0, active != rules_.cend(), unused);
+  active = highlight(active, QStringView(text), 0, active != rules_.cend(), unused);
   setCurrentBlockState(active != rules_.cend() ? active->first : -1);
 }
 
