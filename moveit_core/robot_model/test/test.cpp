@@ -204,6 +204,18 @@ TEST(PlanarJointTest, ComputeVariablePositionsNormalizeYaw)
   }
 }
 
+TEST(PlanarJointTest, InterpolateDiffDriveNormalizesYaw)
+{
+  moveit::core::PlanarJointModel pjm("joint", 0, 0);
+  pjm.setMotionModel(moveit::core::PlanarJointModel::DIFF_DRIVE);
+  const double from[3] = { 0.0, 0.0, -2.9 };
+  const double to[3] = { 0.0, 0.0, 3.0 };
+  double state[3];
+  pjm.interpolate(from, to, 1.0, state);
+  EXPECT_GE(state[2], -M_PI) << "theta=" << state[2];
+  EXPECT_LE(state[2], M_PI) << "theta=" << state[2];
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
