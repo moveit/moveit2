@@ -270,11 +270,19 @@ std::string ControllerEditWidget::getControllerType()
 std::map<std::string, std::string> ControllerEditWidget::getAdditionalParameters()
 {
   std::map<std::string, std::string> parameters;
+  std::string controller_type = getControllerType();
   for (unsigned int i = 0; i < additional_fields_.size(); i++)
   {
     std::string key = additional_fields_[i]->parameter_name_;
     std::string value = additional_fields_inputs_[i]->text().trimmed().toStdString();
-    parameters[key] = value;
+    if (value.empty())
+    {
+      value = additional_fields_[i]->getDefaultValue(controller_type);
+    }
+    if (!value.empty())
+    {
+      parameters[key] = value;
+    }
   }
   return parameters;
 }
