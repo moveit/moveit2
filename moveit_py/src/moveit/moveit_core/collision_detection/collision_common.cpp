@@ -40,6 +40,75 @@ namespace moveit_py
 {
 namespace bind_collision_detection
 {
+void initBodyType(py::module& m)
+{
+  py::module collision_detection = m.def_submodule("collision_detection");
+
+  py::enum_<collision_detection::BodyType>(collision_detection, "BodyType", R"(
+      The type of a body involved in a collision contact.
+      )")
+      .value("ROBOT_LINK", collision_detection::BodyTypes::ROBOT_LINK, "A link on the robot.")
+      .value("ROBOT_ATTACHED", collision_detection::BodyTypes::ROBOT_ATTACHED, "A body attached to a robot link.")
+      .value("WORLD_OBJECT", collision_detection::BodyTypes::WORLD_OBJECT, "A body in the environment.")
+      .export_values();
+}
+
+void initContact(py::module& m)
+{
+  py::module collision_detection = m.def_submodule("collision_detection");
+
+  py::class_<collision_detection::Contact>(collision_detection, "Contact", R"(
+      A contact point between two bodies.
+      )")
+      .def(py::init<>())
+      .def_readwrite("body_name_1", &collision_detection::Contact::body_name_1, R"(
+          str: The name of the first body in contact.
+          )")
+      .def_readwrite("body_name_2", &collision_detection::Contact::body_name_2, R"(
+          str: The name of the second body in contact.
+          )")
+      .def_readwrite("body_type_1", &collision_detection::Contact::body_type_1, R"(
+          BodyType: The type of the first body in contact.
+          )")
+      .def_readwrite("body_type_2", &collision_detection::Contact::body_type_2, R"(
+          BodyType: The type of the second body in contact.
+          )")
+      .def_readwrite("depth", &collision_detection::Contact::depth, R"(
+          float: Penetration depth between the two bodies.
+          )")
+      .def_readwrite("pos", &collision_detection::Contact::pos, R"(
+          numpy.ndarray: Contact position (3D vector).
+          )")
+      .def_readwrite("normal", &collision_detection::Contact::normal, R"(
+          numpy.ndarray: Normal unit vector at the contact point (3D vector).
+          )")
+      .def_readwrite("percent_interpolation", &collision_detection::Contact::percent_interpolation, R"(
+          float: Distance percentage between cast poses until collision (0 = start pose, 1 = end pose).
+          )");
+}
+
+void initCostSource(py::module& m)
+{
+  py::module collision_detection = m.def_submodule("collision_detection");
+
+  py::class_<collision_detection::CostSource>(collision_detection, "CostSource", R"(
+      A partial cost incurred in a particular volume due to a collision.
+      )")
+      .def(py::init<>())
+      .def_readwrite("aabb_min", &collision_detection::CostSource::aabb_min, R"(
+          list[float]: Minimum bound of the AABB defining the volume responsible for this cost.
+          )")
+      .def_readwrite("aabb_max", &collision_detection::CostSource::aabb_max, R"(
+          list[float]: Maximum bound of the AABB defining the volume responsible for this cost.
+          )")
+      .def_readwrite("cost", &collision_detection::CostSource::cost, R"(
+          float: The partial cost (probability of object existence at collision point).
+          )")
+      .def("get_volume", &collision_detection::CostSource::getVolume, R"(
+          float: Volume of the AABB around this cost source.
+          )");
+}
+
 void initCollisionRequest(py::module& m)
 {
   py::module collision_detection = m.def_submodule("collision_detection");
@@ -121,16 +190,34 @@ void initCollisionResult(py::module& m)
                      int: Number of contacts returned.
                      )")
 
-      // TODO (peterdavidfagan): define binding and test for ContactMap.
-      .def_readwrite("contacts", &collision_detection::CollisionResult::contacts,
-                     R"(
-                     dict: A dict returning the pairs of ids of the bodies in contact, plus information about the contacts themselves.
-                     )")
+      .def_property_readonly(
+          "contacts",
+          [](const collision_detection::CollisionResult& self) {
+            py::dict result;
+            for (const auto& [key, contact_vec] : self.contacts)
+            {
+              py::list py_contacts;
+              for (const auto& contact : contact_vec)
+                py_contacts.append(contact);
+              result[py::make_tuple(key.first, key.second)] = py_contacts;
+            }
+            return result;
+          },
+          R"(
+          dict[tuple[str, str], list[Contact]]: Pairs of body ids in contact mapped to their contact details.
+          )")
 
-      .def_readwrite("cost_sources", &collision_detection::CollisionResult::cost_sources,
-                     R"(
-                     dict: The individual cost sources from computed costs.
-                     )");
+      .def_property_readonly(
+          "cost_sources",
+          [](const collision_detection::CollisionResult& self) {
+            py::list result;
+            for (const auto& cs : self.cost_sources)
+              result.append(cs);
+            return result;
+          },
+          R"(
+          list[CostSource]: Individual cost sources from computed costs, ordered highest cost first.
+          )");
 }
 }  // namespace bind_collision_detection
 }  // namespace moveit_py
