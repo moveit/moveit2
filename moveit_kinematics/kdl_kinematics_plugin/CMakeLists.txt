@@ -10,7 +10,7 @@ target_link_libraries(
   moveit_kdl_kinematics_plugin
   kdl_kinematics_parameters
   rclcpp::rclcpp
-  random_numbers::random_numbers
+  ${random_numbers_LIBRARIES}
   pluginlib::pluginlib
   moveit_core::moveit_core
   ${moveit_msgs_TARGETS}
@@ -18,6 +18,8 @@ target_link_libraries(
   kdl_parser::kdl_parser
   tf2_kdl::tf2_kdl
   Eigen3::Eigen)
+target_include_directories(moveit_kdl_kinematics_plugin
+                           PUBLIC ${random_numbers_INCLUDE_DIRS})
 
 # prevent pluginlib from using boost
 target_compile_definitions(moveit_kdl_kinematics_plugin

@@ -23,6 +23,7 @@ target_link_libraries(
   rsl::rsl
   ament_index_cpp::ament_index_cpp
   Boost::headers
+  Boost::regex
   ${geometry_msgs_TARGETS}
   urdf::urdf
   pluginlib::pluginlib

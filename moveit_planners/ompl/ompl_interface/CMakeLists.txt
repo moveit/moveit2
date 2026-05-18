@@ -39,7 +39,8 @@ target_link_libraries(
          pluginlib::pluginlib
          tf2_eigen::tf2_eigen
          tf2_ros::tf2_ros
-         Boost::headers)
+         Boost::headers
+         Boost::serialization)
 add_executable(moveit_generate_state_database
                scripts/generate_state_database.cpp)
 target_link_libraries(moveit_generate_state_database moveit_ompl_interface)
