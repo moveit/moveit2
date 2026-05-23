@@ -243,7 +243,8 @@ CostFn getConstraintsCostFunction(const std::shared_ptr<const planning_scene::Pl
     setJointPositions(positions, joints, state);
     state.update();
 
-    return constraints.decide(state).distance * cost_scale;
+    const auto& result = constraints.decide(state);
+    return result.satisfied ? 0.0 : result.distance * cost_scale;
   };
 
   return getCostFunctionFromStateValidator(constraints_validator_fn, CONSTRAINT_CHECK_DISTANCE);
