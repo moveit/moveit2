@@ -33,18 +33,18 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black
-    rev: 25.12.0
+    rev: 26.5.1
     hooks:
       - id: black
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v14.0.6
+    rev: v21.1.8
     hooks:
       - id: clang-format
         types_or: [c++, c, cuda]
         args: ["-fallback-style=none"]
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell
         args: ['--write-changes', '--ignore-words=.codespell_words', '--skip="*.eps"']
