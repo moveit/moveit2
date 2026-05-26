@@ -4,7 +4,8 @@ generate_parameter_library(default_response_adapter_parameters
 add_library(
   moveit_default_planning_response_adapter_plugins SHARED
   src/add_ruckig_traj_smoothing.cpp src/add_time_optimal_parameterization.cpp
-  src/display_motion_path.cpp src/validate_path.cpp)
+  src/display_motion_path.cpp src/validate_path.cpp
+  src/limit_max_cartesian_link_speed.cpp)
 
 target_link_libraries(moveit_default_planning_response_adapter_plugins
                       default_response_adapter_parameters)
