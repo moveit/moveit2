@@ -76,12 +76,12 @@ rclcpp::Logger getLogger()
  * @param[in] claimed_interface claimed interface as joint_name/INTERFACE_TYPE
  * @return joint_name part of the /p claimed_interface
  */
-std::string parseJointNameFromResource(const std::string& claimed_interface)
+static std::string parseJointNameFromResource(const std::string& claimed_interface)
 {
-  const auto index = claimed_interface.find('/');
-  if (index == std::string::npos)
-    return claimed_interface;
-  return claimed_interface.substr(0, index);
+  const auto last = claimed_interface.rfind('/');
+  if (last == std::string::npos)
+    return claimed_interface;               // no interface segment present
+  return claimed_interface.substr(0, last); // preserve multi-DOF suffix; strip only interface
 }
 
 /**
