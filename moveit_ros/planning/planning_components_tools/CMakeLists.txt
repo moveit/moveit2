@@ -53,4 +53,11 @@ install(
           moveit_evaluate_collision_checking_speed
           moveit_publish_scene_from_text
   RUNTIME DESTINATION lib/${PROJECT_NAME})
+
+if(BUILD_TESTING)
+  find_package(launch_testing_ament_cmake REQUIRED)
+
+  add_launch_test(test/test_publish_scene_from_text.py)
+endif()
+
 # lint_cmake:
