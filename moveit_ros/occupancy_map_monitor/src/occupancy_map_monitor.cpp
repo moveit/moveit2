@@ -37,17 +37,18 @@
 #include <moveit/collision_detection/occupancy_map.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor_middleware_handle.hpp>
+#include <moveit/utils/logger.hpp>
 #include <moveit_msgs/srv/load_map.hpp>
 #include <moveit_msgs/srv/save_map.hpp>
 #include <rclcpp/clock.hpp>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <rclcpp/node.hpp>
+#include <geometric_shapes/shape_operations.h>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-#include <moveit/utils/logger.hpp>
 
 namespace occupancy_map_monitor
 {
@@ -211,6 +212,35 @@ ShapeHandle OccupancyMapMonitor::excludeShape(const shapes::ShapeConstPtr& shape
     }
   }
   return h;
+}
+
+void OccupancyMapMonitor::clearShape(const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& pose)
+{
+  if (!tree_ || !shape)
+    return;
+
+  // get the local shape extents
+  Eigen::Vector3d extents = shapes::computeShapeExtents(shape.get());
+  Eigen::Vector3d local_min = -extents * 0.5;
+  Eigen::Vector3d local_max = extents * 0.5;
+
+  // AABB by transforming the 8 corners of the local bounding box
+  Eigen::Vector3d global_min(std::numeric_limits<double>::max(), std::numeric_limits<double>::max(),
+                             std::numeric_limits<double>::max());
+  Eigen::Vector3d global_max(-std::numeric_limits<double>::max(), -std::numeric_limits<double>::max(),
+                             -std::numeric_limits<double>::max());
+  for (int i = 0; i < 8; ++i)
+  {
+    Eigen::Vector3d corner;
+    corner << (i & 1 ? local_max.x() : local_min.x()), (i & 2 ? local_max.y() : local_min.y()),
+        (i & 4 ? local_max.z() : local_min.z());
+
+    Eigen::Vector3d transformed_corner = pose * corner;
+    global_min = global_min.cwiseMin(transformed_corner);
+    global_max = global_max.cwiseMax(transformed_corner);
+  }
+
+  tree_->clearRegion(global_min, global_max);
 }
 
 void OccupancyMapMonitor::forgetShape(ShapeHandle handle)
