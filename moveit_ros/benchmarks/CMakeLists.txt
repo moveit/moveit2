@@ -36,6 +36,7 @@ if(WIN32)
 endif()
 ament_target_dependencies(moveit_ros_benchmarks ${THIS_PACKAGE_INCLUDE_DEPENDS})
 target_link_libraries(moveit_ros_benchmarks ${EXTRA_LIB})
+target_compile_features(moveit_ros_benchmarks PRIVATE cxx_std_20)
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
 ament_target_dependencies(moveit_run_benchmark ${THIS_PACKAGE_INCLUDE_DEPENDS})
