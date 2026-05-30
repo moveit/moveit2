@@ -260,10 +260,6 @@ void TrajectoryExecutionManager::initialize()
       {
         setWaitForTrajectoryCompletion(parameter.as_bool());
       }
-      else
-      {
-        result.successful = false;
-      }
     }
     return result;
   };
