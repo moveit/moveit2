@@ -204,6 +204,26 @@ TEST(PlanarJointTest, ComputeVariablePositionsNormalizeYaw)
   }
 }
 
+TEST(PlanarJointTest, InterpolateNormalizesYaw)
+{
+  // Create a simple planar joint model with some dummy parameters
+  moveit::core::PlanarJointModel pjm("joint", 0, 0);
+
+  // Test for normalization
+  const double from[3] = { 0.0, 0.0, -2.9 };
+  const double to[3] = { 0.0, 0.0, 3.0 };
+
+  // Check that yaw value is normalized between [-pi, pi]
+  for (auto model : { moveit::core::PlanarJointModel::HOLONOMIC, moveit::core::PlanarJointModel::DIFF_DRIVE })
+  {
+    pjm.setMotionModel(model);
+    double state[3];
+    pjm.interpolate(from, to, 1.0, state);
+    EXPECT_GE(state[2], -M_PI) << "model=" << model << " theta=" << state[2];
+    EXPECT_LE(state[2], M_PI) << "model=" << model << " theta=" << state[2];
+  }
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
