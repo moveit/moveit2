@@ -58,7 +58,6 @@ using boost_progress_display = boost::progress_display;
 #endif
 
 #include <boost/math/constants/constants.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <math.h>
 #include <limits>

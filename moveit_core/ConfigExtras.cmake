@@ -5,7 +5,6 @@ find_package(
   REQUIRED
   chrono
   date_time
-  filesystem
   iostreams
   program_options
   regex

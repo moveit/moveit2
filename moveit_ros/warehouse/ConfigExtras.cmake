@@ -5,7 +5,6 @@ find_package(
   REQUIRED
   thread
   system
-  filesystem
   regex
   date_time
   program_options)

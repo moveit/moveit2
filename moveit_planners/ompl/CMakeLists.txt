@@ -9,7 +9,6 @@ find_package(
   Boost
   REQUIRED
   system
-  filesystem
   date_time
   thread
   serialization)
