@@ -299,7 +299,7 @@ TrajectoryGenerator::cartesianTrapVelocityProfile(double max_velocity_scaling_fa
 
 void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& scene,
                                    const planning_interface::MotionPlanRequest& req,
-                                   planning_interface::MotionPlanResponse& res, double sampling_time)
+                                   planning_interface::MotionPlanResponse& res)
 {
   RCLCPP_INFO_STREAM(getLogger(), "Generating " << req.planner_id << " trajectory...");
   rclcpp::Time planning_begin = clock_->now();
@@ -345,6 +345,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   trajectory_msgs::msg::JointTrajectory joint_trajectory;
   try
   {
+    auto sampling_time = sampling_.max_seconds;
     plan(plan_info.start_scene, req, plan_info, sampling_time, joint_trajectory);
   }
   catch (const MoveItErrorCodeException& ex)
@@ -394,4 +395,16 @@ void TrajectoryGenerator::setMaxCartesianSpeed(const moveit_msgs::msg::MotionPla
   }
 }
 
+void TrajectoryGenerator::setSamplingTime(double sampling_time)
+{
+  if (sampling_time > 0.0)
+  {
+    sampling_.max_seconds = sampling_time;
+    RCLCPP_INFO(getLogger(), "received sampling_time: %f", sampling_time);
+  }
+  else
+  {
+    RCLCPP_INFO(getLogger(), "using default sampling_time: %f", sampling_.max_seconds);
+  }
+}
 }  // namespace pilz_industrial_motion_planner

@@ -1,0 +1,9 @@
+pilz_sampling:
+  max_seconds: {
+    type: double,
+    default_value: 0.1,
+    description: "Maximum time interval between two consecutive samples in seconds",
+    validation: {
+      gt: [ 0.0 ]
+    }
+  }

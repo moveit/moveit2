@@ -55,8 +55,9 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const moveit::core::RobotModelConstPtr& robot_model,
-                                               const LimitsContainer& planner_limits, const std::string& group_name)
-  : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
+                                               const LimitsContainer& planner_limits,
+                                               const pilz_sampling::Params& sampling, const std::string& group_name)
+  : TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits, sampling)
 {
   if (!planner_limits_.hasJointLimits())
   {
