@@ -30,7 +30,7 @@
   <depend>trajectory_msgs</depend>
 
   <exec_depend>controller_manager</exec_depend>
-  <exec_depend>position_controllers</exec_depend>
+  <exec_depend>forward_command_controller</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>moveit_resources_panda_moveit_config</exec_depend>
@@ -41,7 +41,7 @@
   <test_depend>moveit_planners_ompl</test_depend>
   <test_depend>moveit_resources_panda_moveit_config</test_depend>
   <test_depend>moveit_simple_controller_manager</test_depend>
-  <test_depend>position_controllers</test_depend>
+  <test_depend>forward_command_controller</test_depend>
   <test_depend>robot_state_publisher</test_depend>
   <test_depend>ros_testing</test_depend>
 
