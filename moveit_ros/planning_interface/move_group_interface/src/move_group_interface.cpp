@@ -36,6 +36,7 @@
 
 /* Author: Ioan Sucan, Sachin Chitta */
 
+#include <cstdint>
 #include <stdexcept>
 #include <sstream>
 #include <memory>
