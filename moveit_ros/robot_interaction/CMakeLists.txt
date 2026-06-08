@@ -32,8 +32,10 @@ target_include_directories(
 set_target_properties(
   moveit_robot_interaction PROPERTIES VERSION
                                       "${moveit_ros_robot_interaction_VERSION}")
-ament_target_dependencies(moveit_robot_interaction
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  moveit_robot_interaction moveit_core::moveit_core
+  moveit_ros_planning::moveit_ros_planning
+  interactive_markers::interactive_markers ${tf2_geometry_msgs_TARGETS})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -41,8 +43,15 @@ if(BUILD_TESTING)
   target_link_libraries(locked_robot_state_test moveit_robot_interaction)
 endif()
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_ros_robot_interaction::moveit_ros_robot_interaction to link all
+# libraries at once.
+add_library(moveit_ros_robot_interaction INTERFACE)
+target_link_libraries(moveit_ros_robot_interaction
+                      INTERFACE moveit_robot_interaction)
+
 install(
-  TARGETS moveit_robot_interaction
+  TARGETS moveit_ros_robot_interaction moveit_robot_interaction
   EXPORT moveit_ros_robot_interactionTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
