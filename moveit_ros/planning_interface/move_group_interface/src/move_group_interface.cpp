@@ -65,20 +65,9 @@
 
 #include <std_msgs/msg/string.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
-// TODO: Remove conditional include when released to all active distros.
-#if __has_include(<tf2/utils.hpp>)
 #include <tf2/utils.hpp>
-#else
-#include <tf2/utils.h>
-#endif
 #include <tf2_eigen/tf2_eigen.hpp>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/transform_listener.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/transform_listener.h>
-#endif
 
 namespace moveit
 {
