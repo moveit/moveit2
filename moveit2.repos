@@ -8,3 +8,7 @@ repositories:
     type: git
     url: https://github.com/moveit/moveit_resources.git
     version: ros2
+  picknik_controllers:
+    type: git
+    url: https://github.com/PickNikRobotics/picknik_controllers.git
+    version: main
