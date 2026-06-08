@@ -36,6 +36,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <map>
 #include <moveit/macros/class_forward.hpp>
 #include <moveit/mesh_filter/gl_renderer.hpp>
