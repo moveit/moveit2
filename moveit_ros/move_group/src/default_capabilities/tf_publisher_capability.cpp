@@ -41,13 +41,7 @@
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/utils/message_checks.hpp>
 #include <moveit/move_group/capability_names.hpp>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/transform_broadcaster.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/transform_broadcaster.h>
-#endif
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/robot_state/attached_body.hpp>
