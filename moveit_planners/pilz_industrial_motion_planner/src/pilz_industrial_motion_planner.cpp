@@ -54,7 +54,7 @@ namespace pilz_industrial_motion_planner
 {
 namespace
 {
-const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
+const std::string PARAMETER_NAMESPACE = "robot_description_planning";
 rclcpp::Logger getLogger()
 {
   return moveit::getLogger("moveit.planners.pilz.command_planner");
@@ -73,12 +73,17 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
 
   // Obtain the aggregated joint limits
   aggregated_limit_active_joints_ = pilz_industrial_motion_planner::JointLimitsAggregator::getAggregatedLimits(
-      node, PARAM_NAMESPACE_LIMITS, model->getActiveJointModels());
+      node, PARAMETER_NAMESPACE, model->getActiveJointModels());
 
   // Obtain cartesian limits
-  param_listener_ =
-      std::make_shared<cartesian_limits::ParamListener>(node, PARAM_NAMESPACE_LIMITS + ".cartesian_limits");
-  params_ = param_listener_->get_params();
+  cartesian_limits_param_listener_ =
+      std::make_shared<cartesian_limits::ParamListener>(node, PARAMETER_NAMESPACE + ".cartesian_limits");
+  cartesian_limits_params_ = cartesian_limits_param_listener_->get_params();
+
+  // Obtain sampling parameters
+  sampling_param_listener_ =
+      std::make_shared<pilz_sampling::ParamListener>(node, PARAMETER_NAMESPACE + ".pilz_sampling");
+  sampling_params_ = sampling_param_listener_->get_params();
 
   // Load the planning context loader
   planner_context_loader_ = std::make_unique<pluginlib::ClassLoader<PlanningContextLoader>>(
@@ -102,10 +107,11 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr& model, c
 
     pilz_industrial_motion_planner::LimitsContainer limits;
     limits.setJointLimits(aggregated_limit_active_joints_);
-    limits.setCartesianLimits(params_);
+    limits.setCartesianLimits(cartesian_limits_params_);
 
     loader_pointer->setLimits(limits);
     loader_pointer->setModel(model_);
+    loader_pointer->setSampling(sampling_params_);
 
     registerContextLoader(loader_pointer);
   }

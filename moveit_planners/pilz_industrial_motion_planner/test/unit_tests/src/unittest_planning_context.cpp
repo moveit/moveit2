@@ -118,8 +118,11 @@ protected:
     limits.setJointLimits(joint_limits);
     limits.setCartesianLimits(cartesian_limit);
 
+    pilz_sampling::Params sampling;
+    sampling.max_seconds = 0.1;
+
     planning_context_ = std::unique_ptr<typename T::Type_>(
-        new typename T::Type_("TestPlanningContext", planning_group_, robot_model_, limits));
+        new typename T::Type_("TestPlanningContext", planning_group_, robot_model_, limits, sampling));
 
     // Define and set the current scene
     auto scene = std::make_shared<planning_scene::PlanningScene>(robot_model_);

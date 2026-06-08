@@ -67,10 +67,11 @@ public:
    * @throw TrajectoryGeneratorInvalidLimitsException
    * @param model: robot model
    * @param planner_limits: limits in joint and Cartesian spaces
+   * @param sampling: sampling parameters
    */
   TrajectoryGeneratorPolyline(const moveit::core::RobotModelConstPtr& robot_model,
                               const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
-                              const std::string& group_name);
+                              const pilz_sampling::Params& sampling, const std::string& group_name);
 
 private:
   void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const override;

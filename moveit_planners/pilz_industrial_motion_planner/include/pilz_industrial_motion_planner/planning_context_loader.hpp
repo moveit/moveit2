@@ -35,6 +35,7 @@
 #pragma once
 
 #include <pilz_industrial_motion_planner/limits_container.hpp>
+#include <pilz_industrial_motion_planner/pilz_sampling_parameters.hpp>
 
 #include <memory>
 #include <vector>
@@ -76,6 +77,13 @@ public:
   virtual bool setLimits(const pilz_industrial_motion_planner::LimitsContainer& limits);
 
   /**
+   * @brief Sets the sampling parameters the planner can pass to the contexts
+   * @param sampling container of sampling parameters
+   * @return true if sampling parameters could be set
+   */
+  virtual bool setSampling(const pilz_sampling::Params& sampling);
+
+  /**
    * @brief Return the planning context
    * @param planning_context
    * @param name context name
@@ -107,6 +115,9 @@ protected:
   /// Limits to be used during planning
   pilz_industrial_motion_planner::LimitsContainer limits_;
 
+  /// Settings to be used when sampling the output trajectory
+  pilz_sampling::Params sampling_;
+
   /// True if model is set
   bool model_set_;
 
@@ -123,7 +134,7 @@ bool PlanningContextLoader::loadContext(planning_interface::PlanningContextPtr& 
 {
   if (limits_set_ && model_set_)
   {
-    planning_context = std::make_shared<T>(name, group, model_, limits_);
+    planning_context = std::make_shared<T>(name, group, model_, limits_, sampling_);
     return true;
   }
   else

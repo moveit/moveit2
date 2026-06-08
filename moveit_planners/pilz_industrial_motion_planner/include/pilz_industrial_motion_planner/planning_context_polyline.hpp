@@ -60,8 +60,10 @@ class PlanningContextPolyline : public pilz_industrial_motion_planner::PlanningC
 public:
   PlanningContextPolyline(const std::string& name, const std::string& group,
                           const moveit::core::RobotModelConstPtr& model,
-                          const pilz_industrial_motion_planner::LimitsContainer& limits)
-    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorPolyline>(name, group, model, limits)
+                          const pilz_industrial_motion_planner::LimitsContainer& limits,
+                          const pilz_sampling::Params& sampling)
+    : pilz_industrial_motion_planner::PlanningContextBase<TrajectoryGeneratorPolyline>(name, group, model, limits,
+                                                                                       sampling)
   {
   }
 };

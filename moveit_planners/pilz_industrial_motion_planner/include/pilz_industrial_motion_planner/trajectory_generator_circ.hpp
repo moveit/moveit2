@@ -74,13 +74,14 @@ public:
    * @brief Constructor of CIRC Trajectory Generator.
    *
    * @param planner_limits Limits in joint and Cartesian spaces
+   * @param sampling Sampling parameters
    *
    * @throw TrajectoryGeneratorInvalidLimitsException
    *
    */
   TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr& robot_model,
                           const pilz_industrial_motion_planner::LimitsContainer& planner_limits,
-                          const std::string& group_name);
+                          const pilz_sampling::Params& sampling, const std::string& group_name);
 
 private:
   void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest& req) const override;

@@ -63,7 +63,7 @@ bool pilz_industrial_motion_planner::PlanningContextLoaderPolyline::loadContext(
 {
   if (limits_set_ && model_set_)
   {
-    planning_context = std::make_shared<PlanningContextPolyline>(name, group, model_, limits_);
+    planning_context = std::make_shared<PlanningContextPolyline>(name, group, model_, limits_, sampling_);
     return true;
   }
   else
