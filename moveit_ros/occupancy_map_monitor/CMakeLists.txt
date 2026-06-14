@@ -13,9 +13,7 @@ find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(Eigen3 REQUIRED)
-# Enforce system version liboctomap-dev
-# https://github.com/moveit/moveit2/issues/2862
-find_package(octomap 1.9.7...<1.10.0 REQUIRED)
+find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
 
