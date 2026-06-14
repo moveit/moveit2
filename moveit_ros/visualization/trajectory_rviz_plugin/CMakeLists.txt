@@ -17,7 +17,6 @@ target_link_libraries(
   ${moveit_msgs_TARGETS}
   pluginlib::pluginlib
   Boost::headers
-  rviz_ogre_vendor::OgreMain
   rviz_ogre_vendor::OgreOverlay)
 target_include_directories(moveit_trajectory_rviz_plugin_core
                            PRIVATE "${OGRE_PREFIX_DIR}/include")

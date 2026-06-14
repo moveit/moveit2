@@ -21,10 +21,8 @@ target_link_libraries(
   eigen_stl_containers::eigen_stl_containers
   pluginlib::pluginlib
   rclcpp::rclcpp
-  rmw_implementation::rmw_implementation
   urdf::urdf
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   srdfdom::srdfdom
   ${visualization_msgs_TARGETS}
   tf2_eigen::tf2_eigen

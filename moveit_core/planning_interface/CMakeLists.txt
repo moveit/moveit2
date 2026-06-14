@@ -14,7 +14,6 @@ target_link_libraries(
   moveit_utils
   ${moveit_msgs_TARGETS}
   urdf::urdf
-  urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers)
+  urdfdom::urdf_parser)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

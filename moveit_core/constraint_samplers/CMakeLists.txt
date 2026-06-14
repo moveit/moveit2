@@ -19,7 +19,6 @@ target_link_libraries(
   moveit_utils
   urdf::urdf
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   ${visualization_msgs_TARGETS})
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

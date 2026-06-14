@@ -26,10 +26,8 @@ target_link_libraries(
   moveit_utils
   ${BULLET_LIBRARIES}
   rclcpp::rclcpp
-  rmw_implementation::rmw_implementation
   urdf::urdf
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   ${visualization_msgs_TARGETS}
   ${octomap_msgs_TARGETS})
 
@@ -49,7 +47,6 @@ target_link_libraries(
   urdf::urdf
   ${visualization_msgs_TARGETS}
   pluginlib::pluginlib
-  rmw_implementation::rmw_implementation
   ${octomap_msgs_TARGETS})
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

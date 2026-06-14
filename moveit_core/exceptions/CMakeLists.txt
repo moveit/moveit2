@@ -5,8 +5,7 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_exceptions PROPERTIES VERSION
                                                    "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(
-  moveit_exceptions moveit_utils Boost::headers rclcpp::rclcpp
-  urdfdom::urdf_parser urdfdom_headers::urdfdom_headers)
+target_link_libraries(moveit_exceptions moveit_utils Boost::headers
+                      rclcpp::rclcpp urdfdom::urdf_parser)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

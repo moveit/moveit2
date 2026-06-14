@@ -10,9 +10,7 @@ target_link_libraries(
   geometric_shapes::geometric_shapes
   tf2_eigen::tf2_eigen
   rclcpp::rclcpp
-  rmw_implementation::rmw_implementation
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   Boost::headers)
 set_target_properties(moveit_transforms PROPERTIES VERSION
                                                    "${${PROJECT_NAME}_VERSION}")

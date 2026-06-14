@@ -25,7 +25,6 @@ target_link_libraries(
   Boost::headers
   rclcpp::rclcpp
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   ${octomap_msgs_TARGETS}
   octomap)
 

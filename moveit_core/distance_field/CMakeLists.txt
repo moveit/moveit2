@@ -14,7 +14,6 @@ target_link_libraries(
   Boost::iostreams
   eigen_stl_containers::eigen_stl_containers
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   ${visualization_msgs_TARGETS}
   geometric_shapes::geometric_shapes
   tf2_eigen::tf2_eigen

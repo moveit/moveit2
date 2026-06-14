@@ -17,10 +17,8 @@ target_link_libraries(
   moveit_utils
   fcl
   rclcpp::rclcpp
-  rmw_implementation::rmw_implementation
   urdf::urdf
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   ${visualization_msgs_TARGETS})
 
 add_library(collision_detector_fcl_plugin SHARED
@@ -35,8 +33,7 @@ target_link_libraries(
   rclcpp::rclcpp
   urdf::urdf
   ${visualization_msgs_TARGETS}
-  pluginlib::pluginlib
-  rmw_implementation::rmw_implementation)
+  pluginlib::pluginlib)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(

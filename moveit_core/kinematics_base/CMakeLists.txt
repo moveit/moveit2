@@ -15,7 +15,6 @@ target_link_libraries(
   moveit_kinematics_base
   rclcpp::rclcpp
   urdf::urdf
-  urdfdom_headers::urdfdom_headers
   srdfdom::srdfdom
   ${moveit_msgs_TARGETS}
   geometric_shapes::geometric_shapes

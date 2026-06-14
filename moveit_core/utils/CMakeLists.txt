@@ -29,7 +29,6 @@ target_link_libraries(
   pluginlib::pluginlib
   srdfdom::srdfdom
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   rclcpp::rclcpp
   fmt::fmt)
 set_target_properties(moveit_test_utils PROPERTIES VERSION

@@ -14,10 +14,8 @@ target_link_libraries(
   moveit_robot_trajectory
   ruckig::ruckig
   rclcpp::rclcpp
-  rmw_implementation::rmw_implementation
   urdf::urdf
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   ${visualization_msgs_TARGETS}
   Boost::headers)
 

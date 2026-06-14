@@ -11,7 +11,6 @@ target_link_libraries(
   moveit_robot_state
   moveit_utils
   urdf::urdf
-  urdfdom_headers::urdfdom_headers
   ${orocos_kdl_LIBRARIES}
   ${visualization_msgs_TARGETS}
   kdl_parser::kdl_parser)

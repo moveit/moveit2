@@ -16,7 +16,6 @@ target_link_libraries(
   urdf::urdf
   ${tf2_geometry_msgs_TARGETS}
   geometric_shapes::geometric_shapes
-  urdfdom_headers::urdfdom_headers
   Boost::headers)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)

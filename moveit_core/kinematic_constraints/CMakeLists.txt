@@ -25,7 +25,6 @@ target_link_libraries(
   moveit_utils
   urdf::urdf
   urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers
   ${tf2_geometry_msgs_TARGETS}
   ${geometry_msgs_TARGETS}
   ${visualization_msgs_TARGETS}

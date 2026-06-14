@@ -50,8 +50,8 @@ target_link_libraries(
   moveit_setup_framework::moveit_setup_framework
   moveit_setup_srdf_plugins::moveit_setup_srdf_plugins
   pluginlib::pluginlib
-  ${QT_CORE}
-  ${QT_WIDGETS}
+  Qt${QT_VERSION_MAJOR}::Core
+  Qt${QT_VERSION_MAJOR}::Widgets
   rclcpp::rclcpp)
 
 add_executable(moveit_setup_assistant_updater src/collisions_updater.cpp)
@@ -67,8 +67,8 @@ target_link_libraries(
   moveit_setup_framework::moveit_setup_framework
   moveit_setup_srdf_plugins::moveit_setup_srdf_plugins
   pluginlib::pluginlib
-  ${QT_CORE}
-  ${QT_WIDGETS}
+  Qt${QT_VERSION_MAJOR}::Core
+  Qt${QT_VERSION_MAJOR}::Widgets
   rclcpp::rclcpp)
 
 set_target_properties(moveit_setup_assistant_updater

@@ -68,8 +68,8 @@ target_link_libraries(
          moveit_ros_planning::moveit_ros_planning
          moveit_ros_visualization::moveit_ros_visualization
          pluginlib::pluginlib
-         ${QT_CORE}
-         ${QT_WIDGETS}
+         Qt${QT_VERSION_MAJOR}::Core
+         Qt${QT_VERSION_MAJOR}::Widgets
          rclcpp::rclcpp
          rviz_common::rviz_common
          rviz_rendering::rviz_rendering

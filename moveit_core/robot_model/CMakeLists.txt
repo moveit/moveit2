@@ -39,7 +39,6 @@ target_link_libraries(
   eigen_stl_containers::eigen_stl_containers
   geometric_shapes::geometric_shapes
   urdf::urdf
-  urdfdom_headers::urdfdom_headers
   srdfdom::srdfdom
   ${visualization_msgs_TARGETS})
 

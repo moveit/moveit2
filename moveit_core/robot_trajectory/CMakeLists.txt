@@ -6,13 +6,8 @@ target_include_directories(
 set_target_properties(moveit_robot_trajectory
                       PROPERTIES VERSION ${${PROJECT_NAME}_VERSION})
 target_link_libraries(
-  moveit_robot_trajectory
-  moveit_robot_model
-  moveit_robot_state
-  moveit_utils
-  rclcpp::rclcpp
-  urdfdom::urdf_parser
-  urdfdom_headers::urdfdom_headers)
+  moveit_robot_trajectory moveit_robot_model moveit_robot_state moveit_utils
+  rclcpp::rclcpp urdfdom::urdf_parser)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 
