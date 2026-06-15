@@ -88,7 +88,8 @@ install(
 
 ament_export_dependencies(fmt)
 ament_export_dependencies(rclcpp)
-ament_export_dependencies(Qt${QT_VERSION_MAJOR})
+ament_export_dependencies(Qt${QT_VERSION_MAJOR}Core
+                          Qt${QT_VERSION_MAJOR}Widgets)
 ament_export_dependencies(moveit_common)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(moveit_ros_planning)

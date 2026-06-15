@@ -27,8 +27,13 @@ find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-    ament_index_cpp moveit_setup_framework moveit_setup_srdf_plugins pluginlib
-    Qt${QT_VERSION_MAJOR} rclcpp)
+    ament_index_cpp
+    moveit_setup_framework
+    moveit_setup_srdf_plugins
+    pluginlib
+    Qt${QT_VERSION_MAJOR}Core
+    Qt${QT_VERSION_MAJOR}Widgets
+    rclcpp)
 
 # Header files that need Qt Moc pre-processing for use with Qt signals, etc:
 set(HEADERS include/moveit_setup_assistant/navigation_widget.hpp
