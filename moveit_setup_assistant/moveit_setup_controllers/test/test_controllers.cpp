@@ -92,7 +92,12 @@ TEST_F(ControllersTest, ParsePanda)
 
   const ControllerInfo& ci2 = controllers[1 - offset];
   EXPECT_EQ("panda_hand_controller", ci2.name_);
-  EXPECT_EQ("position_controllers/GripperActionController", ci2.type_);
+  // Humble/Iron use position_controllers/GripperActionController; Jazzy and
+  // newer use parallel_gripper_action_controller/GripperActionController.
+  // Accept either so the test is distro-agnostic.
+  EXPECT_TRUE(ci2.type_ == "position_controllers/GripperActionController" ||
+              ci2.type_ == "parallel_gripper_action_controller/GripperActionController")
+      << "Unexpected gripper controller type: " << ci2.type_;
   EXPECT_EQ(1u, ci2.joints_.size());
 
   /*
