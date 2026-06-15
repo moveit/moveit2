@@ -46,7 +46,7 @@ target_link_libraries(
   tf2::tf2
   tf2_eigen::tf2_eigen
   tf2_ros::tf2_ros
-  ${tf2_geometry_msgs_TARGETS})
+  tf2_geometry_msgs::tf2_geometry_msgs)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

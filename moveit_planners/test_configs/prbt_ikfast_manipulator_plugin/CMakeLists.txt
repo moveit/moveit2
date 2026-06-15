@@ -52,7 +52,7 @@ target_link_libraries(
   tf2_kdl::tf2_kdl
   tf2_eigen::tf2_eigen
   tf2_eigen_kdl::tf2_eigen_kdl
-  ${tf2_geometry_msgs_TARGETS})
+  tf2_geometry_msgs::tf2_geometry_msgs)
 
 pluginlib_export_plugin_description_file(
   moveit_core prbt_manipulator_moveit_ikfast_plugin_description.xml)

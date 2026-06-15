@@ -11,7 +11,7 @@ target_link_libraries(
   message_filters::message_filters
   ${sensor_msgs_TARGETS}
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   tf2::tf2)
 set_target_properties(
   moveit_pointcloud_octomap_updater_core
@@ -32,7 +32,7 @@ target_link_libraries(
   message_filters::message_filters
   ${sensor_msgs_TARGETS}
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   tf2::tf2
   pluginlib::pluginlib)
 

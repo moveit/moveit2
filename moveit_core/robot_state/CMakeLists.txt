@@ -14,7 +14,7 @@ target_link_libraries(
   moveit_transforms
   eigen_stl_containers::eigen_stl_containers
   urdf::urdf
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   geometric_shapes::geometric_shapes
   Boost::headers)
 

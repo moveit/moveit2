@@ -45,7 +45,7 @@ target_link_libraries(
   rclcpp_action::rclcpp_action
   ${std_srvs_TARGETS}
   tf2::tf2
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   tf2_ros::tf2_ros)
 
 add_library(
@@ -83,7 +83,7 @@ target_link_libraries(
   rclcpp_action::rclcpp_action
   ${std_srvs_TARGETS}
   tf2::tf2
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   tf2_ros::tf2_ros)
 
 add_executable(move_group src/move_group.cpp)
@@ -100,7 +100,7 @@ target_link_libraries(
   rclcpp_action::rclcpp_action
   ${std_srvs_TARGETS}
   tf2::tf2
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   tf2_ros::tf2_ros
   Boost::headers)
 
@@ -117,7 +117,7 @@ target_link_libraries(
   rclcpp_action::rclcpp_action
   ${std_srvs_TARGETS}
   tf2::tf2
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   tf2_ros::tf2_ros)
 
 install(TARGETS move_group list_move_group_capabilities

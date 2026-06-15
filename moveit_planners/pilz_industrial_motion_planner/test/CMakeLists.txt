@@ -27,7 +27,7 @@ target_link_libraries(
   tf2::tf2
   tf2_eigen::tf2_eigen
   tf2_eigen_kdl::tf2_eigen_kdl
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   tf2_kdl::tf2_kdl
   tf2_ros::tf2_ros
   ${orocos_kdl_LIBRARIES}

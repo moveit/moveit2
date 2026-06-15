@@ -11,7 +11,7 @@ target_link_libraries(
   image_transport::image_transport
   ${sensor_msgs_TARGETS}
   tf2::tf2
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   geometric_shapes::geometric_shapes
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor)
 
@@ -26,7 +26,7 @@ target_link_libraries(
   image_transport::image_transport
   ${sensor_msgs_TARGETS}
   tf2::tf2
-  ${tf2_geometry_msgs_TARGETS}
+  tf2_geometry_msgs::tf2_geometry_msgs
   geometric_shapes::geometric_shapes
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
   pluginlib::pluginlib)
