@@ -14,7 +14,6 @@ target_link_libraries(
   rclcpp::rclcpp
   urdf::urdf
   pluginlib::pluginlib
-  class_loader::class_loader
   moveit_core::moveit_core)
 
 install(

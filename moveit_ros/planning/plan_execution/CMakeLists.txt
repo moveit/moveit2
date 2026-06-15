@@ -9,7 +9,6 @@ target_link_libraries(
   moveit_core::moveit_core
   rclcpp::rclcpp
   Boost::headers
-  class_loader::class_loader
   pluginlib::pluginlib)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

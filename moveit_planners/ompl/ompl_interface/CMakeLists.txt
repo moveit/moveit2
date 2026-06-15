@@ -40,7 +40,8 @@ target_link_libraries(
          tf2_eigen::tf2_eigen
          tf2_ros::tf2_ros
          Boost::headers
-         Boost::serialization)
+         Boost::serialization
+         Boost::date_time)
 add_executable(moveit_generate_state_database
                scripts/generate_state_database.cpp)
 target_link_libraries(moveit_generate_state_database moveit_ompl_interface)

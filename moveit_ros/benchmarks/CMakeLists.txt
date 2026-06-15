@@ -38,6 +38,7 @@ target_link_libraries(
   moveit_ros_benchmarks
   rclcpp::rclcpp
   Boost::headers
+  Boost::date_time
   tf2_eigen::tf2_eigen
   moveit_core::moveit_core
   moveit_ros_planning::moveit_ros_planning
