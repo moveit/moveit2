@@ -31,6 +31,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     pluginlib
     octomap
     geometric_shapes
+    tf2_ros
     Boost)
 
 add_library(
@@ -48,6 +49,7 @@ target_link_libraries(
   pluginlib::pluginlib
   octomap
   geometric_shapes::geometric_shapes
+  tf2_ros::tf2_ros
   Boost::headers)
 
 add_executable(moveit_ros_occupancy_map_server src/occupancy_map_server.cpp)
@@ -60,6 +62,7 @@ target_link_libraries(
           pluginlib::pluginlib
           octomap
           geometric_shapes::geometric_shapes
+          tf2_ros::tf2_ros
           Boost::headers)
 
 install(

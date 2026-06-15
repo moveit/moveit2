@@ -123,8 +123,10 @@ target_link_libraries(
 install(TARGETS move_group list_move_group_capabilities
         RUNTIME DESTINATION lib/moveit_ros_move_group)
 
-# Create an umbrella INTERFACE target so downstream packages can use
-# moveit_ros_move_group::moveit_ros_move_group to link all libraries at once.
+# Create an umbrella INTERFACE target so downstream packages can link the
+# move_group capabilities API via moveit_ros_move_group::moveit_ros_move_group.
+# moveit_move_group_default_capabilities is a runtime pluginlib plugin and is
+# intentionally not part of this target.
 add_library(moveit_ros_move_group INTERFACE)
 target_link_libraries(moveit_ros_move_group
                       INTERFACE moveit_move_group_capabilities_base)

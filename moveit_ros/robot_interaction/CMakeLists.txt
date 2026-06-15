@@ -14,8 +14,14 @@ find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS moveit_core moveit_ros_planning
-                                 interactive_markers tf2_geometry_msgs)
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+    moveit_core
+    moveit_ros_planning
+    interactive_markers
+    tf2
+    tf2_eigen
+    tf2_ros
+    tf2_geometry_msgs)
 
 include_directories(include)
 
@@ -33,9 +39,14 @@ set_target_properties(
   moveit_robot_interaction PROPERTIES VERSION
                                       "${moveit_ros_robot_interaction_VERSION}")
 target_link_libraries(
-  moveit_robot_interaction moveit_core::moveit_core
+  moveit_robot_interaction
+  moveit_core::moveit_core
   moveit_ros_planning::moveit_ros_planning
-  interactive_markers::interactive_markers ${tf2_geometry_msgs_TARGETS})
+  interactive_markers::interactive_markers
+  tf2::tf2
+  tf2_eigen::tf2_eigen
+  tf2_ros::tf2_ros
+  ${tf2_geometry_msgs_TARGETS})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
