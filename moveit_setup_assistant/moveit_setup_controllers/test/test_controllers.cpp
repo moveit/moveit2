@@ -127,6 +127,26 @@ TEST_F(ControllersTest, OutputFanuc)
   }
 }
 
+// Fanuc has no gripper, so OutputFanuc doesn't exercise the gripper branch of
+// ros2_controllers.yaml generation. Panda has a GripperActionController, which
+// must be written with the singular `joint` key (not the `joints` list). A full
+// YAML equivalence check isn't possible here because the panda gripper config
+// carries extra parameters (effort/velocity interfaces) the Setup Assistant does
+// not generate, so assert on the gripper parameter shape directly.
+TEST_F(ControllersTest, OutputPandaGripperUsesSingularJoint)
+{
+  config_data_->preloadWithFullConfig("moveit_resources_panda_moveit_config");
+  config_data_->get<moveit_setup::controllers::ControlXacroConfig>("control_xacro")->loadFromDescription();
+  generateFiles<ROS2ControllersConfig>("ros2_controllers");
+
+  YAML::Node generated = YAML::LoadFile(output_dir_ / "config/ros2_controllers.yaml");
+  ASSERT_TRUE(generated["panda_hand_controller"]) << "generated config missing panda_hand_controller";
+  const YAML::Node params = generated["panda_hand_controller"]["ros__parameters"];
+  ASSERT_TRUE(params) << "panda_hand_controller missing ros__parameters";
+  EXPECT_TRUE(params["joint"]) << "gripper controller must emit the singular 'joint' parameter";
+  EXPECT_FALSE(params["joints"]) << "gripper controller must not emit the 'joints' list";
+}
+
 TEST_F(ControllersTest, AddDefaultControllers)
 {
   // only preload urdf and srdf

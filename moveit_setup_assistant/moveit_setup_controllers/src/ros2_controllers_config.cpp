@@ -202,8 +202,10 @@ bool ROS2ControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitter&
         {
           emitter << YAML::Key << "joints" << YAML::Value << ci.joints_;
         }
-        else
+        else if (!ci.joints_.empty())
         {
+          // GripperActionController controls a single joint; guard against an
+          // empty joint list so we never index joints_[0] out of bounds.
           emitter << YAML::Key << "joint" << YAML::Value << ci.joints_[0];
         }
 
