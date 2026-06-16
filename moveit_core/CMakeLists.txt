@@ -19,9 +19,7 @@ find_package(geometric_shapes REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(kdl_parser REQUIRED)
 find_package(moveit_msgs REQUIRED)
-# Enforce system version liboctomap-dev
-# https://github.com/moveit/moveit2/issues/2862
-find_package(octomap 1.9.7...<1.10.0 REQUIRED)
+find_package(octomap REQUIRED)
 find_package(octomap_msgs REQUIRED)
 find_package(orocos_kdl REQUIRED)
 find_package(osqp REQUIRED)
