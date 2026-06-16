@@ -8,4 +8,4 @@ find_package(
   Boost REQUIRED
   COMPONENTS date_time program_options
              # ${BOOST_PYTHON_COMPONENT}
-             system thread)
+             thread)

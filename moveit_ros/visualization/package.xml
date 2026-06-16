@@ -11,7 +11,7 @@
 
   <license>BSD-3-Clause</license>
 
-  <url type="website">http://moveit.ros.org</url>
+  <url type="website">https://moveit.ai</url>
   <url type="bugtracker">https://github.com/moveit/moveit2/issues</url>
   <url type="repository">https://github.com/moveit/moveit2</url>
 
@@ -25,8 +25,9 @@
 
   <build_depend>class_loader</build_depend>
   <build_depend>eigen</build_depend>
-  <build_depend>libqt5-opengl-dev</build_depend>
-  <build_depend>qtbase5-dev</build_depend>
+  <build_depend condition="$ROS_DISTRO == humble or $ROS_DISTRO == jazzy or $ROS_DISTRO == kilted">qtbase5-dev</build_depend>
+  <build_depend condition="$ROS_DISTRO == humble or $ROS_DISTRO == jazzy or $ROS_DISTRO == kilted">libqt5-opengl-dev</build_depend>
+  <build_depend condition="$ROS_DISTRO != humble and $ROS_DISTRO != jazzy and $ROS_DISTRO != kilted">qt6-base-dev</build_depend>
 
   <depend>geometric_shapes</depend>
   <depend>interactive_markers</depend>

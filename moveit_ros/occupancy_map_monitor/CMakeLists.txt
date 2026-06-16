@@ -13,11 +13,11 @@ find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(Eigen3 REQUIRED)
-# Enforce system version liboctomap-dev
-# https://github.com/moveit/moveit2/issues/2862
-find_package(octomap 1.9.7...<1.10.0 REQUIRED)
+find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(Boost REQUIRED)
 
 include_directories(include)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
@@ -29,6 +29,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     pluginlib
     octomap
     geometric_shapes
+    tf2_ros
     Boost)
 
 add_library(
@@ -38,14 +39,29 @@ add_library(
 set_target_properties(
   moveit_ros_occupancy_map_monitor
   PROPERTIES VERSION "${moveit_ros_occupancy_map_monitor_VERSION}")
-ament_target_dependencies(moveit_ros_occupancy_map_monitor
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  moveit_ros_occupancy_map_monitor
+  rclcpp::rclcpp
+  moveit_core::moveit_core
+  ${moveit_msgs_TARGETS}
+  pluginlib::pluginlib
+  octomap
+  geometric_shapes::geometric_shapes
+  tf2_ros::tf2_ros
+  Boost::headers)
 
 add_executable(moveit_ros_occupancy_map_server src/occupancy_map_server.cpp)
-ament_target_dependencies(moveit_ros_occupancy_map_server PUBLIC
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
-target_link_libraries(moveit_ros_occupancy_map_server
-                      PRIVATE moveit_ros_occupancy_map_monitor)
+target_link_libraries(
+  moveit_ros_occupancy_map_server
+  PRIVATE moveit_ros_occupancy_map_monitor
+          rclcpp::rclcpp
+          moveit_core::moveit_core
+          ${moveit_msgs_TARGETS}
+          pluginlib::pluginlib
+          octomap
+          geometric_shapes::geometric_shapes
+          tf2_ros::tf2_ros
+          Boost::headers)
 
 install(
   TARGETS moveit_ros_occupancy_map_monitor

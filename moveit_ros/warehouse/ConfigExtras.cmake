@@ -4,7 +4,6 @@ find_package(
   Boost
   REQUIRED
   thread
-  system
   regex
   date_time
   program_options)

@@ -486,7 +486,11 @@ bool JointsWidgetEventFilter::eventFilter(QObject* /*target*/, QEvent* event)
   if (event->type() == QEvent::MouseButtonPress)
   {
     QAbstractItemView* view = qobject_cast<QAbstractItemView*>(parent());
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QModelIndex index = view->indexAt(static_cast<QMouseEvent*>(event)->position().toPoint());
+#else
     QModelIndex index = view->indexAt(static_cast<QMouseEvent*>(event)->pos());
+#endif
     if (index.flags() & Qt::ItemIsEditable)  // mouse event on any editable slider?
     {
       view->setCurrentIndex(index);
@@ -529,7 +533,11 @@ void ProgressBarEditor::mousePressEvent(QMouseEvent* event)
 
 void ProgressBarEditor::mouseMoveEvent(QMouseEvent* event)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+  double v = std::min(max_, std::max(min_, min_ + event->position().x() * (max_ - min_) / width()));
+#else
   double v = std::min(max_, std::max(min_, min_ + event->x() * (max_ - min_) / width()));
+#endif
   if (value_ != v)
   {
     value_ = v;

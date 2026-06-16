@@ -20,10 +20,27 @@ jobs:
           - IMAGE: rolling-ci
             CCOV: true
             ROS_DISTRO: rolling
+            # Ignore deprecation errors from upstream packages on rolling
+            SUPPRESS_DEPRECATION_ERROR: true
           - IMAGE: rolling-ci
             ROS_DISTRO: rolling
             IKFAST_TEST: true
             CLANG_TIDY: pedantic
+            SUPPRESS_DEPRECATION_ERROR: true
+          - IMAGE: rolling-ci
+            ROS_DISTRO: rolling
+            # Non-blocking job to surface deprecation warnings
+            DEPRECATION_CHECK: true
+          # Rolling on Ubuntu Resolute. No prebuilt rolling-resolute base image exists yet
+          # (https://github.com/osrf/docker_images/issues/878), so we omit DOCKER_IMAGE and let
+          # industrial_ci build on ubuntu:resolute, installing Rolling from the ros-testing repo.
+          # Setting OS_CODE_NAME=resolute also avoids industrial_ci's default of pinning Rolling to
+          # the latest Noble-supported index. Non-blocking until all Resolute packages are released.
+          - IMAGE: rolling-resolute
+            ROS_DISTRO: rolling
+            OS_CODE_NAME: resolute
+            ROS_REPO: testing
+            SUPPRESS_DEPRECATION_ERROR: true
           - IMAGE: humble-ci
             ROS_DISTRO: humble
           - IMAGE: jazzy-ci
@@ -33,7 +50,6 @@ jobs:
       # https://stackoverflow.com/a/41673702
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unknown-warning-option
-      DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: >
         moveit2.repos
         $(f="moveit2_$(sed 's/-.*$//' <<< "${{ matrix.env.IMAGE }}").repos"; test -r $f && echo $f)
@@ -51,7 +67,7 @@ jobs:
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
-        -DCMAKE_CXX_FLAGS="-Werror $CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer' || ''}}"
+        -DCMAKE_CXX_FLAGS="-Werror ${{ matrix.env.SUPPRESS_DEPRECATION_ERROR && '-Wno-error=deprecated-declarations ' || ''}}$CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer' || ''}}"
       UPSTREAM_CMAKE_ARGS: "-DCMAKE_CXX_FLAGS=''"
       DOWNSTREAM_CMAKE_ARGS: -DCMAKE_CXX_FLAGS="-Wall -Wextra"
       CCACHE_DIR: ${{ github.workspace }}/.ccache
@@ -67,8 +83,9 @@ jobs:
       CXX: ${{ matrix.env.CLANG_TIDY && 'clang++' }}
       ADDITIONAL_DEBS: lld
 
-    name: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.IKFAST_TEST && ' + ikfast' || ''}}${{ matrix.env.CLANG_TIDY && (github.event_name != 'workflow_dispatch' && ' + clang-tidy (delta)' || ' + clang-tidy (all)') || '' }}
+    name: ${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && ' + ccov' || ''}}${{ matrix.env.IKFAST_TEST && ' + ikfast' || ''}}${{ matrix.env.CLANG_TIDY && (github.event_name != 'workflow_dispatch' && ' + clang-tidy (delta)' || ' + clang-tidy (all)') || '' }}${{ matrix.env.DEPRECATION_CHECK && ' + deprecation check' || '' }}${{ matrix.env.OS_CODE_NAME && ' (experimental)' || '' }}
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.env.DEPRECATION_CHECK || matrix.env.OS_CODE_NAME == 'resolute' }}
     steps:
       - name: "Free up disk space"
         if: matrix.env.CCOV
@@ -140,9 +157,14 @@ jobs:
       - name: Generate ikfast packages
         if: matrix.env.IKFAST_TEST
         run: moveit_kinematics/test/test_ikfast_plugins.sh
+      - name: Set prebuilt DOCKER_IMAGE
+        # Jobs that build on a bare OS image (OS_CODE_NAME set) must leave DOCKER_IMAGE unset so
+        # industrial_ci builds the base itself. All other jobs use our prebuilt moveit/moveit2 image.
+        if: ${{ ! matrix.env.OS_CODE_NAME }}
+        run: echo "DOCKER_IMAGE=moveit/moveit2:${{ matrix.env.IMAGE }}" >> "$GITHUB_ENV"
       - id: ici
         name: Run industrial_ci
-        uses: ros-industrial/industrial_ci@ba2a3d0f830f8051b356711a8df2fedfc5d256cf
+        uses: ros-industrial/industrial_ci@c553397753252d630e88e7e91aa69c6c8a478ee0
         env: ${{ matrix.env }}
 # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
 # See: https://github.com/moveit/moveit2/issues/2852

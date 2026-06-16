@@ -9,5 +9,4 @@ find_package(
   program_options
   regex
   serialization
-  system
   thread)
