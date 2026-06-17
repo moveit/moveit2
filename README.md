@@ -16,6 +16,14 @@ For the commercially supported version see [MoveIt Pro](http://picknik.ai/pro).
 
 See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/).
 
+
+## Branch Policy
+
+| Branch | Use Case | Breaking changes | Distro scope | Bloomed to buildfarm |
+|--------|----------|------------------|--------------|----------------------|
+| main | Development | Yes | All active distros (distro-portable) | Only rolling |
+| humble / jazzy / kilted | Stable release branches | No (only backport bug fixes) | Exactly one distro | Exactly one distro |
+
 ## Install
 
 - [Binary Install](https://moveit.ai/install-moveit2/binary/)
