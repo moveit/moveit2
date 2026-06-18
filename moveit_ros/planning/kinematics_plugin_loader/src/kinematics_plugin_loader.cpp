@@ -88,13 +88,17 @@ public:
   std::vector<std::string> chooseTipFrames(const moveit::core::JointModelGroup* jmg)
   {
     std::vector<std::string> tips;
-    // get the last link in the chain
-    RCLCPP_DEBUG(logger_,
-                 "Choosing tip frame of kinematic solver for group %s"
-                 "based on last link in chain",
-                 jmg->getName().c_str());
 
-    tips.push_back(jmg->getLinkModels().back()->getName());
+    // try to retrieve the tip frames from the joint model group
+    if (!jmg->getEndEffectorTips(tips))
+    {
+      // get the last link in the chain as fallback
+      RCLCPP_DEBUG(logger_,
+                  "Choosing tip frame of kinematic solver for group %s"
+                  "based on last link in chain",
+                  jmg->getName().c_str());
+      tips.push_back(jmg->getLinkModels().back()->getName());
+    }
 
     // Error check
     if (tips.empty())
