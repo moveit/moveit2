@@ -3,7 +3,6 @@
 find_package(
   Boost
   REQUIRED
-  filesystem
   date_time
   program_options
   thread

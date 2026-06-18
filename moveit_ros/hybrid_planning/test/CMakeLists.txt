@@ -17,7 +17,7 @@ target_link_libraries(
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ros_testing REQUIRED)
-  find_package(Boost REQUIRED COMPONENTS filesystem)
+  find_package(Boost REQUIRED COMPONENTS)
 
   # TODO (vatanaksoytezer / andyze: Flaky behaviour, investigate and re-enable
   # this test asap) Basic integration tests
