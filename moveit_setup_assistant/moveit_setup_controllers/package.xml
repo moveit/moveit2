@@ -4,9 +4,9 @@
   <name>moveit_setup_controllers</name>
   <version>2.14.1</version>
   <description>MoveIt Setup Steps for ROS 2 Control</description>
-  <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
+  <maintainer email="david@metrorobots.com">David V. Lu!!</maintainer>
   <license>BSD-3-Clause</license>
-  <author email="davidvlu@gmail.com">David V. Lu!!</author>
+  <author email="david@metrorobots.com">David V. Lu!!</author>
 
   <buildtool_depend>ament_cmake_ros</buildtool_depend>
 
