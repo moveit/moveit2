@@ -271,6 +271,7 @@ void PlanarJointModel::interpolate(const double* from, const double* to, const d
       state[1] = to[1];
       state[2] = drive_angle + final_turn * percent;
     }
+    normalizeRotation(state);
   }
 }
 
