@@ -70,7 +70,7 @@ void CurrentStateMonitorMiddlewareHandle::createJointStateSubscription(const std
                                                                        JointStateUpdateCallback callback)
 {
   joint_state_subscription_ =
-      node_->create_subscription<sensor_msgs::msg::JointState>(topic, rclcpp::SystemDefaultsQoS(), callback);
+      node_->create_subscription<sensor_msgs::msg::JointState>(topic, rclcpp::SensorDataQoS(), callback);
 }
 
 void CurrentStateMonitorMiddlewareHandle::resetJointStateSubscription()
