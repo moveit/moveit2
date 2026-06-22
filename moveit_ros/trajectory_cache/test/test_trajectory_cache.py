@@ -56,7 +56,7 @@ def robot_fixture(moveit_config):
         package="tf2_ros",
         executable="static_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "panda_link0"],
+        arguments=["--frame-id", "world", "--child-frame-id", "panda_link0"],
     )
 
     robot_state_publisher = Node(
