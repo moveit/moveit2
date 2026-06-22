@@ -36,11 +36,25 @@ jobs:
           # industrial_ci build on ubuntu:resolute, installing Rolling from the ros-testing repo.
           # Setting OS_CODE_NAME=resolute also avoids industrial_ci's default of pinning Rolling to
           # the latest Noble-supported index. Non-blocking until all Resolute packages are released.
+          #
+          # DOCKER_RUN_OPTS injects CMAKE_POLICY_VERSION_MINIMUM=3.5 into the container so
+          # source-built osqp_vendor 0.2.0 (see moveit2_rolling.repos) can configure its bundled
+          # OSQP v0.6.2, which uses cmake_minimum_required(3.2) — incompatible with Resolute's
+          # CMake 4 without the policy override. The env-var form propagates through
+          # ExternalProject_Add sub-builds; the -D form does not. Remove when osqp_vendor
+          # publishes a Resolute-compatible binary (tracked in tier4/osqp_vendor#25).
+          #
+          # SUPPRESS_CPP_ERROR drops -Werror=cpp so that the deprecated <ciso646> include in
+          # system liboctomap-dev (OcTreeKey.h:40) doesn't fatal-error the build under GCC 15.
+          # Remove when OctoMap/octomap merges the <ciso646> -> <version> fix and Debian/Ubuntu
+          # repackages liboctomap-dev on Resolute. Upstream issue: OctoMap/octomap#434.
           - IMAGE: rolling-resolute
             ROS_DISTRO: rolling
             OS_CODE_NAME: resolute
             ROS_REPO: testing
             SUPPRESS_DEPRECATION_ERROR: true
+            SUPPRESS_CPP_ERROR: true
+            DOCKER_RUN_OPTS: '-e CMAKE_POLICY_VERSION_MINIMUM=3.5'
           - IMAGE: humble-ci
             ROS_DISTRO: humble
           - IMAGE: jazzy-ci
@@ -67,7 +81,7 @@ jobs:
         -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld
         -DCMAKE_BUILD_TYPE=${{ matrix.env.CCOV && 'Debug' || 'Release'}}
-        -DCMAKE_CXX_FLAGS="-Werror ${{ matrix.env.SUPPRESS_DEPRECATION_ERROR && '-Wno-error=deprecated-declarations ' || ''}}$CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer' || ''}}"
+        -DCMAKE_CXX_FLAGS="-Werror ${{ matrix.env.SUPPRESS_DEPRECATION_ERROR && '-Wno-error=deprecated-declarations ' || ''}}${{ matrix.env.SUPPRESS_CPP_ERROR && '-Wno-error=cpp ' || ''}}$CXXFLAGS${{ matrix.env.CCOV && ' --coverage -O2 -fno-omit-frame-pointer' || ''}}"
       UPSTREAM_CMAKE_ARGS: "-DCMAKE_CXX_FLAGS=''"
       DOWNSTREAM_CMAKE_ARGS: -DCMAKE_CXX_FLAGS="-Wall -Wextra"
       CCACHE_DIR: ${{ github.workspace }}/.ccache

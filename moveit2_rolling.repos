@@ -1,0 +1,52 @@
+# Rolling-on-Resolute source-build workarounds.
+#
+# Each entry below is a moveit2 dependency that is released in rosdistro's
+# rolling/distribution.yaml but not yet bloomed to a Resolute apt binary. CI's
+# rolling-resolute (experimental) job is failing at `rosdep install` for these
+# until the buildfarm produces ros-rolling-* debs for Ubuntu Resolute.
+#
+# Convention is documented in .github/DISTRO_COMPAT_POLICY.md §2.1:
+#   - Versions match the rosdistro `release: version:` field exactly.
+#   - Each entry carries a removal trigger comment.
+#   - Drop entries promptly as the binaries appear at
+#     https://repo.ros2.org/status_page/ros_rolling_default.html
+#
+# osqp_vendor 0.2.0 builds via ExternalProject_Add of OSQP v0.6.2, which has
+# cmake_minimum_required(3.2) and trips CMake 4's removal of pre-3.5
+# compatibility. The companion ci.yaml change for this PR sets
+# CMAKE_POLICY_VERSION_MINIMUM=3.5 as an env var in the rolling-resolute
+# container (propagates through ExternalProject sub-builds; the -D form does
+# not). Remove this entry + the env var when tier4/osqp_vendor#25
+# (osqp 1.0 migration) lands and a Resolute deb appears.
+repositories:
+  # ompl 1.7.0 (current rosdistro release) calls find_package(Boost COMPONENTS
+  # system ...) which Boost 1.90 no longer provides. ompl 2.0.1 dropped Boost
+  # from CMakeLists entirely (similar to moveit2#3727). Pin to 2.0.1 instead of
+  # the rosdistro release until ompl cuts a 1.x release with the fix (tracked
+  # in ompl/ompl#1429).
+  ompl:
+    type: git
+    url: https://github.com/ompl/ompl.git
+    version: 2.0.1
+  ros_industrial_cmake_boilerplate:
+    type: git
+    url: https://github.com/ros-industrial/ros_industrial_cmake_boilerplate.git
+    version: 0.5.4
+  osqp_vendor:
+    type: git
+    url: https://github.com/tier4/osqp_vendor.git
+    version: 0.2.0
+  stomp:
+    type: git
+    url: https://github.com/ros-industrial/stomp.git
+    version: 0.1.2
+  # warehouse_ros_sqlite 1.0.7 (current rosdistro release) calls
+  # find_package(Boost COMPONENTS ... system ...) which Boost 1.90 no longer
+  # provides. The fix is on the ros2 branch (moveit/warehouse_ros_sqlite@c3847d5f3
+  # "Remove 'system' component from Boost package (#61)") but unreleased.
+  # Pin to that commit until a 1.0.8 ships. The repo also moved from
+  # ros-planning/ to moveit/ — use the new canonical URL.
+  warehouse_ros_sqlite:
+    type: git
+    url: https://github.com/moveit/warehouse_ros_sqlite.git
+    version: c3847d5f3b001388ad11f2bfb62328d9be1921d1
