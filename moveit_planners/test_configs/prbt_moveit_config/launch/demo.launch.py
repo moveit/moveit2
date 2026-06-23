@@ -168,7 +168,7 @@ def generate_launch_description():
         executable="static_transform_publisher",
         name="static_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "prbt_link0"],
+        arguments=["--frame-id", "world", "--child-frame-id", "prbt_link0"],
     )
 
     # Publish TF
