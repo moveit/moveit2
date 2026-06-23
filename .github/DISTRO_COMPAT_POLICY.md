@@ -254,3 +254,45 @@ When a distro goes EOL per [REP 2000](https://www.ros.org/reps/rep-2000.html), o
 5. Adds a MIGRATION.md entry noting the support drop (§1.5).
 
 **Where the policy lives**: this document plus the matrix file. Don't fork the support set into a separate "supported distros" list anywhere else — the matrix is the truth.
+
+### Per-distro branches
+
+Each non-EOL ROS distro has a corresponding long-lived branch on `moveit/moveit2` (`humble`, `jazzy`, `kilted`, ...). These branches are **stabilization-only**: bug fix backports from `main`, and nothing else. They are the basis for `catkin_prepare_release` + `bloom-release` for that distro's stream.
+
+**Workflow file presence** — only this minimal set lives on per-distro branches; everything else is `main`-only:
+
+| Workflow                | main | per-distro branch |
+|-------------------------|:---:|:---:|
+| `ci.yaml`               | ✓   | ✓ |
+| `docker.yaml`           | ✓   | ✓ |
+| `docker_lint.yaml`      | ✓   | ✓ |
+| `format.yaml`           | ✓   | ✓ |
+| `prerelease.yaml`       | ✓   | — |
+| `sonar.yaml`            | ✓   | — |
+| `stale.yaml`            | ✓   | — |
+| `tutorial_docker.yaml`  | ✓   | — |
+
+Rationale: per-distro branches don't have the breadth of churn `main` does, so the tutorial/prerelease/sonar/stale machinery is wasted overhead. Anything found by those workflows on a per-distro branch is also found on `main` first.
+
+**`ci.yaml` policy on per-distro branches**:
+- Matrix: exactly two entries — `<distro>-ci` with `CCOV: true`, and `<distro>-ci` with `IKFAST_TEST: true` + `CLANG_TIDY: pedantic`. No deprecation-check, no resolute-experimental, no extra noise — that's all `main`-only.
+- Triggers: `workflow_dispatch`, `pull_request`, `merge_group`, `push: branches: [<distro>]`. Note the branch name in the `push` trigger must match the actual branch — a common fork-from-main bug is leaving it as `[main]`.
+
+**`docker.yaml` policy on per-distro branches**:
+- `ROS_DISTRO: [<distro>]` in every job's matrix.
+- `push: branches: [<distro>]` so pushes to the branch automatically rebuild the per-distro `moveit/moveit2:<distro>-{ci,release,source}` images.
+
+### Forking a new per-distro branch
+
+When a new ROS distro is declared stable (e.g., L-turtle), fork the per-distro branch from `main` and apply these distro-specific edits in a single bootstrap commit:
+
+1. **`ci.yaml`**:
+   - Replace the multi-entry matrix with the two-entry per-distro shape above.
+   - Change `push: branches: [main]` → `[<distro>]`.
+2. **`docker.yaml`**:
+   - Change every `ROS_DISTRO: [rolling]` matrix → `[<distro>]` (typically 3 occurrences across the release/ci/source jobs).
+   - Change `push: branches: [main]` → `[<distro>]`.
+3. **Delete** the workflows that don't live on per-distro branches: `prerelease.yaml`, `sonar.yaml`, `stale.yaml`, `tutorial_docker.yaml`.
+4. **Trigger `docker.yaml` once manually** via `workflow_dispatch` on the new branch (or push any commit to it) so the buildfarm produces the initial `moveit/moveit2:<distro>-ci` Docker image. Subsequent CI runs on PRs against the branch then have a real image to pull.
+
+**Reference**: [#3769](https://github.com/moveit/moveit2/pull/3769) for the kilted-branch retrofit that established this pattern.
