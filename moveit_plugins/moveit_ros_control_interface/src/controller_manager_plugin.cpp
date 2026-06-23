@@ -569,15 +569,10 @@ public:
     {
       if (isActive(controller) && controller.chain_connections.size() > 1)
       {
-<<<<<<< HEAD
-        RCLCPP_ERROR_STREAM(LOGGER, "Controller with name %s chains to more than one controller. Chaining to more than "
-                                    "one controller is not supported.");
-=======
         RCLCPP_ERROR_STREAM(getLogger(), "Controller with name "
                                              << controller.name
                                              << " chains to more than one controller. "
                                                 "Chaining to more than one controller is not supported.");
->>>>>>> 848c062a0 (Fix ERROR stream + check only active controllers for multiple chained controllers (#3556))
         return false;
       }
       for (const auto& chained_controller : controller.chain_connections)
