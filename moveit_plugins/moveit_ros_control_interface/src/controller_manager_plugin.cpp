@@ -569,7 +569,7 @@ public:
     {
       if (isActive(controller) && controller.chain_connections.size() > 1)
       {
-        RCLCPP_ERROR_STREAM(getLogger(), "Controller with name "
+        RCLCPP_ERROR_STREAM(LOGGER, "Controller with name "
                                              << controller.name
                                              << " chains to more than one controller. "
                                                 "Chaining to more than one controller is not supported.");
