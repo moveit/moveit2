@@ -182,7 +182,17 @@ void InteractiveMarkerDisplay::unsubscribe()
   Display::reset();
 }
 
+// rviz_common 16.0.1 (Rolling) removed the deprecated (float, float) overload
+// in favor of (std::chrono::nanoseconds, std::chrono::nanoseconds); see
+// ros2/rviz#1533. Header declaration in interactive_marker_display.hpp is
+// guarded the same way; remove this branch when Kilted goes EOL.
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+void InteractiveMarkerDisplay::update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt)
+// For Kilted and older
+#else
 void InteractiveMarkerDisplay::update(float wall_dt, float ros_dt)
+#endif
 {
   (void)wall_dt;
   (void)ros_dt;
