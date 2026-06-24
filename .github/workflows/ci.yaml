@@ -138,7 +138,10 @@ jobs:
           restore-keys: ${{ env.CACHE_PREFIX }}
         env:
           GHA_CACHE_SAVE: always
-          CACHE_PREFIX: target_ws${{ matrix.env.CCOV && '-ccov' || '' }}-${{ matrix.env.IMAGE }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml', '.github/workflows/ci.yaml') }}
+          # The variant token (ccov/tidy/default) keeps caches built with different compilers/flags
+          # in separate key namespaces. Without it, the clang (clang-tidy) and gcc (deprecation/plain)
+          # rolling jobs share one key and restore each other's build tree, forcing a full rebuild.
+          CACHE_PREFIX: target_ws-${{ matrix.env.IMAGE }}-${{ matrix.env.CCOV && 'ccov' || matrix.env.CLANG_TIDY && 'tidy' || 'default' }}-${{ hashFiles('**/CMakeLists.txt', '**/package.xml', '.github/workflows/ci.yaml') }}
       - name: Cache ccache
         uses: rhaschke/cache@main
         with:
@@ -149,7 +152,12 @@ jobs:
             ${{ env.CACHE_PREFIX }}
         env:
           GHA_CACHE_SAVE: always
-          CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}${{ matrix.env.CCOV && '-ccov' || '' }}
+          # Use a distinct, non-nested suffix per build variant. GHA restore-keys match by prefix, and
+          # the old 'ccache-rolling-ci' prefix matched the 'ccache-rolling-ci-ccov' cache, so the gcc
+          # (deprecation) and clang (clang-tidy) jobs kept restoring the Debug+coverage ccov cache and
+          # missing on nearly every compile. 'ccov'/'tidy'/'default' are non-nested so each job restores
+          # only its own cache.
+          CACHE_PREFIX: ccache-${{ matrix.env.IMAGE }}-${{ matrix.env.CCOV && 'ccov' || matrix.env.CLANG_TIDY && 'tidy' || 'default' }}
       - name: Configure ccache
         run: |
           mkdir -p ${{ env.CCACHE_DIR }}
