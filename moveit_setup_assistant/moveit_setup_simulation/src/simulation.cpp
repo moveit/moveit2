@@ -34,6 +34,8 @@
 
 /* Author: David V. Lu!! */
 
+#include <fstream>
+
 #include <moveit_setup_simulation/simulation.hpp>
 
 namespace moveit_setup

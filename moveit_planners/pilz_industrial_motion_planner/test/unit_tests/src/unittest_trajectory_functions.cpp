@@ -32,6 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <cstdint>
 #include <gtest/gtest.h>
 
 #include <map>

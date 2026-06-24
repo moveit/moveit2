@@ -27,6 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdint>
 #include <ogre_helpers/mesh_shape.hpp>
 
 #include <OgreMesh.h>
