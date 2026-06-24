@@ -217,7 +217,7 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
   rclcpp::Time generation_begin = clock.now();
 
   // generate the time samples
-  const double epsilon = 10e-06;  // avoid adding the last time sample twice
+  const double epsilon = 1e-5;  // avoid adding the last time sample twice
   std::vector<double> time_samples;
   for (double t_sample = 0.0; t_sample < trajectory.Duration() - epsilon; t_sample += sampling_time)
   {
@@ -229,9 +229,9 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
   Eigen::Isometry3d pose_sample;
   std::map<std::string, double> ik_solution_last, ik_solution, joint_velocity_last;
   ik_solution_last = initial_joint_position;
-  for (const auto& item : ik_solution_last)
+  for (const auto& [joint_name, _] : ik_solution_last)
   {
-    joint_velocity_last[item.first] = 0.0;
+    joint_velocity_last[joint_name] = 0.0;
   }
 
   for (std::vector<double>::const_iterator time_iter = time_samples.begin(); time_iter != time_samples.end();
