@@ -46,13 +46,7 @@
 #include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.hpp>
 #include <moveit/robot_state/robot_state.hpp>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/buffer.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/buffer.h>
-#endif
 
 namespace moveit_cpp
 {

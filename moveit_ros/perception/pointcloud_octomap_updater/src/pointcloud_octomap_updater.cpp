@@ -38,27 +38,11 @@
 #include <moveit/pointcloud_octomap_updater/pointcloud_octomap_updater.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-// TODO: Remove conditional includes when released to all active distros.
-#if __has_include(<tf2/LinearMath/Vector3.hpp>)
 #include <tf2/LinearMath/Vector3.hpp>
-#else
-#include <tf2/LinearMath/Vector3.h>
-#endif
-#if __has_include(<tf2/LinearMath/Transform.hpp>)
 #include <tf2/LinearMath/Transform.hpp>
-#else
-#include <tf2/LinearMath/Transform.h>
-#endif
 #include <sensor_msgs/point_cloud2_iterator.hpp>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/create_timer_interface.hpp>
 #include <tf2_ros/create_timer_ros.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/create_timer_interface.h>
-#include <tf2_ros/create_timer_ros.h>
-#endif
 #include <moveit/utils/logger.hpp>
 #include <rclcpp/version.h>
 

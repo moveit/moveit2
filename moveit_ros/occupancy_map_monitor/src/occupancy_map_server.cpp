@@ -39,13 +39,7 @@
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
 
 #include <octomap_msgs/conversions.h>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/transform_listener.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/transform_listener.h>
-#endif
 #include <rclcpp/clock.hpp>
 #include <rclcpp/executors.hpp>
 #include <rclcpp/experimental/buffers/intra_process_buffer.hpp>
