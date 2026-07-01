@@ -55,6 +55,8 @@
 #include <memory>
 #include <queue>
 #include <moveit/utils/logger.hpp>
+#include <unordered_set>
+
 
 static const rclcpp::Duration CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1.0);
 

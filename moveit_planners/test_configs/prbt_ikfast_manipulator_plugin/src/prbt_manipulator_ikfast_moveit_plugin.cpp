@@ -782,7 +782,7 @@ bool IKFastKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_
     return false;
   }
 
-  KDL::Frame p_out;
+  KDL::Frame p_out = KDL::Frame::Identity();
   if (link_names.size() == 0)
   {
     RCLCPP_WARN_STREAM(LOGGER, "Link names with nothing");

@@ -41,6 +41,8 @@
 #include <eigen3/Eigen/Eigen>
 #include <moveit/controller_manager/controller_manager.hpp>
 #include <pluginlib/class_loader.hpp>
+#include <unordered_set>
+
 
 class MockControllersManagerService final : public rclcpp::Node
 {
