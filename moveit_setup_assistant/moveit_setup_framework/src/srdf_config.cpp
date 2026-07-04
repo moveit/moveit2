@@ -238,6 +238,8 @@ bool SRDFConfig::GeneratedJointLimits::writeYaml(YAML::Emitter& emitter)
 {
   // yaml-cpp serializes whole-number doubles (e.g. 1.0) as integers ("1"), which ROS 2 parameter
   // loading rejects with "expected [double] got [integer]". Format them explicitly with a decimal point.
+  // TODO: remove once a yaml-cpp release includes SetEnforceFloatDot(), merged upstream but not yet
+  // in a release: https://github.com/jbeder/yaml-cpp/pull/1407
   auto toDoubleString = [](double val) -> std::string {
     std::ostringstream ss;
     ss << val;
