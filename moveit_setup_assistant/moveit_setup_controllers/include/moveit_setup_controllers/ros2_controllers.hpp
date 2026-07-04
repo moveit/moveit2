@@ -72,7 +72,10 @@ public:
 
   std::vector<std::string> getAvailableTypes() const override
   {
-    return { "joint_trajectory_controller/JointTrajectoryController", "position_controllers/GripperActionController" };
+    // position_controllers/GripperActionController is used on Humble/Iron;
+    // parallel_gripper_action_controller/GripperActionController on Jazzy+.
+    return { "joint_trajectory_controller/JointTrajectoryController", "position_controllers/GripperActionController",
+             "parallel_gripper_action_controller/GripperActionController" };
   }
 
   std::string getDefaultType() const override

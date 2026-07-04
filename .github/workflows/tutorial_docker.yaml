@@ -16,8 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ROS_DISTRO: [rolling]
-    runs-on: ubuntu-latest
+        ROS_DISTRO: [jazzy]
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
       contents: read

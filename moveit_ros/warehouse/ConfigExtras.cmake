@@ -4,7 +4,6 @@ find_package(
   Boost
   REQUIRED
   thread
-  system
   filesystem
   regex
   date_time

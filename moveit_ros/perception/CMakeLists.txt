@@ -53,6 +53,9 @@ find_package(sensor_msgs REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(geometric_shapes REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(OpenCV)
 
@@ -104,8 +107,13 @@ endif()
 
 add_subdirectory(semantic_world)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_ros_perception::moveit_ros_perception to link all libraries at once.
+add_library(moveit_ros_perception INTERFACE)
+target_link_libraries(moveit_ros_perception INTERFACE ${THIS_PACKAGE_LIBRARIES})
+
 install(
-  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  TARGETS moveit_ros_perception ${THIS_PACKAGE_LIBRARIES}
   EXPORT moveit_ros_perceptionTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

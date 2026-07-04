@@ -10,11 +10,9 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 set_target_properties(moveit_planning_pipeline_interfaces
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-target_link_libraries(moveit_planning_pipeline_interfaces
-                      moveit_planning_pipeline)
-
-ament_target_dependencies(moveit_planning_pipeline_interfaces moveit_core
-                          moveit_msgs rclcpp)
+target_link_libraries(
+  moveit_planning_pipeline_interfaces moveit_planning_pipeline
+  moveit_core::moveit_core ${moveit_msgs_TARGETS} rclcpp::rclcpp)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(

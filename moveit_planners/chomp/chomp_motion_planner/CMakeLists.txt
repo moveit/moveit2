@@ -11,6 +11,7 @@ find_package(moveit_core REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rsl REQUIRED)
 find_package(trajectory_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS moveit_core rclcpp rsl trajectory_msgs
                                  visualization_msgs)
@@ -23,7 +24,9 @@ add_library(
   src/chomp_optimizer.cpp src/chomp_planner.cpp)
 set_target_properties(chomp_motion_planner
                       PROPERTIES VERSION "${chomp_motion_planner_VERSION}")
-ament_target_dependencies(chomp_motion_planner ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  chomp_motion_planner moveit_core::moveit_core rclcpp::rclcpp rsl::rsl
+  ${trajectory_msgs_TARGETS} ${visualization_msgs_TARGETS})
 
 install(
   TARGETS chomp_motion_planner

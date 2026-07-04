@@ -7,13 +7,12 @@ add_library(
   src/check_start_state_collision.cpp src/validate_workspace_bounds.cpp
   src/resolve_constraint_frames.cpp)
 
-target_link_libraries(moveit_default_planning_request_adapter_plugins
-                      default_request_adapter_parameters)
-
 set_target_properties(moveit_default_planning_request_adapter_plugins
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(moveit_default_planning_request_adapter_plugins
-                          moveit_core rclcpp pluginlib)
+target_link_libraries(
+  moveit_default_planning_request_adapter_plugins
+  default_request_adapter_parameters moveit_core::moveit_core rclcpp::rclcpp
+  pluginlib::pluginlib)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

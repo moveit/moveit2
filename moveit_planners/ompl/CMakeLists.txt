@@ -5,14 +5,7 @@ project(moveit_planners_ompl LANGUAGES CXX)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(
-  Boost
-  REQUIRED
-  system
-  filesystem
-  date_time
-  thread
-  serialization)
+find_package(Boost REQUIRED filesystem date_time thread serialization)
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
@@ -31,8 +24,14 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 add_subdirectory(ompl_interface)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_planners_ompl::moveit_planners_ompl to link all libraries at once.
+add_library(moveit_planners_ompl INTERFACE)
+target_link_libraries(moveit_planners_ompl INTERFACE moveit_ompl_interface
+                                                     moveit_ompl_planner_plugin)
+
 install(
-  TARGETS moveit_ompl_interface moveit_ompl_planner_plugin
+  TARGETS moveit_planners_ompl moveit_ompl_interface moveit_ompl_planner_plugin
   EXPORT moveit_planners_omplTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

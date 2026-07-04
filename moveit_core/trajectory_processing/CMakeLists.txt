@@ -8,17 +8,16 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_core>)
 set_target_properties(moveit_trajectory_processing
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(
+target_link_libraries(
   moveit_trajectory_processing
-  rclcpp
-  rmw_implementation
-  urdf
-  urdfdom
-  urdfdom_headers
-  visualization_msgs
-  Boost)
-target_link_libraries(moveit_trajectory_processing moveit_robot_state
-                      moveit_robot_trajectory ruckig::ruckig)
+  moveit_robot_state
+  moveit_robot_trajectory
+  ruckig::ruckig
+  rclcpp::rclcpp
+  urdf::urdf
+  urdfdom::urdf_parser
+  ${visualization_msgs_TARGETS}
+  Boost::headers)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 

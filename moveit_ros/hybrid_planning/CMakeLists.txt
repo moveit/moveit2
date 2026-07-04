@@ -75,8 +75,13 @@ rclcpp_components_register_nodes(
   moveit_local_planner_component
   "moveit::hybrid_planning::LocalPlannerComponent")
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_hybrid_planning::moveit_hybrid_planning to link all libraries at once.
+add_library(moveit_hybrid_planning INTERFACE)
+target_link_libraries(moveit_hybrid_planning INTERFACE ${LIBRARIES})
+
 install(
-  TARGETS ${LIBRARIES}
+  TARGETS moveit_hybrid_planning ${LIBRARIES}
   EXPORT moveit_hybrid_planningTargets
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
