@@ -83,8 +83,34 @@ Servo::~Servo()
 
 void Servo::setPaused(bool paused)
 {
+<<<<<<< HEAD
   servo_calcs_.setPaused(paused);
   collision_checker_.setPaused(paused);
+=======
+  // Load the smoothing plugin
+  try
+  {
+    smoother_loader_ = std::make_unique<pluginlib::ClassLoader<online_signal_smoothing::SmoothingBaseClass>>(
+        "moveit_core", "online_signal_smoothing::SmoothingBaseClass");
+    smoother_ = smoother_loader_->createUniqueInstance(servo_params_.smoothing_filter_plugin_name);
+  }
+  catch (pluginlib::PluginlibException& ex)
+  {
+    RCLCPP_ERROR(logger_, "Exception while loading the smoothing plugin '%s': '%s'",
+                 servo_params_.smoothing_filter_plugin_name.c_str(), ex.what());
+    std::exit(EXIT_FAILURE);
+  }
+
+  // Initialize the smoothing plugin
+  moveit::core::RobotStatePtr robot_state = planning_scene_monitor_->getStateMonitor()->getCurrentState();
+  const int num_joints =
+      robot_state->getJointModelGroup(servo_params_.move_group_name)->getActiveJointModelNames().size();
+  if (!smoother_->initialize(node_, planning_scene_monitor_->getRobotModel(), num_joints))
+  {
+    RCLCPP_ERROR(logger_, "Smoothing plugin could not be initialized");
+    std::exit(EXIT_FAILURE);
+  }
+>>>>>>> 92654dd1b (Fix severe warning from class loader in servo (#3577))
 }
 
 bool Servo::getCommandFrameTransform(Eigen::Isometry3d& transform)
