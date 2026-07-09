@@ -52,10 +52,12 @@ When a header path, type, or API differs between distros, condition the divergen
 
 **Snapshot for common carrier packages** (as of 2026-07 — verify with `apt show`, `<pkg>/version.h`, or the upstream release notes):
 
-| Package | Rolling-on-Noble<br>(frozen `rolling-ci`) | Rolling-on-Resolute<br>(current) |
-|---|---|---|
-| `rclcpp` | 30.1.4 | 33.0.x |
-| `ament_index_cpp` | 1.13.1 | 1.14.1 |
+| Package | Humble<br>(jammy) | Jazzy<br>(noble) | Kilted<br>(noble) | Lyrical<br>(resolute) | Rolling-on-Noble<br>(frozen `rolling-ci`) | Rolling-on-Resolute<br>(current) |
+|---|---|---|---|---|---|---|
+| `rclcpp` | 16.0.19 | 28.1.21 | 29.5.8 | 32.0.1 | 30.1.4 | 33.0.x |
+| `ament_index_cpp` | 1.4.1 | 1.8.4 | 1.11.4 | 1.13.3 | 1.13.1 | 1.14.1 |
+
+Note the **Rolling-on-Noble ↔ Lyrical inversion**: `rclcpp` 30.1.4 (Rolling-on-Noble) is older than 32.0.1 (Lyrical), because Lyrical branched from Rolling *after* the frozen Rolling-on-Noble snapshot was cut. Version-macro guards need to match the intent — a guard set at "≥ 30" catches Rolling-on-Noble too, which may or may not be desired.
 
 Rolling's rclcpp bumped 30 → 33 across the Noble→Resolute transition, but different packages moved through their own major/minor releases on different timelines. **The frozen `rolling-ci` container is a snapshot of one moment in Rolling's timeline** — a guard that's true on current Rolling can be true or false on that container depending on the threshold.
 
