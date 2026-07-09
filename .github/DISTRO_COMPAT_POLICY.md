@@ -18,30 +18,50 @@ Every conditional block added under §1.1–§1.4 carries a **cleanup comment** 
 
 ### §1.1 — C++ source divergence
 
-When a header path, type, or API differs between distros, condition the divergent code on the rclcpp version macro. rclcpp's version is the most reliable proxy for distro features because every distro ships exactly one rclcpp release.
+When a header path, type, or API differs between distros, condition the divergent code on a **version macro from the package that actually carries the divergent feature** — not on `RCLCPP_VERSION` as a general-purpose distro proxy.
+
+**Guideline**: pick the version macro of the package whose header, type, or symbol you're switching on:
+
+| Feature you're guarding | Guard on |
+|---|---|
+| `tf2` header rename | `TF2_VERSION_GTE(...)` (from `<tf2/version.h>`) |
+| `ament_index_cpp` API rename | `AMENT_INDEX_CPP_VERSION_GTE(...)` (from `<ament_index_cpp/version.h>`) |
+| An rclcpp API change | `RCLCPP_VERSION_GTE(...)` (from `<rclcpp/version.h>`) |
+| A generic distro-era switch with no specific package carrier | Fall back to `RCLCPP_VERSION_GTE(...)`, but verify the threshold |
+
+**Why not always rclcpp?** Every ROS 2 package has its own version macro and its own release cadence. When two packages happen to move through the same major version at the same time, `RCLCPP_VERSION_GTE(N, 0, 0)` works as a proxy. But their versions can *drift*, and a proxy that was correct at write-time can silently misbehave when the upstream package moves independently. Concrete example: `ament_index_cpp` renamed `get_package_share_directory.hpp` → `get_package_share_path.hpp` in 1.14, but at that moment Rolling's `rclcpp` had already been at ≥ 30 for months — so an `RCLCPP_VERSION_GTE(30, 0, 0)` guard triggered on Rolling containers built *before* ament_index_cpp 1.14 shipped, referencing a header that didn't exist yet (see #3703 → #3705).
+
+**Example — guarding on the actual carrier**:
 
 ```cpp
-#include <rclcpp/version.h>
-
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
-#include <tf2_ros/buffer.hpp>
-// For Jazzy and older
+// ament_index_cpp 1.14 replaced get_package_share_directory.hpp with
+// get_package_share_path.hpp. Remove when Kilted goes EOL.
+#include <ament_index_cpp/version.h>
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+#include <ament_index_cpp/get_package_share_path.hpp>
 #else
-#include <tf2_ros/buffer.h>
+#include <ament_index_cpp/get_package_share_directory.hpp>
 #endif
 ```
 
-Version pins per distro (from Nav2):
+**Picking the threshold value**:
 
-| Distro | rclcpp version |
-|---|---|
-| Humble | falls into the `else` baseline |
-| Jazzy | ≥ 29.0 |
-| Kilted | ≥ 29.6 |
-| Rolling, L-turtle | ≥ 30 |
+1. Read the upstream PR that added the feature and find the release it shipped in.
+2. Verify against the *frozen* CI container (`moveit/moveit2:rolling-ci`) — that container may be running older versions than current Rolling. If the guard's threshold is between the frozen container's version and current Rolling's, the code will fail on `rolling-ci`.
+3. Cite the upstream release in a comment and in the MIGRATION.md entry.
 
-**Reference**: [#3567](https://github.com/moveit/moveit2/pull/3567).
+**Snapshot for common carrier packages** (as of 2026-07 — verify with `apt show`, `<pkg>/version.h`, or the upstream release notes):
+
+| Package | Rolling-on-Noble<br>(frozen `rolling-ci`) | Rolling-on-Resolute<br>(current) |
+|---|---|---|
+| `rclcpp` | 30.1.4 | 33.0.x |
+| `ament_index_cpp` | 1.13.1 | 1.14.1 |
+
+Rolling's rclcpp bumped 30 → 33 across the Noble→Resolute transition, but different packages moved through their own major/minor releases on different timelines. **The frozen `rolling-ci` container is a snapshot of one moment in Rolling's timeline** — a guard that's true on current Rolling can be true or false on that container depending on the threshold.
+
+**`RCLCPP_VERSION` fallback**: only when the guarded change lives in `rclcpp` itself (e.g. a `rclcpp::Node` API change), or when there is genuinely no more-specific carrier (e.g. a compiler / C++ standard cutover that correlates with distro age).
+
+**References**: [#3567](https://github.com/moveit/moveit2/pull/3567), [#3703](https://github.com/moveit/moveit2/pull/3703) → [#3705](https://github.com/moveit/moveit2/pull/3705) (retrospective — wrong-package-proxy example).
 
 ### §1.2 — `package.xml` dependency divergence
 
@@ -151,7 +171,10 @@ Every PR that introduces, modifies, or removes a distro-conditional code path mu
 - [06/2026] `position_controllers` was removed from `ros2_controllers` 6.7.0 ([ros-controls/ros2_controllers#2016](https://github.com/ros-controls/ros2_controllers/pull/2016)). Consumers using `position_controllers/JointGroupPositionController` should migrate to `forward_command_controller/ForwardCommandController` with `interface_name: position`. Consumers using `position_controllers/GripperActionController` should migrate to `parallel_gripper_action_controller/GripperActionController`.
 ```
 
-**PR review checklist**: reviewers reject any PR that introduces a distro-conditional change without a MIGRATION.md entry.
+**PR review checklist**: reviewers reject any PR that introduces a distro-conditional change without a MIGRATION.md entry. For §1.1 (C++ version-macro) guards, reviewers also verify that:
+
+- The threshold matches the release the feature actually shipped in — cross-check the PR body against the upstream release notes, not just "the version I saw on my machine."
+- The guard uses the version macro of the package that *carries* the feature (`AMENT_INDEX_CPP_VERSION_GTE`, `TF2_VERSION_GTE`, etc.), not `RCLCPP_VERSION_GTE` as a distro proxy, unless the change genuinely lives in `rclcpp`.
 
 **Cleanup**: distro release-note entries stay (they're historical). *Workaround* entries (e.g. "Remove when Resolute syncs osqp_vendor") get retired together with the workaround code.
 
@@ -242,6 +265,20 @@ When REP 2000 declares a new distro supported, add a `<distro>-ci` entry to the 
 ### Graduating an experimental job to required
 
 When an experimental job is consistently green — or red only on externally-blocked items that are tracked via §2.1 — promote it by dropping `continue-on-error` and the `(experimental)` suffix. §2.1 source-build entries should be in place before graduation so the job has a real chance to pass.
+
+### Auditing existing version guards when Rolling changes base OS
+
+When Rolling migrates to a new Ubuntu base (e.g. Noble → Resolute), core package versions jump — sometimes by multiple majors — and the `moveit/moveit2:rolling-ci` container gets rebuilt against the new base. That's the moment when §1.1 guards can silently misbehave: a guard whose threshold sat safely between "then-Rolling" and "then-Rolling-plus-one" may no longer discriminate correctly.
+
+In the CI-matrix PR that adopts the new Rolling base:
+
+1. Grep for `RCLCPP_VERSION_GTE`, `AMENT_INDEX_CPP_VERSION_GTE`, and any other `*_VERSION_GTE` guards in the tree.
+2. For each site, cross-check the threshold against:
+   - The upstream release that added the feature (from the PR body / MIGRATION.md).
+   - The version currently installed in `moveit/moveit2:rolling-ci` and in the new Rolling base — a good guard has its threshold above the frozen container's version and at-or-below the new Rolling's version. If both are on the same side of the threshold, the guard is doing nothing.
+3. Convert any `RCLCPP_VERSION_GTE(...)` guards whose *actual* carrier is a different package (per §1.1) to the correct carrier's version macro.
+
+Historical example: the Noble → Resolute transition (2026-07) invalidated `RCLCPP_VERSION_GTE(30, 0, 0)` guards that were guarding `ament_index_cpp` changes — see #3703 → #3705.
 
 ### Dropping a distro
 
