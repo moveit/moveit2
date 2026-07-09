@@ -74,6 +74,8 @@ struct ServoParameters
   // Properties of outgoing commands
   std::string command_out_topic{ "/panda_arm_controller/joint_trajectory" };
   double publish_period{ 0.034 };
+  // Maximum expected latency between generating a servo command and the controller receiving it [seconds]
+  double max_expected_latency{ 0.1 };
   std::string command_out_type{ "trajectory_msgs/JointTrajectory" };
   bool publish_joint_positions{ true };
   bool publish_joint_velocities{ true };
