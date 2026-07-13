@@ -44,7 +44,7 @@ repos:
         types_or: [c++, c, cuda]
         args: ["-fallback-style=none"]
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.2
     hooks:
       - id: codespell
         args: ['--write-changes', '--ignore-words=.codespell_words', '--skip="*.eps"']
