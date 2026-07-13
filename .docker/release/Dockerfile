@@ -12,4 +12,4 @@ ENV RTI_NC_LICENSE_ACCEPTED yes
 RUN apt-get update -q && \
     apt-get upgrade -q -y && \
     apt-get install -y ros-rolling-moveit --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+    rm -Rf /var/lib/apt/lists/*
