@@ -17,7 +17,7 @@ target_link_libraries(
   ${visualization_msgs_TARGETS}
   geometric_shapes::geometric_shapes
   tf2_eigen::tf2_eigen
-  octomap)
+  ${OCTOMAP_LIBRARIES})
 set_target_properties(moveit_distance_field
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 
