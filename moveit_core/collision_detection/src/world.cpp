@@ -130,7 +130,7 @@ World::ObjectConstPtr World::getObject(const std::string& object_id) const
 
 void World::ensureUnique(ObjectPtr& obj)
 {
-  if (obj && !obj.unique())
+  if (obj && obj.use_count() != 1)
     obj = std::make_shared<Object>(*obj);
 }
 
