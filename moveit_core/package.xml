@@ -36,7 +36,6 @@
   <depend>generate_parameter_library</depend>
   <depend>geometric_shapes</depend>
   <depend>geometry_msgs</depend>
-  <depend>google_benchmark_vendor</depend>
   <depend>kdl_parser</depend>
   <depend>libfcl-dev</depend>
   <depend>moveit_common</depend>
