@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*********************************************************************************
  * BSD 3-Clause License
  *
  * Copyright (c) 2019, Los Alamos National Security, LLC
@@ -13,7 +13,7 @@
  * * Redistributions in binary form must reproduce the above copyright notice,
  *   this list of conditions and the following disclaimer in the documentation
  *   and/or other materials provided with the distribution.
- *
+ * 
  * * Neither the name of the copyright holder nor the names of its
  *   contributors may be used to endorse or promote products derived from
  *   this software without specific prior written permission.
@@ -23,68 +23,78 @@
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE
  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * FOR ANY DIRECT, INDIRECT, ICIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVERb
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *******************************************************************************/
-/*
- * Title      : collision_monitor.hpp
- * Project    : moveit_servo
- * Created    : 06/08/2023
- * Author     : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
+ ********************************************************************************/
+
+/*      Title       : collision_monitor.hpp
+ *      Project     : moveit_servo
+ *      Created     : 06/08/2023
+ *      Author      : Brian O'Neil, Andy Zelenak, Blake Anderson, V Mohammed Ibrahim
  *
- * Description: Monitors the planning scene for collision and publishes the velocity scaling.
+ *      Description : A collision monitor thread that reads the current collision scene
+ *                    that updates the collision velocity scale.
  */
 
 #pragma once
 
+#include <moveit_servo/servo.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
-#include <moveit/planning_scene/planning_scene.hpp>
-#include <moveit_servo/moveit_servo_lib_parameters.hpp>
 
 namespace moveit_servo
 {
 
+/**
+ * \brief A collision monitor thread that reads the current collision scene
+ *        and updates the collision velocity scale.
+ */
 class CollisionMonitor
 {
 public:
-  CollisionMonitor(const planning_scene_monitor::PlanningSceneMonitorPtr& planning_scene_monitor,
+  /**
+   * \brief Constructor for CollisionMonitor.
+   * \param planning_scene_monitor Pointer to the planning scene monitor.
+   * \param servo_params Reference to the servo parameters.
+   * \param collision_velocity_scale Reference to the atomic double storing the collision velocity scale.
+   */
+  CollisionMonitor(const planning_scene_monitor::Planning_SceneMonitorPtr& planning_scene_monitor,
                    const servo::Params& servo_params, std::atomic<double>& collision_velocity_scale);
 
+  /**
+   * \brief Starts the collision monitor thread.
+   */
   void start();
 
+  /**
+   * \brief Stops the collision monitor thread.
+   */
   void stop();
+
+  // Disable copy construction.
+  CollisionMonitor(const CollisionMonitor&) = delete;
+
+  // Disable copy assignment.
+  CollisionMonitor& operator=(CollisionMonitor&) = delete;
 
 private:
   /**
-   * \brief The collision checking function, this will run in a separate thread.
+   * \brief The collision monitor loop.
    */
   void checkCollisions();
 
-  // Variables
-
+  const planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
   const servo::Params& servo_params_;
 
-  const planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
-  moveit::core::RobotState robot_state_;
+  // Thread controls
+  std::atomic<bool> stop_collision_monitor_;
+  std::thread collision_monitor_thread_;
 
-  // The collision monitor thread.
-  std::thread monitor_thread_;
-  // The flag used for stopping the collision monitor thread.
-  std::atomic<bool> stop_requested_;
-
-  // The scaling factor when approaching a collision.
+  // The collision velocity`scale updated by the thread
   std::atomic<double>& collision_velocity_scale_;
-
-  // The data structures used to get information about robot self collisions.
-  collision_detection::CollisionRequest self_collision_request_;
-  collision_detection::CollisionResult self_collision_result_;
-  // The data structures used to get information about robot collision with other objects in the collision scene.
-  collision_detection::CollisionRequest scene_collision_request_;
-  collision_detection::CollisionResult scene_collision_result_;
 };
 
 }  // namespace moveit_servo
