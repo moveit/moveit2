@@ -119,6 +119,10 @@ private:
   double length_ = 0.0;
   std::list<std::pair<double, bool>> switching_points_;
   std::list<std::unique_ptr<PathSegment>> path_segments_;
+  // Cache the last-accessed segment so getPathSegment can resume its forward scan locally instead of
+  // rescanning from the front every call (integration queries advance monotonically along the path).
+  mutable std::list<std::unique_ptr<PathSegment>>::const_iterator cached_it_;
+  mutable bool cache_valid_ = false;
 };
 
 class Trajectory
