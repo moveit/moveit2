@@ -57,8 +57,9 @@ rclcpp::Logger getLogger()
 }  // namespace
 
 MoveGroupMoveAction::MoveGroupMoveAction()
-  : MoveGroupCapability("move_action"), move_state_(IDLE), preempt_requested_{ false }
+  : MoveGroupCapability("move_action"), move_state_(IDLE), preempt_requested_{ false }, queued_goal_{ nullptr }
 {
+  std::thread{ [this]() { executeQueuedGoals(); } }.detach();
 }
 
 void MoveGroupMoveAction::initialize()
@@ -76,15 +77,36 @@ void MoveGroupMoveAction::initialize()
         preemptMoveCallback();
         return rclcpp_action::CancelResponse::ACCEPT;
       },
-      [this](const std::shared_ptr<MGActionGoal>& goal) {
-        std::thread{ [this](const std::shared_ptr<move_group::MGActionGoal>& goal) { executeMoveCallback(goal); }, goal }
-            .detach();
-      });
+      [this](const std::shared_ptr<MGActionGoal>& goal) { setQueuedGoal(goal); });
 }
 
-void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal>& goal)
+void MoveGroupMoveAction::setQueuedGoal(const std::shared_ptr<MGActionGoal>& goal)
 {
-  goal_ = goal;
+  std::unique_lock lock(queued_goal_mutex_);
+  queued_goal_ = goal;
+  lock.unlock();
+  queued_goal_cvar_.notify_one();
+}
+
+std::shared_ptr<MGActionGoal> MoveGroupMoveAction::awaitQueuedGoal()
+{
+  std::unique_lock lock(queued_goal_mutex_);
+  queued_goal_cvar_.wait(lock, [this]() { return (queued_goal_ != nullptr); });
+  return std::move(queued_goal_);
+}
+
+void MoveGroupMoveAction::executeQueuedGoals()
+{
+  while (true)
+  {
+    goal_ = awaitQueuedGoal();
+    executeMoveCallback();
+    goal_.reset();
+  }
+}
+
+void MoveGroupMoveAction::executeMoveCallback()
+{
   RCLCPP_INFO(getLogger(), "executing..");
   setMoveState(PLANNING, goal_);
   // before we start planning, ensure that we have the latest robot state received...
@@ -93,39 +115,38 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   context_->planning_scene_monitor_->updateFrameTransforms();
 
   auto action_res = std::make_shared<MGAction::Result>();
-  if (goal->get_goal()->planning_options.plan_only || !context_->allow_trajectory_execution_)
+  if (goal_->get_goal()->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
-    if (!goal->get_goal()->planning_options.plan_only)
+    if (!goal_->get_goal()->planning_options.plan_only)
     {
       RCLCPP_WARN(getLogger(), "This instance of MoveGroup is not allowed to execute trajectories "
                                "but the goal request has plan_only set to false. "
                                "Only a motion plan will be computed anyway.");
     }
-    executeMoveCallbackPlanOnly(goal, action_res);
+    executeMoveCallbackPlanOnly(goal_, action_res);
   }
   else
-    executeMoveCallbackPlanAndExecute(goal, action_res);
+    executeMoveCallbackPlanAndExecute(goal_, action_res);
 
   bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res->planned_trajectory);
   // @todo: Response messages
   RCLCPP_INFO_STREAM(getLogger(), getActionResultString(action_res->error_code, planned_trajectory_empty,
-                                                        goal->get_goal()->planning_options.plan_only));
+                                                        goal_->get_goal()->planning_options.plan_only));
   if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
-    goal->succeed(action_res);
+    goal_->succeed(action_res);
   }
   else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
   {
-    goal->canceled(action_res);
+    goal_->canceled(action_res);
   }
   else
   {
-    goal->abort(action_res);
+    goal_->abort(action_res);
   }
 
   setMoveState(IDLE, goal_);
   preempt_requested_ = false;
-  goal_.reset();
 }
 
 void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_ptr<MGActionGoal>& goal,
