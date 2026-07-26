@@ -176,12 +176,18 @@ bool MoveGroupCartesianPathService::computeService(
 
           // time trajectory
           // \todo optionally compute timing to move the eef with constant speed
-          trajectory_processing::TimeOptimalTrajectoryGeneration time_param;
-          time_param.computeTimeStamps(rt, 1.0);
+          if (req->time_optimize)
+          {
+            auto orig_point_count = rt.getWayPointCount();
+            trajectory_processing::TimeOptimalTrajectoryGeneration time_param;
+            time_param.computeTimeStamps(rt, 1.0);
+            RCLCPP_INFO(LOGGER, "Optimized trajectory with %u points to %u points", (unsigned int)orig_point_count,
+                        (unsigned int)rt.getWayPointCount());
+          }
 
           rt.getRobotTrajectoryMsg(res->solution);
           RCLCPP_INFO(LOGGER, "Computed Cartesian path with %u points (followed %lf%% of requested trajectory)",
-                      (unsigned int)traj.size(), res->fraction * 100.0);
+                      (unsigned int)rt.getWayPointCount(), res->fraction * 100.0);
           if (display_computed_paths_ && rt.getWayPointCount() > 0)
           {
             moveit_msgs::msg::DisplayTrajectory disp;
