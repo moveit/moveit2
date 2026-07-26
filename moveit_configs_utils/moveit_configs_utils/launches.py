@@ -216,6 +216,8 @@ def generate_move_group_launch(moveit_config):
     # default to false, because almost nothing in move_group relies on this information
     ld.add_action(DeclareBooleanLaunchArg("monitor_dynamics", default_value=False))
 
+    ld.add_action(DeclareBooleanLaunchArg("use_sim_time", default_value=False))
+
     should_publish = LaunchConfiguration("publish_monitored_planning_scene")
 
     move_group_configuration = {
@@ -233,7 +235,8 @@ def generate_move_group_launch(moveit_config):
         "publish_geometry_updates": should_publish,
         "publish_state_updates": should_publish,
         "publish_transforms_updates": should_publish,
-        "monitor_dynamics": False,
+        "monitor_dynamics": LaunchConfiguration("monitor_dynamics"),
+        "use_sim_time": LaunchConfiguration("use_sim_time")
     }
 
     move_group_params = [
