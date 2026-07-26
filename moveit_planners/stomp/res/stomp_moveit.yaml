@@ -52,6 +52,11 @@ stomp_moveit:
     description: "Weight of the acceleration costs to be applied for the general cost calculation. A value of 0 disables this cost.",
     default_value: 0.1,
   }
+  maximize_clearance: {
+    type: bool,
+    description: "Experimental: Enables a cost function that attempts to maximize the distance to collision.",
+    default_value: false,
+  }
   delta_t: {
     type: double,
     description: "Assumed time change between consecutive points - used for computing control costs",
