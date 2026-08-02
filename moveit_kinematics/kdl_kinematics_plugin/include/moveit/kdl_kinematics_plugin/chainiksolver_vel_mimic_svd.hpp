@@ -31,6 +31,7 @@
 
 #include <moveit/kdl_kinematics_plugin/joint_mimic.hpp>
 #include <Eigen/SVD>
+#include <Eigen/Eigenvalues>
 
 namespace KDL
 {

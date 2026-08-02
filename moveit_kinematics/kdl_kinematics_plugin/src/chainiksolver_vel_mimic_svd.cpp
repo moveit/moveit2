@@ -109,19 +109,34 @@ int ChainIkSolverVelMimicSVD::CartToJnt(const JntArray& q_in, const Twist& v_in,
   vin.topRows<3>() = Eigen::Map<const Eigen::Array3d>(v_in.vel.data, 3) * cartesian_weights.topRows<3>().array();
   vin.bottomRows<3>() = Eigen::Map<const Eigen::Array3d>(v_in.rot.data, 3) * cartesian_weights.bottomRows<3>().array();
 
-  // Do a singular value decomposition: J = U*S*V^t
-  svd_.compute(jac.topRows(rows));
+  // x = J^T (JJ^T)^# vin via a small (rows x rows) self-adjoint eigendecomposition of JJ^T -- the
+  // same thresholded min-norm pseudo-inverse solution as svd_.solve, but far cheaper than a
+  // JacobiSVD of the 6xN Jacobian.
+  const auto Jp = jac.topRows(rows);
+  Eigen::MatrixXd A = Jp * Jp.transpose();
+  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> es(A);
+  const Eigen::VectorXd& ev = es.eigenvalues();
+  const Eigen::MatrixXd& V = es.eigenvectors();
+  const double sv_max = std::sqrt(std::max(0.0, ev.maxCoeff()));
+  const double abs_thr = svd_.threshold() * sv_max;  // same relative threshold as JacobiSVD
+  Eigen::VectorXd y = V.transpose() * vin.topRows(rows);
+  for (Eigen::Index k = 0; k < ev.size(); ++k)
+  {
+    const double sv = std::sqrt(std::max(0.0, ev(k)));
+    y(k) = (sv > abs_thr) ? y(k) / ev(k) : 0.0;
+  }
+  const Eigen::VectorXd x_sol = Jp.transpose() * (V * y);
 
   if (num_mimic_joints_ > 0)
   {
-    qdot_out_reduced_.noalias() = svd_.solve(vin.topRows(rows));
+    qdot_out_reduced_.noalias() = x_sol;
     qdot_out_reduced_.array() *= joint_weights.array();
     for (unsigned int i = 0; i < chain_.getNrOfJoints(); ++i)
       qdot_out(i) = qdot_out_reduced_[mimic_joints_[i].map_index] * mimic_joints_[i].multiplier;
   }
   else
   {
-    qdot_out.data.noalias() = svd_.solve(vin.topRows(rows));
+    qdot_out.data.noalias() = x_sol;
     qdot_out.data.array() *= joint_weights.array();
   }
 
