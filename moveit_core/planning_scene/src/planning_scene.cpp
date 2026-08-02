@@ -267,22 +267,22 @@ void PlanningScene::allocateCollisionDetector(const collision_detection::Collisi
   if (parent_detector)
   {
     collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(parent_detector->cenv_, world_);
-    collision_detector_->cenv_unpadded_ =
-        collision_detector_->alloc_->allocateEnv(parent_detector->cenv_unpadded_, world_);
+    // Defer the unpadded env; record how to build it on first use.
+    collision_detector_->unpadded_parent_src_ = parent_detector->cenv_unpadded_const_;
   }
   else
   {
     collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
-    collision_detector_->cenv_unpadded_ = collision_detector_->alloc_->allocateEnv(world_, getRobotModel());
+    // Defer the unpadded env (build from world+model on first use).
 
     // Copy padding to collision_detector_->cenv_
     if (prev_coll_detector)
       collision_detector_->copyPadding(*prev_coll_detector);
   }
+  collision_detector_->unpadded_alloc_ = allocator;
 
   // Assign const pointers
   collision_detector_->cenv_const_ = collision_detector_->cenv_;
-  collision_detector_->cenv_unpadded_const_ = collision_detector_->cenv_unpadded_;
 }
 
 const collision_detection::CollisionEnvConstPtr&
