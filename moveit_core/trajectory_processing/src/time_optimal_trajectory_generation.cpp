@@ -305,6 +305,10 @@ double Path::getLength() const
 PathSegment* Path::getPathSegment(double& s) const
 {
   std::list<std::unique_ptr<PathSegment>>::const_iterator it = path_segments_.begin();
+  // Resume from the cached segment when s is at/after its start (the common case during integration,
+  // whose queries advance along the path); otherwise fall back to the front. Same result.
+  if (cache_valid_ && (*cached_it_)->position_ <= s)
+    it = cached_it_;
   std::list<std::unique_ptr<PathSegment>>::const_iterator next = it;
   ++next;
   while (next != path_segments_.end() && s >= (*next)->position_)
@@ -312,6 +316,8 @@ PathSegment* Path::getPathSegment(double& s) const
     it = next;
     ++next;
   }
+  cached_it_ = it;
+  cache_valid_ = true;
   s -= (*it)->position_;
   return (*it).get();
 }
