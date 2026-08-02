@@ -46,13 +46,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/version.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/transform_listener.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/transform_listener.h>
-#endif
 #include <moveit/utils/logger.hpp>
 
 using namespace moveit_servo;

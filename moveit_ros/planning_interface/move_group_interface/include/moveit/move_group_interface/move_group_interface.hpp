@@ -57,13 +57,7 @@
 
 #include <memory>
 #include <utility>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/buffer.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/buffer.h>
-#endif
 
 #include <moveit_move_group_interface_export.h>
 
