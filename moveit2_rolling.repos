@@ -1,0 +1,21 @@
+# Rolling-only source-checkouts.
+#
+# Convention: pin dependencies by SHA (not branch), so `vcs pull` in the
+# AFTER_SETUP_UPSTREAM_WORKSPACE step cannot drift the tree under a warm ccache.
+# CI matrix entries whose IMAGE starts with "rolling-" pick up this file
+# automatically via UPSTREAM_WORKSPACE (see .github/workflows/ci.yaml).
+#
+# osqp_vendor: consume the moveit-org fork which vendors OSQP v1.0.0 and
+# therefore declares cmake_minimum_required(3.16), building cleanly on
+# CMake 4 (which resolute ships). rosdistro release of this fork is planned
+# for lyrical + rolling; humble/jazzy/kilted stay on tier4/osqp_vendor's
+# apt-shipped 0.2.0 (OSQP v0.6.x) release. Swap the SHA below for a tag
+# once moveit/osqp_vendor cuts one. Refs #3786.
+#
+# NOTE: This file may conflict with #3760 which also introduces
+# moveit2_rolling.repos; whichever PR lands second reconciles.
+repositories:
+  osqp_vendor:
+    type: git
+    url: https://github.com/moveit/osqp_vendor.git
+    version: 58a52e815ad005d1fc971dca0fdc0c0e8100444b  # Update OSQP version to v1.0.0 (#1)
