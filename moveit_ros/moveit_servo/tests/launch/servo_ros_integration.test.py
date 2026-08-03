@@ -1,5 +1,6 @@
 import os
 import launch
+from launch.event_handlers import OnProcessExit
 import unittest
 import launch_ros
 import launch_testing
@@ -145,7 +146,15 @@ def generate_test_description():
             launch.actions.TimerAction(
                 period=7.0, actions=[panda_arm_controller_spawner]
             ),
-            launch.actions.TimerAction(period=9.0, actions=[servo_gtest]),
+            # Gate the gtest launch on the last-in-chain spawner completing so the
+            # test does not race controller activation. Prior fixed 9s timer flaked
+            # under load (ServoRosFixture.testJointJog).
+            launch.actions.RegisterEventHandler(
+                OnProcessExit(
+                    target_action=panda_arm_controller_spawner,
+                    on_exit=[servo_gtest],
+                )
+            ),
             launch_testing.actions.ReadyToTest(),
         ]
     ), {
