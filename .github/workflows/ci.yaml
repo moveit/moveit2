@@ -36,11 +36,18 @@ jobs:
           # industrial_ci build on ubuntu:resolute, installing Rolling from the ros-testing repo.
           # Setting OS_CODE_NAME=resolute also avoids industrial_ci's default of pinning Rolling to
           # the latest Noble-supported index. Non-blocking until all Resolute packages are released.
+          #
+          # SUPPRESS_CPP_ERROR drops -Werror=cpp so the deprecated <ciso646> include in
+          # system liboctomap-dev (OcTreeKey.h:40) does not fatal-error under GCC 15, which
+          # is what Resolute ships. The upstream fix (OctoMap/octomap#434) is merged, but
+          # Resolute still packages the unfixed header -- verified against
+          # liboctomap-dev 1.10.0+dfsg-3. Remove once Ubuntu repackages it.
           - IMAGE: rolling-resolute
             ROS_DISTRO: rolling
             OS_CODE_NAME: resolute
             ROS_REPO: testing
             SUPPRESS_DEPRECATION_ERROR: true
+            SUPPRESS_CPP_ERROR: true
           - IMAGE: humble-ci
             ROS_DISTRO: humble
           - IMAGE: jazzy-ci
