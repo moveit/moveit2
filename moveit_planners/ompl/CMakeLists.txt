@@ -5,7 +5,7 @@ project(moveit_planners_ompl LANGUAGES CXX)
 find_package(moveit_common REQUIRED)
 moveit_package()
 
-find_package(Boost REQUIRED filesystem date_time thread serialization)
+find_package(Boost REQUIRED date_time thread serialization)
 find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
