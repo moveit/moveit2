@@ -5,7 +5,8 @@ import unittest
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, TimerAction
+from launch.actions import DeclareLaunchArgument, RegisterEventHandler, TimerAction
+from launch.event_handlers import OnProcessExit
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from moveit_configs_utils import MoveItConfigsBuilder
@@ -94,7 +95,15 @@ def generate_test_description():
                 description="Binary directory of package "
                 "containing test executables",
             ),
-            TimerAction(period=2.0, actions=[hybrid_planning_gtest]),
+            # Gate the gtest launch on the last spawner exiting (== controller
+            # activated). The prior fixed TimerAction raced controller
+            # activation under load and caused this family to flake.
+            RegisterEventHandler(
+                OnProcessExit(
+                    target_action=panda_joint_group_position_controller_spawner,
+                    on_exit=[hybrid_planning_gtest],
+                )
+            ),
             launch_testing.actions.ReadyToTest(),
         ]
         + common_launch
