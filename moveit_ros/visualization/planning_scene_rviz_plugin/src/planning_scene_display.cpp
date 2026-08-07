@@ -302,6 +302,15 @@ const std::string PlanningSceneDisplay::getMoveGroupNS() const
   return move_group_ns_property_->getStdString();
 }
 
+const std::string PlanningSceneDisplay::getRobotDescription() const
+{
+  const std::string robot_description = robot_description_property_->getStdString();
+  if (getMoveGroupNS().empty() || robot_description.empty() || robot_description.front() == '/')
+    return robot_description;
+
+  return rclcpp::names::append(getMoveGroupNS(), robot_description);
+}
+
 const moveit::core::RobotModelConstPtr& PlanningSceneDisplay::getRobotModel() const
 {
   if (planning_scene_monitor_)
@@ -539,7 +548,7 @@ void PlanningSceneDisplay::unsetLinkColor(rviz_default_plugins::robot::Robot* ro
 // ******************************************************************************************
 planning_scene_monitor::PlanningSceneMonitorPtr PlanningSceneDisplay::createPlanningSceneMonitor()
 {
-  auto rml = moveit::planning_interface::getSharedRobotModelLoader(node_, robot_description_property_->getStdString());
+  auto rml = moveit::planning_interface::getSharedRobotModelLoader(node_, getRobotDescription());
   return std::make_shared<planning_scene_monitor::PlanningSceneMonitor>(node_, rml,
                                                                         getNameStd() + "_planning_scene_monitor");
 }
