@@ -84,6 +84,35 @@ c --------x--- v   |
 #include <cstddef>  // for size_t
 #include <Eigen/Sparse>
 
+// OSQP shipped v1.0 in 2024 with a redesigned C API. Neither v0.6.x nor v1.0
+// exposes a numeric version macro that's usable from a preprocessor #if
+// (v0.6's OSQP_VERSION is a string literal in constants.h; v1's numeric
+// macros live in a non-installed private/version.h), so we don't have a
+// clean OSQP-provided switch.
+//
+// Preferred signal: MOVEIT_OSQP_V1 is defined at compile time from
+// moveit_core/online_signal_smoothing/CMakeLists.txt based on the version
+// find_package(osqp) actually resolved. That keeps compile-time API selection
+// consistent with link-time library selection when a build environment has
+// BOTH v0.6 (apt) and v1.0 (source-overlay) installed.
+//
+// Fallback for tooling that doesn't run through our CMakeLists (LSP,
+// clang-tidy stand-alone, etc.): probe for a v1-only header. The osqp CMake
+// target sets INTERFACE_INCLUDE_DIRECTORIES to ${prefix}/include/osqp, so
+// headers are searched directly without an `osqp/` prefix.
+//
+// TODO(#3786): remove the v0.6.x branch once every supported distro consumes
+// an osqp_vendor >= 1.0.0. Concrete trigger: Humble EOL (2027-05) or when
+// Jazzy/Kilted release an osqp_vendor 1.0 of their own. See #3751 for the
+// distro-compat-guard policy.
+#ifndef MOVEIT_OSQP_V1
+#if __has_include(<osqp_api_types.h>)
+#define MOVEIT_OSQP_V1 1
+#else
+#define MOVEIT_OSQP_V1 0
+#endif
+#endif
+
 namespace online_signal_smoothing
 {
 MOVEIT_STRUCT_FORWARD(OSQPDataWrapper);
@@ -127,9 +156,9 @@ public:
    */
   ~AccelerationLimitedPlugin() override
   {
-    if (osqp_workspace_ != nullptr)
+    if (osqp_solver_ != nullptr)
     {
-      osqp_cleanup(osqp_workspace_);
+      osqp_cleanup(osqp_solver_);
     }
   }
 
@@ -156,7 +185,11 @@ private:
   Eigen::SparseMatrix<double> constraints_sparse_;
   /** \brief osqp types used for optimization problem */
   OSQPDataWrapperPtr osqp_data_;
-  OSQPWorkspace* osqp_workspace_ = nullptr;
+#if MOVEIT_OSQP_V1
+  OSQPSolver* osqp_solver_ = nullptr;
+#else
+  OSQPWorkspace* osqp_solver_ = nullptr;
+#endif
   OSQPSettings osqp_settings_;
 };
 }  // namespace online_signal_smoothing
