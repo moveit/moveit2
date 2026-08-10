@@ -34,6 +34,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <gtest/gtest.h>
 #ifndef INSTANTIATE_TEST_SUITE_P  // prior to gtest 1.10
 #define INSTANTIATE_TEST_SUITE_P(...) INSTANTIATE_TEST_CASE_P(__VA_ARGS__)
