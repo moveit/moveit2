@@ -33,6 +33,13 @@ target_link_libraries(
   ${orocos_kdl_LIBRARIES}
   Boost::headers)
 
+# Install to lib/ (on AMENT_PREFIX_PATH → LD_LIBRARY_PATH) so the installed
+# unit-test binaries resolve it on Resolute, where they otherwise fail at load
+# with "libpilz_industrial_motion_planner_test_utils.so: cannot open shared
+# object". Older distros tolerate this because the build-tree path remains
+# visible to the loader.
+install(TARGETS ${PROJECT_NAME}_test_utils LIBRARY DESTINATION lib)
+
 # Unit tests
 add_subdirectory(unit_tests)
 
