@@ -2,6 +2,30 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* moveit_core: dual-support OSQP v0.6.x and v1.0 in AccelerationLimitedPlugin (`#3806 <https://github.com/moveit/moveit2/issues/3806>`_)
+  OSQP v1.0 redesigned the C API. A MOVEIT_OSQP_V1 compile guard lets one branch
+  support both: Lyrical/Rolling use the moveit-org osqp_vendor fork (OSQP v1.0),
+  while Humble/Jazzy/Kilted stay on the apt-shipped v0.6.x.
+* Replace shared_ptr::unique() checks (`#3793 <https://github.com/moveit/moveit2/issues/3793>`_)
+* resolute: complete ament_index_cpp::get_package_share migration on Rolling (`#3705 <https://github.com/moveit/moveit2/issues/3705>`_)
+* resolute: drop octomap version range (`#3755 <https://github.com/moveit/moveit2/issues/3755>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* CMake: remove boost system (`#3727 <https://github.com/moveit/moveit2/issues/3727>`_)
+* Update deprecated usage of get_package_share without std::filesystem::path (`#3703 <https://github.com/moveit/moveit2/issues/3703>`_)
+* Fix findWayPointIndicesForDurationAfterStart method when out of bounds (`#3626 <https://github.com/moveit/moveit2/issues/3626>`_)
+* normalize quaternion sign for planar joint (`#3628 <https://github.com/moveit/moveit2/issues/3628>`_)
+* Populate velocities and accelerations for multidof joint trajectories (`#3635 <https://github.com/moveit/moveit2/issues/3635>`_)
+* Replace rclcpp::Rate with rclcpp::WallRate (`#3558 <https://github.com/moveit/moveit2/issues/3558>`_)
+* Fix: Fix Trajectory template usage for checkOvershoot with StandardVector (`#3617 <https://github.com/moveit/moveit2/issues/3617>`_)
+* Fix build errors for macOS (`#3548 <https://github.com/moveit/moveit2/issues/3548>`_)
+* Contributors: Cong Liu, Dhruv Patel, Ezra Brooks, Guilhem Saurel, Joshua Supratman, Nathan Brooks, Shivam Maurya, Stephanie Eng, Tobias Fischer, Xingxin HE
+
 2.14.1 (2025-09-09)
 -------------------
 * Update pre-commit-config (`#2805 <https://github.com/moveit/moveit2/issues/2805>`_)

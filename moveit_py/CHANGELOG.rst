@@ -2,6 +2,18 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* [macOS] Fix compilation and linking issues in MoveIt2 (`#3631 <https://github.com/moveit/moveit2/issues/3631>`_)
+* fix(moveit_py): RobotState.state_info (`#3588 <https://github.com/moveit/moveit2/issues/3588>`_)
+* pybind11_vendor is removed in favor of pybind11-dev (`#3568 <https://github.com/moveit/moveit2/issues/3568>`_)
+* Contributors: Alejandro Hernández Cordero, Dhruv Patel, Matthijs van der Burgh, Nathan Brooks, Shivam Maurya, Stephanie Eng
+
 2.14.1 (2025-09-09)
 -------------------
 * Update pre-commit-config (`#2805 <https://github.com/moveit/moveit2/issues/2805>`_)

@@ -2,6 +2,19 @@
 Changelog for package moveit_setup_controllers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix rviz Qt6 threshold: 15.1 -> 15.1.14 (`#3807 <https://github.com/moveit/moveit2/issues/3807>`_)
+  Corrects the gate added in #3707: rviz_common 15.1.0-15.1.13 are still Qt5.
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* Support parallel_gripper_action_controller in Setup Assistant (`#3752 <https://github.com/moveit/moveit2/issues/3752>`_)
+* Use Qt6 on Rolling and newer distros (`#3707 <https://github.com/moveit/moveit2/issues/3707>`_)
+  rviz switched to Qt6 in rviz_common 15.1.14. Downstream rviz plugins must build
+  against the same Qt major version as the rviz they link.
+* Contributors: Nathan Brooks
+
 2.14.1 (2025-09-09)
 -------------------
 

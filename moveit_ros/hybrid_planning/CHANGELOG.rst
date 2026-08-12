@@ -2,6 +2,20 @@
 Changelog for package moveit_hybrid_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* De-flake servo and hybrid_planning launch fixtures (`#3809 <https://github.com/moveit/moveit2/issues/3809>`_)
+* Use modern --frame-id/--child-frame-id args for test static_transform_publisher (`#3762 <https://github.com/moveit/moveit2/issues/3762>`_)
+* resolute: migrate moveit_hybrid_planning off removed position_controllers (`#3753 <https://github.com/moveit/moveit2/issues/3753>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* Replace rclcpp::Rate with rclcpp::WallRate (`#3558 <https://github.com/moveit/moveit2/issues/3558>`_)
+* Fix deprecations in image_common and tf2_ros (`#3567 <https://github.com/moveit/moveit2/issues/3567>`_)
+* Contributors: Cong Liu, Nathan Brooks, Shivam Maurya
+
 2.14.1 (2025-09-09)
 -------------------
 

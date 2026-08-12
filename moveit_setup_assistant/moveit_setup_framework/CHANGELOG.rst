@@ -2,6 +2,22 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix rviz Qt6 threshold: 15.1 -> 15.1.14 (`#3807 <https://github.com/moveit/moveit2/issues/3807>`_)
+  Corrects the gate added in #3707: rviz_common 15.1.0-15.1.13 are still Qt5.
+* resolute: complete ament_index_cpp::get_package_share migration on Rolling (`#3705 <https://github.com/moveit/moveit2/issues/3705>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* Update deprecated usage of get_package_share without std::filesystem::path (`#3703 <https://github.com/moveit/moveit2/issues/3703>`_)
+* Use Qt6 on Rolling and newer distros (`#3707 <https://github.com/moveit/moveit2/issues/3707>`_)
+  rviz switched to Qt6 in rviz_common 15.1.14. Downstream rviz plugins must build
+  against the same Qt major version as the rviz they link.
+* [macOS] Fix compilation and linking issues in MoveIt2 (`#3631 <https://github.com/moveit/moveit2/issues/3631>`_)
+* Contributors: Dhruv Patel, Nathan Brooks, Shivam Maurya, Stephanie Eng
+
 2.14.1 (2025-09-09)
 -------------------
 

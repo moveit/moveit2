@@ -2,6 +2,12 @@
 Changelog for package moveit_resources_prbt_moveit_config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use modern --frame-id/--child-frame-id args for test static_transform_publisher (`#3762 <https://github.com/moveit/moveit2/issues/3762>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Contributors: Nathan Brooks, Shivam Maurya
+
 2.14.1 (2025-09-09)
 -------------------
 

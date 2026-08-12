@@ -2,6 +2,11 @@
 Changelog for package moveit_runtime
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Contributors: Shivam Maurya
+
 2.14.1 (2025-09-09)
 -------------------
 

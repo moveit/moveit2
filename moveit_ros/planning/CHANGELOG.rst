@@ -2,6 +2,22 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* Replace shared_ptr::unique() checks (`#3793 <https://github.com/moveit/moveit2/issues/3793>`_)
+* resolute: complete ament_index_cpp::get_package_share migration on Rolling (`#3705 <https://github.com/moveit/moveit2/issues/3705>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* CMake: remove boost system (`#3727 <https://github.com/moveit/moveit2/issues/3727>`_)
+* Update deprecated usage of get_package_share without std::filesystem::path (`#3703 <https://github.com/moveit/moveit2/issues/3703>`_)
+* Shutdown only after all tests are run (`#3637 <https://github.com/moveit/moveit2/issues/3637>`_)
+* Replace rclcpp::Rate with rclcpp::WallRate (`#3558 <https://github.com/moveit/moveit2/issues/3558>`_)
+* Fix deprecations in image_common and tf2_ros (`#3567 <https://github.com/moveit/moveit2/issues/3567>`_)
+* Contributors: Cong Liu, Ezra Brooks, Guilhem Saurel, Nathan Brooks, Shivam Maurya, Stephanie Eng, Tobias Fischer
+
 2.14.1 (2025-09-09)
 -------------------
 
