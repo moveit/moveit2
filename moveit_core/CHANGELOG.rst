@@ -2,8 +2,8 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.0 (2026-08-12)
+-------------------
 * resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
 * moveit_core: dual-support OSQP v0.6.x and v1.0 in AccelerationLimitedPlugin (`#3806 <https://github.com/moveit/moveit2/issues/3806>`_)
   OSQP v1.0 redesigned the C API. A MOVEIT_OSQP_V1 compile guard lets one branch

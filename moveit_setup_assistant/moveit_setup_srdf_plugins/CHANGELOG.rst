@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.0 (2026-08-12)
+-------------------
 * moveit_setup_srdf_plugins: make test_srdf fail loudly instead of segfaulting (`#3810 <https://github.com/moveit/moveit2/issues/3810>`_)
 * Fix rviz Qt6 threshold: 15.1 -> 15.1.14 (`#3807 <https://github.com/moveit/moveit2/issues/3807>`_)
   Corrects the gate added in #3707: rviz_common 15.1.0-15.1.13 are still Qt5.

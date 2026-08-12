@@ -2,8 +2,8 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.0 (2026-08-12)
+-------------------
 * resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
 * moveit_servo: add explicit <rclcpp/executors.hpp> include in servo_ros_fixture (`#3787 <https://github.com/moveit/moveit2/issues/3787>`_)
 * De-flake servo and hybrid_planning launch fixtures (`#3809 <https://github.com/moveit/moveit2/issues/3809>`_)

@@ -2,8 +2,8 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.0 (2026-08-12)
+-------------------
 * fix setuptools deprecation (`#3540 <https://github.com/moveit/moveit2/issues/3540>`_)
 * Contributors: mosfet80
 
