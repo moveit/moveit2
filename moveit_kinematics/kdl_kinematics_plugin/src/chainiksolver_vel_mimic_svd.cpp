@@ -25,6 +25,8 @@
 
 #include <moveit/kdl_kinematics_plugin/chainiksolver_vel_mimic_svd.hpp>
 
+#include "pseudoinverse.hpp"
+
 namespace
 {
 unsigned int countMimicJoints(const std::vector<kdl_kinematics_plugin::JointMimic>& mimic_joints)
@@ -109,23 +111,9 @@ int ChainIkSolverVelMimicSVD::CartToJnt(const JntArray& q_in, const Twist& v_in,
   vin.topRows<3>() = Eigen::Map<const Eigen::Array3d>(v_in.vel.data, 3) * cartesian_weights.topRows<3>().array();
   vin.bottomRows<3>() = Eigen::Map<const Eigen::Array3d>(v_in.rot.data, 3) * cartesian_weights.bottomRows<3>().array();
 
-  // x = J^T (JJ^T)^# vin via a small (rows x rows) self-adjoint eigendecomposition of JJ^T -- the
-  // same thresholded min-norm pseudo-inverse solution as svd_.solve, but far cheaper than a
-  // JacobiSVD of the 6xN Jacobian.
-  const auto Jp = jac.topRows(rows);
-  Eigen::MatrixXd A = Jp * Jp.transpose();
-  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> es(A);
-  const Eigen::VectorXd& ev = es.eigenvalues();
-  const Eigen::MatrixXd& V = es.eigenvectors();
-  const double sv_max = std::sqrt(std::max(0.0, ev.maxCoeff()));
-  const double abs_thr = svd_.threshold() * sv_max;  // same relative threshold as JacobiSVD
-  Eigen::VectorXd y = V.transpose() * vin.topRows(rows);
-  for (Eigen::Index k = 0; k < ev.size(); ++k)
-  {
-    const double sv = std::sqrt(std::max(0.0, ev(k)));
-    y(k) = (sv > abs_thr) ? y(k) / ev(k) : 0.0;
-  }
-  const Eigen::VectorXd x_sol = Jp.transpose() * (V * y);
+  const auto jacobian = jac.topRows(rows);
+  const Eigen::VectorXd x_sol =
+      kdl_kinematics_plugin::internal::solvePseudoinverse(jacobian, vin.topRows(rows), svd_.threshold());
 
   if (num_mimic_joints_ > 0)
   {
