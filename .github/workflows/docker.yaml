@@ -219,7 +219,7 @@ jobs:
             ghcr.io/${{ env.IMAGE }}
 
   tutorial-source:
-    needs: ci
+    needs: source
     strategy:
       fail-fast: false
       matrix:
