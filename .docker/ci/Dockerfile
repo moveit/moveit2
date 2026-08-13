@@ -3,9 +3,9 @@
 
 ARG ROS_DISTRO=rolling
 FROM ros:${ROS_DISTRO}-ros-base
-LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer="Robert Haschke rhaschke@techfak.uni-bielefeld.de"
 
-ENV TERM xterm
+ENV TERM=xterm
 
 # Setup (temporary) ROS workspace
 WORKDIR /root/ws_moveit
