@@ -22,8 +22,7 @@ jobs:
       packages: write
       contents: read
     env:
-      GH_IMAGE: ghcr.io/moveit/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      DH_IMAGE: moveit/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
+      IMAGE: moveit/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
       PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
 
     steps:
@@ -67,8 +66,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            ${{ env.GH_IMAGE }}
-            ${{ env.DH_IMAGE }}
+            ${{ env.IMAGE }}
+            ghcr.io/${{ env.IMAGE }}
 
   delete_untagged:
     runs-on: ubuntu-latest
