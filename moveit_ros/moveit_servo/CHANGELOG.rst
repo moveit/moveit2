@@ -2,6 +2,20 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.0 (2026-08-12)
+-------------------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* moveit_servo: add explicit <rclcpp/executors.hpp> include in servo_ros_fixture (`#3787 <https://github.com/moveit/moveit2/issues/3787>`_)
+* De-flake servo and hybrid_planning launch fixtures (`#3809 <https://github.com/moveit/moveit2/issues/3809>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* Improve documentation for composeMultiArrayMessage to clarify usage (`#3543 <https://github.com/moveit/moveit2/issues/3543>`_)
+* Adjust moveit_servo clock to work with fake_hardware (`#3529 <https://github.com/moveit/moveit2/issues/3529>`_)
+* Fix severe warning from class loader in servo (`#3577 <https://github.com/moveit/moveit2/issues/3577>`_)
+* Fix deprecations in image_common and tf2_ros (`#3567 <https://github.com/moveit/moveit2/issues/3567>`_)
+* Contributors: Himanshu Ravindra Iwanati, Nathan Brooks, Zarnack, bijoua29
+
 2.14.1 (2025-09-09)
 -------------------
 

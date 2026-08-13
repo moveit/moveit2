@@ -2,6 +2,18 @@
 Changelog for package moveit_ros_perception
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.0 (2026-08-12)
+-------------------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* resolute: fix depth_image_octomap_updater for image_transport 7.x (`#3756 <https://github.com/moveit/moveit2/issues/3756>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* [macOS] Fix compilation and linking issues in MoveIt2 (`#3631 <https://github.com/moveit/moveit2/issues/3631>`_)
+* Fix deprecations in image_common and tf2_ros (`#3567 <https://github.com/moveit/moveit2/issues/3567>`_)
+* Contributors: Dhruv Patel, Nathan Brooks, Shivam Maurya, Stephanie Eng
+
 2.14.1 (2025-09-09)
 -------------------
 * More user-friendly log message for pointcloud_octomap_updater (`#3514 <https://github.com/moveit/moveit2/issues/3514>`_)

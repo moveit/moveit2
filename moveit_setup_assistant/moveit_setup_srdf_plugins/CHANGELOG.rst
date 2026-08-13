@@ -2,6 +2,20 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.0 (2026-08-12)
+-------------------
+* moveit_setup_srdf_plugins: make test_srdf fail loudly instead of segfaulting (`#3810 <https://github.com/moveit/moveit2/issues/3810>`_)
+* Fix rviz Qt6 threshold: 15.1 -> 15.1.14 (`#3807 <https://github.com/moveit/moveit2/issues/3807>`_)
+  Corrects the gate added in #3707: rviz_common 15.1.0-15.1.13 are still Qt5.
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* Migrate from deprecated QVariant::Type::Int to QMetaType::Int (`#3712 <https://github.com/moveit/moveit2/issues/3712>`_)
+* Use Qt6 on Rolling and newer distros (`#3707 <https://github.com/moveit/moveit2/issues/3707>`_)
+  rviz switched to Qt6 in rviz_common 15.1.14. Downstream rviz plugins must build
+  against the same Qt major version as the rviz they link.
+* Contributors: Nathan Brooks
+
 2.14.1 (2025-09-09)
 -------------------
 

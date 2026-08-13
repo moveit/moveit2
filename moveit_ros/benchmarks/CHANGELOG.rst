@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_benchmarks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.0 (2026-08-12)
+-------------------
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* (rolling)  Fix moveit_ros_benchmarks compile fail (`#3593 <https://github.com/moveit/moveit2/issues/3593>`_)
+* Contributors: Nathan Brooks, Shivam Maurya, mosfet80
+
 2.14.1 (2025-09-09)
 -------------------
 

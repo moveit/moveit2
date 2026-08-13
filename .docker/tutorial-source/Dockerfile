@@ -7,12 +7,12 @@ ARG ROS_DISTRO=rolling
 ARG GZ_VERSION=ionic
 
 FROM moveit/moveit2:${ROS_DISTRO}-ci
-LABEL maintainer Tyler Weaver tyler@picknik.ai
+LABEL maintainer="Tyler Weaver tyler@picknik.ai"
 
 ARG GZ_VERSION
 
 # Export ROS_UNDERLAY for downstream docker containers
-ENV ROS_UNDERLAY /root/ws_moveit/install
+ENV ROS_UNDERLAY=/root/ws_moveit/install
 WORKDIR $ROS_UNDERLAY/..
 
 # Copy MoveIt sources from docker context

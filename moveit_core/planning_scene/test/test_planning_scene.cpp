@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan */
 
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.hpp>
 #include <moveit/planning_scene/planning_scene.hpp>

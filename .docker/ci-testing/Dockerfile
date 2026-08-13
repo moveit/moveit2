@@ -2,9 +2,9 @@
 # CI image using the ROS testing repository
 
 FROM osrf/ros2:testing
-LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer="Robert Haschke rhaschke@techfak.uni-bielefeld.de"
 
-ENV TERM xterm
+ENV TERM=xterm
 
 # Overwrite the ROS_DISTRO set in osrf/ros2:testing to the distro tied to this Dockerfile (OUR_ROS_DISTRO).
 # In case ROS_DISTRO is now different from what was set in osrf/ros2:testing, run `rosdep update` again

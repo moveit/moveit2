@@ -39,6 +39,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/version.h>
 #include <rclcpp_action/rclcpp_action.hpp>

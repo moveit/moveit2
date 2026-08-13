@@ -2,6 +2,19 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.0 (2026-08-12)
+-------------------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* resolute: GCC 15 / C++20 / rviz API build fixes, and octomap -Werror=cpp suppression (`#3760 <https://github.com/moveit/moveit2/issues/3760>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* [macOS] Fix compilation and linking issues in MoveIt2 (`#3631 <https://github.com/moveit/moveit2/issues/3631>`_)
+* use offset in polyline (`#3632 <https://github.com/moveit/moveit2/issues/3632>`_)
+* Feature: New POLYLINE command in Pilz planner for space trajectory generation (`#3610 <https://github.com/moveit/moveit2/issues/3610>`_)
+* Contributors: Aiman Taher Abdulmwala Haidar, Dhruv Patel, Nathan Brooks, Shivam Maurya, Stephanie Eng
+
 2.14.1 (2025-09-09)
 -------------------
 

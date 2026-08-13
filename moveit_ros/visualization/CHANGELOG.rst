@@ -2,6 +2,23 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.0 (2026-08-12)
+-------------------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* resolute: GCC 15 / C++20 / rviz API build fixes, and octomap -Werror=cpp suppression (`#3760 <https://github.com/moveit/moveit2/issues/3760>`_)
+* Fix rviz Qt6 threshold: 15.1 -> 15.1.14 (`#3807 <https://github.com/moveit/moveit2/issues/3807>`_)
+  Corrects the gate added in #3707: rviz_common 15.1.0-15.1.13 are still Qt5.
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* CMake: remove boost system (`#3727 <https://github.com/moveit/moveit2/issues/3727>`_)
+* Use Qt6 on Rolling and newer distros (`#3707 <https://github.com/moveit/moveit2/issues/3707>`_)
+  rviz switched to Qt6 in rviz_common 15.1.14. Downstream rviz plugins must build
+  against the same Qt major version as the rviz they link.
+* Fix deprecations in image_common and tf2_ros (`#3567 <https://github.com/moveit/moveit2/issues/3567>`_)
+* Contributors: Guilhem Saurel, Nathan Brooks, Shivam Maurya
+
 2.14.1 (2025-09-09)
 -------------------
 * Initialize the namespace property for custom iMarkers in rviz (`#3547 <https://github.com/moveit/moveit2/issues/3547>`_)

@@ -5,10 +5,10 @@
 
 ARG ROS_DISTRO=rolling
 FROM moveit/moveit2:${ROS_DISTRO}-ci
-LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer="Robert Haschke rhaschke@techfak.uni-bielefeld.de"
 
 # Export ROS_UNDERLAY for downstream docker containers
-ENV ROS_UNDERLAY /root/ws_moveit/install
+ENV ROS_UNDERLAY=/root/ws_moveit/install
 WORKDIR $ROS_UNDERLAY/..
 
 # Copy MoveIt sources from docker context

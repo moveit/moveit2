@@ -2,6 +2,19 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.0 (2026-08-12)
+-------------------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* Replace shared_ptr::unique() checks (`#3793 <https://github.com/moveit/moveit2/issues/3793>`_)
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* CMake: remove boost system (`#3727 <https://github.com/moveit/moveit2/issues/3727>`_)
+* [OMPL] also check constraints in StateValidityCallback (`#3586 <https://github.com/moveit/moveit2/issues/3586>`_)
+* Update ompl_interface with latest version of OMPL (`#2994 <https://github.com/moveit/moveit2/issues/2994>`_)
+* Contributors: Guilhem Saurel, Marq Rasmussen, Matthijs van der Burgh, Nathan Brooks, Shivam Maurya, Tobias Fischer
+
 2.14.1 (2025-09-09)
 -------------------
 

@@ -3,9 +3,9 @@
 
 ARG ROS_DISTRO=rolling
 FROM ros:${ROS_DISTRO}-ros-base
-LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer="Robert Haschke rhaschke@techfak.uni-bielefeld.de"
 
-ENV TERM xterm
+ENV TERM=xterm
 
 # Setup (temporary) ROS workspace
 WORKDIR /root/ws_moveit
@@ -25,7 +25,7 @@ RUN \
         # Some basic requirements
         wget git sudo curl \
         # Preferred build tools
-        clang clang-format-18 clang-tidy clang-tools \
+        clang clang-format clang-tidy clang-tools \
         ccache && \
     #
     # Globally disable git security
