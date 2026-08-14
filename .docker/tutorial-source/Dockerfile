@@ -6,17 +6,8 @@
 ARG ROS_DISTRO=rolling
 ARG GZ_VERSION=ionic
 
-FROM moveit/moveit2:${ROS_DISTRO}-ci
+FROM moveit/moveit2:${ROS_DISTRO}-source
 LABEL maintainer="Tyler Weaver tyler@picknik.ai"
-
-ARG GZ_VERSION
-
-# Export ROS_UNDERLAY for downstream docker containers
-ENV ROS_UNDERLAY=/root/ws_moveit/install
-WORKDIR $ROS_UNDERLAY/..
-
-# Copy MoveIt sources from docker context
-COPY . src/moveit2
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
