@@ -178,7 +178,7 @@ jobs:
         with:
           docker: ${{ env.DOCKER_IMAGE }}
           workdir: ${{ env.BASEDIR }}/target_ws
-          lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative
+          lcov_capture_args: --ignore-errors=gcov,gcov,mismatch,mismatch,negative,negative,inconsistent,inconsistent
           ignore: '"*/target_ws/build/*" "*/target_ws/install/*" "*/test/*"'
       - name: Upload codecov report
         uses: codecov/codecov-action@v7
