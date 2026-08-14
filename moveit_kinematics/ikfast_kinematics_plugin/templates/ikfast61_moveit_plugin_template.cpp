@@ -808,10 +808,14 @@ bool IKFastKinematicsPlugin::getPositionFK(const std::vector<std::string>& link_
     return false;
   }
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wvla-cxx-extension"
+#endif
   IkReal angles[num_joints_];
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
   for (unsigned char i = 0; i < num_joints_; ++i)
     angles[i] = joint_angles[i];
 
