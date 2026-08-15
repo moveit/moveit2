@@ -41,6 +41,12 @@
  * This file, including the ikfast cpp from OpenRAVE below, forms a MoveIt kinematics plugin.
  */
 
+#include <cmath>
+#include <list>
+#include <vector>
+#include <limits>
+#include <complex>
+
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/kinematics_base/kinematics_base.hpp>
 #include <moveit/robot_state/robot_state.hpp>
