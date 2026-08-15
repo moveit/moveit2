@@ -72,4 +72,8 @@ ament_export_targets(moveit_resources_prbt_ikfast_manipulator_pluginTargets
 ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS}
                           generate_parameter_library)
 
+target_compile_definitions(
+  prbt_manipulator_moveit_ikfast_plugin
+  PRIVATE IKFAST_NO_MAIN IKFAST_NAMESPACE=prbt_manipulator)
+
 ament_package()

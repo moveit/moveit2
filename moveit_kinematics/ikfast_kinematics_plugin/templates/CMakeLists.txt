@@ -59,4 +59,8 @@ ament_export_dependencies(rclcpp)
 ament_export_dependencies(tf2_kdl)
 ament_export_dependencies(tf2_eigen)
 ament_export_dependencies(generate_parameter_library)
+
+target_compile_definitions(${IKFAST_LIBRARY_NAME}
+                           PRIVATE IKFAST_NO_MAIN IKFAST_NAMESPACE=_NAMESPACE_)
+
 ament_package()
