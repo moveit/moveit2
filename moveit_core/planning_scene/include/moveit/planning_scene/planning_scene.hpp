@@ -953,7 +953,6 @@ private:
 
     mutable collision_detection::CollisionEnvPtr cenv_unpadded_;
     mutable collision_detection::CollisionEnvConstPtr cenv_unpadded_const_;
-    CollisionDetectorConstPtr unpadded_parent_;
     mutable std::once_flag cenv_unpadded_once_;
 
     const collision_detection::CollisionEnvConstPtr& getCollisionEnv() const
@@ -963,10 +962,9 @@ private:
     const collision_detection::CollisionEnvConstPtr& getCollisionEnvUnpadded() const
     {
       std::call_once(cenv_unpadded_once_, [this]() {
-        if (unpadded_parent_)
-          cenv_unpadded_ = alloc_->allocateEnv(unpadded_parent_->getCollisionEnvUnpadded(), cenv_->getWorld());
-        else
-          cenv_unpadded_ = alloc_->allocateEnv(cenv_->getWorld(), cenv_->getRobotModel());
+        cenv_unpadded_ = alloc_->allocateEnv(cenv_, cenv_->getWorld());
+        cenv_unpadded_->setPadding(0.0);
+        cenv_unpadded_->setScale(1.0);
         cenv_unpadded_const_ = cenv_unpadded_;
       });
       return cenv_unpadded_const_;

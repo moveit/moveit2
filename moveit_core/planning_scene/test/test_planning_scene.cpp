@@ -256,7 +256,7 @@ TEST(PlanningScene, LoadRestoreDiff)
   EXPECT_EQ(ps->getCollisionEnvUnpadded()->getWorld()->size(), 2u);
 }
 
-TEST(PlanningScene, UnpaddedCollisionEnvironmentIsLazyAndInheritedByNestedDiffs)
+TEST(PlanningScene, UnpaddedCollisionEnvironmentIsLazyAcrossNestedDiffs)
 {
   auto allocator = std::make_shared<CountingCollisionDetectorAllocator>();
   auto root = std::make_shared<planning_scene::PlanningScene>(moveit::core::loadTestingRobotModel("panda"));
@@ -274,8 +274,8 @@ TEST(PlanningScene, UnpaddedCollisionEnvironmentIsLazyAndInheritedByNestedDiffs)
   EXPECT_EQ(allocator->copyAllocations(), 2u);
 
   grandchild->getCollisionEnvUnpadded();
-  EXPECT_EQ(allocator->freshAllocations(), 2u);
-  EXPECT_EQ(allocator->copyAllocations(), 4u);
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 3u);
 }
 
 TEST(PlanningScene, UnpaddedCollisionEnvironmentIsInitializedOnceAcrossThreads)
@@ -290,8 +290,34 @@ TEST(PlanningScene, UnpaddedCollisionEnvironmentIsInitializedOnceAcrossThreads)
   for (std::thread& thread : threads)
     thread.join();
 
-  EXPECT_EQ(allocator->freshAllocations(), 2u);
-  EXPECT_EQ(allocator->copyAllocations(), 0u);
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 1u);
+}
+
+TEST(PlanningScene, DetachedSceneDoesNotRetainDeferredCollisionEnvironmentSource)
+{
+  auto allocator = std::make_shared<CountingCollisionDetectorAllocator>();
+  auto source = std::make_shared<planning_scene::PlanningScene>(moveit::core::loadTestingRobotModel("panda"));
+  source->allocateCollisionDetector(allocator);
+  source->getCollisionEnvNonConst()->setLinkPadding("panda_link0", 0.1);
+  source->getCollisionEnvNonConst()->setLinkScale("panda_link0", 1.1);
+  std::weak_ptr<const planning_scene::PlanningScene> source_scene = source;
+  std::weak_ptr<const collision_detection::CollisionEnv> source_collision_environment = source->getCollisionEnv();
+  std::weak_ptr<const collision_detection::World> source_world = source->getWorld();
+
+  planning_scene::PlanningScenePtr detached = planning_scene::PlanningScene::clone(source);
+  source.reset();
+
+  EXPECT_TRUE(source_scene.expired());
+  EXPECT_TRUE(source_collision_environment.expired());
+  EXPECT_TRUE(source_world.expired());
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 1u);
+
+  EXPECT_DOUBLE_EQ(detached->getCollisionEnvUnpadded()->getLinkPadding("panda_link0"), 0.0);
+  EXPECT_DOUBLE_EQ(detached->getCollisionEnvUnpadded()->getLinkScale("panda_link0"), 1.0);
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 2u);
 }
 
 TEST(PlanningScene, MakeAttachedDiff)

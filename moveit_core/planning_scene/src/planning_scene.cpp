@@ -267,7 +267,6 @@ void PlanningScene::allocateCollisionDetector(const collision_detection::Collisi
   if (parent_detector)
   {
     collision_detector_->cenv_ = collision_detector_->alloc_->allocateEnv(parent_detector->cenv_, world_);
-    collision_detector_->unpadded_parent_ = parent_detector;
   }
   else
   {
