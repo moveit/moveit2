@@ -71,7 +71,11 @@ XmlSyntaxHighlighter::highlight(Rules::const_iterator active, QStringView text, 
 
   if (search_end)  // find end of active rule
   {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    auto match = active->second.end.matchView(text);
+#else
     auto match = active->second.end.match(text);
+#endif
     // when returned, end indicates the end of the closing expression
     end = match.hasMatch() ? match.capturedEnd() : text.size();
     setFormat(start, end, active->second.format);
@@ -96,7 +100,11 @@ XmlSyntaxHighlighter::highlight(Rules::const_iterator active, QStringView text, 
     offset = 0;   // (re)start at beginning of (clipped) text
     while (true)  // process all matches of rule
     {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+      auto match = rule.start.matchView(text, offset);
+#else
       auto match = rule.start.match(text, offset);
+#endif
       if (!match.hasMatch())
         break;
 
