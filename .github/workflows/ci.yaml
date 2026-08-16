@@ -45,6 +45,7 @@ jobs:
       # Pull any updates to the upstream workspace (after restoring it from cache)
       AFTER_SETUP_UPSTREAM_WORKSPACE: |
         vcs pull $BASEDIR/upstream_ws/src
+      AFTER_INSTALL_TARGET_DEPENDENCIES: |
         # silent octomap warnings until upstream fix (OctoMap/octomap#434) is released:
         sed -i 's/#include *<ciso646>//' /usr/include/octomap/OcTreeKey.h
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
