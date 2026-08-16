@@ -39,6 +39,7 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <atomic>
 #include <list>
 #include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <moveit/trajectory_processing/time_parameterization.hpp>
@@ -118,11 +119,8 @@ private:
 
   double length_ = 0.0;
   std::list<std::pair<double, bool>> switching_points_;
-  std::list<std::unique_ptr<PathSegment>> path_segments_;
-  // Cache the last-accessed segment so getPathSegment can resume its forward scan locally instead of
-  // rescanning from the front every call (integration queries advance monotonically along the path).
-  mutable std::list<std::unique_ptr<PathSegment>>::const_iterator cached_it_;
-  mutable bool cache_valid_ = false;
+  std::vector<std::unique_ptr<PathSegment>> path_segments_;
+  mutable std::atomic<std::size_t> cached_segment_{ 0 };
 };
 
 class Trajectory
