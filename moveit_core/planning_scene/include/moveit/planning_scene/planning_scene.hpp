@@ -54,6 +54,7 @@
 #include <memory>
 #include <functional>
 #include <optional>
+#include <mutex>
 #include <thread>
 #include <variant>
 #include <optional>
@@ -950,12 +951,10 @@ private:
     collision_detection::CollisionEnvPtr cenv_;  // never nullptr
     collision_detection::CollisionEnvConstPtr cenv_const_;
 
-    // Unpadded env is built LAZILY on first use (see getCollisionEnvUnpadded); many scenes never query it.
     mutable collision_detection::CollisionEnvPtr cenv_unpadded_;
     mutable collision_detection::CollisionEnvConstPtr cenv_unpadded_const_;
-    // Source for the deferred unpadded env: parent's unpadded env (child scenes) or null (build from model).
-    collision_detection::CollisionEnvConstPtr unpadded_parent_src_;
-    collision_detection::CollisionDetectorAllocatorPtr unpadded_alloc_;
+    CollisionDetectorConstPtr unpadded_parent_;
+    mutable std::once_flag cenv_unpadded_once_;
 
     const collision_detection::CollisionEnvConstPtr& getCollisionEnv() const
     {
@@ -963,13 +962,13 @@ private:
     }
     const collision_detection::CollisionEnvConstPtr& getCollisionEnvUnpadded() const
     {
-      if (!cenv_unpadded_const_)  // lazy: build on first access, then cache
-      {
-        cenv_unpadded_ = unpadded_parent_src_ ?
-                             unpadded_alloc_->allocateEnv(unpadded_parent_src_, cenv_->getWorld()) :
-                             unpadded_alloc_->allocateEnv(cenv_->getWorld(), cenv_->getRobotModel());
+      std::call_once(cenv_unpadded_once_, [this]() {
+        if (unpadded_parent_)
+          cenv_unpadded_ = alloc_->allocateEnv(unpadded_parent_->getCollisionEnvUnpadded(), cenv_->getWorld());
+        else
+          cenv_unpadded_ = alloc_->allocateEnv(cenv_->getWorld(), cenv_->getRobotModel());
         cenv_unpadded_const_ = cenv_unpadded_;
-      }
+      });
       return cenv_unpadded_const_;
     }
     void copyPadding(const CollisionDetector& src);
