@@ -183,7 +183,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   connect(ui_->set_as_goal_state_button, &QPushButton::clicked, this, &MotionPlanningFrame::setAsGoalStateButtonClicked);
   connect(ui_->remove_state_button, &QPushButton::clicked, this, &MotionPlanningFrame::removeStateButtonClicked);
   connect(ui_->clear_states_button, &QPushButton::clicked, this, &MotionPlanningFrame::clearStatesButtonClicked);
-  connect(ui_->approximate_ik, &QCheckBox::stateChanged, this, &MotionPlanningFrame::approximateIKChanged);
+  connect(ui_->approximate_ik, &QCheckBox::checkStateChanged, this, &MotionPlanningFrame::approximateIKChanged);
 
   connect(ui_->detect_objects_button, &QPushButton::clicked, this, &MotionPlanningFrame::detectObjectsButtonClicked);
   connect(ui_->pick_button, &QPushButton::clicked, this, &MotionPlanningFrame::pickObjectButtonClicked);
@@ -209,12 +209,12 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   connect(ui_->acceleration_scaling_factor, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this,
           &MotionPlanningFrame::configChanged);
 
-  connect(ui_->allow_replanning, &QCheckBox::stateChanged, this, &MotionPlanningFrame::configChanged);
-  connect(ui_->allow_looking, &QCheckBox::stateChanged, this, &MotionPlanningFrame::configChanged);
-  connect(ui_->allow_external_program, &QCheckBox::stateChanged, this, &MotionPlanningFrame::configChanged);
-  connect(ui_->use_cartesian_path, &QCheckBox::stateChanged, this, &MotionPlanningFrame::configChanged);
-  connect(ui_->collision_aware_ik, &QCheckBox::stateChanged, this, &MotionPlanningFrame::configChanged);
-  connect(ui_->approximate_ik, &QCheckBox::stateChanged, this, &MotionPlanningFrame::configChanged);
+  connect(ui_->allow_replanning, &QCheckBox::checkStateChanged, this, &MotionPlanningFrame::configChanged);
+  connect(ui_->allow_looking, &QCheckBox::checkStateChanged, this, &MotionPlanningFrame::configChanged);
+  connect(ui_->allow_external_program, &QCheckBox::checkStateChanged, this, &MotionPlanningFrame::configChanged);
+  connect(ui_->use_cartesian_path, &QCheckBox::checkStateChanged, this, &MotionPlanningFrame::configChanged);
+  connect(ui_->collision_aware_ik, &QCheckBox::checkStateChanged, this, &MotionPlanningFrame::configChanged);
+  connect(ui_->approximate_ik, &QCheckBox::checkStateChanged, this, &MotionPlanningFrame::configChanged);
 
   connect(ui_->wcenter_x, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this,
           &MotionPlanningFrame::configChanged);
