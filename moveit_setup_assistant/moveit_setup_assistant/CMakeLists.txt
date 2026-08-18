@@ -8,7 +8,7 @@ moveit_package()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(Boost REQUIRED program_options)
+find_package(Boost CONFIG REQUIRED program_options)
 # rviz switched to Qt6 in 15.1.14: https://github.com/ros2/rviz/pull/1635
 # (merged 2025-12-08, first released in the 15.1.14 tag on 2025-12-17 -- 15.1.0
 # through 15.1.13 are still Qt5)

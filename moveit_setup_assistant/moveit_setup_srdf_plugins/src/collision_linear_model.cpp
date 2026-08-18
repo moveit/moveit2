@@ -254,8 +254,17 @@ void SortFilterProxyModel::setShowAll(bool show_all)
   if (show_all_ == show_all)
     return;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+  beginFilterChange();
+#endif
+
   show_all_ = show_all;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+  endFilterChange(QSortFilterProxyModel::Direction::Rows);
+#else
   invalidateFilter();
+#endif
 }
 
 bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
