@@ -26,7 +26,8 @@ target_link_libraries(
   rclcpp::rclcpp
   urdfdom::urdf_parser
   ${octomap_msgs_TARGETS}
-  octomap)
+  octomap
+  octomath)
 
 install(DIRECTORY include/ DESTINATION include/moveit_core)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_planning_scene_export.h

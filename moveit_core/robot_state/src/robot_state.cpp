@@ -49,6 +49,7 @@
 #include <functional>
 #include <moveit/macros/console_colors.hpp>
 #include <moveit/robot_model/aabb.hpp>
+#include <iomanip>
 #include <moveit/utils/logger.hpp>
 
 namespace moveit
