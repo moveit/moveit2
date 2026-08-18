@@ -51,10 +51,11 @@ target_link_libraries(moveit_servo_lib_cpp moveit_servo_lib_parameters
 add_library(moveit_servo_lib_ros SHARED src/servo_node.cpp)
 set_target_properties(moveit_servo_lib_ros PROPERTIES VERSION
                                                       "${moveit_servo_VERSION}")
-target_link_libraries(moveit_servo_lib_ros moveit_servo_lib_cpp
-                      ${control_msgs_TARGETS} realtime_tools::realtime_tools
-                      ${std_srvs_TARGETS})
-  
+target_link_libraries(
+  moveit_servo_lib_ros moveit_servo_lib_cpp
+  ${control_msgs_TARGETS} realtime_tools::realtime_tools
+  ${std_srvs_TARGETS})
+
 # ##############################################################################
 # Components ##
 # ##############################################################################
