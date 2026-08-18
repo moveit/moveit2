@@ -48,21 +48,8 @@ set_target_properties(moveit_servo_lib_cpp PROPERTIES VERSION
 target_link_libraries(
   moveit_servo_lib_cpp
   moveit_servo_lib_parameters
-  ${control_msgs_TARGETS}
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
   moveit_ros_planning::moveit_ros_planning
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_components::component
-  realtime_tools::realtime_tools
-  ${sensor_msgs_TARGETS}
-  ${std_msgs_TARGETS}
-  ${std_srvs_TARGETS}
-  tf2_eigen::tf2_eigen
-  ${trajectory_msgs_TARGETS})
+  )
 
 add_library(moveit_servo_lib_ros SHARED src/servo_node.cpp)
 set_target_properties(moveit_servo_lib_ros PROPERTIES VERSION
@@ -71,20 +58,8 @@ target_link_libraries(
   moveit_servo_lib_ros
   moveit_servo_lib_cpp
   ${control_msgs_TARGETS}
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_planning::moveit_ros_planning
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_components::component
   realtime_tools::realtime_tools
-  ${sensor_msgs_TARGETS}
-  ${std_msgs_TARGETS}
-  ${std_srvs_TARGETS}
-  tf2_eigen::tf2_eigen
-  ${trajectory_msgs_TARGETS})
+  ${std_srvs_TARGETS})
 
 # ##############################################################################
 # Components ##
@@ -101,64 +76,19 @@ rclcpp_components_register_node(moveit_servo_lib_ros PLUGIN
 add_executable(demo_joint_jog demos/cpp_interface/demo_joint_jog.cpp)
 target_link_libraries(
   demo_joint_jog
-  moveit_servo_lib_cpp
-  ${control_msgs_TARGETS}
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_planning::moveit_ros_planning
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_components::component
-  realtime_tools::realtime_tools
-  ${sensor_msgs_TARGETS}
-  ${std_msgs_TARGETS}
-  ${std_srvs_TARGETS}
-  tf2_eigen::tf2_eigen
-  ${trajectory_msgs_TARGETS})
+  moveit_servo_lib_cpp)
 
 # Executable node for the twist demo
 add_executable(demo_twist demos/cpp_interface/demo_twist.cpp)
 target_link_libraries(
   demo_twist
-  moveit_servo_lib_cpp
-  ${control_msgs_TARGETS}
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_planning::moveit_ros_planning
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_components::component
-  realtime_tools::realtime_tools
-  ${sensor_msgs_TARGETS}
-  ${std_msgs_TARGETS}
-  ${std_srvs_TARGETS}
-  tf2_eigen::tf2_eigen
-  ${trajectory_msgs_TARGETS})
+  moveit_servo_lib_cpp)
 
 # Executable node for the pose demo
 add_executable(demo_pose demos/cpp_interface/demo_pose.cpp)
 target_link_libraries(
   demo_pose
-  moveit_servo_lib_cpp
-  ${control_msgs_TARGETS}
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_planning::moveit_ros_planning
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_components::component
-  realtime_tools::realtime_tools
-  ${sensor_msgs_TARGETS}
-  ${std_msgs_TARGETS}
-  ${std_srvs_TARGETS}
-  tf2_eigen::tf2_eigen
-  ${trajectory_msgs_TARGETS})
+  moveit_servo_lib_cpp)
 
 # Keyboard control example for servo
 add_executable(servo_keyboard_input demos/servo_keyboard_input.cpp)
@@ -166,20 +96,7 @@ target_include_directories(servo_keyboard_input PUBLIC include)
 target_link_libraries(
   servo_keyboard_input
   ${control_msgs_TARGETS}
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_planning::moveit_ros_planning
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_components::component
-  realtime_tools::realtime_tools
-  ${sensor_msgs_TARGETS}
-  ${std_msgs_TARGETS}
-  ${std_srvs_TARGETS}
-  tf2_eigen::tf2_eigen
-  ${trajectory_msgs_TARGETS})
+  moveit_core::moveit_core)
 
 # ##############################################################################
 # Install ##
@@ -227,21 +144,7 @@ if(BUILD_TESTING)
   target_link_libraries(
     moveit_servo_utils_test
     moveit_servo_lib_cpp
-    ${control_msgs_TARGETS}
-    ${geometry_msgs_TARGETS}
-    moveit_core::moveit_core
-    ${moveit_msgs_TARGETS}
-    moveit_ros_planning::moveit_ros_planning
-    moveit_ros_planning_interface::moveit_ros_planning_interface
-    pluginlib::pluginlib
-    rclcpp::rclcpp
-    rclcpp_components::component
-    realtime_tools::realtime_tools
-    ${sensor_msgs_TARGETS}
-    ${std_msgs_TARGETS}
-    ${std_srvs_TARGETS}
-    tf2_eigen::tf2_eigen
-    ${trajectory_msgs_TARGETS})
+    moveit_core::moveit_core)
   add_ros_test(tests/launch/servo_utils.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -251,21 +154,8 @@ if(BUILD_TESTING)
   target_link_libraries(
     moveit_servo_cpp_integration_test
     moveit_servo_lib_cpp
-    ${control_msgs_TARGETS}
-    ${geometry_msgs_TARGETS}
-    moveit_core::moveit_core
-    ${moveit_msgs_TARGETS}
-    moveit_ros_planning::moveit_ros_planning
-    moveit_ros_planning_interface::moveit_ros_planning_interface
-    pluginlib::pluginlib
-    rclcpp::rclcpp
-    rclcpp_components::component
-    realtime_tools::realtime_tools
-    ${sensor_msgs_TARGETS}
-    ${std_msgs_TARGETS}
-    ${std_srvs_TARGETS}
-    tf2_eigen::tf2_eigen
-    ${trajectory_msgs_TARGETS})
+    moveit_core::moveit_core)
+
   add_ros_test(tests/launch/servo_cpp_integration.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -275,20 +165,9 @@ if(BUILD_TESTING)
   target_link_libraries(
     moveit_servo_ros_integration_test
     ${control_msgs_TARGETS}
-    ${geometry_msgs_TARGETS}
     moveit_core::moveit_core
-    ${moveit_msgs_TARGETS}
-    moveit_ros_planning::moveit_ros_planning
-    moveit_ros_planning_interface::moveit_ros_planning_interface
-    pluginlib::pluginlib
-    rclcpp::rclcpp
-    rclcpp_components::component
-    realtime_tools::realtime_tools
-    ${sensor_msgs_TARGETS}
-    ${std_msgs_TARGETS}
-    ${std_srvs_TARGETS}
-    tf2_eigen::tf2_eigen
-    ${trajectory_msgs_TARGETS})
+    ${trajectory_msgs_TARGETS}
+    )
   add_ros_test(tests/launch/servo_ros_integration.test.py TIMEOUT 120 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
