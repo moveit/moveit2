@@ -46,6 +46,33 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/robot_state/conversions.hpp>
 
+#include <algorithm>
+
+class TestablePlanningSceneMonitor : public planning_scene_monitor::PlanningSceneMonitor
+{
+public:
+  using PlanningSceneMonitor::PlanningSceneMonitor;
+
+  void addLinkShape(const moveit::core::LinkModel* link, occupancy_map_monitor::ShapeHandle handle)
+  {
+    link_shape_handles_[link].emplace_back(handle, 0);
+  }
+
+  bool setStaticTransform(const std::string& target_frame, const std::string& source_frame)
+  {
+    geometry_msgs::msg::TransformStamped transform;
+    transform.header.frame_id = target_frame;
+    transform.child_frame_id = source_frame;
+    transform.transform.rotation.w = 1.0;
+    return tf_buffer_->setTransform(transform, "test", true);
+  }
+
+  bool getShapeTransforms(const std::string& target_frame, occupancy_map_monitor::ShapeTransformCache& cache) const
+  {
+    return getShapeTransformCache(target_frame, rclcpp::Time(0), cache);
+  }
+};
+
 class PlanningSceneMonitorTest : public ::testing::Test
 {
 public:
@@ -53,8 +80,8 @@ public:
   {
     test_node_ = std::make_shared<rclcpp::Node>("moveit_planning_scene_monitor_test");
     executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-    planning_scene_monitor_ = std::make_unique<planning_scene_monitor::PlanningSceneMonitor>(
-        test_node_, "robot_description", "planning_scene_monitor");
+    planning_scene_monitor_ =
+        std::make_unique<TestablePlanningSceneMonitor>(test_node_, "robot_description", "planning_scene_monitor");
     planning_scene_monitor_->monitorDiffs(true);
     scene_ = planning_scene_monitor_->getPlanningScene();
     executor_->add_node(test_node_);
@@ -81,7 +108,7 @@ protected:
   rclcpp::Executor::SharedPtr executor_;
   std::thread executor_thread_;
 
-  planning_scene_monitor::PlanningSceneMonitorPtr planning_scene_monitor_;
+  std::unique_ptr<TestablePlanningSceneMonitor> planning_scene_monitor_;
   planning_scene::PlanningScenePtr scene_;
 };
 
@@ -96,6 +123,44 @@ TEST_F(PlanningSceneMonitorTest, TestPersistentScene)
   msg.is_diff = msg.robot_state.is_diff = false;
   planning_scene_monitor_->newPlanningSceneMessage(msg);
   EXPECT_EQ(scene, planning_scene_monitor_->getPlanningScene());
+}
+
+TEST_F(PlanningSceneMonitorTest, ShapeTransformCacheWaitsForLateTransforms)
+{
+  const moveit::core::LinkModel* link =
+      planning_scene_monitor_->getRobotModel()->getLinkModelsWithCollisionGeometry()[0];
+  planning_scene_monitor_->addLinkShape(link, 1);
+
+  bool transform_set = false;
+  std::thread transform_thread([this, link, &transform_set]() {
+    std::this_thread::sleep_for(std::chrono::milliseconds{ 5 });
+    transform_set = planning_scene_monitor_->setStaticTransform("sensor", link->getName());
+  });
+  occupancy_map_monitor::ShapeTransformCache cache;
+  EXPECT_TRUE(planning_scene_monitor_->getShapeTransforms("sensor", cache));
+  transform_thread.join();
+
+  EXPECT_TRUE(transform_set);
+  EXPECT_EQ(cache.count(1), 1u);
+}
+
+TEST_F(PlanningSceneMonitorTest, ShapeTransformCacheContinuesAfterMissingTransform)
+{
+  std::vector<const moveit::core::LinkModel*> links =
+      planning_scene_monitor_->getRobotModel()->getLinkModelsWithCollisionGeometry();
+  ASSERT_GE(links.size(), 3u);
+  std::sort(links.begin(), links.end());
+  for (std::size_t i = 0; i < 3; ++i)
+    planning_scene_monitor_->addLinkShape(links[i], i + 1);
+  ASSERT_TRUE(planning_scene_monitor_->setStaticTransform("sensor", links[0]->getName()));
+  ASSERT_TRUE(planning_scene_monitor_->setStaticTransform("sensor", links[2]->getName()));
+
+  occupancy_map_monitor::ShapeTransformCache cache;
+  EXPECT_TRUE(planning_scene_monitor_->getShapeTransforms("sensor", cache));
+
+  EXPECT_EQ(cache.count(1), 1u);
+  EXPECT_EQ(cache.count(2), 0u);
+  EXPECT_EQ(cache.count(3), 1u);
 }
 
 using UpdateType = planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType;

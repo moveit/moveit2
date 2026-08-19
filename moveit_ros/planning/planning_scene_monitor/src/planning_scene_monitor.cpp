@@ -59,6 +59,7 @@
 
 #include <fmt/format.h>
 #include <memory>
+#include <optional>
 
 #include <std_msgs/msg/string.hpp>
 
@@ -1222,68 +1223,70 @@ void PlanningSceneMonitor::stopSceneMonitor()
 bool PlanningSceneMonitor::getShapeTransformCache(const std::string& target_frame, const rclcpp::Time& target_time,
                                                   occupancy_map_monitor::ShapeTransformCache& cache) const
 {
-  try
-  {
-    std::scoped_lock _(shape_handles_lock_);
+  std::scoped_lock _(shape_handles_lock_);
+  const auto lookup_transform = [this, &target_frame,
+                                 &target_time](const std::string& source_frame) -> std::optional<Eigen::Isometry3d> {
+    try
+    {
+      return tf2::transformToEigen(static_cast<const tf2::BufferCore&>(*tf_buffer_)
+                                       .lookupTransform(target_frame, source_frame, tf2_ros::fromRclcpp(target_time)));
+    }
+    catch (const tf2::TransformException&)
+    {
+      try
+      {
+        return tf2::transformToEigen(tf_buffer_->lookupTransform(target_frame, source_frame, target_time,
+                                                                 shape_transform_cache_lookup_wait_time_));
+      }
+      catch (const tf2::TransformException&)
+      {
+        return std::nullopt;
+      }
+    }
+  };
 
-    for (const std::pair<const moveit::core::LinkModel* const,
-                         std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
-         link_shape_handles_)
+  for (const std::pair<const moveit::core::LinkModel* const,
+                       std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>& link_shape_handle :
+       link_shape_handles_)
+  {
+    const std::optional<Eigen::Isometry3d> transform = lookup_transform(link_shape_handle.first->getName());
+    if (!transform)
+      continue;
+    for (std::size_t j = 0; j < link_shape_handle.second.size(); ++j)
     {
-      if (tf_buffer_->canTransform(target_frame, link_shape_handle.first->getName(), target_time,
-                                   shape_transform_cache_lookup_wait_time_))
-      {
-        Eigen::Isometry3d ttr = tf2::transformToEigen(
-            tf_buffer_->lookupTransform(target_frame, link_shape_handle.first->getName(), target_time));
-        for (std::size_t j = 0; j < link_shape_handle.second.size(); ++j)
-        {
-          cache[link_shape_handle.second[j].first] =
-              ttr * link_shape_handle.first->getCollisionOriginTransforms()[link_shape_handle.second[j].second];
-        }
-      }
-    }
-    for (const std::pair<const moveit::core::AttachedBody* const,
-                         std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>&
-             attached_body_shape_handle : attached_body_shape_handles_)
-    {
-      if (tf_buffer_->canTransform(target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time,
-                                   shape_transform_cache_lookup_wait_time_))
-      {
-        Eigen::Isometry3d transform = tf2::transformToEigen(tf_buffer_->lookupTransform(
-            target_frame, attached_body_shape_handle.first->getAttachedLinkName(), target_time));
-        for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
-        {
-          cache[attached_body_shape_handle.second[k].first] =
-              transform *
-              attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
-        }
-      }
-    }
-    {
-      if (tf_buffer_->canTransform(target_frame, scene_->getPlanningFrame(), target_time,
-                                   shape_transform_cache_lookup_wait_time_))
-      {
-        Eigen::Isometry3d transform =
-            tf2::transformToEigen(tf_buffer_->lookupTransform(target_frame, scene_->getPlanningFrame(), target_time));
-        for (const std::pair<const std::string,
-                             std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
-                 collision_body_shape_handle : collision_body_shape_handles_)
-        {
-          for (const std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
-               collision_body_shape_handle.second)
-            cache[it.first] = transform * (*it.second);
-        }
-      }
+      cache[link_shape_handle.second[j].first] =
+          *transform * link_shape_handle.first->getCollisionOriginTransforms()[link_shape_handle.second[j].second];
     }
   }
-  catch (tf2::TransformException& ex)
+  for (const std::pair<const moveit::core::AttachedBody* const,
+                       std::vector<std::pair<occupancy_map_monitor::ShapeHandle, std::size_t>>>&
+           attached_body_shape_handle : attached_body_shape_handles_)
   {
-    rclcpp::Clock steady_clock = rclcpp::Clock();
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wold-style-cast"
-    RCLCPP_ERROR_THROTTLE(logger_, steady_clock, 1000, "Transform error: %s", ex.what());
-#pragma GCC diagnostic pop
-    return false;
+    const std::optional<Eigen::Isometry3d> transform =
+        lookup_transform(attached_body_shape_handle.first->getAttachedLinkName());
+    if (!transform)
+      continue;
+    for (std::size_t k = 0; k < attached_body_shape_handle.second.size(); ++k)
+    {
+      cache[attached_body_shape_handle.second[k].first] =
+          *transform *
+          attached_body_shape_handle.first->getShapePosesInLinkFrame()[attached_body_shape_handle.second[k].second];
+    }
+  }
+  if (!collision_body_shape_handles_.empty())
+  {
+    const std::optional<Eigen::Isometry3d> transform = lookup_transform(scene_->getPlanningFrame());
+    if (transform)
+    {
+      for (const std::pair<const std::string,
+                           std::vector<std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>>>&
+               collision_body_shape_handle : collision_body_shape_handles_)
+      {
+        for (const std::pair<occupancy_map_monitor::ShapeHandle, const Eigen::Isometry3d*>& it :
+             collision_body_shape_handle.second)
+          cache[it.first] = *transform * (*it.second);
+      }
+    }
   }
   return true;
 }
