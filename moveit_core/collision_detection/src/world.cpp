@@ -402,7 +402,7 @@ void World::updateGlobalPosesInternal(ObjectPtr& obj, bool update_shape_poses, b
 
 World::ObserverHandle World::addObserver(const ObserverCallbackFn& callback)
 {
-  const auto o = new Observer(callback);
+  const auto o = std::make_shared<Observer>(callback);
   observers_.push_back(o);
   return ObserverHandle(o);
 }
@@ -411,9 +411,8 @@ void World::removeObserver(ObserverHandle observer_handle)
 {
   for (auto obs = observers_.begin(); obs != observers_.end(); ++obs)
   {
-    if (*obs == observer_handle.observer_)
+    if (obs->get() == observer_handle.observer_.lock().get())
     {
-      delete *obs;
       observers_.erase(obs);
       return;
     }
@@ -428,15 +427,15 @@ void World::notifyAll(Action action)
 
 void World::notify(const ObjectConstPtr& obj, Action action)
 {
-  for (Observer* observer : observers_)
+  for (const auto& observer : observers_)
     observer->callback_(obj, action);
 }
 
 void World::notifyObserverAllObjects(const ObserverHandle observer_handle, Action action) const
 {
-  for (auto observer : observers_)
+  for (const auto& observer : observers_)
   {
-    if (observer == observer_handle.observer_)
+    if (observer.get() == observer_handle.observer_.lock().get())
     {
       // call the callback for each object
       for (const auto& object : objects_)
