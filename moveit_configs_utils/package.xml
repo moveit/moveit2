@@ -7,7 +7,7 @@
   <maintainer email="moveit_releasers@googlegroups.com">MoveIt Release Team</maintainer>
   <license>BSD-3-Clause</license>
   <author email="jafar@picknik.ai">Jafar Abdi</author>
-  <author email="davidvlu@gmail.com">David V. Lu!!</author>
+  <author email="david@metrorobots.com">David V. Lu!!</author>
 
   <exec_depend>ament_index_python</exec_depend>
   <exec_depend>launch_param_builder</exec_depend>
