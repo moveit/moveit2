@@ -159,21 +159,22 @@ stomp::TaskPtr createStompTask(const stomp::StompConfiguration& config, StompPla
   // Cost, noise and filter functions are provided for planning.
   // TODO(henningkayser): parameterize cost penalties
   using namespace stomp_moveit;
-  CostFn cost_fn;
+  std::vector<CostFn> cost_functions = { costs::getCollisionCostFunction(planning_scene, group,
+                                                                         1.0 /* collision penalty */) };
   if (!constraints.empty())
   {
-    cost_fn = costs::sum({ costs::getCollisionCostFunction(planning_scene, group, 1.0 /* collision penalty */),
-                           costs::getConstraintsCostFunction(planning_scene, group, constraints.getAllConstraints(),
-                                                             1.0 /* constraint penalty */) });
+    cost_functions.push_back(costs::getConstraintsCostFunction(planning_scene, group, constraints.getAllConstraints(),
+                                                               1.0 /* constraint penalty */));
   }
-  else
+  if (context.getParams().maximize_clearance)
   {
-    cost_fn = costs::getCollisionCostFunction(planning_scene, group, 1.0 /* collision penalty */);
+    cost_functions.push_back(costs::getCollisionDistanceCostFunction(planning_scene, group));
   }
 
   // TODO(henningkayser): parameterize stddev
   const std::vector<double> stddev(group->getActiveJointModels().size(), 0.1);
   auto noise_generator_fn = noise::getNormalDistributionGenerator(num_timesteps, stddev);
+  auto cost_fn = costs::sum(cost_functions);
   auto filter_fn =
       filters::chain({ filters::simpleSmoothingMatrix(num_timesteps), filters::enforcePositionBounds(group) });
   auto iteration_callback_fn =
@@ -299,6 +300,11 @@ bool StompPlanningContext::terminate()
 
 void StompPlanningContext::clear()
 {
+}
+
+const stomp_moveit::Params& StompPlanningContext::getParams() const
+{
+  return params_;
 }
 
 void StompPlanningContext::setPathPublisher(
