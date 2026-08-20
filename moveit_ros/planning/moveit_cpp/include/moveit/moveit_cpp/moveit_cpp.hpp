@@ -78,14 +78,21 @@ public:
       const std::string ns = "planning_scene_monitor_options";
       node->get_parameter_or(ns + ".name", name, std::string("planning_scene_monitor"));
       node->get_parameter_or(ns + ".robot_description", robot_description, std::string("robot_description"));
+      node->get_parameter_or(ns + ".joint_state_topic", joint_state_topic, joint_state_topic);
+      node->get_parameter_or(ns + ".attached_collision_object_topic", attached_collision_object_topic,
+                             attached_collision_object_topic);
+      node->get_parameter_or(ns + ".monitored_planning_scene_topic", monitored_planning_scene_topic,
+                             monitored_planning_scene_topic);
+      node->get_parameter_or(ns + ".publish_planning_scene_topic", publish_planning_scene_topic,
+                             publish_planning_scene_topic);
       node->get_parameter_or(ns + ".wait_for_initial_state_timeout", wait_for_initial_state_timeout, 0.0);
     }
     std::string name;
     std::string robot_description;
-    const std::string joint_state_topic;
-    const std::string attached_collision_object_topic;
-    const std::string monitored_planning_scene_topic;
-    const std::string publish_planning_scene_topic;
+    std::string joint_state_topic;
+    std::string attached_collision_object_topic;
+    std::string monitored_planning_scene_topic;
+    std::string publish_planning_scene_topic;
     double wait_for_initial_state_timeout;
   };
 
