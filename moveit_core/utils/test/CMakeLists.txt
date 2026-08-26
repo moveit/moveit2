@@ -14,6 +14,13 @@ find_package(ament_cmake_gtest REQUIRED)
 ament_add_gtest(test_logger test_logger.cpp)
 target_link_libraries(test_logger moveit_utils)
 
+# Regression test for getGlobalRootLogger()'s before-rclcpp::init() fallback.
+# Deliberately its own single-test executable/process -- see the file comment in
+# test_logger_before_init.cpp for why this can't be a test case inside
+# test_logger.cpp above.
+ament_add_gtest(test_logger_before_init test_logger_before_init.cpp)
+target_link_libraries(test_logger_before_init moveit_utils)
+
 find_package(launch_testing_ament_cmake)
 
 # These tests do not work on Humble as /rosout logging from child loggers does

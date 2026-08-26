@@ -45,15 +45,10 @@
 // the real moveit_utils rather than recompiling logger.cpp, and does not
 // expose anything through the public moveit/utils/logger.hpp API.
 //
-// GetGlobalRootLoggerTest must run before SetNodeLoggerNameTest: the latter
-// is the only test that touches the process-wide default rclcpp context
-// (via plain rclcpp::init()), and getGlobalRootLogger()'s underlying logger
-// is a function-local static that is only ever computed once for the life
-// of the process. GoogleTest runs tests within one binary in the order they
-// are defined (no shuffling is enabled here), so that ordering holds by
-// construction; GetGlobalRootLoggerTest also asserts its own precondition
-// (no context initialized yet) so a violation fails loudly instead of
-// silently exercising the wrong code path.
+// getGlobalRootLogger()'s before-rclcpp::init() fallback is covered
+// separately, by its own single-test executable/process
+// (test_logger_before_init.cpp) -- not here, since that behavior can only
+// be observed by the first thing in a process to touch it.
 #include "../src/logger_detail.hpp"
 
 #include <moveit/utils/logger.hpp>
@@ -62,33 +57,8 @@
 #include <memory>
 #include <string>
 
-namespace moveit
-{
-// getGlobalRootLogger() has external linkage (it is not static/anonymous),
-// but is intentionally not declared in the public logger.hpp -- it is an
-// implementation detail of setNodeLoggerName()/getLogger(). Forward-declare
-// it here to exercise its no-init fallback path directly, without adding it
-// to the public header.
-rclcpp::Logger& getGlobalRootLogger();
-}  // namespace moveit
-
 namespace
 {
-
-TEST(GetGlobalRootLoggerTest, FallsBackToNonNodeLoggerBeforeInit)
-{
-  // Precondition for this test to mean anything: no rclcpp context has been
-  // initialized yet in this process. getGlobalRootLogger()'s underlying
-  // logger is a function-local static computed once per process, so if this
-  // ever runs after some other test has called rclcpp::init(), it would
-  // silently stop testing the "before init" fallback path. Fail loudly
-  // instead of passing for the wrong reason.
-  ASSERT_FALSE(rclcpp::ok());
-
-  // getGlobalRootLogger() must not throw or crash when no rclcpp context has
-  // ever been initialized; it should fall back to a plain, non-node logger.
-  EXPECT_NO_THROW({ rclcpp::Logger logger = moveit::getGlobalRootLogger(); });
-}
 
 // Each white-box test below uses its own private rclcpp::Context (rather
 // than the process default one) so tests are fully isolated from one
@@ -128,6 +98,32 @@ TEST(RegisterNodeResetOnPreShutdownTest, ExplicitShutdownDestroysNode)
 
   EXPECT_EQ(node, nullptr) << "the caller's own node slot must be reset by the callback";
   EXPECT_TRUE(weak_node.expired()) << "node must be destroyed before rcl_shutdown(), not after";
+}
+
+// Regression test for a race CodeRabbit flagged in getGlobalRootLogger():
+// once registerNodeResetOnPreShutdown() returns, a concurrent
+// rclcpp::shutdown() can reset the node at any point afterwards, including
+// before the caller's first read of it. This deterministically exercises
+// the worst case of that race -- the reset having already happened by the
+// time the read takes its lock -- without needing actual concurrent
+// threads (which would make the test flaky). It proves the lock-then-check
+// pattern getGlobalRootLogger() and setNodeLoggerName() both use is safe:
+// once the same mutex the callback locks is held, the node is never
+// dereferenced without first being checked for null.
+TEST(RegisterNodeResetOnPreShutdownTest, LockedReadAfterResetDoesNotDereferenceNull)
+{
+  std::shared_ptr<rclcpp::Context> context;
+  rclcpp::NodeOptions options = makeOptionsWithFreshContext(context);
+
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("race_test_node", options);
+  std::shared_ptr<std::mutex> mutex = moveit::detail::registerNodeResetOnPreShutdown(node);
+
+  // Simulate a shutdown racing ahead of the first locked read.
+  context->shutdown("simulate a shutdown racing ahead of the first read");
+  ASSERT_EQ(node, nullptr);
+
+  std::lock_guard<std::mutex> lock(*mutex);
+  EXPECT_FALSE(static_cast<bool>(node)) << "node must be safely observed as reset while holding the lock";
 }
 
 // Proves the callback does not strongly capture either the node or the

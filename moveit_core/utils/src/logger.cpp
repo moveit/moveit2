@@ -57,13 +57,21 @@ rclcpp::Logger& getGlobalRootLogger()
     try
     {
       static rclcpp::Node::SharedPtr moveit_node = rclcpp::Node::make_shared(name);
-      // See registerNodeResetOnPreShutdown()'s documentation for why the
-      // returned mutex must exist even though it is not otherwise used here:
-      // this call, immediately after constructing moveit_node, is what makes
-      // moveit_node's destruction ordering (relative to the mutex) safe.
       static std::shared_ptr<std::mutex> s_mutex = detail::registerNodeResetOnPreShutdown(moveit_node);
-      (void)s_mutex;
-      return moveit_node->get_logger();
+
+      // The pre-shutdown callback registered above can run concurrently on
+      // another thread as soon as it's registered (e.g. if rclcpp::shutdown()
+      // races with this, the very first, call to getGlobalRootLogger()), and
+      // may reset moveit_node to null. Lock the same mutex the callback locks
+      // before reading moveit_node, so the read and the reset can't race.
+      std::lock_guard<std::mutex> lock(*s_mutex);
+      if (moveit_node)
+      {
+        return moveit_node->get_logger();
+      }
+      // Shutdown's pre-shutdown callback already reset the node: fall back to
+      // a plain, non-node logger instead of dereferencing a destroyed node.
+      return rclcpp::get_logger(name);
     }
     catch (const std::exception& ex)
     {
