@@ -46,17 +46,6 @@ namespace moveit
 namespace detail
 {
 
-/// Out-of-band flag + mutex used to guard a caller-owned rclcpp::Node::SharedPtr
-/// against a pre-shutdown callback resetting it concurrently, and to record
-/// whether that reset has already happened. Deliberately its own, separately
-/// allocated object -- NOT a wrapper that also stores the Node::SharedPtr
-/// itself. See registerNodeResetOnPreShutdown() for why.
-struct LoggerNodeFlag
-{
-  std::mutex mutex;
-  bool retired = false;
-};
-
 /// Arranges for `node` -- a caller-owned rclcpp::Node::SharedPtr with static
 /// storage duration -- to be reset from an rclcpp pre-shutdown callback
 /// (which runs *before* rcl_shutdown() tears down the associated RMW
@@ -67,64 +56,48 @@ struct LoggerNodeFlag
 /// the unspecified destruction order of unrelated function-local static
 /// objects. See moveit/moveit2#3827.
 ///
-/// Returns a LoggerNodeFlag the caller must lock (its mutex) before reading
-/// or writing `node` afterwards, and can check (`retired`) to know whether
-/// the callback already reset it.
+/// Returns a mutex the caller must lock before reading or writing `node`
+/// afterwards, so a concurrent caller and pre-shutdown callback can't race
+/// on it.
 ///
-/// Two deliberate design choices here, both required together and each
-/// empirically verified while developing this fix:
+/// Two independent, deliberate design choices:
 ///
-/// 1. The callback captures `node` by *reference*, not by storing a
-///    shared_ptr to it (or to a wrapper struct that also owns it). Even a
-///    same-process, non-heap struct that bundles an rclcpp::Node::SharedPtr
-///    together with any other member was observed to break ordinary Node
-///    teardown at process exit when rclcpp::shutdown() is never called
-///    explicitly -- independent of, and in addition to, the reference-cycle
-///    concern below. Keeping `node` a fully standalone
-///    rclcpp::Node::SharedPtr, exactly as in the pre-fix code, avoids that.
-///    A plain reference cannot itself ever be part of a shared_ptr reference
-///    cycle.
+/// A. Node capture: the callback references the caller-owned `node` slot
+///    itself, rather than strongly capturing the Node. A strong Node
+///    capture could create Context -> pre-shutdown callback -> Node ->
+///    Context: Context strongly owns every pre-shutdown callback registered
+///    on it, and Node (via its NodeBase) strongly owns its
+///    rclcpp::Context::SharedPtr, so a callback holding a shared_ptr to the
+///    Node would close that cycle. A plain reference cannot itself be part
+///    of a shared_ptr reference cycle, so this can't happen.
 ///
-/// 2. The callback captures the returned LoggerNodeFlag by *weak_ptr*, not
-///    shared_ptr. rclcpp::Node (via its NodeBase) strongly owns an
-///    rclcpp::Context::SharedPtr, and Context strongly owns every
-///    pre-shutdown callback registered on it. A callback holding a
-///    shared_ptr to state that (transitively) owns the node would close a
-///    strong reference cycle back to the context
-///    (Context -> callback -> state -> node -> Context) that reference
-///    counting alone could never break: if rclcpp::shutdown() were never
-///    called, nothing would ever be destroyed at all, rather than merely
-///    being destroyed later. A weak_ptr capture means the only edge from
-///    Context back to this flag is non-owning, so there is no cycle.
-///
-/// Together, this also makes the callback's behavior when
-/// rclcpp::shutdown() is never called explicitly well-defined: `node` is a
-/// static, so by the time it and the returned flag (constructed
-/// immediately afterwards, by the caller) reach static destruction, the
-/// flag -- constructed later -- is destroyed first, by the standard's
-/// reverse-order-of-completed-construction rule. That drops the callback's
-/// only strong-refcounted reference *before* `node` is destroyed, so by the
-/// time the callback could possibly fire afterwards (e.g. from within the
-/// context's own destructor), locking the weak_ptr fails and the callback
-/// safely does nothing, leaving `node` to be destroyed exactly as it would
-/// have been before this fix -- not fixed, but not worsened either.
-inline std::shared_ptr<LoggerNodeFlag> registerNodeResetOnPreShutdown(rclcpp::Node::SharedPtr& node)
+/// B. Guard/mutex capture: the callback captures the returned mutex by
+///    *weak_ptr*, not shared_ptr, so that in the "rclcpp::shutdown() is
+///    never called" static-destruction path, the caller-owned mutex --
+///    constructed immediately after `node`, so by the standard's
+///    reverse-order-of-completed-construction rule it is destroyed *before*
+///    `node` -- is already gone by the time `node` itself is destroyed. The
+///    weak_ptr lock then fails if the callback fires while `node` is being
+///    (or has been) destroyed, so the callback never touches the `node`
+///    slot while its own static shared_ptr is itself being torn down,
+///    leaving `node` to be destroyed exactly as it would have been before
+///    this fix.
+inline std::shared_ptr<std::mutex> registerNodeResetOnPreShutdown(rclcpp::Node::SharedPtr& node)
 {
-  auto flag = std::make_shared<LoggerNodeFlag>();
-  std::weak_ptr<LoggerNodeFlag> weak_flag = flag;
-  node->get_node_base_interface()->get_context()->add_pre_shutdown_callback([weak_flag, &node] {
-    std::shared_ptr<LoggerNodeFlag> locked = weak_flag.lock();
+  auto mutex = std::make_shared<std::mutex>();
+  std::weak_ptr<std::mutex> weak_mutex = mutex;
+  node->get_node_base_interface()->get_context()->add_pre_shutdown_callback([weak_mutex, &node] {
+    std::shared_ptr<std::mutex> locked = weak_mutex.lock();
     if (!locked)
     {
       return;
     }
-    std::lock_guard<std::mutex> lock(locked->mutex);
+    std::lock_guard<std::mutex> lock(*locked);
     // Drop the reference so ~rclcpp::Node runs now, while the RMW context is
     // still alive, instead of racing against it at static destruction time.
     node.reset();
-    locked->retired = true;
   });
-  return flag;
+  return mutex;
 }
 
 }  // namespace detail
