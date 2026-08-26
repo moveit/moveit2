@@ -36,9 +36,11 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/utils/logger.hpp>
+#include <mutex>
 #include <string>
 #include <rsl/random.hpp>
 #include <fmt/format.h>
+#include "logger_detail.hpp"
 
 namespace moveit
 {
@@ -56,6 +58,12 @@ rclcpp::Logger& getGlobalRootLogger()
     try
     {
       static rclcpp::Node::SharedPtr moveit_node = rclcpp::Node::make_shared(name);
+      // See registerNodeResetOnPreShutdown()'s documentation for why the
+      // returned flag must exist even though it is not otherwise used here:
+      // this call, immediately after constructing moveit_node, is what makes
+      // moveit_node's destruction ordering (relative to the flag) safe.
+      static std::shared_ptr<detail::LoggerNodeFlag> flag = detail::registerNodeResetOnPreShutdown(moveit_node);
+      (void)flag;
       return moveit_node->get_logger();
     }
     catch (const std::exception& ex)
@@ -72,8 +80,17 @@ rclcpp::Logger& getGlobalRootLogger()
 
 void setNodeLoggerName(const std::string& name)
 {
-  static auto node = std::make_shared<rclcpp::Node>("moveit", name);
-  getGlobalRootLogger() = node->get_logger();
+  static rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("moveit", name);
+  static std::shared_ptr<detail::LoggerNodeFlag> flag = detail::registerNodeResetOnPreShutdown(node);
+
+  std::lock_guard<std::mutex> lock(flag->mutex);
+  if (node)
+  {
+    getGlobalRootLogger() = node->get_logger();
+  }
+  // If the node has already been reset by a pre-shutdown callback from an
+  // earlier rclcpp::shutdown(), leave the global logger untouched rather
+  // than dereferencing a destroyed node.
 }
 
 rclcpp::Logger getLogger(const std::string& name)
