@@ -18,7 +18,11 @@ target_link_libraries(test_logger moveit_utils)
 # Deliberately its own single-test executable/process -- see the file comment in
 # test_logger_before_init.cpp for why this can't be a test case inside
 # test_logger.cpp above.
-ament_add_gtest(test_logger_before_init test_logger_before_init.cpp)
+ament_add_gtest(
+  test_logger_before_init
+  test_logger_before_init.cpp
+  SKIP_LINKING_MAIN_LIBRARIES
+)
 target_link_libraries(test_logger_before_init moveit_utils)
 
 find_package(launch_testing_ament_cmake)
