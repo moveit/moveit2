@@ -40,6 +40,8 @@
 #include <stdexcept>
 #include <sstream>
 #include <memory>
+#include <mutex>
+#include <atomic>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/version.h>
@@ -213,6 +215,23 @@ public:
   {
     if (constraints_init_thread_)
       constraints_init_thread_->join();
+
+    // Attempt to cancel any active goals to avoid callbacks accessing destroyed state
+    try
+    {
+      std::lock_guard<std::mutex> sl(active_goal_mutex_);
+      if (move_action_client_ && active_move_goal_handle_)
+      {
+        move_action_client_->async_cancel_goal(active_move_goal_handle_);
+      }
+      if (execute_action_client_ && active_execute_goal_handle_)
+      {
+        execute_action_client_->async_cancel_goal(active_execute_goal_handle_);
+      }
+    }
+    catch (...)
+    {
+    }
 
     callback_executor_.cancel();
 
@@ -672,26 +691,38 @@ public:
     goal.planning_options.planning_scene_diff.is_diff = true;
     goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
 
-    bool done = false;
-    rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
-    std::shared_ptr<moveit_msgs::action::MoveGroup::Result> res;
+    struct PlanState
+    {
+      std::atomic<bool> done{false};
+      rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
+      std::shared_ptr<moveit_msgs::action::MoveGroup::Result> res;
+    };
+    auto state = std::make_shared<PlanState>();
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
 
     send_goal_opts.goal_response_callback =
-        [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr& goal_handle) {
+        [this, state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr& goal_handle) {
           if (!goal_handle)
           {
-            done = true;
+            state->done = true;
             RCLCPP_INFO(logger_, "Planning request rejected");
           }
           else
+          {
             RCLCPP_INFO(logger_, "Planning request accepted");
+            std::lock_guard<std::mutex> sl(active_goal_mutex_);
+            active_move_goal_handle_ = goal_handle;
+          }
         };
     send_goal_opts.result_callback =
-        [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult& result) {
-          res = result.result;
-          code = result.code;
-          done = true;
+        [this, state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult& result) {
+          state->res = result.result;
+          state->code = result.code;
+          {
+            std::lock_guard<std::mutex> sl(active_goal_mutex_);
+            active_move_goal_handle_.reset();
+          }
+          state->done = true;
 
           switch (result.code)
           {
@@ -713,7 +744,7 @@ public:
     auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
 
     // wait until send_goal_opts.result_callback is called
-    while (!done)
+    while (!state->done)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
@@ -749,26 +780,38 @@ public:
     goal.planning_options.planning_scene_diff.is_diff = true;
     goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
 
-    bool done = false;
-    rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
-    std::shared_ptr<moveit_msgs::action::MoveGroup_Result> res;
+    struct MoveState
+    {
+      std::atomic<bool> done{false};
+      rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
+      std::shared_ptr<moveit_msgs::action::MoveGroup_Result> res;
+    };
+    auto state = std::make_shared<MoveState>();
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::MoveGroup>::SendGoalOptions();
 
     send_goal_opts.goal_response_callback =
-        [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr& goal_handle) {
+        [this, state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr& goal_handle) {
           if (!goal_handle)
           {
-            done = true;
+            state->done = true;
             RCLCPP_INFO(logger_, "Plan and Execute request rejected");
           }
           else
+          {
             RCLCPP_INFO(logger_, "Plan and Execute request accepted");
+            std::lock_guard<std::mutex> sl(active_goal_mutex_);
+            active_move_goal_handle_ = goal_handle;
+          }
         };
     send_goal_opts.result_callback =
-        [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult& result) {
-          res = result.result;
-          code = result.code;
-          done = true;
+        [this, state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult& result) {
+          state->res = result.result;
+          state->code = result.code;
+          {
+            std::lock_guard<std::mutex> sl(active_goal_mutex_);
+            active_move_goal_handle_.reset();
+          }
+          state->done = true;
 
           switch (result.code)
           {
@@ -791,7 +834,7 @@ public:
       return moveit::core::MoveItErrorCode::SUCCESS;
 
     // wait until send_goal_opts.result_callback is called
-    while (!done)
+    while (!state->done)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
@@ -812,26 +855,38 @@ public:
       return moveit::core::MoveItErrorCode::FAILURE;
     }
 
-    bool done = false;
-    rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
-    std::shared_ptr<moveit_msgs::action::ExecuteTrajectory_Result> res;
+    struct ExecuteState
+    {
+      std::atomic<bool> done{false};
+      rclcpp_action::ResultCode code = rclcpp_action::ResultCode::UNKNOWN;
+      std::shared_ptr<moveit_msgs::action::ExecuteTrajectory_Result> res;
+    };
+    auto state = std::make_shared<ExecuteState>();
     auto send_goal_opts = rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory>::SendGoalOptions();
 
     send_goal_opts.goal_response_callback =
-        [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr& goal_handle) {
+        [this, state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr& goal_handle) {
           if (!goal_handle)
           {
-            done = true;
+            state->done = true;
             RCLCPP_INFO(logger_, "Execute request rejected");
           }
           else
+          {
             RCLCPP_INFO(logger_, "Execute request accepted");
+            std::lock_guard<std::mutex> sl(active_goal_mutex_);
+            active_execute_goal_handle_ = goal_handle;
+          }
         };
     send_goal_opts.result_callback =
-        [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::WrappedResult& result) {
-          res = result.result;
-          code = result.code;
-          done = true;
+        [this, state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::WrappedResult& result) {
+          state->res = result.result;
+          state->code = result.code;
+          {
+            std::lock_guard<std::mutex> sl(active_goal_mutex_);
+            active_execute_goal_handle_.reset();
+          }
+          state->done = true;
 
           switch (result.code)
           {
@@ -859,7 +914,7 @@ public:
       return moveit::core::MoveItErrorCode::SUCCESS;
 
     // wait until send_goal_opts.result_callback is called
-    while (!done)
+    while (!state->done)
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
@@ -1223,6 +1278,11 @@ private:
   // std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::Pickup>> pick_action_client_;
   // std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::Place>> place_action_client_;
   std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory>> execute_action_client_;
+
+  // Active goal handles (protected by mutex). Stored so they can be cancelled on destruction
+  std::mutex active_goal_mutex_;
+  rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr active_move_goal_handle_;
+  rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr active_execute_goal_handle_;
 
   // general planning params
   moveit_msgs::msg::RobotState considered_start_state_;
