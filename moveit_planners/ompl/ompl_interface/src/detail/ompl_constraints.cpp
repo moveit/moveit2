@@ -41,10 +41,11 @@
 
 #include <tf2_eigen/tf2_eigen.hpp>
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planners_ompl.ompl_constraints");
-
 namespace ompl_interface
 {
+
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("moveit_planners_ompl.ompl_constraints");
+
 Bounds::Bounds() : size_(0)
 {
 }
@@ -372,33 +373,20 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
   // Parse Position Constraints
   if (!constraints.position_constraints.empty())
   {
-<<<<<<< HEAD
-    RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
-  }
-  if (num_ori_con > 1)
-  {
-    RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
-  }
-  if (num_pos_con > 0)
-  {
-    BaseConstraintPtr pos_con;
-    if (constraints.name == "use_equality_constraints")
-=======
     if (constraints.position_constraints.size() > 1)
->>>>>>> b0401e91a (Handle unsupported position constraints in OMPL (#2417))
     {
-      RCLCPP_WARN(getLogger(), "Only a single position constraint is supported. Using the first one.");
+      RCLCPP_WARN(LOGGER, "Only a single position constraint is supported. Using the first one.");
     }
 
     const auto& primitives = constraints.position_constraints.at(0).constraint_region.primitives;
     if (primitives.size() > 1)
     {
-      RCLCPP_WARN(getLogger(), "Only a single position primitive is supported. Using the first one.");
+      RCLCPP_WARN(LOGGER, "Only a single position primitive is supported. Using the first one.");
     }
     if (primitives.empty() || primitives.at(0).type != shape_msgs::msg::SolidPrimitive::BOX)
     {
-      RCLCPP_ERROR(getLogger(), "Unable to plan with the requested position constraint. "
-                                "Only BOX primitive shapes are supported as constraint region.");
+      RCLCPP_ERROR(LOGGER, "Unable to plan with the requested position constraint. "
+                           "Only BOX primitive shapes are supported as constraint region.");
     }
     else
     {
@@ -421,7 +409,7 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
   {
     if (constraints.orientation_constraints.size() > 1)
     {
-      RCLCPP_WARN(getLogger(), "Only a single orientation constraint is supported. Using the first one.");
+      RCLCPP_WARN(LOGGER, "Only a single orientation constraint is supported. Using the first one.");
     }
 
     auto ori_con = std::make_shared<OrientationConstraint>(robot_model, group, num_dofs);
@@ -432,11 +420,7 @@ ompl::base::ConstraintPtr createOMPLConstraints(const moveit::core::RobotModelCo
   // Check if we have any constraints to plan with
   if (ompl_constraints.empty())
   {
-<<<<<<< HEAD
-    RCLCPP_ERROR(LOGGER, "No path constraints found in planning request.");
-=======
-    RCLCPP_ERROR(getLogger(), "Failed to parse any supported path constraints from planning request.");
->>>>>>> b0401e91a (Handle unsupported position constraints in OMPL (#2417))
+    RCLCPP_ERROR(LOGGER, "Failed to parse any supported path constraints from planning request.");
     return nullptr;
   }
 
