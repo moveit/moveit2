@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Replace all moveit.ros.org to moveit.ai (`#3675 <https://github.com/moveit/moveit2/issues/3675>`_)
+* Initialize the namespace property for custom iMarkers in rviz (`#3550 <https://github.com/moveit/moveit2/issues/3550>`_)
+* Contributors: Ladislav Škvarka, Erik Holum
+
 2.5.9 (2025-04-15)
 ------------------
 * Planning scene monitor: reliable QoS (backport `#3400 <https://github.com/ros-planning/moveit2/issues/3400>`_) (`#3409 <https://github.com/ros-planning/moveit2/issues/3409>`_)

@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Replace all moveit.ros.org to moveit.ai (`#3675 <https://github.com/moveit/moveit2/issues/3675>`_)
+* Contributors: Ladislav Škvarka
+
 2.5.9 (2025-04-15)
 ------------------
 * Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (backport `#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_) (`#3364 <https://github.com/ros-planning/moveit2/issues/3364>`_)

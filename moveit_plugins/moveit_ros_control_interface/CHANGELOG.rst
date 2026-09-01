@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Fix ERROR stream + check only active controllers for multiple chained controllers (`#3766 <https://github.com/moveit/moveit2/issues/3766>`_)
+* ROS Parameter for service call timeout for ros_control controllers (`#3432 <https://github.com/moveit/moveit2/issues/3432>`_)
+* Contributors: Ashwin Sajith Nambiar, Nathan Brooks
+
 2.5.9 (2025-04-15)
 ------------------
 * SERVICE_CALL_TIMEOUT = 1 second is harsh 🥵 (`#3382 <https://github.com/ros-planning/moveit2/issues/3382>`_) (`#3406 <https://github.com/ros-planning/moveit2/issues/3406>`_)

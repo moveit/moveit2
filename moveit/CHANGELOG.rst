@@ -2,6 +2,11 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Replace all moveit.ros.org to moveit.ai (`#3675 <https://github.com/moveit/moveit2/issues/3675>`_)
+* Contributors: Ladislav Škvarka
+
 2.5.9 (2025-04-15)
 ------------------
 

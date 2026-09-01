@@ -2,6 +2,13 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Replace all moveit.ros.org to moveit.ai (`#3675 <https://github.com/moveit/moveit2/issues/3675>`_)
+* Skip joints not belonging to RobotModel (`#3634 <https://github.com/moveit/moveit2/issues/3634>`_)
+* Check rclcpp::ok before sleeping for clean shutdown (backport `#3484 <https://github.com/moveit/moveit2/issues/3484>`_) (`#3485 <https://github.com/moveit/moveit2/issues/3485>`_)
+* Contributors: Ladislav Škvarka, Maik Fruhner, Stephanie Eng
+
 2.5.9 (2025-04-15)
 ------------------
 * Planning scene monitor: reliable QoS (backport `#3400 <https://github.com/ros-planning/moveit2/issues/3400>`_) (`#3409 <https://github.com/ros-planning/moveit2/issues/3409>`_)

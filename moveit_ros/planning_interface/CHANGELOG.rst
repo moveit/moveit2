@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Scale acceleration and velocity of cartesian interpolations (`#1968 <https://github.com/moveit/moveit2/issues/1968>`_)
+* Replace all moveit.ros.org to moveit.ai (`#3675 <https://github.com/moveit/moveit2/issues/3675>`_)
+* Contributors: Ladislav Škvarka, Yadu, Robert Haschke
+
 2.5.9 (2025-04-15)
 ------------------
 

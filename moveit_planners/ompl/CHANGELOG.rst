@@ -2,6 +2,12 @@
 Changelog for package moveit_planners_ompl
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Handle unsupported position constraints in OMPL (`#2621 <https://github.com/moveit/moveit2/issues/2621>`_)
+* Replace all moveit.ros.org to moveit.ai (`#3675 <https://github.com/moveit/moveit2/issues/3675>`_)
+* Contributors: Ladislav Škvarka, Sebastian Jahr, Robert Haschke
+
 2.5.9 (2025-04-15)
 ------------------
 

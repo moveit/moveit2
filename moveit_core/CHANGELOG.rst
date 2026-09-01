@@ -2,6 +2,12 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Replace all moveit.ros.org to moveit.ai (`#3675 <https://github.com/moveit/moveit2/issues/3675>`_)
+* Backport MoveItPy to Humble (`#3487 <https://github.com/moveit/moveit2/issues/3487>`_)
+* Contributors: Ladislav Škvarka, Samuele Sandrini, Robert Haschke
+
 2.5.9 (2025-04-15)
 ------------------
 

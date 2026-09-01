@@ -2,6 +2,13 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.5.10 (2026-09-01)
+-------------------
+* Adds multi (joint) state validation service (`#3495 <https://github.com/moveit/moveit2/issues/3495>`_)
+* Scale acceleration and velocity of cartesian interpolations (`#1968 <https://github.com/moveit/moveit2/issues/1968>`_)
+* Replace all moveit.ros.org to moveit.ai (`#3675 <https://github.com/moveit/moveit2/issues/3675>`_)
+* Contributors: Ladislav Škvarka, Yadu, Tom Noble, Robert Haschke
+
 2.5.9 (2025-04-15)
 ------------------
 * Ports moveit1 `#3689 <https://github.com/ros-planning/moveit/issues/3689>`_ (backport `#3357 <https://github.com/ros-planning/moveit2/issues/3357>`_) (`#3364 <https://github.com/ros-planning/moveit2/issues/3364>`_)
