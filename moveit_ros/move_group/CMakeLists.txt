@@ -47,6 +47,7 @@ add_library(moveit_move_group_default_capabilities SHARED
   src/default_capabilities/query_planners_service_capability.cpp
   src/default_capabilities/kinematics_service_capability.cpp
   src/default_capabilities/state_validation_service_capability.cpp
+  src/default_capabilities/multi_state_validation_service_capability.cpp
   src/default_capabilities/cartesian_path_service_capability.cpp
   src/default_capabilities/get_planning_scene_service_capability.cpp
   src/default_capabilities/apply_planning_scene_service_capability.cpp
