@@ -468,15 +468,6 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
   {
     int previous_state = current_state_;
     int waypoint_count = displaying_trajectory_message_->getWayPointCount();
-    if (use_sim_time_property_->getBool())
-    {
-      current_state_time_ += sim_dt;
-    }
-    else
-    {
-      current_state_time_ += wall_dt;
-    }
-    float tm = getStateDisplayTime();
 
     if (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible() && trajectory_slider_panel_->isPaused())
     {
@@ -488,25 +479,47 @@ void TrajectoryVisualization::update(float wall_dt, float sim_dt)
       current_state_ = 0;
       current_state_time_ = 0.0;
     }
-    else if (tm < 0.0)
-    {
-      // using realtime factors: skip to next waypoint based on elapsed display time
-      const float rt_factor = -tm;  // negative tm is the intended realtime factor
-      while (current_state_ < waypoint_count &&
-             (tm = displaying_trajectory_message_->getWayPointDurationFromPrevious(current_state_ + 1) / rt_factor) <
-                 current_state_time_)
+    else
+    {  // Handle the update based on the time elapsed
+      float dt;
+      float tm = getStateDisplayTime();
+
+      if (use_sim_time_property_->getBool())
       {
-        current_state_time_ -= tm;
-        // if we are stuck in the while loop we should move the robot along the path to keep up
-        if (tm < current_state_time_)
-          display_path_robot_->update(displaying_trajectory_message_->getWayPointPtr(current_state_));
+        dt = sim_dt;
+      }
+      else
+      {
+        dt = wall_dt;
+      }
+      // Convert from ns to s
+      dt /= 1e9;
+      // Scale dt by user entered factor (e.g. "3x")
+      // The negative sign on tm indicates that dt should be scaled.
+      if (tm < 0.0)
+        dt *= -tm;
+      current_state_time_ += dt;
+      if (tm < 0.0)
+      {
+        for (; current_state_ < waypoint_count; ++current_state_)
+        {
+          float state_duration = displaying_trajectory_message_->getWayPointDurationFromPrevious(current_state_ + 1);
+          // If we are on the last state, show it for a fixed amount of time before looping.
+          // getWayPointDurationFromPrevious returns 0 for the last state, so we need to handle it separately.
+          // Its our choice to specify either the start state display duration or the end state display duration.
+          if (current_state_ == waypoint_count - 1)
+            state_duration = 1.0;
+          if (current_state_time_ < state_duration)
+            break;
+          current_state_time_ -= state_duration;
+        }
+      }
+      else if (current_state_time_ > tm)
+      {  // fixed display time per state
+
+        current_state_time_ = 0.0;
         ++current_state_;
       }
-    }
-    else if (current_state_time_ > tm)
-    {  // fixed display time per state
-      current_state_time_ = 0.0;
-      ++current_state_;
     }
 
     if (current_state_ == previous_state)
