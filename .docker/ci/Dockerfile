@@ -24,6 +24,9 @@ RUN \
     apt-get -q install --no-install-recommends -y \
         # Some basic requirements
         wget git sudo curl \
+        # Use default gfortran for libopenmpi-dev
+        # https://bugs.launchpad.net/ubuntu/+source/openmpi/+bug/2166011
+        gfortran \
         # Preferred build tools
         clang clang-format clang-tidy clang-tools \
         ccache && \

@@ -12,5 +12,5 @@ ENV RTI_NC_LICENSE_ACCEPTED=yes
 RUN apt-get update -q && \
     apt-get install -y ros2-testing-apt-source && apt-get update -q && \
     apt-get upgrade -q -y && \
-    apt-get install -y "ros-${ROS_DISTRO}-moveit-*" --no-install-recommends && \
+    apt-get install -y gfortran "ros-${ROS_DISTRO}-moveit-*" --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
