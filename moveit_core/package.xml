@@ -28,7 +28,15 @@
 
   <depend>angles</depend>
   <depend>assimp</depend>
-  <depend>boost</depend>
+  <depend>libboost-dev</depend>
+  <depend>libboost-chrono-dev</depend>
+  <depend>libboost-date-time-dev</depend>
+  <depend>libboost-filesystem-dev</depend>
+  <depend>libboost-iostreams-dev</depend>
+  <depend>libboost-program-options-dev</depend>
+  <depend>libboost-regex-dev</depend>
+  <depend>libboost-serialization-dev</depend>
+  <depend>libboost-thread-dev</depend>
   <depend>bullet</depend>
   <depend>common_interfaces</depend>
   <depend>eigen</depend>
