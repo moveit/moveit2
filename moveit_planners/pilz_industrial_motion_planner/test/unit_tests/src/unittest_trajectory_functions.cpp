@@ -70,10 +70,6 @@ static constexpr double L2{ 0.3070 };  // Height of second connector
 static constexpr double L3{ 0.0840 };  // Distance last joint to flange
 
 // parameters from parameter server
-const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
-const std::string GROUP_TIP_LINK_NAME("group_tip_link");
-const std::string ROBOT_TCP_LINK_NAME("tcp_link");
-const std::string IK_FAST_LINK_NAME("ik_fast_link");
 const std::string RANDOM_TEST_NUMBER("random_test_number");
 
 /**

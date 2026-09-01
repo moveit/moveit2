@@ -155,7 +155,9 @@ void robotStateToMultiDofJointState(const RobotState& state, sensor_msgs::msg::M
       p = tf2::eigenToTransform(t);
     }
     else
+    {
       p = tf2::eigenToTransform(state.getJointTransform(joint_model));
+    }
     mjs.joint_names.push_back(joint_model->getName());
     mjs.transforms.push_back(p.transform);
   }
@@ -354,7 +356,9 @@ void msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCol
       }
     }
     else
+    {
       RCLCPP_ERROR(getLogger(), "The attached body for link '%s' has no geometry", aco.link_name.c_str());
+    }
   }
   else if (aco.object.operation == moveit_msgs::msg::CollisionObject::REMOVE)
   {
@@ -365,7 +369,9 @@ void msgToAttachedBody(const Transforms* tf, const moveit_msgs::msg::AttachedCol
     }
   }
   else
+  {
     RCLCPP_ERROR(getLogger(), "Unknown collision object operation: %d", aco.object.operation);
+  }
 }
 
 bool robotStateMsgToRobotStateHelper(const Transforms* tf, const moveit_msgs::msg::RobotState& robot_state,

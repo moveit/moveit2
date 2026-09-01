@@ -213,10 +213,14 @@ bool MoveGroupCartesianPathService::computeService(
       }
     }
     else
+    {
       res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE;
+    }
   }
   else
+  {
     res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
+  }
 
   return true;
 }

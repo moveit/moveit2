@@ -1029,7 +1029,9 @@ bool testutils::getBlendTestData(const rclcpp::Node::SharedPtr& node, const size
       return true;
     }
     else
+    {
       return false;
+    }
   };
 
   for (size_t i = 1; i < dataset_num + 1; ++i)

@@ -119,10 +119,14 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
           error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         }
         else
+        {
           error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
+        }
       }
       else
+      {
         error_code.val = moveit_msgs::msg::MoveItErrorCodes::FRAME_TRANSFORM_FAILURE;
+      }
     }
     else
     {
@@ -156,13 +160,17 @@ void MoveGroupKinematicsService::computeIK(moveit_msgs::msg::PositionIKRequest& 
             error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
           }
           else
+          {
             error_code.val = moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION;
+          }
         }
       }
     }
   }
   else
+  {
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
+  }
 }
 
 bool MoveGroupKinematicsService::computeIKService(const std::shared_ptr<rmw_request_id_t>& /* unused */,

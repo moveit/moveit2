@@ -184,7 +184,9 @@ void PR2ArmIK::addJointToChainInfo(const urdf::JointConstSharedPtr& joint, movei
       limit.has_position_limits = true;
     }
     else
+    {
       limit.has_position_limits = false;
+    }
   }
   else
   {
@@ -198,7 +200,9 @@ void PR2ArmIK::addJointToChainInfo(const urdf::JointConstSharedPtr& joint, movei
     limit.has_velocity_limits = 1;
   }
   else
+  {
     limit.has_velocity_limits = 0;
+  }
   info.limits.push_back(limit);
 }
 

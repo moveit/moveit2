@@ -59,7 +59,7 @@ namespace
  * @return Concatenated result string.
  */
 template <typename... T>
-std::string concatenateWithSeparator(char separator, T... content)
+std::string concatenateWithSeparator(char separator, const T&... content)
 {
   std::string result;
   (result.append(content).append({ separator }), ...);
@@ -75,7 +75,7 @@ std::string concatenateWithSeparator(char separator, T... content)
  * base_namespace.controller_name.param_name
  */
 template <typename... T>
-std::string makeParameterName(T... strings)
+std::string makeParameterName(const T&... strings)
 {
   return concatenateWithSeparator<T...>('.', strings...);
 }

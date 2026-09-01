@@ -174,10 +174,14 @@ void OccupancyMapMonitor::addUpdater(const OccupancyMapUpdaterPtr& updater)
       }
     }
     else
+    {
       updater->setTransformCacheCallback(transform_cache_callback_);
+    }
   }
   else
+  {
     RCLCPP_ERROR(logger_, "nullptr updater was specified");
+  }
 }
 
 void OccupancyMapMonitor::publishDebugInformation(bool flag)
@@ -265,15 +269,21 @@ bool OccupancyMapMonitor::getShapeTransformCache(std::size_t index, const std::s
           return false;
         }
         else
+        {
           cache[jt->second] = it.second;
+        }
       }
       return true;
     }
     else
+    {
       return false;
+    }
   }
   else
+  {
     return false;
+  }
 }
 
 bool OccupancyMapMonitor::saveMapCallback(const std::shared_ptr<rmw_request_id_t>& /* unused */,
