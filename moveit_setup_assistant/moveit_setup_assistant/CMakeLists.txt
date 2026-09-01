@@ -92,7 +92,7 @@ install(
   DESTINATION include/moveit_setup_assistant)
 install(DIRECTORY include/ DESTINATION include/moveit_setup_assistant)
 
-ament_export_include_directories(include)
+ament_export_include_directories(include/moveit_setup_assistant)
 install(DIRECTORY launch DESTINATION share/moveit_setup_assistant)
 install(DIRECTORY resources DESTINATION share/moveit_setup_assistant)
 ament_export_targets(moveit_setup_assistantTargets HAS_LIBRARY_TARGET)
