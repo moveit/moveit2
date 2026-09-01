@@ -28,7 +28,7 @@ RUN --mount=type=cache,target=/root/.ccache/ \
     apt-get -q update && \
     rosdep update && \
     DEBIAN_FRONTEND=noninteractive \
-    rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+        rosdep install -y --from-paths src --ignore-src --rosdistro "${ROS_DISTRO}" --as-root=apt:false && \
     rm -rf /var/lib/apt/lists/* && \
     # Build the workspace
     colcon build \
