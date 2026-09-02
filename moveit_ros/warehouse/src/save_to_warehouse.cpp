@@ -93,7 +93,9 @@ void onSceneUpdate(planning_scene_monitor::PlanningSceneMonitor& psm, moveit_war
     }
   }
   else
+  {
     RCLCPP_INFO(getLogger(), "Scene name is empty. Not saving.");
+  }
 }
 
 void onMotionPlanRequest(const moveit_msgs::msg::MotionPlanRequest& req,

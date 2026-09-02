@@ -201,7 +201,9 @@ bool FloatingJointModel::normalizeRotation(double* values) const
     return true;
   }
   else
+  {
     return false;
+  }
 }
 
 unsigned int FloatingJointModel::getStateSpaceDimension() const

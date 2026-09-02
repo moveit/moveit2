@@ -58,7 +58,9 @@ void XmlSyntaxHighlighter::addTag(const QString& tag, const QTextCharFormat& for
     });
   }
   else
+  {
     rule.parent = rules_.end();
+  }
 
   rules_.insert(std::make_pair(rules_.size(), rule));
 }

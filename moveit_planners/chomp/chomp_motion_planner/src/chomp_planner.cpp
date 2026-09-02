@@ -239,7 +239,9 @@ void ChompPlanner::solve(const planning_scene::PlanningSceneConstPtr& planning_s
       }
     }
     else
+    {
       break;
+    }
   }  // end of while loop
 
   // resetting the CHOMP Parameters to the original values after a successful plan
