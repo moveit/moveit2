@@ -287,6 +287,7 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
 
 MotionPlanningFrame::~MotionPlanningFrame()
 {
+  execution_job_.cancelAndWait();
   delete ui_;
 }
 
@@ -484,6 +485,7 @@ void MotionPlanningFrame::changePlanningGroupHelper()
 
 void MotionPlanningFrame::clearRobotModel()
 {
+  execution_job_.cancelAndWait();
   ui_->planner_param_treeview->setMoveGroup(moveit::planning_interface::MoveGroupInterfacePtr());
   joints_tab_->clearRobotModel();
   move_group_.reset();
