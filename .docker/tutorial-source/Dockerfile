@@ -10,7 +10,7 @@ LABEL maintainer="Robert Haschke rhaschke@techfak.uni-bielefeld.de"
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
-RUN --mount=type=cache,target=/root/.ccache/,sharing=locked \
+RUN --mount=type=cache,target=/root/.ccache \
         # Install Gazebo, which is needed by some dependencies.
         apt-get -q update && \
         apt-get install -y "ros-${ROS_DISTRO}-ros-gz" --no-install-recommends && \

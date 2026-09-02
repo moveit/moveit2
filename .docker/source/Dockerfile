@@ -16,7 +16,7 @@ COPY . src/moveit2
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 # https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#minimize-the-number-of-layers
-RUN --mount=type=cache,target=/root/.ccache/ \
+RUN --mount=type=cache,target=/root/.ccache \
     # Enable ccache
     PATH=/usr/lib/ccache:$PATH && \
     # Fetch required upstream sources for building

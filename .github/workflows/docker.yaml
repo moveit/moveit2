@@ -11,8 +11,9 @@ on:
   pull_request:
     paths:
       - .docker/**
+      - .github/workflows/docker.build.yaml
       - .github/workflows/docker.yaml
-      - moveit2.repos
+      - "*.repos"
 
 jobs:
   release:
@@ -20,104 +21,32 @@ jobs:
       fail-fast: false
       matrix:
         ROS_DISTRO: [lyrical, rolling]
-    runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
-    env:
-      IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
-
-    steps:
-      - uses: rhaschke/docker-run-action@main
-        name: Check for apt updates
-        continue-on-error: true
-        id: apt
-        with:
-          image: ${{ env.IMAGE }}
-          run: |
-            apt-get update
-            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
-            echo "no_cache=$have_updates" >> "$GITHUB_OUTPUT"
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Login to Github Container Registry
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to DockerHub
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and Push
-        uses: docker/build-push-action@v7
-        with:
-          file: .docker/${{ github.job }}/Dockerfile
-          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: ${{ env.PUSH }}
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE }}
-          cache-to: type=inline
-          tags: |
-            ${{ env.IMAGE }}
-            ghcr.io/${{ env.IMAGE }}
+    uses: ./.github/workflows/docker.build.yaml
+    with:
+      image: moveit/moveit2:${{ matrix.ROS_DISTRO }}-release
+      dockerfile: .docker/release/Dockerfile
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      check_apt_updates: true
+    secrets: inherit
 
   ci:
     strategy:
       fail-fast: false
       matrix:
         ROS_DISTRO: [lyrical, rolling]
-    runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
-    env:
-      IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
-
-    steps:
-      - uses: rhaschke/docker-run-action@main
-        name: Check for apt updates
-        continue-on-error: true
-        id: apt
-        with:
-          image: ${{ env.IMAGE }}
-          run: |
-            apt-get update
-            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
-            echo "no_cache=$have_updates" >> "$GITHUB_OUTPUT"
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Login to Github Container Registry
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to DockerHub
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and Push
-        uses: docker/build-push-action@v7
-        with:
-          file: .docker/${{ github.job }}/Dockerfile
-          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: ${{ env.PUSH }}
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE }}
-          cache-to: type=inline
-          tags: |
-            ${{ env.IMAGE }}
-            ghcr.io/${{ env.IMAGE }}
+    uses: ./.github/workflows/docker.build.yaml
+    with:
+      image: moveit/moveit2:${{ matrix.ROS_DISTRO }}-ci
+      dockerfile: .docker/ci/Dockerfile
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      check_apt_updates: true
+    secrets: inherit
 
   ci-testing:
     needs: ci
@@ -125,52 +54,16 @@ jobs:
       fail-fast: false
       matrix:
         ROS_DISTRO: [lyrical, rolling]
-    runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
-    env:
-      IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
-
-    steps:
-      - uses: rhaschke/docker-run-action@main
-        name: Check for apt updates
-        continue-on-error: true
-        id: apt
-        with:
-          image: ${{ env.IMAGE }}
-          run: |
-            apt-get update
-            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
-            echo "no_cache=$have_updates" >> "$GITHUB_OUTPUT"
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Login to Github Container Registry
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to DockerHub
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build and Push
-        uses: docker/build-push-action@v7
-        with:
-          file: .docker/${{ github.job }}/Dockerfile
-          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: ${{ env.PUSH }}
-          no-cache: ${{ steps.apt.outputs.no_cache || github.event_name == 'workflow_dispatch' }}
-          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE }}
-          cache-to: type=inline
-          tags: |
-            ${{ env.IMAGE }}
-            ghcr.io/${{ env.IMAGE }}
+    uses: ./.github/workflows/docker.build.yaml
+    with:
+      image: moveit/moveit2:${{ matrix.ROS_DISTRO }}-ci-testing
+      dockerfile: .docker/ci-testing/Dockerfile
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      check_apt_updates: true
+    secrets: inherit
 
   source:
     needs: ci-testing
@@ -178,45 +71,16 @@ jobs:
       fail-fast: false
       matrix:
         ROS_DISTRO: [lyrical, rolling]
-    runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
-    env:
-      IMAGE: moveit/moveit2:${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
-
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Login to Github Container Registry
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to DockerHub
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: "Remove .dockerignore"
-        run: rm .dockerignore  # enforce full source context
-      - name: Build and Push
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: .docker/${{ github.job }}/Dockerfile
-          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: ${{ env.PUSH }}
-          cache-from: type=registry,ref=ghcr.io/${{ env.IMAGE }}
-          cache-to: type=inline
-          tags: |
-            ${{ env.IMAGE }}
-            ghcr.io/${{ env.IMAGE }}
+    uses: ./.github/workflows/docker.build.yaml
+    with:
+      image: moveit/moveit2:${{ matrix.ROS_DISTRO }}-source
+      dockerfile: .docker/source/Dockerfile
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+      full_source_context: true
+    secrets: inherit
 
   tutorial-source:
     needs: source
@@ -224,57 +88,15 @@ jobs:
       fail-fast: false
       matrix:
         ROS_DISTRO: [lyrical, rolling]
-    runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
-    env:
-      IMAGE: moveit/moveit2:main-${{ matrix.ROS_DISTRO }}-${{ github.job }}
-      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
-
-    steps:
-      - uses: actions/checkout@v7
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Login to Github Container Registry
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login to DockerHub
-        if: env.PUSH == 'true'
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: "Remove .dockerignore"
-        run: rm .dockerignore  # enforce full source context
-      - name: Cache ccache
-        uses: actions/cache@v5
-        with:
-          path: .ccache
-          key: docker-tutorial-ccache-${{ matrix.ROS_DISTRO }}-${{ hashFiles( '.docker/tutorial-source/Dockerfile' ) }}
-      - name: inject ccache into docker
-        uses: reproducible-containers/buildkit-cache-dance@v3.3.0
-        with:
-           cache-map: |
-              {
-                ".ccache": "/root/.ccache/"
-              }
-      - name: Build and Push
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: .docker/${{ github.job }}/Dockerfile
-          build-args: ROS_DISTRO=${{ matrix.ROS_DISTRO }}
-          push: ${{ env.PUSH }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          tags: |
-            ${{ env.IMAGE }}
-            ghcr.io/${{ env.IMAGE }}
+    uses: ./.github/workflows/docker.build.yaml
+    with:
+      image: moveit/moveit2:main-${{ matrix.ROS_DISTRO }}-tutorial-source
+      dockerfile: .docker/tutorial-source/Dockerfile
+      ros_distro: ${{ matrix.ROS_DISTRO }}
+    secrets: inherit
 
   delete_untagged:
     runs-on: ubuntu-latest
