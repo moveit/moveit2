@@ -359,11 +359,20 @@ void RobotModel::buildGroupStates(const srdf::Model& srdf_model)
             for (std::size_t j = 0; j < vn.size(); ++j)
               state[vn[j]] = jt->second[j];
           }
+          else if (vn.empty())
+          {
+            RCLCPP_ERROR(getLogger(),
+                         "Group state '%s' for group '%s' supplies %d value(s) for joint '%s', "
+                         "but that joint is fixed in the robot model and has no variables. "
+                         "Remove it from the group state, or make the joint movable in the URDF.",
+                         group_state.name_.c_str(), jmg->getName().c_str(), static_cast<int>(jt->second.size()),
+                         jt->first.c_str());
+          }
           else
           {
             RCLCPP_ERROR(getLogger(),
                          "The model for joint '%s' requires %d variable values, "
-                         "but only %d variable values were supplied in default state '%s' for group '%s'",
+                         "but %d variable values were supplied in default state '%s' for group '%s'",
                          jt->first.c_str(), static_cast<int>(vn.size()), static_cast<int>(jt->second.size()),
                          group_state.name_.c_str(), jmg->getName().c_str());
           }
