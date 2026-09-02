@@ -35,6 +35,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <exception>
 #include <functional>
 #include <mutex>
 #include <thread>
@@ -49,6 +50,7 @@ public:
   using Generation = std::uint64_t;
   using Job = std::function<void(Generation)>;
   using CancelJob = std::function<void()>;
+  using ExceptionHandler = std::function<void(Generation, std::exception_ptr)>;
 
   ExecutionJob() = default;
   ExecutionJob(const ExecutionJob&) = delete;
@@ -60,7 +62,7 @@ public:
   }
 
   /** Start a job unless another job is still active. */
-  bool start(Job job, CancelJob cancel_job)
+  bool start(Job job, CancelJob cancel_job, ExceptionHandler exception_handler)
   {
     std::scoped_lock lock(mutex_);
     if (active_)
@@ -73,10 +75,30 @@ public:
     cancel_job_ = std::move(cancel_job);
     try
     {
-      thread_ = std::thread([this, job = std::move(job), generation]() mutable {
-        job(generation);
-        active_ = false;
-      });
+      thread_ = std::thread(
+          [this, job = std::move(job), exception_handler = std::move(exception_handler), generation]() mutable {
+            std::exception_ptr exception;
+            try
+            {
+              job(generation);
+            }
+            catch (...)
+            {
+              exception = std::current_exception();
+            }
+            active_ = false;
+            if (exception && exception_handler)
+            {
+              try
+              {
+                exception_handler(generation, exception);
+              }
+              catch (...)
+              {
+                // Exception reporting must not escape the worker boundary either.
+              }
+            }
+          });
     }
     catch (...)
     {

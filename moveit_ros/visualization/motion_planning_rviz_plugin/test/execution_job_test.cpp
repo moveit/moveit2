@@ -37,6 +37,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <stdexcept>
 
 namespace moveit_rviz_plugin
 {
@@ -59,9 +60,11 @@ TEST(ExecutionJob, RejectsConcurrentJob)
           release = true;
         }
         condition.notify_one();
-      }));
+      },
+      [](ExecutionJob::Generation, std::exception_ptr) {}));
 
-  EXPECT_FALSE(execution.start([&](ExecutionJob::Generation) { second_job_ran = true; }, [] {}));
+  EXPECT_FALSE(execution.start([&](ExecutionJob::Generation) { second_job_ran = true; }, [] {},
+                               [](ExecutionJob::Generation, std::exception_ptr) {}));
   execution.cancelAndWait();
   EXPECT_FALSE(second_job_ran);
   EXPECT_FALSE(execution.active());
@@ -88,7 +91,8 @@ TEST(ExecutionJob, DestructionCancelsBeforeJoining)
             canceled = true;
           }
           condition.notify_one();
-        }));
+        },
+        [](ExecutionJob::Generation, std::exception_ptr) {}));
   }
 
   EXPECT_TRUE(canceled);
@@ -99,7 +103,8 @@ TEST(ExecutionJob, CancelAndWaitInvalidatesCompletion)
 {
   ExecutionJob execution;
   ExecutionJob::Generation generation = 0;
-  ASSERT_TRUE(execution.start([&](ExecutionJob::Generation value) { generation = value; }, [] {}));
+  ASSERT_TRUE(execution.start([&](ExecutionJob::Generation value) { generation = value; }, [] {},
+                              [](ExecutionJob::Generation, std::exception_ptr) {}));
 
   execution.wait();
   ASSERT_TRUE(execution.isCurrent(generation));
@@ -112,14 +117,59 @@ TEST(ExecutionJob, NewJobInvalidatesPreviousCompletion)
   ExecutionJob execution;
   ExecutionJob::Generation first_generation = 0;
   ExecutionJob::Generation second_generation = 0;
-  ASSERT_TRUE(execution.start([&](ExecutionJob::Generation value) { first_generation = value; }, [] {}));
+  ASSERT_TRUE(execution.start([&](ExecutionJob::Generation value) { first_generation = value; }, [] {},
+                              [](ExecutionJob::Generation, std::exception_ptr) {}));
   execution.wait();
   ASSERT_TRUE(execution.isCurrent(first_generation));
 
-  ASSERT_TRUE(execution.start([&](ExecutionJob::Generation value) { second_generation = value; }, [] {}));
+  ASSERT_TRUE(execution.start([&](ExecutionJob::Generation value) { second_generation = value; }, [] {},
+                              [](ExecutionJob::Generation, std::exception_ptr) {}));
   execution.wait();
 
   EXPECT_FALSE(execution.isCurrent(first_generation));
   EXPECT_TRUE(execution.isCurrent(second_generation));
+}
+
+TEST(ExecutionJob, ReportsExceptionsAndAllowsRestart)
+{
+  ExecutionJob execution;
+  ExecutionJob::Generation job_generation = 0;
+  ExecutionJob::Generation exception_generation = 0;
+  std::exception_ptr exception;
+
+  ASSERT_TRUE(execution.start(
+      [&](ExecutionJob::Generation generation) {
+        job_generation = generation;
+        throw std::runtime_error("execution failed");
+      },
+      [] {},
+      [&](ExecutionJob::Generation generation, std::exception_ptr caught_exception) {
+        exception_generation = generation;
+        exception = caught_exception;
+      }));
+  execution.wait();
+
+  EXPECT_FALSE(execution.active());
+  EXPECT_EQ(job_generation, exception_generation);
+  ASSERT_NE(exception, nullptr);
+  EXPECT_THROW(std::rethrow_exception(exception), std::runtime_error);
+
+  bool restarted_job_ran = false;
+  ASSERT_TRUE(execution.start([&](ExecutionJob::Generation) { restarted_job_ran = true; }, [] {},
+                              [](ExecutionJob::Generation, std::exception_ptr) {}));
+  execution.wait();
+  EXPECT_TRUE(restarted_job_ran);
+}
+
+TEST(ExecutionJob, ContainsExceptionHandlerFailures)
+{
+  ExecutionJob execution;
+  ASSERT_TRUE(execution.start([](ExecutionJob::Generation) { throw std::runtime_error("execution failed"); }, [] {},
+                              [](ExecutionJob::Generation, std::exception_ptr) {
+                                throw std::runtime_error("reporting failed");
+                              }));
+
+  execution.wait();
+  EXPECT_FALSE(execution.active());
 }
 }  // namespace moveit_rviz_plugin

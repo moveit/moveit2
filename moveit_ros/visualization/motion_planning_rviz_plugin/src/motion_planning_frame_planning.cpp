@@ -70,7 +70,10 @@ void MotionPlanningFrame::executeButtonClicked()
       [this, move_group, plan](ExecutionJob::Generation execution_generation) {
         computeExecuteButtonClicked(move_group, plan, execution_generation);
       },
-      [move_group] { move_group->stop(); });
+      [move_group] { move_group->stop(); },
+      [this](ExecutionJob::Generation execution_generation, std::exception_ptr exception) {
+        queueFailedExecution(execution_generation, exception);
+      });
 }
 
 void MotionPlanningFrame::planAndExecuteButtonClicked()
@@ -101,7 +104,10 @@ void MotionPlanningFrame::planAndExecuteButtonClicked()
         computePlanAndExecuteButtonClicked(move_group, use_cartesian_path, cartesian_goal, velocity_scaling_factor,
                                            acceleration_scaling_factor, execution_generation);
       },
-      [move_group] { move_group->stop(); });
+      [move_group] { move_group->stop(); },
+      [this](ExecutionJob::Generation execution_generation, std::exception_ptr exception) {
+        queueFailedExecution(execution_generation, exception);
+      });
 }
 
 void MotionPlanningFrame::stopButtonClicked()
@@ -280,6 +286,24 @@ void MotionPlanningFrame::queueFinishedExecution(bool success, ExecutionJob::Gen
         onFinishedExecution(success);
       },
       Qt::QueuedConnection);
+}
+
+void MotionPlanningFrame::queueFailedExecution(ExecutionJob::Generation execution_generation,
+                                               std::exception_ptr exception)
+{
+  try
+  {
+    std::rethrow_exception(exception);
+  }
+  catch (const std::exception& error)
+  {
+    RCLCPP_ERROR(logger_, "Execution job failed: %s", error.what());
+  }
+  catch (...)
+  {
+    RCLCPP_ERROR(logger_, "Execution job failed with an unknown exception");
+  }
+  queueFinishedExecution(false, execution_generation);
 }
 
 void MotionPlanningFrame::onFinishedExecution(bool success)

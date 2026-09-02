@@ -265,6 +265,7 @@ private:
                                           ExecutionJob::Generation execution_generation);
   void queueFinishedExecution(bool success, ExecutionJob::Generation execution_generation,
                               const moveit::planning_interface::MoveGroupInterface::PlanPtr& plan = {});
+  void queueFailedExecution(ExecutionJob::Generation execution_generation, std::exception_ptr exception);
   void onFinishedExecution(bool success);
   void populateConstraintsList();
   void populateConstraintsList(const std::vector<std::string>& constr);
