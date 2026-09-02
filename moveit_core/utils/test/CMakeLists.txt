@@ -5,6 +5,26 @@ target_link_libraries(logger_dut rclcpp::rclcpp moveit_utils)
 # Install is needed to for launchtest to execute
 install(TARGETS logger_dut DESTINATION lib/${PROJECT_NAME})
 
+# Unit test for the logger's node lifecycle (regression test for
+# moveit/moveit2#3827). Links against the real moveit_utils library; reaches
+# registerNodeResetOnPreShutdown() via the internal (non-installed)
+# src/logger_detail.hpp shared with logger.cpp, without exposing it through the
+# public moveit/utils/logger.hpp API.
+find_package(ament_cmake_gtest REQUIRED)
+ament_add_gtest(test_logger test_logger.cpp)
+target_link_libraries(test_logger moveit_utils)
+
+# Regression test for getGlobalRootLogger()'s before-rclcpp::init() fallback.
+# Deliberately its own single-test executable/process -- see the file comment in
+# test_logger_before_init.cpp for why this can't be a test case inside
+# test_logger.cpp above.
+ament_add_gtest(
+  test_logger_before_init
+  test_logger_before_init.cpp
+  SKIP_LINKING_MAIN_LIBRARIES
+)
+target_link_libraries(test_logger_before_init moveit_utils)
+
 find_package(launch_testing_ament_cmake)
 
 # These tests do not work on Humble as /rosout logging from child loggers does
