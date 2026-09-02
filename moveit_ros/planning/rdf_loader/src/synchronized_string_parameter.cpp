@@ -36,6 +36,8 @@
 
 #include <moveit/rdf_loader/synchronized_string_parameter.hpp>
 
+#include <cctype>
+
 namespace rdf_loader
 {
 std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node,
@@ -120,7 +122,12 @@ bool SynchronizedStringParameter::shouldPublish()
 
 bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration& timeout)
 {
-  const auto nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
+  auto nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
+  for (char& character : nd_name)
+  {
+    if (!std::isalnum(static_cast<unsigned char>(character)) && character != '_')
+      character = '_';
+  }
   const auto temp_node = std::make_shared<rclcpp::Node>(nd_name, node_->get_namespace());
   string_subscriber_ = temp_node->create_subscription<std_msgs::msg::String>(
       name_,
