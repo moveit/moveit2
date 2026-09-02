@@ -73,9 +73,14 @@ public:
   ExecutorThread(const ExecutorThread&) = delete;
   ExecutorThread& operator=(const ExecutorThread&) = delete;
 
+  bool isCurrentThread() const noexcept
+  {
+    return execution_thread_.joinable() && execution_thread_.get_id() == std::this_thread::get_id();
+  }
+
   void stop() noexcept
   {
-    if (!execution_thread_.joinable())
+    if (!execution_thread_.joinable() || isCurrentThread())
       return;
 
     stop_requested_->store(true);
@@ -175,6 +180,18 @@ void initMoveitPy(py::module& m)
              auto executor_thread = std::make_shared<ExecutorThread>(node);
 
              auto custom_deleter = [executor_thread](moveit_cpp::MoveItCpp* moveit_cpp) {
+               if (executor_thread->isCurrentThread())
+               {
+                 // A node callback may release the final MoveItCpp holder. Defer cleanup so the executor thread is
+                 // joined externally and MoveItCpp remains alive until the callback has returned.
+                 std::thread cleanup_thread([executor_thread, moveit_cpp]() {
+                   executor_thread->stop();
+                   delete moveit_cpp;
+                 });
+                 cleanup_thread.detach();
+                 return;
+               }
+
                executor_thread->stop();
                delete moveit_cpp;
              };
