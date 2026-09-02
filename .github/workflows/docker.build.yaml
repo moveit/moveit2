@@ -1,0 +1,116 @@
+name: Build Docker image
+
+on:
+  workflow_call:
+    inputs:
+      base_job:
+        required: false
+        type: string
+      image:
+        required: true
+        type: string
+      dockerfile:
+        required: true
+        type: string
+      ros_distro:
+        required: true
+        type: string
+      check_apt_updates:
+        default: false
+        type: boolean
+      full_source_context:
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    env:
+      PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'moveit/moveit2') }}
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: rhaschke/docker-run-action@main
+        name: Check for apt updates
+        continue-on-error: true
+        id: apt
+        if: inputs.check_apt_updates
+        with:
+          image: ${{ inputs.image }}
+          run: |
+            apt-get update
+            have_updates=$(apt-get --simulate upgrade | grep -q "^0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.$" && echo false || echo true)
+            echo "no_cache=$have_updates" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+        id: setup-buildx
+      - name: Login to Github Container Registry
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to DockerHub
+        if: env.PUSH == 'true'
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Download image artifact
+        uses: actions/download-artifact@v8
+        if: ${{ inputs.base_job }}
+        with:
+          name: ${{ inputs.base_job }}
+          path: ${{ runner.temp }}
+
+      - name: Extract image artifact
+        if: ${{ inputs.base_job }}
+        run: |
+          docker load --input ${{ runner.temp }}/image.tar
+          docker image ls -a
+
+      - name: Cache
+        uses: actions/cache@v5
+        id: cache
+        with:
+          path: caches
+          key: docker-tutorial-cache-${{ inputs.ros_distro }}-${{ hashFiles(inputs.dockerfile) }}
+      - name: Inject caches into docker
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.setup-buildx.outputs.name }}
+          cache-dir: caches
+          dockerfile: ${{ inputs.dockerfile }}
+          skip-extraction: ${{ steps.cache.outputs.cache-hit }}
+
+      - name: Remove .dockerignore
+        if: inputs.full_source_context
+        run: rm .dockerignore  # enforce full source context
+      - name: Build and Push
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ inputs.dockerfile }}
+          build-args: ROS_DISTRO=${{ inputs.ros_distro }}
+          outputs: ${{ env.PUSH == 'true' && 'type=registry' || format('type=docker,dest={0}/{1}.tar', runner.temp, github.job) }}
+          tags: |
+            ${{ inputs.image }}
+            ghcr.io/${{ inputs.image }}
+          no-cache: ${{ (inputs.check_apt_updates && steps.apt.outputs.no_cache) || github.event_name == 'workflow_dispatch' }}
+          cache-to: type=gha,mode=max
+          cache-from: |
+            type=gha
+            type=registry,ref=ghcr.io/${{ inputs.image }}
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v7
+        if: env.PUSH == 'false'
+        with:
+          name: ${{ github.job }}
+          path: ${{ runner.temp }}/image.tar
