@@ -40,6 +40,10 @@
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 #include <moveit/utils/robot_model_test_utils.hpp>
 
+#include <atomic>
+#include <cmath>
+#include <thread>
+
 using trajectory_processing::Path;
 using trajectory_processing::TimeOptimalTrajectoryGeneration;
 using trajectory_processing::Trajectory;
@@ -65,7 +69,78 @@ void setAccelerationLimits(const moveit::core::RobotModelPtr& robot_model)
     joint_model->setVariableBounds(joint_bounds_msg);
   }
 }
+
+Path createSegmentedPath()
+{
+  return *Path::create({ Eigen::Vector2d(0.0, 0.0), Eigen::Vector2d(1.0, 0.0), Eigen::Vector2d(1.0, 1.0),
+                         Eigen::Vector2d(2.0, 1.0) },
+                       0.1);
+}
+
+void expectQueriesMatchUncachedCopies(Path& cached_path, const std::vector<double>& queries)
+{
+  for (const double query : queries)
+  {
+    SCOPED_TRACE(query);
+    const Path uncached_path(cached_path);
+    EXPECT_TRUE(cached_path.getConfig(query).isApprox(uncached_path.getConfig(query)));
+    EXPECT_TRUE(cached_path.getTangent(query).isApprox(uncached_path.getTangent(query)));
+    EXPECT_TRUE(cached_path.getCurvature(query).isApprox(uncached_path.getCurvature(query)));
+  }
+}
 }  // namespace
+
+TEST(time_optimal_trajectory_generation, PathSegmentCacheHandlesForwardAndBackwardQueries)
+{
+  Path path = createSegmentedPath();
+  const double length = path.getLength();
+  expectQueriesMatchUncachedCopies(path, { 0.0, 0.1 * length, 0.4 * length, 0.7 * length, length });
+  expectQueriesMatchUncachedCopies(path, { 0.9 * length, 0.6 * length, 0.2 * length, 0.0 });
+}
+
+TEST(time_optimal_trajectory_generation, PathSegmentCacheHandlesSegmentBoundaries)
+{
+  Path path = createSegmentedPath();
+  for (const auto& [position, discontinuity] : path.getSwitchingPoints())
+  {
+    (void)discontinuity;
+    expectQueriesMatchUncachedCopies(path, { std::nextafter(position, 0.0), position,
+                                             std::nextafter(position, path.getLength()) });
+  }
+}
+
+TEST(time_optimal_trajectory_generation, CopiedPathDoesNotReuseSourceCache)
+{
+  Path source = createSegmentedPath();
+  source.getConfig(0.9 * source.getLength());
+  Path copy(source);
+  expectQueriesMatchUncachedCopies(copy, { 0.1 * copy.getLength() });
+}
+
+TEST(time_optimal_trajectory_generation, PathSegmentCacheSupportsConcurrentQueries)
+{
+  const Path path = createSegmentedPath();
+  std::atomic_bool matches{ true };
+  std::vector<std::thread> threads;
+  for (std::size_t thread_index = 0; thread_index < 4; ++thread_index)
+  {
+    threads.emplace_back([&path, &matches, thread_index]() {
+      Path baseline(path);
+      for (std::size_t query_index = 0; query_index < 500; ++query_index)
+      {
+        const double query =
+            static_cast<double>((query_index * 37 + thread_index * 13) % 501) / 500.0 * path.getLength();
+        if (!path.getConfig(query).isApprox(baseline.getConfig(query)) ||
+            !path.getTangent(query).isApprox(baseline.getTangent(query)) ||
+            !path.getCurvature(query).isApprox(baseline.getCurvature(query)))
+          matches = false;
+      }
+    });
+  }
+  for (std::thread& thread : threads)
+    thread.join();
+  EXPECT_TRUE(matches);
+}
 
 TEST(time_optimal_trajectory_generation, test1)
 {
