@@ -398,8 +398,9 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
     }
     else if (expected_type == CommandType::TWIST)
     {
-      // Transform the twist command to the planning frame, which is the base frame of the active subgroup's IK solver,
-      // before applying it. Additionally verify there is an IK solver, and that the transformation is successful.
+      // Transform the twist command to the planning frame, which is the base frame of the active subgroup's IK
+      // solver, or (if no IK solver is configured) the base link of the subgroup's kinematic chain. Additionally
+      // verify a base frame could be determined, and that the transformation is successful.
       const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
       if (planning_frame_maybe.has_value())
       {
@@ -420,14 +421,16 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       else
       {
         servo_status_ = StatusCode::INVALID;
-        RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_subgroup_name.c_str());
+        RCLCPP_ERROR(logger_, "No IK solver and no unambiguous kinematic chain base frame for planning group %s.",
+                     active_subgroup_name.c_str());
       }
     }
     else if (expected_type == CommandType::POSE)
     {
-      // Transform the pose command to the planning frame, which is the base frame of the active subgroup's IK solver,
-      // before applying it. The end effector frame is also extracted as the tip frame of the IK solver.
-      // Additionally verify there is an IK solver, and that the transformation is successful.
+      // Transform the pose command to the planning frame, which is the base frame of the active subgroup's IK
+      // solver, or (if no IK solver is configured) the base link of the subgroup's kinematic chain. The end
+      // effector frame is extracted the same way. Additionally verify these frames could be determined, and
+      // that the transformation is successful.
       const auto planning_frame_maybe = getIKSolverBaseFrame(robot_state, active_subgroup_name);
       const auto ee_frame_maybe = getIKSolverTipFrame(robot_state, active_subgroup_name);
       if (planning_frame_maybe.has_value() && ee_frame_maybe.has_value())
@@ -449,7 +452,8 @@ Eigen::VectorXd Servo::jointDeltaFromCommand(const ServoInput& command, const mo
       else
       {
         servo_status_ = StatusCode::INVALID;
-        RCLCPP_ERROR(logger_, "No IK solver for planning group %s.", active_subgroup_name.c_str());
+        RCLCPP_ERROR(logger_, "No IK solver and no unambiguous kinematic chain base/tip frame for planning group %s.",
+                     active_subgroup_name.c_str());
       }
     }
 
