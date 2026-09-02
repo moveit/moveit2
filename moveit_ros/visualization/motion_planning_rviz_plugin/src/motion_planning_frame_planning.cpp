@@ -59,24 +59,57 @@ void MotionPlanningFrame::planButtonClicked()
 
 void MotionPlanningFrame::executeButtonClicked()
 {
+  if (!move_group_ || !current_plan_ || execution_job_.active())
+    return;
+
   ui_->execute_button->setEnabled(false);
-  // execution is done in a separate thread, to not block other background jobs by blocking for synchronous execution
-  planning_display_->spawnBackgroundJob([this] { computeExecuteButtonClicked(); });
+  ui_->stop_button->setEnabled(true);
+  auto move_group = move_group_;
+  auto plan = current_plan_;
+  execution_job_.start(
+      [this, move_group, plan](ExecutionJob::Generation execution_generation) {
+        computeExecuteButtonClicked(move_group, plan, execution_generation);
+      },
+      [move_group] { move_group->stop(); });
 }
 
 void MotionPlanningFrame::planAndExecuteButtonClicked()
 {
+  if (!move_group_ || execution_job_.active())
+    return;
+
   publishSceneIfNeeded();
   ui_->plan_and_execute_button->setEnabled(false);
   ui_->execute_button->setEnabled(false);
-  // execution is done in a separate thread, to not block other background jobs by blocking for synchronous execution
-  planning_display_->spawnBackgroundJob([this] { computePlanAndExecuteButtonClicked(); });
+  ui_->stop_button->setEnabled(true);
+
+  configureForPlanning();
+  planning_display_->rememberPreviousStartState();
+  move_group_->setStartStateToCurrentState();
+
+  auto move_group = move_group_;
+  bool use_cartesian_path = ui_->use_cartesian_path->isEnabled() && ui_->use_cartesian_path->checkState();
+  moveit::core::RobotStateConstPtr cartesian_goal;
+  if (use_cartesian_path)
+    cartesian_goal = std::make_shared<moveit::core::RobotState>(*planning_display_->getQueryGoalState());
+  double velocity_scaling_factor = ui_->velocity_scaling_factor->value();
+  double acceleration_scaling_factor = ui_->acceleration_scaling_factor->value();
+
+  execution_job_.start(
+      [this, move_group, use_cartesian_path, cartesian_goal, velocity_scaling_factor,
+       acceleration_scaling_factor](ExecutionJob::Generation execution_generation) {
+        computePlanAndExecuteButtonClicked(move_group, use_cartesian_path, cartesian_goal, velocity_scaling_factor,
+                                           acceleration_scaling_factor, execution_generation);
+      },
+      [move_group] { move_group->stop(); });
 }
 
 void MotionPlanningFrame::stopButtonClicked()
 {
   ui_->stop_button->setEnabled(false);  // avoid clicking again
-  planning_display_->addBackgroundJob([this] { computeStopButtonClicked(); }, "stop");
+  auto move_group = move_group_;
+  if (move_group)
+    planning_display_->addBackgroundJob([move_group] { move_group->stop(); }, "stop");
 }
 
 void MotionPlanningFrame::allowReplanningToggled(bool checked)
@@ -120,16 +153,25 @@ void MotionPlanningFrame::onClearOctomapClicked()
 
 bool MotionPlanningFrame::computeCartesianPlan()
 {
+  current_plan_ =
+      computeCartesianPlan(move_group_, *planning_display_->getQueryGoalState(), ui_->velocity_scaling_factor->value(),
+                           ui_->acceleration_scaling_factor->value());
+  return static_cast<bool>(current_plan_);
+}
+
+moveit::planning_interface::MoveGroupInterface::PlanPtr
+MotionPlanningFrame::computeCartesianPlan(const moveit::planning_interface::MoveGroupInterfacePtr& move_group,
+                                          const moveit::core::RobotState& goal, double velocity_scaling_factor,
+                                          double acceleration_scaling_factor)
+{
   rclcpp::Time start = rclcpp::Clock().now();
-  // get goal pose
-  moveit::core::RobotState goal = *planning_display_->getQueryGoalState();
   std::vector<geometry_msgs::msg::Pose> waypoints;
-  const std::string& link_name = move_group_->getEndEffectorLink();
-  const moveit::core::LinkModel* link = move_group_->getRobotModel()->getLinkModel(link_name);
+  const std::string& link_name = move_group->getEndEffectorLink();
+  const moveit::core::LinkModel* link = move_group->getRobotModel()->getLinkModel(link_name);
   if (!link)
   {
     RCLCPP_ERROR_STREAM(logger_, "Failed to determine unique end-effector link: " << link_name);
-    return false;
+    return {};
   }
   waypoints.push_back(tf2::toMsg(goal.getGlobalLinkTransform(link)));
 
@@ -139,7 +181,7 @@ bool MotionPlanningFrame::computeCartesianPlan()
 
   // compute trajectory
   moveit_msgs::msg::RobotTrajectory trajectory;
-  double fraction = move_group_->computeCartesianPath(waypoints, cart_step_size, trajectory, avoid_collisions);
+  double fraction = move_group->computeCartesianPath(waypoints, cart_step_size, trajectory, avoid_collisions);
 
   if (fraction >= 1.0)
   {
@@ -147,20 +189,21 @@ bool MotionPlanningFrame::computeCartesianPlan()
 
     // Compute time parameterization to also provide velocities
     // https://groups.google.com/forum/#!topic/moveit-users/MOoFxy2exT4
-    robot_trajectory::RobotTrajectory rt(move_group_->getRobotModel(), move_group_->getName());
-    rt.setRobotTrajectoryMsg(*move_group_->getCurrentState(), trajectory);
+    robot_trajectory::RobotTrajectory rt(move_group->getRobotModel(), move_group->getName());
+    rt.setRobotTrajectoryMsg(*move_group->getCurrentState(), trajectory);
     trajectory_processing::TimeOptimalTrajectoryGeneration time_parameterization;
-    bool success = time_parameterization.computeTimeStamps(rt, ui_->velocity_scaling_factor->value(),
-                                                           ui_->acceleration_scaling_factor->value());
+    bool success = time_parameterization.computeTimeStamps(rt, velocity_scaling_factor, acceleration_scaling_factor);
     RCLCPP_INFO(logger_, "Computing time stamps %s", success ? "SUCCEEDED" : "FAILED");
 
-    // Store trajectory in current_plan_
-    current_plan_ = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
-    rt.getRobotTrajectoryMsg(current_plan_->trajectory);
-    current_plan_->planning_time = (rclcpp::Clock().now() - start).seconds();
-    return success;
+    if (success)
+    {
+      auto plan = std::make_shared<moveit::planning_interface::MoveGroupInterface::Plan>();
+      rt.getRobotTrajectoryMsg(plan->trajectory);
+      plan->planning_time = (rclcpp::Clock().now() - start).seconds();
+      return plan;
+    }
   }
-  return false;
+  return {};
 }
 
 bool MotionPlanningFrame::computeJointSpacePlan()
@@ -196,51 +239,52 @@ void MotionPlanningFrame::computePlanButtonClicked()
   Q_EMIT planningFinished();
 }
 
-void MotionPlanningFrame::computeExecuteButtonClicked()
+void MotionPlanningFrame::computeExecuteButtonClicked(
+    const moveit::planning_interface::MoveGroupInterfacePtr& move_group,
+    const moveit::planning_interface::MoveGroupInterface::PlanPtr& plan, ExecutionJob::Generation execution_generation)
 {
-  // ensures the MoveGroupInterface is not destroyed while executing
-  moveit::planning_interface::MoveGroupInterfacePtr mgi(move_group_);
-  if (mgi && current_plan_)
-  {
-    ui_->stop_button->setEnabled(true);  // enable stopping
-    bool success = mgi->execute(*current_plan_) == moveit::core::MoveItErrorCode::SUCCESS;
-    onFinishedExecution(success);
-  }
+  bool success = move_group->execute(*plan) == moveit::core::MoveItErrorCode::SUCCESS;
+  queueFinishedExecution(success, execution_generation);
 }
 
-void MotionPlanningFrame::computePlanAndExecuteButtonClicked()
+void MotionPlanningFrame::computePlanAndExecuteButtonClicked(
+    const moveit::planning_interface::MoveGroupInterfacePtr& move_group, bool use_cartesian_path,
+    const moveit::core::RobotStateConstPtr& cartesian_goal, double velocity_scaling_factor,
+    double acceleration_scaling_factor, ExecutionJob::Generation execution_generation)
 {
-  // ensures the MoveGroupInterface is not destroyed while executing
-  moveit::planning_interface::MoveGroupInterfacePtr mgi(move_group_);
-  if (!mgi)
-    return;
-  configureForPlanning();
-  planning_display_->rememberPreviousStartState();
-  // move_group::move() on the server side, will always start from the current state
-  // to suppress a warning, we pass an empty state (which encodes "start from current state")
-  mgi->setStartStateToCurrentState();
-  ui_->stop_button->setEnabled(true);
-  if (ui_->use_cartesian_path->isEnabled() && ui_->use_cartesian_path->checkState())
+  bool success = false;
+  moveit::planning_interface::MoveGroupInterface::PlanPtr plan;
+  if (use_cartesian_path)
   {
-    if (computeCartesianPlan())
-      computeExecuteButtonClicked();
+    plan = computeCartesianPlan(move_group, *cartesian_goal, velocity_scaling_factor, acceleration_scaling_factor);
+    if (plan)
+      success = move_group->execute(*plan) == moveit::core::MoveItErrorCode::SUCCESS;
   }
   else
   {
-    bool success = mgi->move() == moveit::core::MoveItErrorCode::SUCCESS;
-    onFinishedExecution(success);
+    success = move_group->move() == moveit::core::MoveItErrorCode::SUCCESS;
   }
-  ui_->plan_and_execute_button->setEnabled(true);
+  queueFinishedExecution(success, execution_generation, plan);
 }
 
-void MotionPlanningFrame::computeStopButtonClicked()
+void MotionPlanningFrame::queueFinishedExecution(bool success, ExecutionJob::Generation execution_generation,
+                                                 const moveit::planning_interface::MoveGroupInterface::PlanPtr& plan)
 {
-  if (move_group_)
-    move_group_->stop();
+  QMetaObject::invokeMethod(
+      this,
+      [this, success, execution_generation, plan] {
+        if (!execution_job_.isCurrent(execution_generation))
+          return;
+        if (plan)
+          current_plan_ = plan;
+        onFinishedExecution(success);
+      },
+      Qt::QueuedConnection);
 }
 
 void MotionPlanningFrame::onFinishedExecution(bool success)
 {
+  ui_->plan_and_execute_button->setEnabled(true);
   // visualize result of execution
   if (success)
   {
@@ -562,17 +606,20 @@ void MotionPlanningFrame::configureForPlanning()
 
 void MotionPlanningFrame::remotePlanCallback(const std_msgs::msg::Empty::ConstSharedPtr& /*msg*/)
 {
-  planButtonClicked();
+  QMetaObject::invokeMethod(
+      this, [this] { planButtonClicked(); }, Qt::QueuedConnection);
 }
 
 void MotionPlanningFrame::remoteExecuteCallback(const std_msgs::msg::Empty::ConstSharedPtr& /*msg*/)
 {
-  executeButtonClicked();
+  QMetaObject::invokeMethod(
+      this, [this] { executeButtonClicked(); }, Qt::QueuedConnection);
 }
 
 void MotionPlanningFrame::remoteStopCallback(const std_msgs::msg::Empty::ConstSharedPtr& /*msg*/)
 {
-  stopButtonClicked();
+  QMetaObject::invokeMethod(
+      this, [this] { stopButtonClicked(); }, Qt::QueuedConnection);
 }
 
 void MotionPlanningFrame::remoteUpdateStartStateCallback(const std_msgs::msg::Empty::ConstSharedPtr& /*msg*/)
