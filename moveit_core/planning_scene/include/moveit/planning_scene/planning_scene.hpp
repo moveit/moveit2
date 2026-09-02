@@ -54,6 +54,7 @@
 #include <memory>
 #include <functional>
 #include <optional>
+#include <mutex>
 #include <thread>
 #include <variant>
 #include <optional>
@@ -950,8 +951,9 @@ private:
     collision_detection::CollisionEnvPtr cenv_;  // never nullptr
     collision_detection::CollisionEnvConstPtr cenv_const_;
 
-    collision_detection::CollisionEnvPtr cenv_unpadded_;
-    collision_detection::CollisionEnvConstPtr cenv_unpadded_const_;
+    mutable collision_detection::CollisionEnvPtr cenv_unpadded_;
+    mutable collision_detection::CollisionEnvConstPtr cenv_unpadded_const_;
+    mutable std::once_flag cenv_unpadded_once_;
 
     const collision_detection::CollisionEnvConstPtr& getCollisionEnv() const
     {
@@ -959,6 +961,12 @@ private:
     }
     const collision_detection::CollisionEnvConstPtr& getCollisionEnvUnpadded() const
     {
+      std::call_once(cenv_unpadded_once_, [this]() {
+        cenv_unpadded_ = alloc_->allocateEnv(cenv_, cenv_->getWorld());
+        cenv_unpadded_->setPadding(0.0);
+        cenv_unpadded_->setScale(1.0);
+        cenv_unpadded_const_ = cenv_unpadded_;
+      });
       return cenv_unpadded_const_;
     }
     void copyPadding(const CollisionDetector& src);

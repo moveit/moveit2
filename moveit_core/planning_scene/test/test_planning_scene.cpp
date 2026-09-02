@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan */
 
+#include <atomic>
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <moveit/collision_detection_fcl/collision_detector_allocator_fcl.hpp>
@@ -44,12 +45,62 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <octomap_msgs/conversions.h>
 #include <octomap/octomap.h>
 
 #include <moveit/collision_detection/collision_common.hpp>
 #include <moveit/collision_detection/collision_plugin_cache.hpp>
+
+namespace
+{
+class CountingCollisionDetectorAllocator : public collision_detection::CollisionDetectorAllocator
+{
+public:
+  const std::string& getName() const override
+  {
+    static const std::string name = "CountingFCL";
+    return name;
+  }
+
+  collision_detection::CollisionEnvPtr allocateEnv(const collision_detection::WorldPtr& world,
+                                                   const moveit::core::RobotModelConstPtr& robot_model) const override
+  {
+    ++fresh_allocations_;
+    return delegate_->allocateEnv(world, robot_model);
+  }
+
+  collision_detection::CollisionEnvPtr allocateEnv(const collision_detection::CollisionEnvConstPtr& original,
+                                                   const collision_detection::WorldPtr& world) const override
+  {
+    ++copy_allocations_;
+    return delegate_->allocateEnv(original, world);
+  }
+
+  collision_detection::CollisionEnvPtr allocateEnv(const moveit::core::RobotModelConstPtr& robot_model) const override
+  {
+    ++fresh_allocations_;
+    return delegate_->allocateEnv(robot_model);
+  }
+
+  std::size_t freshAllocations() const
+  {
+    return fresh_allocations_;
+  }
+
+  std::size_t copyAllocations() const
+  {
+    return copy_allocations_;
+  }
+
+private:
+  collision_detection::CollisionDetectorAllocatorPtr delegate_ =
+      collision_detection::CollisionDetectorAllocatorFCL::create();
+  mutable std::atomic<std::size_t> fresh_allocations_{ 0 };
+  mutable std::atomic<std::size_t> copy_allocations_{ 0 };
+};
+}  // namespace
 
 // Test not setting the object's pose should use the shape pose as the object pose
 TEST(PlanningScene, TestOneShapeObjectPose)
@@ -203,6 +254,70 @@ TEST(PlanningScene, LoadRestoreDiff)
   EXPECT_EQ(ps->getWorld()->size(), 2u);
   EXPECT_EQ(ps->getCollisionEnv()->getWorld()->size(), 2u);
   EXPECT_EQ(ps->getCollisionEnvUnpadded()->getWorld()->size(), 2u);
+}
+
+TEST(PlanningScene, UnpaddedCollisionEnvironmentIsLazyAcrossNestedDiffs)
+{
+  auto allocator = std::make_shared<CountingCollisionDetectorAllocator>();
+  auto root = std::make_shared<planning_scene::PlanningScene>(moveit::core::loadTestingRobotModel("panda"));
+  root->allocateCollisionDetector(allocator);
+
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 0u);
+
+  planning_scene::PlanningScenePtr child = root->diff();
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 1u);
+
+  planning_scene::PlanningScenePtr grandchild = child->diff();
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 2u);
+
+  grandchild->getCollisionEnvUnpadded();
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 3u);
+}
+
+TEST(PlanningScene, UnpaddedCollisionEnvironmentIsInitializedOnceAcrossThreads)
+{
+  auto allocator = std::make_shared<CountingCollisionDetectorAllocator>();
+  auto scene = std::make_shared<planning_scene::PlanningScene>(moveit::core::loadTestingRobotModel("panda"));
+  scene->allocateCollisionDetector(allocator);
+
+  std::vector<std::thread> threads;
+  for (std::size_t i = 0; i < 8; ++i)
+    threads.emplace_back([scene]() { scene->getCollisionEnvUnpadded(); });
+  for (std::thread& thread : threads)
+    thread.join();
+
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 1u);
+}
+
+TEST(PlanningScene, DetachedSceneDoesNotRetainDeferredCollisionEnvironmentSource)
+{
+  auto allocator = std::make_shared<CountingCollisionDetectorAllocator>();
+  auto source = std::make_shared<planning_scene::PlanningScene>(moveit::core::loadTestingRobotModel("panda"));
+  source->allocateCollisionDetector(allocator);
+  source->getCollisionEnvNonConst()->setLinkPadding("panda_link0", 0.1);
+  source->getCollisionEnvNonConst()->setLinkScale("panda_link0", 1.1);
+  std::weak_ptr<const planning_scene::PlanningScene> source_scene = source;
+  std::weak_ptr<const collision_detection::CollisionEnv> source_collision_environment = source->getCollisionEnv();
+  std::weak_ptr<const collision_detection::World> source_world = source->getWorld();
+
+  planning_scene::PlanningScenePtr detached = planning_scene::PlanningScene::clone(source);
+  source.reset();
+
+  EXPECT_TRUE(source_scene.expired());
+  EXPECT_TRUE(source_collision_environment.expired());
+  EXPECT_TRUE(source_world.expired());
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 1u);
+
+  EXPECT_DOUBLE_EQ(detached->getCollisionEnvUnpadded()->getLinkPadding("panda_link0"), 0.0);
+  EXPECT_DOUBLE_EQ(detached->getCollisionEnvUnpadded()->getLinkScale("panda_link0"), 1.0);
+  EXPECT_EQ(allocator->freshAllocations(), 1u);
+  EXPECT_EQ(allocator->copyAllocations(), 2u);
 }
 
 TEST(PlanningScene, MakeAttachedDiff)
