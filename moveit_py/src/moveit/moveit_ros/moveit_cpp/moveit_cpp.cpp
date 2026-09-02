@@ -35,9 +35,12 @@
 /* Author: Peter David Fagan */
 
 #include "moveit_cpp.hpp"
+#include <atomic>
+#include <chrono>
 #include <pybind11/pytypes.h>
 #include <moveit/utils/logger.hpp>
 #include <string>
+#include <thread>
 
 namespace moveit_py
 {
@@ -47,6 +50,51 @@ rclcpp::Logger getLogger()
 {
   return moveit::getLogger("moveit.py.cpp_initializer");
 }
+
+class ExecutorThread
+{
+public:
+  explicit ExecutorThread(const rclcpp::Node::SharedPtr& node)
+    : executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+    , stop_requested_(std::make_shared<std::atomic_bool>(false))
+    , execution_thread_([node, executor = executor_, stop_requested = stop_requested_]() {
+      executor->add_node(node);
+      while (!stop_requested->load())
+        executor->spin_once(std::chrono::milliseconds(100));
+    })
+  {
+  }
+
+  ~ExecutorThread()
+  {
+    stop();
+  }
+
+  ExecutorThread(const ExecutorThread&) = delete;
+  ExecutorThread& operator=(const ExecutorThread&) = delete;
+
+  void stop() noexcept
+  {
+    if (!execution_thread_.joinable())
+      return;
+
+    stop_requested_->store(true);
+    try
+    {
+      executor_->cancel();
+    }
+    catch (...)
+    {
+      // spin_once has a bounded wait, so the thread can still exit cleanly.
+    }
+    execution_thread_.join();
+  }
+
+private:
+  std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
+  std::shared_ptr<std::atomic_bool> stop_requested_;
+  std::thread execution_thread_;
+};
 
 std::shared_ptr<moveit_cpp::PlanningComponent>
 getPlanningComponent(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
@@ -122,20 +170,12 @@ void initMoveitPy(py::module& m)
 
              RCLCPP_INFO(getLogger(), "Initialize node and executor");
              rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared(node_name, name_space, node_options);
-             std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor =
-                 std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
 
              RCLCPP_INFO(getLogger(), "Spin separate thread");
-             auto spin_node = [node, executor]() {
-               executor->add_node(node);
-               executor->spin();
-             };
-             std::thread execution_thread(spin_node);
-             execution_thread.detach();
+             auto executor_thread = std::make_shared<ExecutorThread>(node);
 
-             auto custom_deleter = [executor](moveit_cpp::MoveItCpp* moveit_cpp) {
-               executor->cancel();
-               rclcpp::shutdown();
+             auto custom_deleter = [executor_thread](moveit_cpp::MoveItCpp* moveit_cpp) {
+               executor_thread->stop();
                delete moveit_cpp;
              };
 
