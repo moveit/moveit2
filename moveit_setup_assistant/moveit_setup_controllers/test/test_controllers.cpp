@@ -37,6 +37,7 @@
 #include <moveit_setup_controllers/ros2_controllers_config.hpp>
 #include <moveit_setup_controllers/moveit_controllers_config.hpp>
 #include <moveit_setup_controllers/ros2_controllers.hpp>
+#include <moveit_setup_controllers/moveit_controllers.hpp>
 
 using moveit_setup::expectYamlEquivalence;
 using moveit_setup::getSharePath;
@@ -173,6 +174,47 @@ TEST_F(ControllersTest, AddDefaultControllers)
 
   // Test that addDefaultControllers() did actually add a controller for the new_group
   EXPECT_EQ(ros2_controllers_config->getControllers().size(), group_count);
+}
+
+// Regression test for https://github.com/moveit/moveit2/issues/3796
+// MoveItControllers::addDefaultControllers() must populate additional
+// controller fields (e.g. action_ns, default), not just name/type/joints.
+TEST_F(ControllersTest, AddDefaultControllersMoveItAdditionalFields)
+{
+  auto config_dir = getSharePath("moveit_resources_panda_moveit_config");
+  YAML::Node settings = YAML::LoadFile(config_dir / ".setup_assistant")["moveit_setup_assistant_config"];
+  config_data_->get<moveit_setup::URDFConfig>("urdf")->loadPrevious(config_dir, settings["URDF"]);
+  auto srdf_config = config_data_->get<moveit_setup::SRDFConfig>("srdf");
+  srdf_config->loadPrevious(config_dir, settings["SRDF"]);
+
+  auto moveit_controllers_config = config_data_->get<MoveItControllersConfig>("moveit_controllers");
+
+  // Initially no controllers
+  EXPECT_EQ(moveit_controllers_config->getControllers().size(), 0u);
+
+  // Run the setup step
+  moveit_setup::controllers::MoveItControllers setup_step;
+  initializeStep(setup_step);
+
+  // Adding default controllers, a FollowJointTrajectory controller for each planning group
+  setup_step.addDefaultControllers();
+
+  size_t group_count = srdf_config->getGroups().size();
+  const std::vector<ControllerInfo>& mcontrollers = moveit_controllers_config->getControllers();
+  ASSERT_EQ(mcontrollers.size(), group_count);
+
+  for (const ControllerInfo& ci : mcontrollers)
+  {
+    EXPECT_EQ("FollowJointTrajectory", ci.type_);
+
+    const auto& action_ns = ci.parameters_.find("action_ns");
+    ASSERT_NE(action_ns, ci.parameters_.end()) << "action_ns parameter missing for " << ci.name_;
+    EXPECT_EQ("follow_joint_trajectory", action_ns->second);
+
+    const auto& default_param = ci.parameters_.find("default");
+    ASSERT_NE(default_param, ci.parameters_.end()) << "default parameter missing for " << ci.name_;
+    EXPECT_EQ("true", default_param->second);
+  }
 }
 
 int main(int argc, char** argv)
