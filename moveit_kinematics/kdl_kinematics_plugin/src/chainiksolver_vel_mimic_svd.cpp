@@ -25,6 +25,8 @@
 
 #include <moveit/kdl_kinematics_plugin/chainiksolver_vel_mimic_svd.hpp>
 
+#include "pseudoinverse.hpp"
+
 namespace
 {
 unsigned int countMimicJoints(const std::vector<kdl_kinematics_plugin::JointMimic>& mimic_joints)
@@ -111,19 +113,20 @@ int ChainIkSolverVelMimicSVD::CartToJnt(const JntArray& q_in, const Twist& v_in,
   vin.topRows<3>() = Eigen::Map<const Eigen::Array3d>(v_in.vel.data, 3) * cartesian_weights.topRows<3>().array();
   vin.bottomRows<3>() = Eigen::Map<const Eigen::Array3d>(v_in.rot.data, 3) * cartesian_weights.bottomRows<3>().array();
 
-  // Do a singular value decomposition: J = U*S*V^t
-  svd_.compute(jac.topRows(rows));
+  const auto jacobian = jac.topRows(rows);
+  const Eigen::VectorXd x_sol =
+      kdl_kinematics_plugin::internal::solvePseudoinverse(jacobian, vin.topRows(rows), svd_.threshold());
 
   if (num_mimic_joints_ > 0)
   {
-    qdot_out_reduced_.noalias() = svd_.solve(vin.topRows(rows));
+    qdot_out_reduced_.noalias() = x_sol;
     qdot_out_reduced_.array() *= joint_weights.array();
     for (unsigned int i = 0; i < chain_.getNrOfJoints(); ++i)
       qdot_out(i) = qdot_out_reduced_[mimic_joints_[i].map_index] * mimic_joints_[i].multiplier;
   }
   else
   {
-    qdot_out.data.noalias() = svd_.solve(vin.topRows(rows));
+    qdot_out.data.noalias() = x_sol;
     qdot_out.data.array() *= joint_weights.array();
   }
 
