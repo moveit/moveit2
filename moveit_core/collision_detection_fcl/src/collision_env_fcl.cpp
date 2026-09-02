@@ -474,6 +474,12 @@ void CollisionEnvFCL::notifyObjectChange(const ObjectConstPtr& obj, World::Actio
 
     for (std::size_t i = 0; i < it->second.collision_objects_.size(); ++i)
     {
+      // World::ensureUnique() may have copy-on-write cloned `obj` into a new World::Object
+      // since these FCL objects were built, freeing the old one. CollisionGeometryData only
+      // stores a raw World::Object*, so refresh it here or getID() reads freed memory.
+      const_cast<FCLGeometry*>(it->second.collision_geometry_[i].get())
+          ->updateCollisionGeometryData(obj.get(), static_cast<int>(i), false);
+
       it->second.collision_objects_[i]->setTransform(transform2fcl(obj->global_shape_poses_[i]));
 
       // compute AABB, order matters
