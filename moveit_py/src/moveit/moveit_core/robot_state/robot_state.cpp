@@ -35,6 +35,7 @@
 /* Author: Peter David Fagan */
 
 #include "robot_state.hpp"
+#include <pybind11/numpy.h>
 #include <pybind11/stl.h>
 #include <moveit_py/moveit_py_utils/ros_msg_typecasters.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>
@@ -156,6 +157,60 @@ void setJointEfforts(moveit::core::RobotState* self, std::map<std::string, doubl
   {
     self->setVariableEffort(item.first, item.second);
   }
+}
+
+std::vector<double> jointValuesFromPython(const py::object& values)
+{
+  using DoubleArray = py::array_t<double, py::array::c_style | py::array::forcecast>;
+  DoubleArray array = DoubleArray::ensure(values);
+  if (!array)
+    throw py::type_error("Joint values must be a numeric sequence or NumPy array");
+
+  // Match the shapes previously accepted by the Eigen::VectorXd binding: 1-D or n-by-1.
+  // Copy into an owned vector so conversion does not depend on the Eigen caster path that
+  // crashes under Humble for the reported NumPy joint-group setter calls (#3718).
+  if (array.ndim() != 1 && (array.ndim() != 2 || array.shape(1) != 1))
+    throw py::value_error("Joint values must be one-dimensional or an n-by-1 array");
+
+  if (array.size() == 0)
+    return {};
+  return { array.data(), array.data() + array.size() };
+}
+
+const moveit::core::JointModelGroup* validateJointValueCount(moveit::core::RobotState* self,
+                                                             const std::string& joint_model_group_name,
+                                                             const std::vector<double>& values, bool active_only)
+{
+  const moveit::core::JointModelGroup* group = self->getJointModelGroup(joint_model_group_name);
+  if (!group)
+    return nullptr;
+
+  const std::size_t expected_count = active_only ? group->getActiveVariableCount() : group->getVariableCount();
+  if (values.size() != expected_count)
+  {
+    throw py::value_error("Expected " + std::to_string(expected_count) + " values for joint model group '" +
+                          joint_model_group_name + "', got " + std::to_string(values.size()));
+  }
+  return group;
+}
+
+void setJointGroupPositions(moveit::core::RobotState* self, const std::string& joint_model_group_name,
+                            const py::object& position_values)
+{
+  const std::vector<double> values = jointValuesFromPython(position_values);
+  const moveit::core::JointModelGroup* group = validateJointValueCount(self, joint_model_group_name, values, false);
+  // Core vector overloads take &gstate[0]; skip the call for empty/zero-variable groups.
+  if (group && !values.empty())
+    self->setJointGroupPositions(group, values);
+}
+
+void setJointGroupActivePositions(moveit::core::RobotState* self, const std::string& joint_model_group_name,
+                                  const py::object& position_values)
+{
+  const std::vector<double> values = jointValuesFromPython(position_values);
+  const moveit::core::JointModelGroup* group = validateJointValueCount(self, joint_model_group_name, values, true);
+  if (group && !values.empty())
+    self->setJointGroupActivePositions(group, values);
 }
 
 Eigen::VectorXd copyJointGroupPositions(const moveit::core::RobotState* self, const std::string& joint_model_group_name)
@@ -339,29 +394,30 @@ void initRobotState(py::module& m)
       .def_property("joint_efforts", &moveit_py::bind_robot_state::getJointEfforts,
                     &moveit_py::bind_robot_state::setJointEfforts, py::return_value_policy::copy)
 
-      .def("set_joint_group_positions",
-           py::overload_cast<const std::string&, const Eigen::VectorXd&>(
-               &moveit::core::RobotState::setJointGroupPositions),
+      // Owned-vector conversion for the two setters reported in #3718. Velocities and
+      // accelerations remain on the Eigen bindings until Humble evidence shows they share
+      // the same failure mode.
+      .def("set_joint_group_positions", &moveit_py::bind_robot_state::setJointGroupPositions,
            py::arg("joint_model_group_name"), py::arg("position_values"),
            R"(
            Sets the positions of the joints in the specified joint model group.
 
 	   Args:
                joint_model_group_name (str):
-               position_values (:py:class:`numpy.ndarray`): The positions of the joints in the joint model group.
+               position_values (array-like): Numeric sequence or NumPy array of joint positions
+                   (one-dimensional or n-by-1), converted to float64.
        )")
 
       // peterdavidfagan: I am not sure if additional function names are better than having function parameters for joint setting.
-      .def("set_joint_group_active_positions",
-           py::overload_cast<const std::string&, const Eigen::VectorXd&>(
-               &moveit::core::RobotState::setJointGroupActivePositions),
+      .def("set_joint_group_active_positions", &moveit_py::bind_robot_state::setJointGroupActivePositions,
            py::arg("joint_model_group_name"), py::arg("position_values"),
            R"(
            Sets the active positions of joints in the specified joint model group.
 
            Args:
                joint_model_group_name (str): The name of the joint model group to set the active positions for.
-               position_values (:py:class:`numpy.ndarray`): The positions of the joints in the joint model group.
+               position_values (array-like): Numeric sequence or NumPy array of active joint positions
+                   (one-dimensional or n-by-1), converted to float64.
        )")
 
       .def("get_joint_group_positions", &moveit_py::bind_robot_state::copyJointGroupPositions,
