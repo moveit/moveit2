@@ -289,15 +289,15 @@ public:
   class ObserverHandle
   {
   public:
-    ObserverHandle() : observer_(nullptr)
+    ObserverHandle() : observer_()
     {
     }
 
   private:
-    ObserverHandle(const Observer* o) : observer_(o)
+    ObserverHandle(const std::shared_ptr<Observer>& o) : observer_(o)
     {
     }
-    const Observer* observer_;
+    std::weak_ptr<Observer> observer_;
     friend class World;
   };
 
@@ -349,6 +349,6 @@ private:
   };
 
   /// All registered observers of this world representation
-  std::vector<Observer*> observers_;
+  std::vector<std::shared_ptr<Observer>> observers_;
 };
 }  // namespace collision_detection
