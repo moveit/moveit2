@@ -24,13 +24,12 @@ jobs:
           - IMAGE: lyrical-ci-testing
             IKFAST_TEST: true
             EXTRA_CXX_FLAGS: -Wno-error=deprecated-declarations
+            CLANG_TIDY: pedantic
           - IMAGE: rolling-ci
           - IMAGE: lyrical-ci-testing
             EXTRA_CXX_FLAGS: -Wno-error=deprecated-declarations
           - IMAGE: jazzy-ci
             IKFAST_TEST: true
-            # Moved here because Ubuntu 26.04 has issues compiling with clang++
-            CLANG_TIDY: pedantic
           - IMAGE: humble-ci
     env:
       # TODO(andyz): When this clang-tidy issue is fixed, remove -Wno-unknown-warning-option
@@ -176,6 +175,7 @@ jobs:
       - name: Generate codecov report
         uses: rhaschke/lcov-action@main
         if: always() && matrix.env.CCOV && steps.ici.outputs.target_test_results == '0'
+        continue-on-error: true  # ignore non-suppressable errors of lcov
         with:
           docker: ${{ env.DOCKER_IMAGE }}
           workdir: ${{ env.BASEDIR }}/target_ws

@@ -2,6 +2,9 @@
 Changelog for package moveit_resources_prbt_moveit_config
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.1 (2026-08-29)
+-------------------
+
 2.15.0 (2026-08-12)
 -------------------
 * Use modern --frame-id/--child-frame-id args for test static_transform_publisher (`#3762 <https://github.com/moveit/moveit2/issues/3762>`_)

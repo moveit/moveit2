@@ -426,7 +426,9 @@ void RobotStateDisplay::loadRobotModel()
     }
   }
   else
+  {
     setStatus(rviz_common::properties::StatusProperty::Error, "RobotModel", "Loading failed");
+  }
 
   highlights_.clear();
 }

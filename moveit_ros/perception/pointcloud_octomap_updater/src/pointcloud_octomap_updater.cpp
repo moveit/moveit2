@@ -270,7 +270,9 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
       }
     }
     else
+    {
       return;
+    }
   }
 
   /* compute sensor origin in map frame */

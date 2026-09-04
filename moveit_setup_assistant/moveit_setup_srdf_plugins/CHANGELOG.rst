@@ -2,6 +2,12 @@
 Changelog for package moveit_setup_srdf_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.1 (2026-08-29)
+-------------------
+* Fix CI on Ubuntu 26.04 (`#3818 <https://github.com/moveit/moveit2/issues/3818>`_)
+* Fix Qt deprecations
+* Contributors: Robert Haschke
+
 2.15.0 (2026-08-12)
 -------------------
 * moveit_setup_srdf_plugins: make test_srdf fail loudly instead of segfaulting (`#3810 <https://github.com/moveit/moveit2/issues/3810>`_)

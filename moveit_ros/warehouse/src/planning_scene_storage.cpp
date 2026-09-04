@@ -219,7 +219,9 @@ bool moveit_warehouse::PlanningSceneStorage::getPlanningSceneWorld(moveit_msgs::
     return true;
   }
   else
+  {
     return false;
+  }
 }
 
 bool moveit_warehouse::PlanningSceneStorage::getPlanningScene(PlanningSceneWithMetadata& scene_m,

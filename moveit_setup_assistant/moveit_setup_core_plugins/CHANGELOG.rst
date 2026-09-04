@@ -2,6 +2,9 @@
 Changelog for package moveit_setup_core_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.1 (2026-08-29)
+-------------------
+
 2.15.0 (2026-08-12)
 -------------------
 * Fix rviz Qt6 threshold: 15.1 -> 15.1.14 (`#3807 <https://github.com/moveit/moveit2/issues/3807>`_)

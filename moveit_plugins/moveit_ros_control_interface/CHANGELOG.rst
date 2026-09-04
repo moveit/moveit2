@@ -2,6 +2,15 @@
 Changelog for package moveit_ros_control_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.1 (2026-08-29)
+-------------------
+* Fix CI on Ubuntu 26.04 (`#3818 <https://github.com/moveit/moveit2/issues/3818>`_)
+* Address review comments
+* add missing header for unordered_set
+* remove unused queue header
+* Avoid using deprecated FindBoost.cmake module
+* Contributors: Christian Rauch, Robert Haschke
+
 2.15.0 (2026-08-12)
 -------------------
 * Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)

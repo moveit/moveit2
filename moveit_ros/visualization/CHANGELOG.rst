@@ -2,6 +2,14 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.1 (2026-08-29)
+-------------------
+* Modernize Qt signal-slot connections to use function pointers (`#3823 <https://github.com/moveit/moveit2/issues/3823>`_)
+* Fix CI on Ubuntu 26.04 (`#3818 <https://github.com/moveit/moveit2/issues/3818>`_)
+* Address review comments
+* Avoid using deprecated FindBoost.cmake module
+* Contributors: Christian Rauch, Robert Haschke
+
 2.15.0 (2026-08-12)
 -------------------
 * resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)

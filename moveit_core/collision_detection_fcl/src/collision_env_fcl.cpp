@@ -108,7 +108,9 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
             std::make_shared<const fcl::CollisionObjectd>(link_geometry->collision_geometry_));
       }
       else
+      {
         RCLCPP_ERROR(getLogger(), "Unable to construct collision geometry for link '%s'", link->getName().c_str());
+      }
     }
   }
 
@@ -146,7 +148,9 @@ CollisionEnvFCL::CollisionEnvFCL(const moveit::core::RobotModelConstPtr& model, 
         robot_fcl_objs_[index] = std::make_shared<const fcl::CollisionObjectd>(g->collision_geometry_);
       }
       else
+      {
         RCLCPP_ERROR(getLogger(), "Unable to construct collision geometry for link '%s'", link->getName().c_str());
+      }
     }
   }
 
@@ -511,7 +515,9 @@ void CollisionEnvFCL::updatedPaddingOrScaling(const std::vector<std::string>& li
       }
     }
     else
+    {
       RCLCPP_ERROR(getLogger(), "Updating padding or scaling for unknown link: '%s'", link.c_str());
+    }
   }
 }
 

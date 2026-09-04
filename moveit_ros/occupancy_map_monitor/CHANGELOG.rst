@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_occupancy_map_monitor
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.1 (2026-08-29)
+-------------------
+* Fix CI on Ubuntu 26.04 (`#3818 <https://github.com/moveit/moveit2/issues/3818>`_)
+* Avoid using deprecated FindBoost.cmake module
+* Contributors: Robert Haschke
+
 2.15.0 (2026-08-12)
 -------------------
 * resolute: drop octomap version range (`#3755 <https://github.com/moveit/moveit2/issues/3755>`_)

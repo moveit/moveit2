@@ -7,7 +7,7 @@ LABEL maintainer="Robert Haschke rhaschke@techfak.uni-bielefeld.de"
 
 # Switch to ros-testing
 RUN apt-get update && \
-    apt-get install -y ros2-testing-apt-source && \
+    apt-get install -y ros2-testing-apt-source --no-install-recommends && \
     # Upgrade packages to ros-testing and clean apt-cache within one RUN command
     apt-get update && \
     apt-get -qq -y dist-upgrade && \

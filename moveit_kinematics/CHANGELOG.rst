@@ -2,6 +2,17 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.1 (2026-08-29)
+-------------------
+* Fix CI on Ubuntu 26.04 (`#3818 <https://github.com/moveit/moveit2/issues/3818>`_)
+* Fix IKFast plugin compilation
+  The generated solver is no longer included inside the plugin namespace's
+  transitive include set: required standard headers are now included at global
+  scope. Fixes the build on Rolling, where rclcpp no longer provides <list>.
+* Guard clang-specific pragma
+* Avoid using deprecated FindBoost.cmake module
+* Contributors: Robert Haschke
+
 2.15.0 (2026-08-12)
 -------------------
 * docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)

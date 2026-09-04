@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>moveit_core</name>
-  <version>2.15.0</version>
+  <version>2.15.1</version>
   <description>Core libraries used by MoveIt</description>
 
   <maintainer email="henningkayser@picknik.ai">Henning Kayser</maintainer>
@@ -28,7 +28,15 @@
 
   <depend>angles</depend>
   <depend>assimp</depend>
-  <depend>boost</depend>
+  <depend>libboost-dev</depend>
+  <depend>libboost-chrono-dev</depend>
+  <depend>libboost-date-time-dev</depend>
+  <depend>libboost-filesystem-dev</depend>
+  <depend>libboost-iostreams-dev</depend>
+  <depend>libboost-program-options-dev</depend>
+  <depend>libboost-regex-dev</depend>
+  <depend>libboost-serialization-dev</depend>
+  <depend>libboost-thread-dev</depend>
   <depend>bullet</depend>
   <depend>common_interfaces</depend>
   <depend>eigen</depend>
