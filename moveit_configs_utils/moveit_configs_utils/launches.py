@@ -121,12 +121,21 @@ def generate_spawn_controllers_launch(moveit_config):
         "moveit_simple_controller_manager", {}
     ).get("controller_names", [])
     ld = LaunchDescription()
+    # The controller_manager node reads ros2_controllers.yaml, but the
+    # controller nodes do not read it. Give the file to each spawner so that
+    # every controller gets its parameters before configuration.
+    ros2_controllers_path = moveit_config.package_path / "config/ros2_controllers.yaml"
+    param_file_args = (
+        ["--param-file", str(ros2_controllers_path)]
+        if ros2_controllers_path.exists()
+        else []
+    )
     for controller in controller_names + ["joint_state_broadcaster"]:
         ld.add_action(
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=[controller],
+                arguments=[controller] + param_file_args,
                 output="screen",
             )
         )
