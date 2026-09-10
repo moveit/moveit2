@@ -39,6 +39,7 @@
 #include <string>
 #include <rsl/random.hpp>
 #include <fmt/format.h>
+#include "logger_detail.hpp"
 
 namespace moveit
 {
@@ -56,7 +57,21 @@ rclcpp::Logger& getGlobalRootLogger()
     try
     {
       static rclcpp::Node::SharedPtr moveit_node = rclcpp::Node::make_shared(name);
-      return moveit_node->get_logger();
+      static std::shared_ptr<std::mutex> s_mutex = detail::registerNodeResetOnPreShutdown(moveit_node);
+
+      // The pre-shutdown callback registered above can run concurrently on
+      // another thread as soon as it's registered (e.g. if rclcpp::shutdown()
+      // races with this, the very first, call to getGlobalRootLogger()), and
+      // may reset moveit_node to null. Lock the same mutex the callback locks
+      // before reading moveit_node, so the read and the reset can't race.
+      std::lock_guard<std::mutex> lock(*s_mutex);
+      if (moveit_node)
+      {
+        return moveit_node->get_logger();
+      }
+      // Shutdown's pre-shutdown callback already reset the node: fall back to
+      // a plain, non-node logger instead of dereferencing a destroyed node.
+      return rclcpp::get_logger(name);
     }
     catch (const std::exception& ex)
     {
@@ -72,8 +87,20 @@ rclcpp::Logger& getGlobalRootLogger()
 
 void setNodeLoggerName(const std::string& name)
 {
-  static auto node = std::make_shared<rclcpp::Node>("moveit", name);
-  getGlobalRootLogger() = node->get_logger();
+  static rclcpp::Node::SharedPtr s_node = std::make_shared<rclcpp::Node>("moveit", name);
+  static std::shared_ptr<std::mutex> s_mutex = detail::registerNodeResetOnPreShutdown(s_node);
+
+  std::lock_guard<std::mutex> lock(*s_mutex);
+  if (s_node)
+  {
+    getGlobalRootLogger() = s_node->get_logger();
+  }
+  // If the node has already been reset by a pre-shutdown callback from an
+  // earlier rclcpp::shutdown(), leave the global logger untouched rather
+  // than dereferencing a destroyed node. The previously assigned Logger
+  // remains valid: rclcpp::Logger owns its logger-name state independently
+  // and does not retain a reference to the Node, so destroying the Node
+  // does not invalidate the Logger.
 }
 
 rclcpp::Logger getLogger(const std::string& name)
