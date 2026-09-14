@@ -40,6 +40,13 @@
 
 namespace online_signal_smoothing
 {
+#if !MOVEIT_OSQP_V1
+// v0.6.x doesn't expose these names; alias them to the equivalent v0.6 types so
+// the rest of the file can be written in the v1.0 naming without duplication.
+using OSQPInt = c_int;
+using OSQPCscMatrix = csc;
+#endif
+
 rclcpp::Logger getLogger()
 {
   return moveit::getLogger("moveit.core.acceleration_limited_plugin");
@@ -56,13 +63,13 @@ constexpr double ALPHA_LOWER_BOUND = 0.0;
 struct CSCWrapper
 {
   /// row indices, size nzmax starting from 0
-  std::vector<c_int> row_indices;
+  std::vector<OSQPInt> row_indices;
   /// column pointers (size n+1); col indices (size nzmax)
-  std::vector<c_int> column_pointers;
+  std::vector<OSQPInt> column_pointers;
   /// holds the non-zero values in Compressed Sparse Column (CSC) form
   std::vector<double> elements;
   /// osqp C sparse_matrix type
-  csc csc_sparse_matrix;
+  OSQPCscMatrix csc_sparse_matrix;
 
   CSCWrapper(Eigen::SparseMatrix<double>& M)
   {
@@ -103,38 +110,62 @@ struct CSCWrapper
 
 MOVEIT_STRUCT_FORWARD(OSQPDataWrapper);
 
-/** \brief Wrapper struct to make memory management easier for using osqp's C API */
+/** \brief Wrapper struct to make memory management easier for using osqp's C API.
+ * On OSQP v0.6.x, the aggregated OSQPData struct is populated in the constructor
+ * and passed as a single pointer to osqp_setup. On OSQP v1.0+, that aggregate no
+ * longer exists — matrices/vectors are passed directly to osqp_setup — but this
+ * wrapper still owns the Eigen-backed memory for P, A, q, l, u so the solver's
+ * borrowed pointers stay alive across the object's lifetime.
+ */
 struct OSQPDataWrapper
 {
   OSQPDataWrapper(Eigen::SparseMatrix<double>& objective_sparse, Eigen::SparseMatrix<double>& constraints_sparse)
-    : P{ objective_sparse }, A{ constraints_sparse }
+    : P{ objective_sparse }
+    , A{ constraints_sparse }
+    , q{ Eigen::VectorXd::Zero(objective_sparse.rows()) }
+    , l{ Eigen::VectorXd::Zero(constraints_sparse.rows()) }
+    , u{ Eigen::VectorXd::Zero(constraints_sparse.rows()) }
   {
+#if !MOVEIT_OSQP_V1
+    // v0.6.x: populate the OSQPData aggregate that osqp_setup expects.
     data.n = objective_sparse.rows();
     data.m = constraints_sparse.rows();
     data.P = &P.csc_sparse_matrix;
-    q = Eigen::VectorXd::Zero(objective_sparse.rows());
     data.q = q.data();
     data.A = &A.csc_sparse_matrix;
-    l = Eigen::VectorXd::Zero(constraints_sparse.rows());
     data.l = l.data();
-    u = Eigen::VectorXd::Zero(constraints_sparse.rows());
     data.u = u.data();
+#endif
   }
 
-  /// Update the constraint matrix A without reallocating memory
+  /// Update the constraint matrix A without reallocating memory.
+#if MOVEIT_OSQP_V1
+  void updateA(OSQPSolver* solver, Eigen::SparseMatrix<double>& constraints_sparse)
+  {
+    constraints_sparse.makeCompressed();
+    A.update(constraints_sparse);
+    // v1.0: osqp_update_data_mat covers both P and A; we pass nullptrs for the
+    // P side to say "don't update P."
+    osqp_update_data_mat(solver, nullptr, nullptr, 0, A.elements.data(), nullptr,
+                         static_cast<OSQPInt>(A.elements.size()));
+  }
+#else
   void updateA(OSQPWorkspace* work, Eigen::SparseMatrix<double>& constraints_sparse)
   {
     constraints_sparse.makeCompressed();
     A.update(constraints_sparse);
     osqp_update_A(work, A.elements.data(), OSQP_NULL, A.elements.size());
   }
+#endif
 
   CSCWrapper P;
   CSCWrapper A;
   Eigen::VectorXd q;
   Eigen::VectorXd l;
   Eigen::VectorXd u;
+#if !MOVEIT_OSQP_V1
   OSQPData data{};
+#endif
 };
 
 bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit::core::RobotModelConstPtr robot_model,
@@ -186,19 +217,40 @@ bool AccelerationLimitedPlugin::initialize(rclcpp::Node::SharedPtr node, moveit:
   }
   constraints_sparse_.insert(num_constraints - 1, 0) = 0;
   osqp_set_default_settings(&osqp_settings_);
+#if MOVEIT_OSQP_V1
+  // v1.0 renamed OSQPSettings.warm_start -> warm_starting.
+  osqp_settings_.warm_starting = 0;
+#else
   osqp_settings_.warm_start = 0;
+#endif
   osqp_settings_.verbose = 0;
   osqp_data_ = std::make_shared<OSQPDataWrapper>(objective_sparse, constraints_sparse_);
   osqp_data_->q[0] = 0;
 
-  if (osqp_setup(&osqp_workspace_, &osqp_data_->data, &osqp_settings_) != 0)
+#if MOVEIT_OSQP_V1
+  // v1.0: no OSQPData aggregate — matrices/vectors go directly to osqp_setup.
+  if (osqp_setup(&osqp_solver_, &osqp_data_->P.csc_sparse_matrix, osqp_data_->q.data(), &osqp_data_->A.csc_sparse_matrix,
+                 osqp_data_->l.data(), osqp_data_->u.data(), static_cast<OSQPInt>(osqp_data_->A.csc_sparse_matrix.m),
+                 static_cast<OSQPInt>(osqp_data_->P.csc_sparse_matrix.n), &osqp_settings_) != 0)
   {
     osqp_settings_.verbose = 1;
-    // call setup again with verbose enables to trigger error message printing
-    osqp_setup(&osqp_workspace_, &osqp_data_->data, &osqp_settings_);
+    // call setup again with verbose enabled to trigger error message printing
+    osqp_setup(&osqp_solver_, &osqp_data_->P.csc_sparse_matrix, osqp_data_->q.data(), &osqp_data_->A.csc_sparse_matrix,
+               osqp_data_->l.data(), osqp_data_->u.data(), static_cast<OSQPInt>(osqp_data_->A.csc_sparse_matrix.m),
+               static_cast<OSQPInt>(osqp_data_->P.csc_sparse_matrix.n), &osqp_settings_);
     RCLCPP_ERROR(getLogger(), "Failed to initialize osqp problem.");
     return false;
   }
+#else
+  if (osqp_setup(&osqp_solver_, &osqp_data_->data, &osqp_settings_) != 0)
+  {
+    osqp_settings_.verbose = 1;
+    // call setup again with verbose enabled to trigger error message printing
+    osqp_setup(&osqp_solver_, &osqp_data_->data, &osqp_settings_);
+    RCLCPP_ERROR(getLogger(), "Failed to initialize osqp problem.");
+    return false;
+  }
+#endif
 
   return true;
 }
@@ -230,17 +282,28 @@ double jointLimitAccelerationScalingFactor(const Eigen::VectorXd& accelerations,
   return min_scaling_factor;
 }
 
-inline bool updateData(const OSQPDataWrapperPtr& data, OSQPWorkspace* work,
+#if MOVEIT_OSQP_V1
+inline bool updateData(const OSQPDataWrapperPtr& data, OSQPSolver* solver,
                        Eigen::SparseMatrix<double>& constraints_sparse, const Eigen::VectorXd& lower_bound,
                        const Eigen::VectorXd& upper_bound)
+#else
+inline bool updateData(const OSQPDataWrapperPtr& data, OSQPWorkspace* solver,
+                       Eigen::SparseMatrix<double>& constraints_sparse, const Eigen::VectorXd& lower_bound,
+                       const Eigen::VectorXd& upper_bound)
+#endif
 {
-  data->updateA(work, constraints_sparse);
+  data->updateA(solver, constraints_sparse);
   size_t num_constraints = constraints_sparse.rows();
   data->u.block(0, 0, num_constraints - 1, 1) = upper_bound;
   data->l.block(0, 0, num_constraints - 1, 1) = lower_bound;
   data->u[num_constraints - 1] = ALPHA_UPPER_BOUND;
   data->l[num_constraints - 1] = ALPHA_LOWER_BOUND;
-  return 0 == osqp_update_bounds(work, data->l.data(), data->u.data());
+#if MOVEIT_OSQP_V1
+  // v1.0 replaces osqp_update_bounds; nullptr for q means "do not update q."
+  return 0 == osqp_update_data_vec(solver, nullptr, data->l.data(), data->u.data());
+#else
+  return 0 == osqp_update_bounds(solver, data->l.data(), data->u.data());
+#endif
 }
 
 bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::VectorXd& velocities,
@@ -294,10 +357,10 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
   Eigen::VectorXd vel_point = last_positions_ + last_velocities_ * update_period;
   Eigen::VectorXd upper_bound = vel_point - positions + max_acceleration_limits_ * (update_period * update_period);
   Eigen::VectorXd lower_bound = vel_point - positions + min_acceleration_limits_ * (update_period * update_period);
-  if (!updateData(osqp_data_, osqp_workspace_, constraints_sparse_, lower_bound, upper_bound))
+  if (!updateData(osqp_data_, osqp_solver_, constraints_sparse_, lower_bound, upper_bound))
   {
     RCLCPP_ERROR_THROTTLE(getLogger(), *node_->get_clock(), 1000,
-                          "failed to set osqp_update_bounds. Make sure the robot's acceleration limits are valid");
+                          "failed to set osqp constraint bounds. Make sure the robot's acceleration limits are valid");
     return false;
   }
 
@@ -307,11 +370,11 @@ bool AccelerationLimitedPlugin::doSmoothing(Eigen::VectorXd& positions, Eigen::V
     positions = last_positions_;
     velocities = last_velocities_;
   }
-  else if (osqp_solve(osqp_workspace_) == 0 &&
-           osqp_workspace_->solution->x[0] >= ALPHA_LOWER_BOUND - osqp_settings_.eps_abs &&
-           osqp_workspace_->solution->x[0] <= ALPHA_UPPER_BOUND + osqp_settings_.eps_abs)
+  else if (osqp_solve(osqp_solver_) == 0 &&
+           osqp_solver_->solution->x[0] >= ALPHA_LOWER_BOUND - osqp_settings_.eps_abs &&
+           osqp_solver_->solution->x[0] <= ALPHA_UPPER_BOUND + osqp_settings_.eps_abs)
   {
-    double alpha = osqp_workspace_->solution->x[0];
+    double alpha = osqp_solver_->solution->x[0];
     positions = alpha * last_positions_ + (1.0 - alpha) * positions.eval();
     velocities = (positions - last_positions_) / update_period;
   }

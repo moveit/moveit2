@@ -48,8 +48,6 @@
 #include <rclcpp/rclcpp.hpp>
 
 // parameters from parameter server
-const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
-const std::string PARAM_TARGET_LINK_NAME("target_link");
 const std::string JOINT_POSITION_TOLERANCE("joint_position_tolerance");
 const std::string JOINT_VELOCITY_TOLERANCE("joint_velocity_tolerance");
 const std::string JOINT_ACCELERATION_TOLERANCE("joint_acceleration_tolerance");

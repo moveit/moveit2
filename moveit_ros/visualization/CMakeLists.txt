@@ -31,8 +31,10 @@ find_package(rviz2 REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
-if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+# rviz switched to Qt6 in 15.1.14: https://github.com/ros2/rviz/pull/1635
+# (merged 2025-12-08, first released in the 15.1.14 tag on 2025-12-17 -- 15.1.0
+# through 15.1.13 are still Qt5)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1.14)
   find_package(Qt6 REQUIRED COMPONENTS Widgets)
   set(QT_VERSION_MAJOR 6)
   # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which

@@ -99,10 +99,14 @@ void MotionPlanningFrame::pathConstraintsIndexChanged(int index)
     {
       std::string c = ui_->path_constraints_combo_box->itemText(index).toStdString();
       if (!move_group_->setPathConstraints(c))
+      {
         RCLCPP_WARN_STREAM(logger_, "Unable to set the path constraints: " << c);
+      }
     }
     else
+    {
       move_group_->clearPathConstraints();
+    }
   }
 }
 

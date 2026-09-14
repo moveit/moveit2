@@ -89,7 +89,9 @@ bool PR2ArmIKSolver::getCount(int& count, int max_count, int min_count)
       return true;
     }
     else
+    {
       return false;
+    }
   }
 }
 
@@ -160,7 +162,9 @@ int PR2ArmIKSolver::CartToJnt(const KDL::JntArray& q_init, const KDL::Frame& p_i
     return 1;
   }
   else
+  {
     return -1;
+  }
 }
 
 int PR2ArmIKSolver::cartToJntSearch(const KDL::JntArray& q_in, const KDL::Frame& p_in, KDL::JntArray& q_out,

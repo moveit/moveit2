@@ -152,7 +152,9 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
         active_variable_count_ += vc;
       }
       else
+      {
         mimic_joints_.push_back(joint_model);
+      }
       for (const std::string& name : name_order)
       {
         variable_names_.push_back(name);
@@ -174,7 +176,9 @@ JointModelGroup::JointModelGroup(const std::string& group_name, const srdf::Mode
       variable_count_ += vc;
     }
     else
+    {
       fixed_joints_.push_back(joint_model);
+    }
   }
 
   // now we need to find all the set of joints within this group
@@ -718,7 +722,9 @@ bool JointModelGroup::canSetStateFromIK(const std::string& tip) const
       }
     }
     else
+    {
       return true;
+    }
   }
 
   // Did not find any valid tip frame links to use

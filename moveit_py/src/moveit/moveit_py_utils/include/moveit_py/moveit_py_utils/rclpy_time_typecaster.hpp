@@ -34,6 +34,7 @@
 
 /* Author: Shobin Vinod */
 
+#include <cstdint>
 #include <pybind11/pybind11.h>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/serialization.hpp>

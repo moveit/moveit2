@@ -40,6 +40,7 @@
 
 #include <chrono>
 #include <control_msgs/msg/joint_jog.hpp>
+#include <cstdint>
 #include <geometry_msgs/msg/twist_stamped.hpp>
 #include <moveit_msgs/srv/servo_command_type.hpp>
 #include <rclcpp/executors/single_threaded_executor.hpp>

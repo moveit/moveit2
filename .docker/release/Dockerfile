@@ -3,13 +3,15 @@
 
 ARG ROS_DISTRO=rolling
 FROM ros:${ROS_DISTRO}-ros-base
-LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer="Robert Haschke rhaschke@techfak.uni-bielefeld.de"
 
 # Allow non-interactive installation of ros-*-rmw-connextdds
-ENV RTI_NC_LICENSE_ACCEPTED yes
+ENV RTI_NC_LICENSE_ACCEPTED=yes
 
 # Commands are combined in single RUN statement with "apt/lists" folder removal to reduce image size
 RUN apt-get update -q && \
+    apt-get install -y ros2-testing-apt-source --no-install-recommends && \
+    apt-get update -q && \
     apt-get upgrade -q -y && \
-    apt-get install -y "ros-${ROS_DISTRO}-moveit-*" --no-install-recommends && \
+    apt-get install -y gfortran "ros-${ROS_DISTRO}-moveit-*" --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*

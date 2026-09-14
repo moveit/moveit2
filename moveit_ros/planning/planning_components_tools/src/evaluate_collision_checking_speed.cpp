@@ -110,7 +110,9 @@ int main(int argc, char** argv)
       std::cin.get();
     }
     else
+    {
       rclcpp::sleep_for(500ms);
+    }
 
     std::vector<moveit::core::RobotStatePtr> states;
     RCLCPP_INFO(node->get_logger(), "Sampling %u valid states...", nthreads);
@@ -132,6 +134,7 @@ int main(int argc, char** argv)
     }
 
     std::vector<std::thread*> threads;
+    threads.reserve(states.size());
     runCollisionDetection(10, trials, *psm.getPlanningScene(), *states[0]);
     for (unsigned int i = 0; i < states.size(); ++i)
     {
@@ -147,7 +150,9 @@ int main(int argc, char** argv)
     }
   }
   else
+  {
     RCLCPP_ERROR(node->get_logger(), "Planning scene not configured");
+  }
 
   return 0;
 }
