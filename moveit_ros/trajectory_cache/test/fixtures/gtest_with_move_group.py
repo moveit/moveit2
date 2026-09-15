@@ -71,7 +71,11 @@ def generate_test_description():
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
+                cmd=[
+                    "ros2 run controller_manager spawner {} --param-file {}".format(
+                        controller, ros2_controllers_path
+                    )
+                ],
                 shell=True,
                 output="log",
             )
@@ -86,7 +90,10 @@ def generate_test_description():
     # MoveGroupInterface::getCurrentState() fails with
     # "Failed to fetch current robot state".
     joint_state_broadcaster_spawner = ExecuteProcess(
-        cmd=["ros2 run controller_manager spawner joint_state_broadcaster"],
+        cmd=[
+            "ros2 run controller_manager spawner joint_state_broadcaster "
+            "--param-file {}".format(ros2_controllers_path)
+        ],
         shell=True,
         output="log",
     )

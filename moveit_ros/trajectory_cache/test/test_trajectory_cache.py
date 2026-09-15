@@ -88,7 +88,11 @@ def robot_fixture(moveit_config):
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
+                cmd=[
+                    "ros2 run controller_manager spawner {} --param-file {}".format(
+                        controller, ros2_controllers_path
+                    )
+                ],
                 shell=True,
                 output="log",
             )
