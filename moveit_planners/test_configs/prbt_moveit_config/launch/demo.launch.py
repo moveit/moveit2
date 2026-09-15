@@ -212,7 +212,7 @@ def generate_launch_description():
         package="controller_manager",
         executable="spawner",
         arguments=[
-            "panda_joint_group_position_controller",
+            "prbt_arm_controller",
             "-c",
             "/controller_manager",
             "--param-file",
