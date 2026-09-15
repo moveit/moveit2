@@ -116,26 +116,31 @@ def generate_static_virtual_joint_tfs_launch(moveit_config):
     return ld
 
 
-def generate_spawn_controllers_launch(moveit_config):
+def generate_spawn_controllers_launch(moveit_config, controller_manager_timeout=None):
     controller_names = moveit_config.trajectory_execution.get(
         "moveit_simple_controller_manager", {}
     ).get("controller_names", [])
     ld = LaunchDescription()
-    # The controller_manager node reads ros2_controllers.yaml, but the
-    # controller nodes do not read it. Give the file to each spawner so that
-    # every controller gets its parameters before configuration.
+    # Pass the same ros2_controllers.yaml to the controller spawners as to the controller_manager
     ros2_controllers_path = moveit_config.package_path / "config/ros2_controllers.yaml"
-    param_file_args = (
+    spawner_args = (
         ["--param-file", str(ros2_controllers_path)]
         if ros2_controllers_path.exists()
         else []
     )
+    # Callers that start the controller_manager in the same launch file may need
+    # to wait longer than the spawner's default for it to come up.
+    if controller_manager_timeout is not None:
+        spawner_args += [
+            "--controller-manager-timeout",
+            str(controller_manager_timeout),
+        ]
     for controller in controller_names + ["joint_state_broadcaster"]:
         ld.add_action(
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=[controller] + param_file_args,
+                arguments=[controller] + spawner_args,
                 output="screen",
             )
         )
