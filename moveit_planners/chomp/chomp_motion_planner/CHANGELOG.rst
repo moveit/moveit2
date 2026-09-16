@@ -2,6 +2,11 @@
 Changelog for package chomp_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix clang-tidy issues
+* Contributors: Robert Haschke
+
 2.15.1 (2026-08-29)
 -------------------
 
