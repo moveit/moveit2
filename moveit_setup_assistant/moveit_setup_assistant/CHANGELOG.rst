@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_assistant
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.2 (2026-09-16)
+-------------------
 * Fix exported include paths for moveit_setup_assistant (`#3844 <https://github.com/moveit/moveit2/issues/3844>`_)
 * Contributors: ゆり
 

@@ -2,8 +2,8 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.2 (2026-09-16)
+-------------------
 * Fix FloatingJointModel::getMaximumExtent(): cover full rotation range (`#3854 <https://github.com/moveit/moveit2/issues/3854>`_)
 * Fix logger node teardown before RMW shutdown (`#3833 <https://github.com/moveit/moveit2/issues/3833>`_)
 * Cleanup boost dependencies

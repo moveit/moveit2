@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_framework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.2 (2026-09-16)
+-------------------
 * Fix clang-tidy issues
 * Contributors: Robert Haschke
 

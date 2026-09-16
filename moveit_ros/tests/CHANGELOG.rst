@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.2 (2026-09-16)
+-------------------
 * Give the controller spawners a parameter file (`#3851 <https://github.com/moveit/moveit2/issues/3851>`_)
 * Contributors: Nathan Brooks
 
