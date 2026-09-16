@@ -56,6 +56,8 @@ def generate_test_description():
             "joint_state_broadcaster",
             "--controller-manager",
             "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
         ],
         output="screen",
     )
@@ -63,13 +65,25 @@ def generate_test_description():
     panda_arm_controller_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["panda_arm_controller", "-c", "/controller_manager"],
+        arguments=[
+            "panda_arm_controller",
+            "-c",
+            "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
+        ],
     )
 
     panda_hand_controller_spawner = launch_ros.actions.Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["panda_hand_controller", "-c", "/controller_manager"],
+        arguments=[
+            "panda_hand_controller",
+            "-c",
+            "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
+        ],
     )
 
     # Static TF

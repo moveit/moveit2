@@ -74,6 +74,8 @@ def generate_test_description():
             "joint_state_broadcaster",
             "--controller-manager",
             "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
         ],
     )
 
@@ -84,6 +86,8 @@ def generate_test_description():
             "panda_joint_group_position_controller",
             "-c",
             "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
         ],
     )
 
