@@ -2,6 +2,27 @@
 Changelog for package moveit_ros_trajectory_cache
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.2 (2026-09-16)
+-------------------
+* Give the controller spawners a parameter file (`#3851 <https://github.com/moveit/moveit2/issues/3851>`_)
+* Fix clang-tidy issues
+* Contributors: Nathan Brooks, Robert Haschke
+
+2.15.1 (2026-08-29)
+-------------------
+
+2.15.0 (2026-08-12)
+-------------------
+* resolute: add explicit <cstdint> / <fstream> includes for GCC 15 (`#3754 <https://github.com/moveit/moveit2/issues/3754>`_)
+* resolute: GCC 15 / C++20 / rviz API build fixes, and octomap -Werror=cpp suppression (`#3760 <https://github.com/moveit/moveit2/issues/3760>`_)
+* De-flake trajectory_cache _with_move_group tests (`#3777 <https://github.com/moveit/moveit2/issues/3777>`_)
+* Use modern --frame-id/--child-frame-id args for test static_transform_publisher (`#3762 <https://github.com/moveit/moveit2/issues/3762>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* Fix deprecations in image_common and tf2_ros (`#3567 <https://github.com/moveit/moveit2/issues/3567>`_)
+* Contributors: Nathan Brooks
+
 2.14.1 (2025-09-09)
 -------------------
 

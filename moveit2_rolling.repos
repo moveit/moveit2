@@ -18,4 +18,12 @@ repositories:
   osqp_vendor:
     type: git
     url: https://github.com/moveit/osqp_vendor.git
-    version: 58a52e815ad005d1fc971dca0fdc0c0e8100444b  # Update OSQP version to v1.0.0 (#1)
+    version: 1df43ba1250bf93347a23a6a1cd481efd1cd2f68  # v1.0.0 tag
+  ros_industrial_cmake_boilerplate:
+    type: git
+    url: https://github.com/ros-industrial/ros_industrial_cmake_boilerplate
+    version: 0.7.4
+  stomp:
+    type: git
+    url: https://github.com/ros-industrial/stomp
+    version: b1a87c80f7338caae25a5c689b876da15492aa75

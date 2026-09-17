@@ -139,7 +139,9 @@ void parseLinkConstraint(std::istream& in, planning_scene_monitor::PlanningScene
                                Eigen::AngleAxisd(y, Eigen::Vector3d::UnitZ()));
     }
     else
+    {
       RCLCPP_ERROR(getLogger(), "Unknown link constraint element: '%s'", type.c_str());
+    }
     in >> type;
   }
 

@@ -3,9 +3,9 @@
 
 ARG ROS_DISTRO=rolling
 FROM ros:${ROS_DISTRO}-ros-base
-LABEL maintainer Robert Haschke rhaschke@techfak.uni-bielefeld.de
+LABEL maintainer="Robert Haschke rhaschke@techfak.uni-bielefeld.de"
 
-ENV TERM xterm
+ENV TERM=xterm
 
 # Setup (temporary) ROS workspace
 WORKDIR /root/ws_moveit
@@ -24,8 +24,11 @@ RUN \
     apt-get -q install --no-install-recommends -y \
         # Some basic requirements
         wget git sudo curl \
+        # Use default gfortran for libopenmpi-dev
+        # https://bugs.launchpad.net/ubuntu/+source/openmpi/+bug/2166011
+        gfortran \
         # Preferred build tools
-        clang clang-format-14 clang-tidy clang-tools \
+        clang clang-format clang-tidy clang-tools \
         ccache && \
     #
     # Globally disable git security
@@ -34,12 +37,12 @@ RUN \
     #
     # Fetch all dependencies from moveit2.repos
     vcs import src < src/moveit2/moveit2.repos && \
-    if [ -r src/moveit2/moveit2_${ROS_DISTRO}.repos ] ; then vcs import src < src/moveit2/moveit2_${ROS_DISTRO}.repos ; fi && \
+    if [ -r "src/moveit2/moveit2_${ROS_DISTRO}.repos" ] ; then vcs import src < "src/moveit2/moveit2_${ROS_DISTRO}.repos" ; fi && \
     #
     # Download all dependencies of MoveIt
     rosdep update && \
     DEBIAN_FRONTEND=noninteractive \
-    rosdep install -y --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} --as-root=apt:false && \
+        rosdep install -y -r --from-paths src --ignore-src --rosdistro "${ROS_DISTRO}" --as-root=apt:false || true && \
     # Remove the source code from this container
     rm -rf src && \
     #

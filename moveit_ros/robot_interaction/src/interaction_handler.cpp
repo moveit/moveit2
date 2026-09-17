@@ -242,7 +242,9 @@ void InteractionHandler::handleEndEffector(
     pose_map_lock_.unlock();
   }
   else
+  {
     return;
+  }
 
   StateChangeCallbackFn callback;
 
@@ -274,7 +276,9 @@ void InteractionHandler::handleJoint(const JointInteraction& vj,
     pose_map_lock_.unlock();
   }
   else
+  {
     return;
+  }
 
   StateChangeCallbackFn callback;
 
