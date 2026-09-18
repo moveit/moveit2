@@ -183,7 +183,12 @@ private Q_SLOTS:
   void allowExternalProgramCommunication(bool enable);
   void pathConstraintsIndexChanged(int index);
   void onNewPlanningSceneState();
-  void startStateTextChanged(const QString& start_state);
+  // passive_sync: true when this call merely re-mirrors a "<current>"-tracking start state to the
+  // live robot after execution, rather than reflecting the user explicitly picking a combo box
+  // entry; see MotionPlanningDisplay::setQueryStartState(). Only the start state ever needs this:
+  // the analogous passive goal-state resync (MotionPlanningFrame::onNewPlanningSceneState()) goes
+  // straight through MotionPlanningDisplay::setQueryGoalState(), not through this function.
+  void startStateTextChanged(const QString& start_state, bool passive_sync = false);
   void goalStateTextChanged(const QString& goal_state);
   void planningGroupTextChanged(const QString& planning_group);
   void onClearOctomapClicked();
@@ -260,7 +265,7 @@ private:
   void updateQueryStateHelper(moveit::core::RobotState& state, const std::string& v);
   void fillStateSelectionOptions();
   void fillPlanningGroupOptions();
-  void startStateTextChangedExec(const std::string& start_state);
+  void startStateTextChangedExec(const std::string& start_state, bool passive_sync);
   void goalStateTextChangedExec(const std::string& goal_state);
 
   // Scene objects tab

@@ -937,17 +937,17 @@ void MotionPlanningDisplay::scheduleDrawQueryGoalState(robot_interaction::Intera
   updateQueryGoalState();
 }
 
-void MotionPlanningDisplay::updateQueryStartState()
+void MotionPlanningDisplay::updateQueryStartState(bool passive_sync)
 {
-  queryStartStateChanged();
+  queryStartStateChanged(passive_sync);
   recomputeQueryStartStateMetrics();
   addMainLoopJob([this] { changedQueryStartState(); });
   context_->queueRender();
 }
 
-void MotionPlanningDisplay::updateQueryGoalState()
+void MotionPlanningDisplay::updateQueryGoalState(bool passive_sync)
 {
-  queryGoalStateChanged();
+  queryGoalStateChanged(passive_sync);
   recomputeQueryGoalStateMetrics();
   addMainLoopJob([this] { changedQueryGoalState(); });
   context_->queueRender();
@@ -958,16 +958,16 @@ void MotionPlanningDisplay::rememberPreviousStartState()
   *previous_state_ = *query_start_state_->getState();
 }
 
-void MotionPlanningDisplay::setQueryStartState(const moveit::core::RobotState& start)
+void MotionPlanningDisplay::setQueryStartState(const moveit::core::RobotState& start, bool passive_sync)
 {
   query_start_state_->setState(start);
-  updateQueryStartState();
+  updateQueryStartState(passive_sync);
 }
 
-void MotionPlanningDisplay::setQueryGoalState(const moveit::core::RobotState& goal)
+void MotionPlanningDisplay::setQueryGoalState(const moveit::core::RobotState& goal, bool passive_sync)
 {
   query_goal_state_->setState(goal);
-  updateQueryGoalState();
+  updateQueryGoalState(passive_sync);
 }
 
 void MotionPlanningDisplay::useApproximateIK(bool flag)
@@ -1282,14 +1282,16 @@ void MotionPlanningDisplay::updateQueryStates(const moveit::core::RobotState& cu
   {
     moveit::core::RobotState start = *getQueryStartState();
     updateStateExceptModified(start, current_state);
-    setQueryStartState(start);
+    // this merely keeps the "<current>" query state mirroring the live robot state; it must not
+    // steal UI focus (e.g. the Joints tab) from whatever the user is actually editing
+    setQueryStartState(start, /*passive_sync=*/true);
   }
 
   if (query_goal_state_ && query_goal_state_property_->getBool() && !group.empty())
   {
     moveit::core::RobotState goal = *getQueryGoalState();
     updateStateExceptModified(goal, current_state);
-    setQueryGoalState(goal);
+    setQueryGoalState(goal, /*passive_sync=*/true);
   }
 }
 

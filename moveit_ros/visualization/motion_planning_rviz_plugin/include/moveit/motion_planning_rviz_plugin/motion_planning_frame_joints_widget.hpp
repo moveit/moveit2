@@ -131,9 +131,13 @@ public:
                            const robot_interaction::InteractionHandlerPtr& start_state_handler,
                            const robot_interaction::InteractionHandlerPtr& goal_state_handler);
 
+  /// True if the Joints tab is currently showing (and would apply edits to) the goal state,
+  /// false if showing the start state. Exposed for testing.
+  bool isShowingGoalState() const;
+
 public Q_SLOTS:
-  void queryStartStateChanged();
-  void queryGoalStateChanged();
+  void queryStartStateChanged(bool passive_sync);
+  void queryGoalStateChanged(bool passive_sync);
   void jogNullspace(double value);
 
 protected:

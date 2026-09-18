@@ -121,7 +121,12 @@ MotionPlanningFrame::MotionPlanningFrame(MotionPlanningDisplay* pdisplay, rviz_c
   connect(ui_->execute_button, &QPushButton::clicked, this, &MotionPlanningFrame::executeButtonClicked);
   connect(ui_->plan_and_execute_button, &QPushButton::clicked, this, &MotionPlanningFrame::planAndExecuteButtonClicked);
   connect(ui_->stop_button, &QPushButton::clicked, this, &MotionPlanningFrame::stopButtonClicked);
-  connect(ui_->start_state_combo_box, &QComboBox::textActivated, this, &MotionPlanningFrame::startStateTextChanged);
+  // wrapped in a lambda: startStateTextChanged() takes a trailing passive_sync argument
+  // (defaulted to false, i.e. "this is a deliberate, user-driven change"), which a plain
+  // member-function-pointer connect() cannot supply since Qt requires the slot's arity not
+  // exceed the signal's
+  connect(ui_->start_state_combo_box, &QComboBox::textActivated, this,
+          [this](const QString& text) { startStateTextChanged(text); });
   connect(ui_->goal_state_combo_box, &QComboBox::textActivated, this, &MotionPlanningFrame::goalStateTextChanged);
   connect(ui_->planning_group_combo_box, &QComboBox::textActivated, this,
           &MotionPlanningFrame::planningGroupTextChanged);

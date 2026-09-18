@@ -241,26 +241,35 @@ void MotionPlanningFrameJointsWidget::changePlanningGroup(
   updateNullspaceSliders();
 }
 
-void MotionPlanningFrameJointsWidget::queryStartStateChanged()
+void MotionPlanningFrameJointsWidget::queryStartStateChanged(bool passive_sync)
 {
   if (!start_state_model_ || !start_state_handler_)
     return;
   ignore_state_changes_ = true;
   start_state_model_->updateRobotState(*start_state_handler_->getState());
   ignore_state_changes_ = false;
-  setActiveModel(start_state_model_.get());
+  // a passive sync (e.g. keeping "<current>" mirrored after execution) must not steal the
+  // view away from whichever state the user is actually looking at / editing
+  if (!passive_sync)
+    setActiveModel(start_state_model_.get());
   updateNullspaceSliders();
 }
 
-void MotionPlanningFrameJointsWidget::queryGoalStateChanged()
+void MotionPlanningFrameJointsWidget::queryGoalStateChanged(bool passive_sync)
 {
   if (!goal_state_model_ || !goal_state_handler_)
     return;
   ignore_state_changes_ = true;
   goal_state_model_->updateRobotState(*goal_state_handler_->getState());
   ignore_state_changes_ = false;
-  setActiveModel(goal_state_model_.get());
+  if (!passive_sync)
+    setActiveModel(goal_state_model_.get());
   updateNullspaceSliders();
+}
+
+bool MotionPlanningFrameJointsWidget::isShowingGoalState() const
+{
+  return goal_state_model_ && ui_->joints_view_->model() == goal_state_model_.get();
 }
 
 void MotionPlanningFrameJointsWidget::setActiveModel(JMGItemModel* model)

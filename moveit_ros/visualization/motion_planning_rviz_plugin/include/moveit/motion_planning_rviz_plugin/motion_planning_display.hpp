@@ -155,12 +155,18 @@ public:
     trajectory_visual_->dropTrajectory();
   }
 
-  void setQueryStartState(const moveit::core::RobotState& start);
-  void setQueryGoalState(const moveit::core::RobotState& goal);
+  /// Set the query start/goal state.
+  /// @param passive_sync set to true when this update merely mirrors the robot's live current
+  ///        state (e.g. keeping a "<current>" query state in sync) rather than reflecting a
+  ///        deliberate, user-driven state change (combo box selection, interactive marker drag,
+  ///        or a Joints tab edit). Passive updates must not steal UI focus (e.g. the Joints tab's
+  ///        active state) from whichever state the user is actually interacting with.
+  void setQueryStartState(const moveit::core::RobotState& start, bool passive_sync = false);
+  void setQueryGoalState(const moveit::core::RobotState& goal, bool passive_sync = false);
 
   void updateQueryStates(const moveit::core::RobotState& current_state);
-  void updateQueryStartState();
-  void updateQueryGoalState();
+  void updateQueryStartState(bool passive_sync = false);
+  void updateQueryGoalState(bool passive_sync = false);
   void rememberPreviousStartState();
 
   void useApproximateIK(bool flag);
@@ -183,8 +189,9 @@ public:
 
 Q_SIGNALS:
   // signals issued when start/goal states of a query changed
-  void queryStartStateChanged();
-  void queryGoalStateChanged();
+  // passive_sync: see setQueryStartState()/setQueryGoalState()
+  void queryStartStateChanged(bool passive_sync);
+  void queryGoalStateChanged(bool passive_sync);
 
 private Q_SLOTS:
 

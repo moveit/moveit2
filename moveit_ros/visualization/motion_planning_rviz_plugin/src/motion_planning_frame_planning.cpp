@@ -257,9 +257,11 @@ void MotionPlanningFrame::onFinishedExecution(bool success)
   // disable stop button
   ui_->stop_button->setEnabled(false);
 
-  // update query start state to current if necessary
+  // update query start state to current if necessary; this is a passive re-sync (the combo box
+  // selection itself did not change), so it must not steal the Joints tab's focus away from
+  // whatever state the user is actually editing (see MotionPlanningDisplay::setQueryStartState())
   if (ui_->start_state_combo_box->currentText() == "<current>")
-    startStateTextChanged(ui_->start_state_combo_box->currentText());
+    startStateTextChanged(ui_->start_state_combo_box->currentText(), /*passive_sync=*/true);
 
   // auto-update goal to stored previous state (but only on success)
   // on failure, the user must update the goal to the previous state himself
@@ -272,25 +274,27 @@ void MotionPlanningFrame::onNewPlanningSceneState()
   moveit::core::RobotState current(planning_display_->getPlanningSceneRO()->getCurrentState());
   if (ui_->start_state_combo_box->currentText() == "<current>")
   {
-    planning_display_->setQueryStartState(current);
+    // passive re-sync: the scene updated, not the combo box selection
+    planning_display_->setQueryStartState(current, /*passive_sync=*/true);
     planning_display_->rememberPreviousStartState();
   }
   if (ui_->goal_state_combo_box->currentText() == "<current>")
-    planning_display_->setQueryGoalState(current);
+    planning_display_->setQueryGoalState(current, /*passive_sync=*/true);
 }
 
-void MotionPlanningFrame::startStateTextChanged(const QString& start_state)
+void MotionPlanningFrame::startStateTextChanged(const QString& start_state, bool passive_sync)
 {
   // use background job: fetching the current state might take up to a second
-  planning_display_->addBackgroundJob([this, state = start_state.toStdString()] { startStateTextChangedExec(state); },
+  planning_display_->addBackgroundJob([this, state = start_state.toStdString(),
+                                       passive_sync] { startStateTextChangedExec(state, passive_sync); },
                                       "update start state");
 }
 
-void MotionPlanningFrame::startStateTextChangedExec(const std::string& start_state)
+void MotionPlanningFrame::startStateTextChangedExec(const std::string& start_state, bool passive_sync)
 {
   moveit::core::RobotState start = *planning_display_->getQueryStartState();
   updateQueryStateHelper(start, start_state);
-  planning_display_->setQueryStartState(start);
+  planning_display_->setQueryStartState(start, passive_sync);
 }
 
 void MotionPlanningFrame::goalStateTextChanged(const QString& goal_state)

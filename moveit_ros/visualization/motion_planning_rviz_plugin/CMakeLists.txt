@@ -57,3 +57,12 @@ target_include_directories(moveit_motion_planning_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_visualization)
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(joints_widget_focus_test test/joints_widget_focus_test.cpp)
+  target_link_libraries(
+    joints_widget_focus_test moveit_motion_planning_rviz_plugin_core
+    moveit_core::moveit_test_utils
+    moveit_ros_robot_interaction::moveit_ros_robot_interaction ${QT_LIBRARIES})
+endif()
