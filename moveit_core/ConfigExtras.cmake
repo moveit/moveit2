@@ -4,7 +4,6 @@ find_package(
   Boost CONFIG REQUIRED
   COMPONENTS chrono
              date_time
-             filesystem
              iostreams
              program_options
              regex
