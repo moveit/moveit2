@@ -344,10 +344,14 @@ void MotionPlanningDisplay::updateBackgroundJobProgressBar()
     {
       p->setMaximum(n);
       if (n > 1)  // only show bar if there will be a progress to show
+      {
         p->show();
+      }
     }
     else  // progress
+    {
       p->setValue(p->maximum() - n);
+    }
     p->update();
   }
 }
@@ -677,7 +681,9 @@ void MotionPlanningDisplay::drawQueryStartState()
     }
   }
   else
+  {
     query_robot_start_->setVisible(false);
+  }
   context_->queueRender();
 }
 
@@ -801,7 +807,9 @@ void MotionPlanningDisplay::drawQueryGoalState()
     }
   }
   else
+  {
     query_robot_goal_->setVisible(false);
+  }
   context_->queueRender();
 }
 
@@ -986,7 +994,9 @@ bool MotionPlanningDisplay::isIKSolutionCollisionFree(moveit::core::RobotState* 
     return res;
   }
   else
+  {
     return true;
+  }
 }
 
 void MotionPlanningDisplay::updateLinkColors()

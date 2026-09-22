@@ -64,8 +64,13 @@ add_subdirectory(kdl_kinematics_plugin)
 add_subdirectory(srv_kinematics_plugin)
 add_subdirectory(test)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_kinematics::moveit_kinematics to link all libraries at once.
+add_library(moveit_kinematics INTERFACE)
+target_link_libraries(moveit_kinematics INTERFACE ${THIS_PACKAGE_LIBRARIES})
+
 install(
-  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  TARGETS moveit_kinematics ${THIS_PACKAGE_LIBRARIES}
   EXPORT ${PROJECT_NAME}Targets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

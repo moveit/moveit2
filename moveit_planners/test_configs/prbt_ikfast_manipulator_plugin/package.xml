@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <package format="3">
   <name>moveit_resources_prbt_ikfast_manipulator_plugin</name>
-  <version>2.14.1</version>
+  <version>2.15.2</version>
   <description>The prbt_ikfast_manipulator_plugin package</description>
   <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
@@ -9,7 +9,7 @@
   <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
   <license>Apache 2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>
-  <url type="website">http://moveit.ros.org</url>
+  <url type="website">https://moveit.ai</url>
   <url type="bugtracker">https://github.com/moveit/moveit-resources/issues</url>
   <url type="repository">https://github.com/moveit/moveit-resources</url>
 

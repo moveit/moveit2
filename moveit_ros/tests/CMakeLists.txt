@@ -13,7 +13,7 @@ if(BUILD_TESTING)
 
   include_directories(include)
   ament_add_gtest_executable(move_group_api_test src/move_group_api_test.cpp)
-  ament_target_dependencies(move_group_api_test rclcpp)
+  target_link_libraries(move_group_api_test rclcpp::rclcpp)
   add_ros_test(launch/move_group_api.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()

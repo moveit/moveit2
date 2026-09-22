@@ -168,7 +168,7 @@ def generate_launch_description():
         executable="static_transform_publisher",
         name="static_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "prbt_link0"],
+        arguments=["--frame-id", "world", "--child-frame-id", "prbt_link0"],
     )
 
     # Publish TF
@@ -203,6 +203,8 @@ def generate_launch_description():
             "joint_state_broadcaster",
             "--controller-manager",
             "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
         ],
     )
 
@@ -210,9 +212,11 @@ def generate_launch_description():
         package="controller_manager",
         executable="spawner",
         arguments=[
-            "panda_joint_group_position_controller",
+            "prbt_arm_controller",
             "-c",
             "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
         ],
     )
 

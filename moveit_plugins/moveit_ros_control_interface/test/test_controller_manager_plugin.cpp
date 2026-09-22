@@ -32,6 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <unordered_set>
 #include <vector>
 
 #include <gtest/gtest.h>

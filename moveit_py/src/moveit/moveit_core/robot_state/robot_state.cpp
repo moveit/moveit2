@@ -67,13 +67,13 @@ void update(moveit::core::RobotState* self, bool force, std::string& category)
 Eigen::MatrixXd getFrameTransform(const moveit::core::RobotState* self, std::string& frame_id)
 {
   bool frame_found;
-  auto transformation = self->getFrameTransform(frame_id, &frame_found);
+  const auto& transformation = self->getFrameTransform(frame_id, &frame_found);
   return transformation.matrix();
 }
 
 Eigen::MatrixXd getGlobalLinkTransform(const moveit::core::RobotState* self, std::string& link_name)
 {
-  auto transformation = self->getGlobalLinkTransform(link_name);
+  const auto& transformation = self->getGlobalLinkTransform(link_name);
   return transformation.matrix();
 }
 

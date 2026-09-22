@@ -119,10 +119,22 @@ bool DepthImageOctomapUpdater::setParams(const std::string& name_space)
 bool DepthImageOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
 {
   node_ = node;
+  // image_transport 7+ (rclcpp >= 30, currently Rolling only) requires a
+  // NodeInterfaces-compatible reference; earlier versions on Humble (3.x),
+  // Jazzy (5.x), and Kilted (6.x) still take a rclcpp::Node::SharedPtr.
+  // For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  input_depth_transport_ = std::make_unique<image_transport::ImageTransport>(*node_);
+  model_depth_transport_ = std::make_unique<image_transport::ImageTransport>(*node_);
+  filtered_depth_transport_ = std::make_unique<image_transport::ImageTransport>(*node_);
+  filtered_label_transport_ = std::make_unique<image_transport::ImageTransport>(*node_);
+  // For Kilted and older
+#else
   input_depth_transport_ = std::make_unique<image_transport::ImageTransport>(node_);
   model_depth_transport_ = std::make_unique<image_transport::ImageTransport>(node_);
   filtered_depth_transport_ = std::make_unique<image_transport::ImageTransport>(node_);
   filtered_label_transport_ = std::make_unique<image_transport::ImageTransport>(node_);
+#endif
 
   tf_buffer_ = monitor_->getTFClient();
   free_space_updater_ = std::make_unique<LazyFreeSpaceUpdater>(tree_);
@@ -204,7 +216,9 @@ mesh_filter::MeshHandle DepthImageOctomapUpdater::excludeShape(const shapes::Sha
     }
   }
   else
+  {
     RCLCPP_ERROR(logger_, "Mesh filter not yet initialized!");
+  }
   return h;
 }
 
@@ -358,7 +372,9 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
       }
     }
     else
+    {
       return;
+    }
   }
 
   if (!updateTransformCache(depth_msg->header.frame_id, depth_msg->header.stamp))

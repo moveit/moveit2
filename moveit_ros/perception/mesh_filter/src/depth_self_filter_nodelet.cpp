@@ -34,6 +34,7 @@
 
 /* Author: Suat Gedikli */
 
+#include <cstdint>
 #include <moveit/mesh_filter/depth_self_filter_nodelet.hpp>
 #include <moveit/mesh_filter/stereo_camera_model.hpp>
 #include <moveit/mesh_filter/mesh_filter.hpp>

@@ -6,7 +6,7 @@ controller_manager:
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
     panda_joint_group_position_controller:
-      type: position_controllers/JointGroupPositionController
+      type: forward_command_controller/ForwardCommandController
 
 panda_arm_controller:
   ros__parameters:
@@ -26,6 +26,7 @@ panda_arm_controller:
 
 panda_joint_group_position_controller:
   ros__parameters:
+    interface_name: position
     joints:
       - panda_joint1
       - panda_joint2

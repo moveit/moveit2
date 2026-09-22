@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan */
 
+#include <cstdint>
 #include <moveit/warehouse/planning_scene_storage.hpp>
 #include <moveit/warehouse/constraints_storage.hpp>
 #include <moveit/warehouse/state_storage.hpp>

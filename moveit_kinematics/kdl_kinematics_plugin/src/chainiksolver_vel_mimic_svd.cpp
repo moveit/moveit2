@@ -96,7 +96,9 @@ int ChainIkSolverVelMimicSVD::CartToJnt(const JntArray& q_in, const Twist& v_in,
     jacToJacReduced(jac_, jac_reduced_);
   }
   else
+  {
     jnt2jac_.JntToJac(q_in, jac_reduced_);
+  }
 
   // weight Jacobian
   auto& jac = jac_reduced_.data;

@@ -120,7 +120,11 @@ bool PointCloudOctomapUpdater::initialize(const rclcpp::Node::SharedPtr& node)
   node_ = node;
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
   auto create_timer_interface =
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+      std::make_shared<tf2_ros::CreateTimerROS>(*node);
+#else
       std::make_shared<tf2_ros::CreateTimerROS>(node->get_node_base_interface(), node->get_node_timers_interface());
+#endif
   tf_buffer_->setCreateTimerInterface(create_timer_interface);
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
   shape_mask_ = std::make_unique<point_containment_filter::ShapeMask>();
@@ -266,7 +270,9 @@ void PointCloudOctomapUpdater::cloudMsgCallback(const sensor_msgs::msg::PointClo
       }
     }
     else
+    {
       return;
+    }
   }
 
   /* compute sensor origin in map frame */

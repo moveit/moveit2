@@ -167,7 +167,9 @@ void MotionPlanningFrame::saveRobotStateButtonClicked(const moveit::core::RobotS
       }
     }
     else
+    {
       QMessageBox::warning(this, "Start state not saved", "Cannot use an empty name for a new start state.");
+    }
   }
   populateRobotStatesList();
 }

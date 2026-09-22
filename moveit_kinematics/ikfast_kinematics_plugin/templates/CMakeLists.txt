@@ -26,20 +26,20 @@ generate_parameter_library(
 set(IKFAST_LIBRARY_NAME _LIBRARY_NAME_)
 add_library(${IKFAST_LIBRARY_NAME} SHARED
             src/_ROBOT_NAME___GROUP_NAME__ikfast_moveit_plugin.cpp)
-ament_target_dependencies(
-  ${IKFAST_LIBRARY_NAME}
-  rclcpp
-  moveit_core
-  pluginlib
-  tf2_kdl
-  orocos_kdl
-  tf2_eigen
-  LAPACK)
 # suppress warnings about unused variables in OpenRave's solver code
 target_compile_options(${IKFAST_LIBRARY_NAME} PRIVATE -Wno-unused-variable
                                                       -Wno-unused-parameter)
 
-target_link_libraries(${IKFAST_LIBRARY_NAME} ikfast_kinematics_parameters)
+target_link_libraries(
+  ${IKFAST_LIBRARY_NAME}
+  ikfast_kinematics_parameters
+  rclcpp::rclcpp
+  moveit_core::moveit_core
+  pluginlib::pluginlib
+  tf2_kdl::tf2_kdl
+  ${orocos_kdl_LIBRARIES}
+  tf2_eigen::tf2_eigen
+  ${LAPACK_LIBRARIES})
 
 install(
   TARGETS ${IKFAST_LIBRARY_NAME} ikfast_kinematics_parameters

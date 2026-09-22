@@ -9,9 +9,11 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(fmt REQUIRED)
-# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+# rviz switched to Qt6 in 15.1.14: https://github.com/ros2/rviz/pull/1635
+# (merged 2025-12-08, first released in the 15.1.14 tag on 2025-12-17 -- 15.1.0
+# through 15.1.13 are still Qt5)
 find_package(rviz2 QUIET)
-if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1.14)
   find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
   set(QT_VERSION_MAJOR 6)
   # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
@@ -54,20 +56,21 @@ target_include_directories(
   moveit_setup_framework
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_framework>)
-ament_target_dependencies(
+target_link_libraries(
   moveit_setup_framework
-  ament_index_cpp
-  moveit_core
-  moveit_ros_planning
-  moveit_ros_visualization
-  pluginlib
-  Qt${QT_VERSION_MAJOR}Core
-  Qt${QT_VERSION_MAJOR}Widgets
-  rclcpp
-  rviz_common
-  rviz_rendering
-  srdfdom
-  urdf)
+  PUBLIC ament_index_cpp::ament_index_cpp
+         fmt::fmt
+         moveit_core::moveit_core
+         moveit_ros_planning::moveit_ros_planning
+         moveit_ros_visualization::moveit_ros_visualization
+         pluginlib::pluginlib
+         Qt${QT_VERSION_MAJOR}::Core
+         Qt${QT_VERSION_MAJOR}::Widgets
+         rclcpp::rclcpp
+         rviz_common::rviz_common
+         rviz_rendering::rviz_rendering
+         srdfdom::srdfdom
+         urdf::urdf)
 
 install(DIRECTORY include/ DESTINATION include/moveit_setup_framework)
 install(FILES moveit_setup_framework_plugins.xml
@@ -87,7 +90,8 @@ install(
 
 ament_export_dependencies(fmt)
 ament_export_dependencies(rclcpp)
-ament_export_dependencies(Qt${QT_VERSION_MAJOR})
+ament_export_dependencies(Qt${QT_VERSION_MAJOR}Core
+                          Qt${QT_VERSION_MAJOR}Widgets)
 ament_export_dependencies(moveit_common)
 ament_export_dependencies(moveit_core)
 ament_export_dependencies(moveit_ros_planning)

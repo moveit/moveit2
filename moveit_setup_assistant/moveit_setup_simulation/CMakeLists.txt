@@ -8,9 +8,11 @@ moveit_package()
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+# rviz switched to Qt6 in 15.1.14: https://github.com/ros2/rviz/pull/1635
+# (merged 2025-12-08, first released in the 15.1.14 tag on 2025-12-17 -- 15.1.0
+# through 15.1.13 are still Qt5)
 find_package(rviz2 QUIET)
-if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1.14)
   find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
   set(QT_VERSION_MAJOR 6)
   # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
@@ -35,8 +37,10 @@ target_include_directories(
   moveit_setup_simulation
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_simulation>)
-ament_target_dependencies(moveit_setup_simulation ament_index_cpp
-                          moveit_setup_framework pluginlib rclcpp)
+target_link_libraries(
+  moveit_setup_simulation ament_index_cpp::ament_index_cpp
+  moveit_setup_framework::moveit_setup_framework pluginlib::pluginlib
+  rclcpp::rclcpp)
 
 install(DIRECTORY templates DESTINATION share/moveit_setup_simulation)
 

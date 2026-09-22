@@ -1,5 +1,17 @@
 add_library(forward_trajectory_plugin SHARED src/forward_trajectory.cpp)
 set_target_properties(forward_trajectory_plugin
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
-ament_target_dependencies(forward_trajectory_plugin
-                          ${THIS_PACKAGE_INCLUDE_DEPENDS})
+target_link_libraries(
+  forward_trajectory_plugin
+  moveit_core::moveit_core
+  ${moveit_msgs_TARGETS}
+  moveit_ros_planning::moveit_ros_planning
+  moveit_ros_planning_interface::moveit_ros_planning_interface
+  pluginlib::pluginlib
+  rclcpp::rclcpp
+  rclcpp_action::rclcpp_action
+  rclcpp_components::component
+  ${std_msgs_TARGETS}
+  ${std_srvs_TARGETS}
+  tf2_ros::tf2_ros
+  ${trajectory_msgs_TARGETS})

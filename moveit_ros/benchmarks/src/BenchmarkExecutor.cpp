@@ -44,7 +44,6 @@
 #include <moveit/utils/logger.hpp>
 
 #include <regex>
-#include <boost/regex.hpp>
 
 #if __has_include(<boost/timer/progress_display.hpp>)
 #include <boost/timer/progress_display.hpp>
@@ -58,7 +57,6 @@ using boost_progress_display = boost::progress_display;
 #endif
 
 #include <boost/math/constants/constants.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <math.h>
 #include <limits>

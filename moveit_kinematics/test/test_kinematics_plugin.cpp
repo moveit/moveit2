@@ -64,7 +64,6 @@ rclcpp::Logger getLogger()
 const std::string ROBOT_DESCRIPTION_PARAM = "robot_description";
 const double DEFAULT_SEARCH_DISCRETIZATION = 0.01f;
 const double EXPECTED_SUCCESS_RATE = 0.8;
-static const std::string UNDEFINED = "<undefined>";
 
 // As loading of parameters is quite slow, we share them across all tests
 class SharedData
