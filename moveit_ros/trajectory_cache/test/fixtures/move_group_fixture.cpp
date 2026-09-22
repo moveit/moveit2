@@ -35,12 +35,12 @@ namespace
 // machine, DDS discovery of /joint_states regularly takes longer than that, which made these tests
 // flake with "Failed to fetch current robot state". Prime the current state monitor here, with a
 // generous timeout, so those short internal waits always find an already-populated monitor.
-constexpr double kCurrentStateWaitSeconds = 10.0;
+constexpr double CURRENT_STATE_WAIT_SECONDS = 10.0;
 
 // Bound how long the spin loop blocks while idle. Long enough to keep the thread asleep instead of
 // busy-waiting (which starves DDS discovery when several of these tests run in parallel), short
 // enough that TearDown() joins promptly.
-constexpr std::chrono::milliseconds kSpinTimeout(100);
+constexpr std::chrono::milliseconds SPIN_TIMEOUT(100);
 
 }  // namespace
 
@@ -69,8 +69,8 @@ void MoveGroupFixture::SetUp()
   db_->setParams(":memory:", 1);
   ASSERT_TRUE(db_->connect());
 
-  ASSERT_TRUE(move_group_->getCurrentState(kCurrentStateWaitSeconds) != nullptr)
-      << "Timed out after " << kCurrentStateWaitSeconds
+  ASSERT_TRUE(move_group_->getCurrentState(CURRENT_STATE_WAIT_SECONDS) != nullptr)
+      << "Timed out after " << CURRENT_STATE_WAIT_SECONDS
       << "s waiting for a complete robot state on /joint_states. The trajectory cache cannot "
          "resolve `is_diff` start states without one.";
 }
@@ -88,6 +88,6 @@ void MoveGroupFixture::spinNode()
   executor.add_node(node_);
   while (is_spinning_ && rclcpp::ok())
   {
-    executor.spin_once(kSpinTimeout);
+    executor.spin_once(SPIN_TIMEOUT);
   }
 }
