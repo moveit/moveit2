@@ -50,6 +50,7 @@
 #include <rviz_common/properties/color_property.hpp>
 #include <rviz_common/properties/enum_property.hpp>
 #include <rviz_common/display_context.hpp>
+#include <rviz_common/logging.hpp>
 // For Rolling, Kilted, and newer
 #if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/buffer.hpp>

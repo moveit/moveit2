@@ -36,6 +36,7 @@
 #include <rviz_common/properties/bool_property.hpp>
 #include <rviz_common/validate_floats.hpp>
 #include <rviz_common/display_context.hpp>
+#include <rviz_common/logging.hpp>
 
 #include <rviz_default_plugins/displays/interactive_markers/interactive_marker_namespace_property.hpp>
 
