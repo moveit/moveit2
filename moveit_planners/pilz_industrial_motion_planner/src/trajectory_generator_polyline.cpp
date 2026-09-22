@@ -45,12 +45,7 @@
 #include <kdl/path_roundedcomposite.hpp>
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/utilities/error.h>
-// TODO: Remove conditional include when released to all active distros.
-#if __has_include(<tf2/convert.hpp>)
 #include <tf2/convert.hpp>
-#else
-#include <tf2/convert.h>
-#endif
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
