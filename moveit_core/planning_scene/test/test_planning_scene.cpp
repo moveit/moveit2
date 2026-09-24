@@ -60,8 +60,8 @@ class CountingCollisionDetectorAllocator : public collision_detection::Collision
 public:
   const std::string& getName() const override
   {
-    static const std::string name = "CountingFCL";
-    return name;
+    static const std::string NAME = "CountingFCL";
+    return NAME;
   }
 
   collision_detection::CollisionEnvPtr allocateEnv(const collision_detection::WorldPtr& world,
@@ -285,6 +285,7 @@ TEST(PlanningScene, UnpaddedCollisionEnvironmentIsInitializedOnceAcrossThreads)
   scene->allocateCollisionDetector(allocator);
 
   std::vector<std::thread> threads;
+  threads.reserve(8);
   for (std::size_t i = 0; i < 8; ++i)
     threads.emplace_back([scene]() { scene->getCollisionEnvUnpadded(); });
   for (std::thread& thread : threads)
