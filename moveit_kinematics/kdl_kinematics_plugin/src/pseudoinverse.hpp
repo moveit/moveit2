@@ -7,6 +7,14 @@
 
 namespace kdl_kinematics_plugin::internal
 {
+/**
+ * Solve the minimum-norm system @f$x = J^T(JJ^T)^\#b@f$.
+ *
+ * IK Jacobians have at most six rows and usually more columns. Decomposing the
+ * small symmetric @f$JJ^T@f$ matrix is therefore significantly faster than
+ * computing a thin SVD of @f$J@f$ on every Newton iteration. The cutoff below
+ * applies the solver's relative singular-value threshold to the eigenvalues.
+ */
 inline Eigen::VectorXd solvePseudoinverse(const Eigen::Ref<const Eigen::MatrixXd>& jacobian,
                                           const Eigen::Ref<const Eigen::VectorXd>& input, double threshold)
 {
