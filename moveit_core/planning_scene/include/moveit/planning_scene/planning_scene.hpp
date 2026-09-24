@@ -962,7 +962,7 @@ private:
     const collision_detection::CollisionEnvConstPtr& getCollisionEnvUnpadded() const
     {
       std::call_once(cenv_unpadded_once_, [this]() {
-        cenv_unpadded_ = alloc_->allocateEnv(cenv_, cenv_->getWorld());
+        cenv_unpadded_ = alloc_->allocateEnv(cenv_->getWorld(), cenv_->getRobotModel());
         cenv_unpadded_->setPadding(0.0);
         cenv_unpadded_->setScale(1.0);
         cenv_unpadded_const_ = cenv_unpadded_;
