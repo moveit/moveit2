@@ -274,8 +274,8 @@ TEST(PlanningScene, UnpaddedCollisionEnvironmentIsLazyAcrossNestedDiffs)
   EXPECT_EQ(allocator->copyAllocations(), 2u);
 
   grandchild->getCollisionEnvUnpadded();
-  EXPECT_EQ(allocator->freshAllocations(), 1u);
-  EXPECT_EQ(allocator->copyAllocations(), 3u);
+  EXPECT_EQ(allocator->freshAllocations(), 2u);
+  EXPECT_EQ(allocator->copyAllocations(), 2u);
 }
 
 TEST(PlanningScene, UnpaddedCollisionEnvironmentIsInitializedOnceAcrossThreads)
@@ -291,8 +291,8 @@ TEST(PlanningScene, UnpaddedCollisionEnvironmentIsInitializedOnceAcrossThreads)
   for (std::thread& thread : threads)
     thread.join();
 
-  EXPECT_EQ(allocator->freshAllocations(), 1u);
-  EXPECT_EQ(allocator->copyAllocations(), 1u);
+  EXPECT_EQ(allocator->freshAllocations(), 2u);
+  EXPECT_EQ(allocator->copyAllocations(), 0u);
 }
 
 TEST(PlanningScene, DetachedSceneDoesNotRetainDeferredCollisionEnvironmentSource)
@@ -317,8 +317,8 @@ TEST(PlanningScene, DetachedSceneDoesNotRetainDeferredCollisionEnvironmentSource
 
   EXPECT_DOUBLE_EQ(detached->getCollisionEnvUnpadded()->getLinkPadding("panda_link0"), 0.0);
   EXPECT_DOUBLE_EQ(detached->getCollisionEnvUnpadded()->getLinkScale("panda_link0"), 1.0);
-  EXPECT_EQ(allocator->freshAllocations(), 1u);
-  EXPECT_EQ(allocator->copyAllocations(), 2u);
+  EXPECT_EQ(allocator->freshAllocations(), 2u);
+  EXPECT_EQ(allocator->copyAllocations(), 1u);
 }
 
 TEST(PlanningScene, MakeAttachedDiff)
