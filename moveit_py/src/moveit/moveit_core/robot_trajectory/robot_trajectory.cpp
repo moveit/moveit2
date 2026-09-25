@@ -164,6 +164,19 @@ void initRobotTrajectory(py::module& m)
            Returns:
                bool: True if the trajectory was successfully retimed, false otherwise.
            )")
+      .def("limit_max_cartesian_link_speed",
+           py::overload_cast<robot_trajectory::RobotTrajectory&, const double, const std::string&>(
+               &trajectory_processing::limitMaxCartesianLinkSpeed),
+           py::arg("max_speed"), py::arg("link_name"),
+           R"(
+           Limits the maximum Cartesian speed of a specified link in the trajectory.  If link_name is empty, the end effectors of the trajectory's joint model group will be used.
+            Args:
+                trajectory (:py:class:`moveit_py.robot_trajectory.RobotTrajectory`): The robot trajectory to be modified.
+                max_speed (float): The maximum allowed Cartesian speed for the specified link.
+                link_name (str): The name of the link whose Cartesian speed is to be limited. If empty, the end effectors of the trajectory's joint model group will be used.
+            Returns:
+                bool: True if the speed limiting was successful, false otherwise.
+           )")
       .def("get_robot_trajectory_msg", &moveit_py::bind_robot_trajectory::getRobotTrajectoryMsg,
            py::arg("joint_filter") = std::vector<std::string>(),
            R"(
