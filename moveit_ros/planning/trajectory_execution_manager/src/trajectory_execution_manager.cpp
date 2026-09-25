@@ -90,6 +90,15 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
     private_executor_->cancel();
   if (private_executor_thread_.joinable())
     private_executor_thread_.join();
+
+  // Release the controller manager and its node in this order
+  // to prevent segfaults on shutdown.
+  callback_handler_.reset();
+  if (private_executor_ && controller_mgr_node_)
+    private_executor_->remove_node(controller_mgr_node_);
+  private_executor_.reset();
+  controller_manager_.reset();
+  controller_mgr_node_.reset();
 }
 
 void TrajectoryExecutionManager::initialize()
