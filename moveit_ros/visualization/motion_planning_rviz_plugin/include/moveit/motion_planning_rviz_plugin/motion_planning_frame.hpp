@@ -42,6 +42,8 @@
 #include <QTreeWidgetItem>
 #include <QListWidgetItem>
 
+#include <moveit/motion_planning_rviz_plugin/execution_job.hpp>
+
 #ifndef Q_MOC_RUN
 #include <moveit/macros/class_forward.hpp>
 #include <moveit/move_group_interface/move_group_interface.hpp>
@@ -142,6 +144,7 @@ protected:
   MotionPlanningFrameJointsWidget* joints_tab_;
 
   moveit::planning_interface::MoveGroupInterfacePtr move_group_;
+  ExecutionJob execution_job_;
   // TODO (ddengster): Enable when moveit_ros_perception is ported
   //  moveit::semantic_world::SemanticWorldPtr semantic_world_;
 
@@ -248,10 +251,21 @@ private:
 
   // Planning tab
   void computePlanButtonClicked();
-  void computeExecuteButtonClicked();
-  void computePlanAndExecuteButtonClicked();
-  void computePlanAndExecuteButtonClickedDisplayHelper();
-  void computeStopButtonClicked();
+  moveit::planning_interface::MoveGroupInterface::PlanPtr
+  computeCartesianPlan(const moveit::planning_interface::MoveGroupInterfacePtr& move_group,
+                       const moveit::core::RobotState& goal, double velocity_scaling_factor,
+                       double acceleration_scaling_factor);
+  void computeExecuteButtonClicked(const moveit::planning_interface::MoveGroupInterfacePtr& move_group,
+                                   const moveit::planning_interface::MoveGroupInterface::PlanPtr& plan,
+                                   ExecutionJob::Generation execution_generation);
+  void computePlanAndExecuteButtonClicked(const moveit::planning_interface::MoveGroupInterfacePtr& move_group,
+                                          bool use_cartesian_path,
+                                          const moveit::core::RobotStateConstPtr& cartesian_goal,
+                                          double velocity_scaling_factor, double acceleration_scaling_factor,
+                                          ExecutionJob::Generation execution_generation);
+  void queueFinishedExecution(bool success, ExecutionJob::Generation execution_generation,
+                              const moveit::planning_interface::MoveGroupInterface::PlanPtr& plan = {});
+  void queueFailedExecution(ExecutionJob::Generation execution_generation, std::exception_ptr exception);
   void onFinishedExecution(bool success);
   void populateConstraintsList();
   void populateConstraintsList(const std::vector<std::string>& constr);
