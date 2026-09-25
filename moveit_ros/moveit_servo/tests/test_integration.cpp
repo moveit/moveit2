@@ -159,6 +159,39 @@ TEST_F(ServoCppFixture, PoseTest)
   ASSERT_NEAR(delta, expected_delta, tol);
 }
 
+TEST_F(ServoCppFixture, PoseHaltsAllJointsAtJointBound)
+{
+  planning_scene_monitor::LockedPlanningSceneRO locked_scene(planning_scene_monitor_);
+  auto robot_state = std::make_shared<moveit::core::RobotState>(locked_scene->getCurrentState());
+
+  const auto& joint_bounds = robot_state->getRobotModel()->getVariableBounds("panda_joint7");
+  const auto& margins = servo_params_.joint_limit_margins;
+  const double joint_margin = margins.size() == 1 ? margins.front() : margins.at(6);
+  robot_state->setVariablePosition("panda_joint7", joint_bounds.max_position_ - joint_margin - 1.0e-4);
+  robot_state->update();
+
+  moveit_servo::PoseCommand pose;
+  pose.frame_id = "panda_link0";
+  pose.pose = robot_state->getGlobalLinkTransform("panda_link8");
+  pose.pose.translation().x() += 0.01;
+  pose.pose.rotate(Eigen::AngleAxisd(M_PI / 2, Eigen::Vector3d::UnitZ()));
+
+  servo_test_instance_->setCommandType(moveit_servo::CommandType::POSE);
+  ASSERT_TRUE(servo_params_.halt_all_joints_in_cartesian_mode);
+
+  const moveit_servo::KinematicState current_state =
+      moveit_servo::extractRobotState(robot_state, servo_params_.move_group_name);
+  const moveit_servo::KinematicState next_state = servo_test_instance_->getNextJointState(robot_state, pose);
+
+  ASSERT_EQ(servo_test_instance_->getStatus(), moveit_servo::StatusCode::JOINT_BOUND);
+  ASSERT_EQ(next_state.positions.size(), current_state.positions.size());
+  for (Eigen::Index index = 0; index < current_state.positions.size(); ++index)
+  {
+    EXPECT_DOUBLE_EQ(next_state.positions[index], current_state.positions[index]);
+    EXPECT_DOUBLE_EQ(next_state.velocities[index], 0.0);
+  }
+}
+
 }  // namespace
 
 int main(int argc, char** argv)
