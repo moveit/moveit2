@@ -39,6 +39,7 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <atomic>
 #include <list>
 #include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <moveit/trajectory_processing/time_parameterization.hpp>
@@ -118,7 +119,8 @@ private:
 
   double length_ = 0.0;
   std::list<std::pair<double, bool>> switching_points_;
-  std::list<std::unique_ptr<PathSegment>> path_segments_;
+  std::vector<std::unique_ptr<PathSegment>> path_segments_;
+  mutable std::atomic<std::size_t> cached_segment_{ 0 };
 };
 
 class Trajectory
