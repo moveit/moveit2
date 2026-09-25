@@ -30,16 +30,15 @@
 #include <kdl/chainjnttojacsolver.hpp>
 
 #include <moveit/kdl_kinematics_plugin/joint_mimic.hpp>
-#include <Eigen/SVD>
+#include <Eigen/Core>
 
 namespace KDL
 {
 /**
- * Implementation of a inverse velocity kinematics algorithm based
- * on the generalize pseudo inverse to calculate the velocity
+ * Implementation of an inverse velocity kinematics algorithm based
+ * on the generalized pseudoinverse to calculate the velocity
  * transformation from Cartesian to joint space of a general
- * KDL::Chain. It uses a svd-calculation based on householders
- * rotations.
+ * KDL::Chain.
  *
  * @ingroup KinematicFamily
  */
@@ -68,7 +67,7 @@ public:
 
   int CartToJnt(const JntArray& q_in, const Twist& v_in, JntArray& qdot_out) override
   {
-    return CartToJnt(q_in, v_in, qdot_out, Eigen::VectorXd::Constant(svd_.cols(), 1.0),
+    return CartToJnt(q_in, v_in, qdot_out, Eigen::VectorXd::Constant(jac_reduced_.columns(), 1.0),
                      Eigen::Matrix<double, 6, 1>::Constant(1.0));
   }
 
@@ -89,7 +88,7 @@ public:
   /// Return true iff we ignore orientation but only consider position for inverse kinematics
   bool isPositionOnly() const
   {
-    return svd_.rows() == 3;
+    return position_ik_;
   }
 
 private:
@@ -102,7 +101,8 @@ private:
   const Chain& chain_;
   ChainJntToJacSolver jnt2jac_;
 
-  Eigen::JacobiSVD<Eigen::MatrixXd> svd_;
+  bool position_ik_;
+  double threshold_;
   Eigen::VectorXd qdot_out_reduced_;
 
   Jacobian jac_;          // full Jacobian

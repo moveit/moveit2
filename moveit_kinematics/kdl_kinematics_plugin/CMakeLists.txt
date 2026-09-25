@@ -29,4 +29,11 @@ target_compile_definitions(moveit_kdl_kinematics_plugin
 target_compile_definitions(moveit_kdl_kinematics_plugin
                            PRIVATE "MOVEIT_KDL_KINEMATICS_PLUGIN_BUILDING_DLL")
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_kdl_pseudoinverse test/test_pseudoinverse.cpp)
+  target_include_directories(test_kdl_pseudoinverse PRIVATE src)
+  target_link_libraries(test_kdl_pseudoinverse Eigen3::Eigen)
+endif()
+
 install(DIRECTORY include/ DESTINATION include/moveit_kinematics)
