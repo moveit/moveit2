@@ -1,5 +1,6 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
+ * Software License Agreement (BSD License)
  *
  *  Copyright (c) 2022, Metro Robots
  *  All rights reserved.
@@ -32,11 +33,14 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+
 /* Author: David V. Lu!! */
+
 
 #include <moveit_setup_controllers/controllers_config.hpp>
 #include <moveit_setup_framework/data/srdf_config.hpp>
 #include <moveit_setup_framework/data_warehouse.hpp>
+
 
 namespace moveit_setup
 {
@@ -52,25 +56,31 @@ bool ControllersConfig::addController(const std::string& name, const std::string
   return addController(controller);
 }
 
+
 bool ControllersConfig::addController(const ControllerInfo& new_controller)
 {
   // Used for holding our search results
   ControllerInfo* searched_ros_controller = nullptr;
 
+
   // Find if there is an existing controller with the same name
   searched_ros_controller = findControllerByName(new_controller.name_);
 
-  if (searched_ros_controller && searched_ros_controller->type_ == new_controller.type_)
+
+  if (searched_ros_controller)
     return false;
+
 
   controllers_.push_back(new_controller);
   return true;
 }
 
+
 ControllerInfo* ControllersConfig::findControllerByName(const std::string& controller_name)
 {
   // Find the Controller we are editing based on the Controller name string
   ControllerInfo* searched_ros_controller = nullptr;  // used for holding our search results
+
 
   for (ControllerInfo& ros_control_config : controllers_)
   {
@@ -81,8 +91,10 @@ ControllerInfo* ControllersConfig::findControllerByName(const std::string& contr
     }
   }
 
+
   return searched_ros_controller;
 }
+
 
 bool ControllersConfig::deleteController(const std::string& controller_name)
 {
