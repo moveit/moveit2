@@ -124,9 +124,14 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
   robot_state_ = std::make_shared<moveit::core::RobotState>(robot_model_);
   robot_state_->setToDefaultValues();
 
+  ik_node_ = std::make_shared<rclcpp::Node>("srv_ik_client", node_->get_namespace());
+
   // Create the ROS2 service client
   RCLCPP_DEBUG(getLogger(), "IK Service client topic : %s", params_.kinematics_solver_service_name.c_str());
-  ik_service_client_ = node_->create_client<moveit_msgs::srv::GetPositionIK>(params_.kinematics_solver_service_name);
+  ik_service_client_ = ik_node_->create_client<moveit_msgs::srv::GetPositionIK>(params_.kinematics_solver_service_name);
+  ik_executor_ = std::make_unique<rclcpp::executors::SingleThreadedExecutor>();
+  ik_executor_->add_node(ik_node_);
+  ik_thread_ = std::thread([this]() { ik_executor_->spin(); });
 
   if (!ik_service_client_->wait_for_service(std::chrono::seconds(1)))
   {  // wait 0.1 seconds, blocking
@@ -312,8 +317,8 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
 
   RCLCPP_DEBUG(getLogger(), "Calling service: %s", ik_service_client_->get_service_name());
   auto result_future = ik_service_client_->async_send_request(ik_srv);
-  const auto& response = result_future.get();
-  if (rclcpp::spin_until_future_complete(node_, result_future) == rclcpp::FutureReturnCode::SUCCESS)
+  const auto response = result_future.get();
+  if (response)
   {
     // Check error code
     error_code.val = response->error_code.val;
@@ -352,7 +357,6 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
     error_code.val = error_code.FAILURE;
     return false;
   }
-
   // Get just the joints we are concerned about in our planning group
   robot_state_->copyJointGroupPositions(joint_model_group_, solution);
 
@@ -382,7 +386,7 @@ bool SrvKinematicsPlugin::searchPositionIK(const std::vector<geometry_msgs::msg:
     }
   }
 
-  RCLCPP_INFO(getLogger(), "IK Solver Succeeded!");
+  RCLCPP_DEBUG(getLogger(), "IK Solver Succeeded!");
   return true;
 }
 
