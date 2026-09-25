@@ -102,9 +102,21 @@ bool pilz_industrial_motion_planner::computePoseIK(const planning_scene::Plannin
   }
   else
   {
-    RCLCPP_ERROR(getLogger(), "Unable to find IK solution.");
-    // TODO(henning): Re-enable logging error
-    // RCLCPP_ERROR_STREAM(getLogger(), "Inverse kinematics for pose \n" << pose.translation() << " has no solution.");
+    std::ostringstream oss;
+    const Eigen::Quaterniond q(pose.rotation());
+    oss << "Unable to find IK solution for (" << pose.translation().transpose() << "; " << q.x() << ", " << q.y()
+        << ", " << q.z() << ", " << q.w() << ") in frame " << frame_id << " for link " << link_name << " in group '"
+        << group_name << "' with seed {";
+    for (auto pair = seed.begin(); pair != seed.end(); ++pair)
+    {
+      oss << pair->first << ": " << pair->second;
+      if (std::distance(pair, seed.end()) > 1)
+      {
+        oss << ", ";
+      }
+    }
+    oss << "}";
+    RCLCPP_ERROR_STREAM(getLogger(), oss.str());
     return false;
   }
 }
