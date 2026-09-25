@@ -39,6 +39,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <moveit/ompl_interface/model_based_planning_context.hpp>
 #include <moveit/ompl_interface/detail/state_validity_checker.hpp>
@@ -81,38 +82,13 @@ rclcpp::Logger getLogger()
 const moveit_msgs::msg::JointConstraint* findUnknownJointConstraint(
     const moveit_msgs::msg::Constraints& constraints, const moveit::core::RobotModelConstPtr& robot_model)
 {
+  const auto& variable_names = robot_model->getVariableNames();
   for (const auto& joint_constraint : constraints.joint_constraints)
   {
-    if (robot_model->hasJointModel(joint_constraint.joint_name))
-    {
-      continue;
-    }
-
-    const std::size_t separator = joint_constraint.joint_name.find_last_of('/');
-    if (separator == std::string::npos || separator + 1 >= joint_constraint.joint_name.length())
-    {
-      return &joint_constraint;
-    }
-
-    const moveit::core::JointModel* joint_model =
-        robot_model->getJointModel(joint_constraint.joint_name.substr(0, separator));
-    if (joint_model == nullptr)
-    {
-      return &joint_constraint;
-    }
-
-    const std::string local_variable_name = joint_constraint.joint_name.substr(separator + 1);
-    bool variable_found = false;
-    for (const auto& variable_name : joint_model->getLocalVariableNames())
-    {
-      if (variable_name == local_variable_name)
-      {
-        variable_found = true;
-        break;
-      }
-    }
-
-    if (!variable_found)
+    const bool known_joint = robot_model->hasJointModel(joint_constraint.joint_name);
+    const bool known_variable =
+        std::find(variable_names.begin(), variable_names.end(), joint_constraint.joint_name) != variable_names.end();
+    if (!known_joint && !known_variable)
     {
       return &joint_constraint;
     }
