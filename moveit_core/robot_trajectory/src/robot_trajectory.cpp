@@ -568,7 +568,7 @@ RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::Robo
 void RobotTrajectory::findWayPointIndicesForDurationAfterStart(double duration, int& before, int& after,
                                                                double& blend) const
 {
-  if (duration < 0.0)
+  if (duration < 0.0 || waypoints_.empty())
   {
     before = 0;
     after = 0;
@@ -581,7 +581,7 @@ void RobotTrajectory::findWayPointIndicesForDurationAfterStart(double duration, 
   double running_duration = 0.0;
   for (; index < num_points; ++index)
   {
-    running_duration += duration_from_previous_[index];
+    running_duration += duration_from_previous_.at(index);
     if (running_duration >= duration)
       break;
   }
@@ -589,14 +589,14 @@ void RobotTrajectory::findWayPointIndicesForDurationAfterStart(double duration, 
   after = std::min<int>(index, num_points - 1);
 
   // Compute duration blend
-  double before_time = running_duration - duration_from_previous_[index];
   if (after == before)
   {
     blend = 1.0;
   }
   else
   {
-    blend = (duration - before_time) / duration_from_previous_[index];
+    double before_time = running_duration - duration_from_previous_.at(index);
+    blend = (duration - before_time) / duration_from_previous_.at(index);
   }
 }
 
