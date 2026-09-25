@@ -42,6 +42,11 @@
 // Testing
 #include <gtest/gtest.h>
 
+#include <condition_variable>
+#include <mutex>
+#include <optional>
+#include <thread>
+
 // Main class
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/robot_state/conversions.hpp>
@@ -145,6 +150,85 @@ TEST_F(PlanningSceneMonitorTest, UpdateTypes)
   msg.is_diff = false;
 
   TRIGGERS_UPDATE(msg, UpdateType::UPDATE_SCENE);
+}
+
+TEST_F(PlanningSceneMonitorTest, StateUpdatePublishesStateOnlyDiff)
+{
+  std::mutex message_mutex;
+  std::condition_variable message_condition;
+  std::optional<moveit_msgs::msg::PlanningScene> full_scene_msg;
+  std::optional<moveit_msgs::msg::PlanningScene> scene_diff_msg;
+
+  auto planning_scene_subscription = test_node_->create_subscription<moveit_msgs::msg::PlanningScene>(
+      "state_only_planning_scene", rclcpp::QoS(10), [&](const moveit_msgs::msg::PlanningScene::ConstSharedPtr& msg) {
+        std::scoped_lock lock(message_mutex);
+        if (msg->is_diff)
+        {
+          scene_diff_msg = *msg;
+        }
+        else
+        {
+          full_scene_msg = *msg;
+        }
+        message_condition.notify_all();
+      });
+
+  planning_scene_monitor_->startPublishingPlanningScene(UpdateType::UPDATE_STATE, "state_only_planning_scene");
+
+  const auto discovery_deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+  while (planning_scene_subscription->get_publisher_count() == 0 &&
+         std::chrono::steady_clock::now() < discovery_deadline)
+  {
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  }
+  const bool publisher_discovered = planning_scene_subscription->get_publisher_count() > 0;
+
+  bool full_scene_received = false;
+  bool scene_diff_received = false;
+  if (publisher_discovered)
+  {
+    planning_scene_monitor_->triggerSceneUpdateEvent(UpdateType::UPDATE_SCENE);
+    {
+      std::unique_lock lock(message_mutex);
+      full_scene_received =
+          message_condition.wait_for(lock, std::chrono::seconds(5), [&] { return full_scene_msg.has_value(); });
+    }
+
+    planning_scene_monitor_->getPlanningScene()->getCurrentStateNonConst();
+    planning_scene_monitor_->triggerSceneUpdateEvent(UpdateType::UPDATE_STATE);
+    {
+      std::unique_lock lock(message_mutex);
+      scene_diff_received =
+          message_condition.wait_for(lock, std::chrono::seconds(5), [&] { return scene_diff_msg.has_value(); });
+    }
+  }
+  planning_scene_monitor_->stopPublishingPlanningScene();
+
+  ASSERT_TRUE(publisher_discovered);
+  ASSERT_TRUE(full_scene_received);
+  ASSERT_TRUE(scene_diff_received);
+  ASSERT_TRUE(full_scene_msg.has_value());
+  ASSERT_TRUE(scene_diff_msg.has_value());
+
+  EXPECT_FALSE(full_scene_msg->is_diff);
+  EXPECT_FALSE(full_scene_msg->link_padding.empty());
+  EXPECT_FALSE(full_scene_msg->link_scale.empty());
+
+  EXPECT_TRUE(scene_diff_msg->is_diff);
+  EXPECT_TRUE(scene_diff_msg->robot_state.is_diff);
+  EXPECT_TRUE(scene_diff_msg->robot_state.attached_collision_objects.empty());
+  EXPECT_TRUE(scene_diff_msg->link_padding.empty());
+  EXPECT_TRUE(scene_diff_msg->link_scale.empty());
+
+  auto receiving_monitor = std::make_unique<planning_scene_monitor::PlanningSceneMonitor>(
+      test_node_, planning_scene_monitor_->getRobotModelLoader(), "state_only_diff_receiver");
+  receiving_monitor->stopPublishingPlanningScene();
+  ASSERT_TRUE(receiving_monitor->newPlanningSceneMessage(*full_scene_msg));
+
+  auto received_update_type{ UpdateType::UPDATE_NONE };
+  receiving_monitor->addUpdateCallback([&](auto type) { received_update_type = type; });
+  ASSERT_TRUE(receiving_monitor->newPlanningSceneMessage(*scene_diff_msg));
+  EXPECT_EQ(received_update_type, UpdateType::UPDATE_STATE);
 }
 
 int main(int argc, char** argv)
