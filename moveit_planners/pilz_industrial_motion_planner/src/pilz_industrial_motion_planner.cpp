@@ -142,6 +142,7 @@ CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& 
   {
     RCLCPP_ERROR_STREAM(getLogger(), "No ContextLoader for planner_id '" << req.planner_id.c_str()
                                                                          << "' found. Planning not possible.");
+    error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return nullptr;
   }
 
