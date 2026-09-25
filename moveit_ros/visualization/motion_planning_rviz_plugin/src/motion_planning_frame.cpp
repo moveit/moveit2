@@ -675,11 +675,11 @@ void MotionPlanningFrame::initFromMoveGroupNS()
       node_->create_publisher<moveit_msgs::msg::PlanningSceneWorld>("planning_scene_world", 1);
 
   // Declare parameter for default planning pipeline
-  if (!node_->has_parameter(planning_display_->getMoveGroupNS() + "default_planning_pipeline"))
-    node_->declare_parameter<std::string>(planning_display_->getMoveGroupNS() + "default_planning_pipeline", "");
+  if (!node_->has_parameter("default_planning_pipeline"))
+    node_->declare_parameter<std::string>("default_planning_pipeline", "");
 
   // Query default planning pipeline id
-  node_->get_parameter(planning_display_->getMoveGroupNS() + "default_planning_pipeline", default_planning_pipeline_);
+  node_->get_parameter("default_planning_pipeline", default_planning_pipeline_);
 
   // Set initial velocity and acceleration scaling factors from ROS parameters
   double factor;
