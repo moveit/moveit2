@@ -97,6 +97,9 @@ private Q_SLOTS:
   void changedRobotDescription();
 
 protected:
+  // Build robot_model_ from rdf_loader_ and pass it to the trajectory playback component
+  void buildRobotModel();
+
   // The trajectory playback component
   TrajectoryVisualizationPtr trajectory_visual_;
 

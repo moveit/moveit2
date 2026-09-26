@@ -77,8 +77,24 @@ void TrajectoryDisplay::loadRobotModel()
 {
   try
   {
-    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, robot_description_property_->getStdString());
+    rdf_loader_ = std::make_shared<rdf_loader::RDFLoader>(node_, robot_description_property_->getStdString(), true);
+    rdf_loader_->setNewModelCallback([this] {
+      buildRobotModel();
+      // The displayed trajectory was built for the previous robot model
+      trajectory_visual_->reset();
+    });
+    buildRobotModel();
+  }
+  catch (std::exception& e)
+  {
+    setStatus(rviz_common::properties::StatusProperty::Error, "RobotModel", QString("Loading failed: %1").arg(e.what()));
+  }
+}
 
+void TrajectoryDisplay::buildRobotModel()
+{
+  try
+  {
     if (!rdf_loader_->getURDF())
     {
       setStatus(rviz_common::properties::StatusProperty::Error, "Robot Model",
