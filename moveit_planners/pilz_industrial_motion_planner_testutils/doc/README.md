@@ -3,7 +3,7 @@
 ## General information
 - Use as little as possible test points (Reason: Reduces maintenance overhead).
 - Test points should be defined following the concept shown below.
-![TestDataConcept](../../pilz_trajectory_generation/test/test_robots/concept_testdata.png)
+![TestDataConcept](../../pilz_industrial_motion_planner/test/test_data/concept_testdata.png)
 - Test points can be defined in joint space or Cartesian space. However, one
 test point should not be defined in both spaces (data redundancy)
 - If a test point is defined in Cartesian space, then also state the

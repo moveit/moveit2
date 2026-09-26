@@ -2,6 +2,11 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.4 (2025-12-05)
+-------------------
+* Python PlanningScene API: add set_current_state() (`#3481 <https://github.com/moveit/moveit2/issues/3481>`_)
+* Allow conversion rclpy.Time <-> rclcpp::Time (`#3453 <https://github.com/moveit/moveit2/issues/3453>`_) (`#3455 <https://github.com/moveit/moveit2/issues/3455>`_)
+
 2.12.3 (2025-04-15)
 -------------------
 * Allow conversion from list[str] to std::vector<std::string> (`#3423 <https://github.com/ros-planning/moveit2/issues/3423>`_) (`#3425 <https://github.com/ros-planning/moveit2/issues/3425>`_)

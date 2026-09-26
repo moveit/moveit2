@@ -29,7 +29,6 @@ jobs:
       # https://stackoverflow.com/a/41673702
       CXXFLAGS: >-
         -Wall -Wextra -Wwrite-strings -Wunreachable-code -Wpointer-arith -Wredundant-decls -Wno-unknown-warning-option
-      CLANG_TIDY_ARGS: --fix --fix-errors --format-style=file
       DOCKER_IMAGE: moveit/moveit2:${{ matrix.env.IMAGE }}
       UPSTREAM_WORKSPACE: >
         moveit2.repos
@@ -139,7 +138,7 @@ jobs:
         run: moveit_kinematics/test/test_ikfast_plugins.sh
       - id: ici
         name: Run industrial_ci
-        uses: ros-industrial/industrial_ci@master
+        uses: ros-industrial/industrial_ci@ba2a3d0f830f8051b356711a8df2fedfc5d256cf
         env: ${{ matrix.env }}
 # NOTE: Testspace is temporarily disabled and needs to be installed for the MoveIt org
 # See: https://github.com/moveit/moveit2/issues/2852

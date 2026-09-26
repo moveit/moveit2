@@ -484,8 +484,67 @@ RobotTrajectory& RobotTrajectory::setRobotTrajectoryMsg(const moveit::core::Robo
     {
       for (std::size_t j = 0; j < trajectory.multi_dof_joint_trajectory.joint_names.size(); ++j)
       {
+        const auto& joint_name = trajectory.multi_dof_joint_trajectory.joint_names[j];
         Eigen::Isometry3d t = tf2::transformToEigen(trajectory.multi_dof_joint_trajectory.points[i].transforms[j]);
-        st->setJointPositions(trajectory.multi_dof_joint_trajectory.joint_names[j], t);
+        st->setJointPositions(joint_name, t);
+
+        if (!trajectory.multi_dof_joint_trajectory.points[i].velocities.empty())
+        {
+          // Note: angular x and y are not currently supported
+          const auto names = st->getVariableNames();
+
+          for (const auto& name : names)
+          {
+            if (name.find("/x") != std::string::npos)
+            {
+              st->setVariableVelocity(joint_name + "/x",
+                                      trajectory.multi_dof_joint_trajectory.points[i].velocities[j].linear.x);
+            }
+            else if (name.find("/y") != std::string::npos)
+            {
+              st->setVariableVelocity(joint_name + "/y",
+                                      trajectory.multi_dof_joint_trajectory.points[i].velocities[j].linear.y);
+            }
+            else if (name.find("/z") != std::string::npos)
+            {
+              st->setVariableVelocity(joint_name + "/z",
+                                      trajectory.multi_dof_joint_trajectory.points[i].velocities[j].linear.z);
+            }
+            else if (name.find("/theta") != std::string::npos)
+            {
+              st->setVariableVelocity(joint_name + "/theta",
+                                      trajectory.multi_dof_joint_trajectory.points[i].velocities[j].angular.z);
+            }
+          }
+        }
+        if (!trajectory.multi_dof_joint_trajectory.points[i].accelerations.empty())
+        {
+          // Note: angular x and y are not currently supported
+          const auto names = st->getVariableNames();
+          for (const auto& name : names)
+          {
+            if (name.find("/x") != std::string::npos)
+            {
+              st->setVariableAcceleration(joint_name + "/x",
+                                          trajectory.multi_dof_joint_trajectory.points[i].accelerations[j].linear.x);
+            }
+            else if (name.find("/y") != std::string::npos)
+            {
+              st->setVariableAcceleration(joint_name + "/y",
+                                          trajectory.multi_dof_joint_trajectory.points[i].accelerations[j].linear.y);
+            }
+            else if (name.find("/z") != std::string::npos)
+            {
+              st->setVariableAcceleration(joint_name + "/z",
+                                          trajectory.multi_dof_joint_trajectory.points[i].accelerations[j].linear.z);
+            }
+            else if (name.find("/theta") != std::string::npos)
+            {
+              st->setVariableAcceleration(joint_name + "/theta",
+                                          trajectory.multi_dof_joint_trajectory.points[i].accelerations[j].angular.z);
+            }
+          }
+        }
       }
       this_time_stamp = rclcpp::Time(trajectory.multi_dof_joint_trajectory.header.stamp) +
                         trajectory.multi_dof_joint_trajectory.points[i].time_from_start;

@@ -2,6 +2,9 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.12.4 (2025-12-05)
+-------------------
+
 2.12.3 (2025-04-15)
 -------------------
 * Update ompl_defaults.yaml to not have an invalid AnytimePathShortening configuration (`#3374 <https://github.com/ros-planning/moveit2/issues/3374>`_) (`#3376 <https://github.com/ros-planning/moveit2/issues/3376>`_)
