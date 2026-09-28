@@ -86,10 +86,8 @@ protected:
     sequence_client_ =
         rclcpp_action::create_client<moveit_msgs::action::MoveGroupSequence>(node_, "sequence_move_group");
 
-    ASSERT_TRUE(move_group_client_->wait_for_action_server(120s))
-        << "move_action server not available";
-    ASSERT_TRUE(sequence_client_->wait_for_action_server(120s))
-        << "sequence_move_group server not available";
+    ASSERT_TRUE(move_group_client_->wait_for_action_server(120s)) << "move_action server not available";
+    ASSERT_TRUE(sequence_client_->wait_for_action_server(120s)) << "sequence_move_group server not available";
   }
 
   int32_t sendMoveGroupPlanOnly(const moveit_msgs::msg::MotionPlanRequest& motion_request)

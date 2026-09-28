@@ -141,10 +141,14 @@ def generate_test_description():
 
 class TestGTestWaitForCompletion(unittest.TestCase):
     def test_gtest_run_complete(self, move_group_error_codes_gtest):
-        self.proc_info.assertWaitForShutdown(move_group_error_codes_gtest, timeout=4000.0)
+        self.proc_info.assertWaitForShutdown(
+            move_group_error_codes_gtest, timeout=4000.0
+        )
 
 
 @launch_testing.post_shutdown_test()
 class TestGTestProcessPostShutdown(unittest.TestCase):
     def test_gtest_pass(self, proc_info, move_group_error_codes_gtest):
-        launch_testing.asserts.assertExitCodes(proc_info, process=move_group_error_codes_gtest)
+        launch_testing.asserts.assertExitCodes(
+            proc_info, process=move_group_error_codes_gtest
+        )
