@@ -1,3 +1,5 @@
+"""Launch integration tests for MoveItErrorCodes returned by move_group actions."""
+
 import os
 import launch
 import unittest
@@ -8,6 +10,7 @@ from moveit_configs_utils import MoveItConfigsBuilder
 
 
 def generate_test_description():
+    """Start move_group with Pilz sequence capabilities and run the error-code gtest."""
     moveit_config = (
         MoveItConfigsBuilder("moveit_resources_panda")
         .robot_description(
@@ -140,7 +143,10 @@ def generate_test_description():
 
 
 class TestGTestWaitForCompletion(unittest.TestCase):
+    """Wait for the gtest process to finish."""
+
     def test_gtest_run_complete(self, move_group_error_codes_gtest):
+        """Block until move_group_error_codes_test exits."""
         self.proc_info.assertWaitForShutdown(
             move_group_error_codes_gtest, timeout=4000.0
         )
@@ -148,7 +154,10 @@ class TestGTestWaitForCompletion(unittest.TestCase):
 
 @launch_testing.post_shutdown_test()
 class TestGTestProcessPostShutdown(unittest.TestCase):
+    """Check gtest exit status after launch shutdown."""
+
     def test_gtest_pass(self, proc_info, move_group_error_codes_gtest):
+        """Assert the gtest process exited with a success code."""
         launch_testing.asserts.assertExitCodes(
             proc_info, process=move_group_error_codes_gtest
         )

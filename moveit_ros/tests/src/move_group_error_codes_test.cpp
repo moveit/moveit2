@@ -1,7 +1,7 @@
 /*********************************************************************
  * Software License Agreement (BSD License)
  *
- *  Copyright (c) 2026
+ *  Copyright (c) 2026, MoveIt Contributors
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+/* Description: Integration tests for MoveItErrorCodes on move_group actions */
+
 #include <chrono>
 #include <memory>
 
@@ -52,7 +54,10 @@ namespace
 constexpr const char* kPandaArmGroup = "panda_arm";
 constexpr const char* kPandaEeLink = "panda_link8";
 constexpr const char* kPandaBaseFrame = "panda_link0";
+constexpr auto kActionServerWait = 30s;
+constexpr auto kActionCallWait = 30s;
 
+/** Cartesian goal outside the Panda workspace (expects NO_IK_SOLUTION). */
 geometry_msgs::msg::PoseStamped unreachableCartesianGoal()
 {
   geometry_msgs::msg::PoseStamped pose;
@@ -62,6 +67,7 @@ geometry_msgs::msg::PoseStamped unreachableCartesianGoal()
   return pose;
 }
 
+/** Build a Pilz motion plan request to the unreachable goal. */
 moveit_msgs::msg::MotionPlanRequest pilzCartesianRequest(const std::string& planner_id)
 {
   moveit_msgs::msg::MotionPlanRequest request;
@@ -76,9 +82,11 @@ moveit_msgs::msg::MotionPlanRequest pilzCartesianRequest(const std::string& plan
   return request;
 }
 
+/** Connects to move_action and sequence_move_group for plan-only error checks. */
 class MoveGroupErrorCodesFixture : public ::testing::Test
 {
 protected:
+  /** Wait for both action servers before each test case. */
   void SetUp() override
   {
     node_ = rclcpp::Node::make_shared("move_group_error_codes_test");
@@ -86,68 +94,63 @@ protected:
     sequence_client_ =
         rclcpp_action::create_client<moveit_msgs::action::MoveGroupSequence>(node_, "sequence_move_group");
 
-    ASSERT_TRUE(move_group_client_->wait_for_action_server(120s)) << "move_action server not available";
-    ASSERT_TRUE(sequence_client_->wait_for_action_server(120s)) << "sequence_move_group server not available";
+    ASSERT_TRUE(move_group_client_->wait_for_action_server(kActionServerWait)) << "move_action server not available";
+    ASSERT_TRUE(sequence_client_->wait_for_action_server(kActionServerWait))
+        << "sequence_move_group server not available";
   }
 
+  /** Send a plan-only action goal and return the result error_code field. */
+  template <typename ActionT, typename ExtractCodeFn>
+  int32_t sendPlanOnly(const typename rclcpp_action::Client<ActionT>::SharedPtr& client, typename ActionT::Goal goal,
+                       const char* action_name, ExtractCodeFn extract_code)
+  {
+    goal.planning_options.plan_only = true;
+
+    auto goal_handle_future = client->async_send_goal(goal);
+    if (rclcpp::spin_until_future_complete(node_, goal_handle_future, kActionCallWait) !=
+        rclcpp::FutureReturnCode::SUCCESS)
+    {
+      ADD_FAILURE() << "Timed out sending " << action_name << " goal";
+      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
+    }
+
+    const auto goal_handle = goal_handle_future.get();
+    if (!goal_handle)
+    {
+      ADD_FAILURE() << action_name << " goal rejected";
+      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
+    }
+
+    auto result_future = client->async_get_result(goal_handle);
+    if (rclcpp::spin_until_future_complete(node_, result_future, kActionCallWait) != rclcpp::FutureReturnCode::SUCCESS)
+    {
+      ADD_FAILURE() << "Timed out waiting for " << action_name << " result";
+      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
+    }
+
+    return extract_code(result_future.get().result);
+  }
+
+  /** Plan-only /move_action; returns response error_code.val. */
   int32_t sendMoveGroupPlanOnly(const moveit_msgs::msg::MotionPlanRequest& motion_request)
   {
     moveit_msgs::action::MoveGroup::Goal goal;
     goal.request = motion_request;
-    goal.planning_options.plan_only = true;
-
-    auto goal_handle_future = move_group_client_->async_send_goal(goal);
-    if (rclcpp::spin_until_future_complete(node_, goal_handle_future, 120s) != rclcpp::FutureReturnCode::SUCCESS)
-    {
-      ADD_FAILURE() << "Timed out sending move_action goal";
-      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
-    }
-
-    const auto goal_handle = goal_handle_future.get();
-    if (!goal_handle)
-    {
-      ADD_FAILURE() << "move_action goal rejected";
-      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
-    }
-
-    auto result_future = move_group_client_->async_get_result(goal_handle);
-    if (rclcpp::spin_until_future_complete(node_, result_future, 120s) != rclcpp::FutureReturnCode::SUCCESS)
-    {
-      ADD_FAILURE() << "Timed out waiting for move_action result";
-      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
-    }
-
-    return result_future.get().result->error_code.val;
+    return sendPlanOnly<moveit_msgs::action::MoveGroup>(
+        move_group_client_, goal, "move_action",
+        [](const moveit_msgs::action::MoveGroup::Result::SharedPtr& result) { return result->error_code.val; });
   }
 
+  /** Plan-only /sequence_move_group; returns response.error_code.val. */
   int32_t sendSequencePlanOnly(const moveit_msgs::msg::MotionSequenceRequest& sequence_request)
   {
     moveit_msgs::action::MoveGroupSequence::Goal goal;
     goal.request = sequence_request;
-    goal.planning_options.plan_only = true;
-
-    auto goal_handle_future = sequence_client_->async_send_goal(goal);
-    if (rclcpp::spin_until_future_complete(node_, goal_handle_future, 120s) != rclcpp::FutureReturnCode::SUCCESS)
-    {
-      ADD_FAILURE() << "Timed out sending sequence_move_group goal";
-      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
-    }
-
-    const auto goal_handle = goal_handle_future.get();
-    if (!goal_handle)
-    {
-      ADD_FAILURE() << "sequence_move_group goal rejected";
-      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
-    }
-
-    auto result_future = sequence_client_->async_get_result(goal_handle);
-    if (rclcpp::spin_until_future_complete(node_, result_future, 120s) != rclcpp::FutureReturnCode::SUCCESS)
-    {
-      ADD_FAILURE() << "Timed out waiting for sequence_move_group result";
-      return moveit_msgs::msg::MoveItErrorCodes::UNDEFINED;
-    }
-
-    return result_future.get().result->response.error_code.val;
+    return sendPlanOnly<moveit_msgs::action::MoveGroupSequence>(
+        sequence_client_, goal, "sequence_move_group",
+        [](const moveit_msgs::action::MoveGroupSequence::Result::SharedPtr& result) {
+          return result->response.error_code.val;
+        });
   }
 
   rclcpp::Node::SharedPtr node_;
@@ -155,12 +158,14 @@ protected:
   rclcpp_action::Client<moveit_msgs::action::MoveGroupSequence>::SharedPtr sequence_client_;
 };
 
+/** Pilz PTP via /move_action should surface NO_IK_SOLUTION, not FAILURE. */
 TEST_F(MoveGroupErrorCodesFixture, PilzMoveActionPreservesNoIkSolution)
 {
   const int32_t error_code = sendMoveGroupPlanOnly(pilzCartesianRequest("PTP"));
   EXPECT_EQ(error_code, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 }
 
+/** Pilz LIN via /sequence_move_group should surface NO_IK_SOLUTION. */
 TEST_F(MoveGroupErrorCodesFixture, PilzSequencePreservesNoIkSolution)
 {
   moveit_msgs::msg::MotionSequenceItem item;
@@ -174,6 +179,7 @@ TEST_F(MoveGroupErrorCodesFixture, PilzSequencePreservesNoIkSolution)
   EXPECT_EQ(error_code, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
 }
 
+/** OMPL with an invalid group should return INVALID_GROUP_NAME. */
 TEST_F(MoveGroupErrorCodesFixture, OmplMoveActionPreservesInvalidGroupName)
 {
   moveit_msgs::msg::MotionPlanRequest request;
@@ -188,6 +194,7 @@ TEST_F(MoveGroupErrorCodesFixture, OmplMoveActionPreservesInvalidGroupName)
 
 }  // namespace
 
+/** Run gtest with rclcpp init/shutdown. */
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);

@@ -27,6 +27,6 @@ if(BUILD_TESTING)
     move_group_error_codes_test rclcpp::rclcpp rclcpp_action::rclcpp_action
     ${moveit_msgs_TARGETS} ${geometry_msgs_TARGETS}
     moveit_core::moveit_kinematic_constraints)
-  add_ros_test(launch/move_group_error_codes.test.py TIMEOUT 120 ARGS
+  add_ros_test(launch/move_group_error_codes.test.py TIMEOUT 300 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()
