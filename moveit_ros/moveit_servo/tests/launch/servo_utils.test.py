@@ -1,5 +1,6 @@
 import os
 import launch
+from launch.event_handlers import OnProcessExit
 import unittest
 import launch_ros
 import launch_testing
@@ -110,7 +111,15 @@ def generate_test_description():
             joint_state_broadcaster_spawner,
             panda_arm_controller_spawner,
             test_container,
-            launch.actions.TimerAction(period=2.0, actions=[servo_gtest]),
+            # Gate the gtest launch on the last spawner exiting (== controller
+            # activated). The prior fixed TimerAction raced controller
+            # activation under load and caused this family to flake.
+            launch.actions.RegisterEventHandler(
+                OnProcessExit(
+                    target_action=panda_arm_controller_spawner,
+                    on_exit=[servo_gtest],
+                )
+            ),
             launch_testing.actions.ReadyToTest(),
         ]
     ), {
