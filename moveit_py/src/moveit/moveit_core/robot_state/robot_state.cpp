@@ -314,7 +314,7 @@ void initRobotState(py::module& m)
                     str: represents the state tree of the robot state.
                     )")
 
-      .def_property_readonly_static(
+      .def_property_readonly(
           "state_info",
           [](const moveit::core::RobotState& s) {
             std::stringstream ss;
