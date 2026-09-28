@@ -54,6 +54,7 @@
 #include <moveit/planning_scene_monitor/current_state_monitor.hpp>
 #include <moveit/collision_plugin_loader/collision_plugin_loader.hpp>
 #include <moveit_msgs/srv/get_planning_scene.hpp>
+#include <atomic>
 #include <memory>
 #include <thread>
 #include <shared_mutex>
@@ -508,6 +509,8 @@ protected:
   // variables for planning scene publishing
   rclcpp::Publisher<moveit_msgs::msg::PlanningScene>::SharedPtr planning_scene_publisher_;
   std::unique_ptr<std::thread> publish_planning_scene_;
+  /// Signals scenePublishingThread() to exit; only written while holding scene_update_mutex_
+  std::atomic<bool> stop_publishing_planning_scene_{ false };
   double publish_planning_scene_frequency_;
   SceneUpdateType publish_update_types_;
   std::atomic<SceneUpdateType> new_scene_update_;

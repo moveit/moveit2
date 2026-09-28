@@ -428,6 +428,12 @@ void PlanningSceneMonitor::stopPublishingPlanningScene()
   {
     std::unique_ptr<std::thread> copy;
     copy.swap(publish_planning_scene_);
+    {
+      // Set the flag while holding the mutex the publishing thread waits on. Otherwise the notification can be
+      // lost between the thread checking its wait condition and blocking, which leaves join() hanging forever.
+      std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
+      stop_publishing_planning_scene_ = true;
+    }
     new_scene_update_condition_.notify_all();
     copy->join();
     monitorDiffs(false);
@@ -452,6 +458,7 @@ void PlanningSceneMonitor::startPublishingPlanningScene(SceneUpdateType update_t
     planning_scene_publisher_ = pnode_->create_publisher<moveit_msgs::msg::PlanningScene>(planning_scene_topic, 100);
     RCLCPP_INFO(logger_, "Publishing maintained planning scene on '%s'", planning_scene_topic.c_str());
     monitorDiffs(true);
+    stop_publishing_planning_scene_ = false;
     publish_planning_scene_ = std::make_unique<std::thread>([this] { scenePublishingThread(); });
   }
   else
@@ -485,7 +492,7 @@ void PlanningSceneMonitor::scenePublishingThread()
     rclcpp::WallRate rate(publish_planning_scene_frequency_);
     {
       std::unique_lock<std::shared_mutex> ulock(scene_update_mutex_);
-      while (new_scene_update_ == UPDATE_NONE && publish_planning_scene_)
+      while (new_scene_update_ == UPDATE_NONE && !stop_publishing_planning_scene_)
         new_scene_update_condition_.wait(ulock);
       if (new_scene_update_ != UPDATE_NONE)
       {
@@ -551,7 +558,7 @@ void PlanningSceneMonitor::scenePublishingThread()
         break;
       rate.sleep();
     }
-  } while (publish_planning_scene_);
+  } while (!stop_publishing_planning_scene_);
 }
 
 void PlanningSceneMonitor::getMonitoredTopics(std::vector<std::string>& topics) const
