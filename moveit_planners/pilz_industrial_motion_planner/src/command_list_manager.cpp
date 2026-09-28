@@ -43,6 +43,7 @@
 #include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <moveit/utils/logger.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 
 #include <pilz_industrial_motion_planner/cartesian_limits_parameters.hpp>
 #include <pilz_industrial_motion_planner/joint_limits_aggregator.hpp>
@@ -249,8 +250,13 @@ CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstP
     planning_interface::MotionPlanResponse res;
     if (!planning_pipeline->generatePlan(planning_scene, req, res))
     {
-      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed.");
-      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      if (res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS ||
+          res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNDEFINED)
+      {
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      }
+      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed: %s",
+                   moveit::core::errorCodeToString(res.error_code).c_str());
     }
     if (res.error_code.val != res.error_code.SUCCESS)
     {

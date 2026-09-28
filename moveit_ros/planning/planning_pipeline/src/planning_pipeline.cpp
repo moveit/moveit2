@@ -309,7 +309,11 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
         RCLCPP_ERROR(node_->get_logger(),
                      "Failed to create PlanningContext for planner '%s'. Aborting planning pipeline.",
                      planner->getDescription().c_str());
-        res.error_code = moveit::core::MoveItErrorCode::PLANNING_FAILED;
+        if (res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS ||
+            res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNDEFINED)
+        {
+          res.error_code = moveit::core::MoveItErrorCode::PLANNING_FAILED;
+        }
         active_ = false;
         return false;
       }
