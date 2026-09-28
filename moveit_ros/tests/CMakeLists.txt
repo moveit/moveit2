@@ -12,7 +12,7 @@ if(BUILD_TESTING)
   find_package(rclcpp_action REQUIRED)
   find_package(moveit_msgs REQUIRED)
   find_package(geometry_msgs REQUIRED)
-  find_package(moveit_kinematic_constraints REQUIRED)
+  find_package(moveit_core REQUIRED)
   find_package(ros_testing REQUIRED)
 
   include_directories(include)
@@ -23,9 +23,10 @@ if(BUILD_TESTING)
 
   ament_add_gtest_executable(move_group_error_codes_test
                              src/move_group_error_codes_test.cpp)
-  ament_target_dependencies(
-    move_group_error_codes_test rclcpp rclcpp_action moveit_msgs geometry_msgs
-                                moveit_kinematic_constraints)
+  ament_target_dependencies(move_group_error_codes_test rclcpp rclcpp_action
+                            moveit_msgs geometry_msgs)
+  target_link_libraries(move_group_error_codes_test
+                        moveit_core::moveit_kinematic_constraints)
   add_ros_test(launch/move_group_error_codes.test.py TIMEOUT 120 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()

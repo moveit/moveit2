@@ -36,7 +36,6 @@
   <test_depend>rclcpp_action</test_depend>
   <test_depend>moveit_msgs</test_depend>
   <test_depend>geometry_msgs</test_depend>
-  <test_depend>moveit_kinematic_constraints</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
