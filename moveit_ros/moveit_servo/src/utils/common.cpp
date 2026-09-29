@@ -57,31 +57,46 @@ namespace moveit_servo
 std::optional<std::string> getIKSolverBaseFrame(const moveit::core::RobotStatePtr& robot_state,
                                                 const std::string& group_name)
 {
-  const auto ik_solver = robot_state->getJointModelGroup(group_name)->getSolverInstance();
+  const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(group_name);
+  const auto ik_solver = joint_model_group->getSolverInstance();
 
   if (ik_solver)
   {
     return ik_solver->getBaseFrame();
   }
-  else
+
+  // No IK solver is configured for this group. jointDeltaFromIK() falls back to a direct Jacobian in that case,
+  // and RobotState::getJacobian() only supports groups that form a kinematic chain. For a chain, the base frame
+  // is unambiguous: the parent link of the group's first joint (matching the root link used internally by
+  // getJacobian()). Non-chain (e.g. branched) groups have no single base frame, so fail rather than guess.
+  if (!joint_model_group->isChain() || joint_model_group->getJointModels().empty())
   {
     return std::nullopt;
   }
+
+  const moveit::core::LinkModel* base_link = joint_model_group->getJointModels().front()->getParentLinkModel();
+  return base_link ? base_link->getName() : robot_state->getRobotModel()->getModelFrame();
 }
 
 std::optional<std::string> getIKSolverTipFrame(const moveit::core::RobotStatePtr& robot_state,
                                                const std::string& group_name)
 {
-  const auto ik_solver = robot_state->getJointModelGroup(group_name)->getSolverInstance();
+  const moveit::core::JointModelGroup* joint_model_group = robot_state->getJointModelGroup(group_name);
+  const auto ik_solver = joint_model_group->getSolverInstance();
 
   if (ik_solver)
   {
     return ik_solver->getTipFrame();
   }
-  else
+
+  // See getIKSolverBaseFrame() for why the fallback only applies to chains. The tip is the chain's last link,
+  // matching the tip link used internally by RobotState::getJacobian().
+  if (!joint_model_group->isChain() || joint_model_group->getLinkModels().empty())
   {
     return std::nullopt;
   }
+
+  return joint_model_group->getLinkModels().back()->getName();
 }
 
 bool isValidCommand(const Eigen::VectorXd& command)

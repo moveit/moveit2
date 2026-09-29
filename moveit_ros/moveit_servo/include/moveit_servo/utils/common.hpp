@@ -58,19 +58,28 @@ namespace moveit_servo
 constexpr int MIN_POINTS_FOR_TRAJ_MSG = 3;
 
 /**
- * \brief Get the base frame of the current active joint group or subgroup's IK solver.
+ * \brief Get the base frame to plan in for the current active joint group or subgroup.
+ * If an IK solver is configured, this is the IK solver's base frame. Otherwise, jointDeltaFromIK() falls back to
+ * a direct Jacobian, which only supports groups that form a kinematic chain; in that case this returns the chain's
+ * root link (the parent link of the group's first joint), matching the base link used internally by
+ * RobotState::getJacobian(). For non-chain (e.g. branched) groups without an IK solver there is no unambiguous
+ * base frame, so std::nullopt is returned.
  * @param robot_state A pointer to the current robot state.
  * @param group_name The currently active joint group name.
- * @return The IK solver base frame, if one exists, otherwise std::nullopt.
+ * @return The base frame, if one can be unambiguously determined, otherwise std::nullopt.
  */
 std::optional<std::string> getIKSolverBaseFrame(const moveit::core::RobotStatePtr& robot_state,
                                                 const std::string& group_name);
 
 /**
- * \brief Get the tip (end-effector) frame of the current active joint group or subgroup's IK solver.
+ * \brief Get the tip (end-effector) frame to plan in for the current active joint group or subgroup.
+ * If an IK solver is configured, this is the IK solver's tip frame. Otherwise, jointDeltaFromIK() falls back to
+ * a direct Jacobian, which only supports groups that form a kinematic chain; in that case this returns the
+ * chain's last link, matching the tip link used internally by RobotState::getJacobian(). For non-chain (e.g.
+ * branched) groups without an IK solver there is no unambiguous tip frame, so std::nullopt is returned.
  * @param robot_state A pointer to the current robot state.
  * @param group_name The currently active joint group name.
- * @return The IK solver tip frame, if one exists, otherwise std::nullopt.
+ * @return The tip frame, if one can be unambiguously determined, otherwise std::nullopt.
  */
 std::optional<std::string> getIKSolverTipFrame(const moveit::core::RobotStatePtr& robot_state,
                                                const std::string& group_name);
