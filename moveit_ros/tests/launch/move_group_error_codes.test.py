@@ -5,6 +5,8 @@ import launch
 import unittest
 import launch_ros
 import launch_testing
+from launch.actions import RegisterEventHandler, TimerAction
+from launch.event_handlers import OnProcessExit
 from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
 
@@ -134,7 +136,14 @@ def generate_test_description():
             joint_state_broadcaster_spawner,
             panda_arm_controller_spawner,
             panda_hand_controller_spawner,
-            move_group_error_codes_gtest,
+            RegisterEventHandler(
+                OnProcessExit(
+                    target_action=joint_state_broadcaster_spawner,
+                    on_exit=[
+                        TimerAction(period=5.0, actions=[move_group_error_codes_gtest]),
+                    ],
+                )
+            ),
             launch_testing.actions.ReadyToTest(),
         ]
     ), {

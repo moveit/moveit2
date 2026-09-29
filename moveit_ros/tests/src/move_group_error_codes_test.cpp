@@ -44,8 +44,10 @@
 #include <moveit_msgs/msg/motion_sequence_item.hpp>
 #include <moveit_msgs/msg/motion_sequence_request.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 
 using namespace std::chrono_literals;
 
@@ -97,7 +99,28 @@ protected:
     ASSERT_TRUE(move_group_client_->wait_for_action_server(kActionServerWait)) << "move_action server not available";
     ASSERT_TRUE(sequence_client_->wait_for_action_server(kActionServerWait))
         << "sequence_move_group server not available";
+
+    auto joint_state_sub = node_->create_subscription<sensor_msgs::msg::JointState>(
+        "/joint_states", rclcpp::SensorDataQoS(),
+        [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) {
+          if (!msg->position.empty())
+          {
+            received_joint_state_ = true;
+          }
+        });
+
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(node_);
+    const rclcpp::Time deadline = node_->get_clock()->now() + kActionServerWait;
+    while (rclcpp::ok() && !received_joint_state_ && node_->get_clock()->now() < deadline)
+    {
+      executor.spin_some(100ms);
+    }
+    ASSERT_TRUE(received_joint_state_) << "Timed out waiting for /joint_states";
+    (void)joint_state_sub;
   }
+
+  bool received_joint_state_{ false };
 
   /** Send a plan-only action goal and return the result error_code field. */
   template <typename ActionT, typename ExtractCodeFn>

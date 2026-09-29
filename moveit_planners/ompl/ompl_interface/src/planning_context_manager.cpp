@@ -522,6 +522,7 @@ ModelBasedPlanningContextPtr PlanningContextManager::getPlanningContext(
     if (pc == planner_configs_.end())
     {
       RCLCPP_ERROR(getLogger(), "Cannot find planning configuration for group '%s'", req.group_name.c_str());
+      error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
       return ModelBasedPlanningContextPtr();
     }
   }
