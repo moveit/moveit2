@@ -119,6 +119,9 @@ public:
   void clearJobs();
 
   const std::string getMoveGroupNS() const;
+  /// Return the robot description name resolved against the Move Group namespace.
+  /// Absolute names are returned unchanged.
+  const std::string getRobotDescription() const;
   const moveit::core::RobotModelConstPtr& getRobotModel() const;
 
   /// wait for robot state more recent than t
