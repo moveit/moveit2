@@ -322,6 +322,73 @@ TEST_F(CollisionDetectionEnvTest, DISABLED_ContinuousCollisionWorld)
   res.clear();
 }
 
+namespace
+{
+/** \brief Test-only subclass exposing CollisionEnvFCL's protected fcl_objs_ cache, so a test can
+ *  check that the World::Object pointer cached inside a collision geometry stays in sync with the
+ *  live World after the object is moved. */
+class TestableCollisionEnvFCL : public collision_detection::CollisionEnvFCL
+{
+public:
+  using CollisionEnvFCL::CollisionEnvFCL;
+
+  const void* getCachedWorldObjectPtr(const std::string& id) const
+  {
+    const auto it = fcl_objs_.find(id);
+    if (it == fcl_objs_.end() || it->second.collision_geometry_.empty())
+      return nullptr;
+    return it->second.collision_geometry_.front()->collision_geometry_data_->ptr.raw;
+  }
+};
+}  // namespace
+
+/** \brief Regression test for a use-after-free in CollisionEnvFCL::notifyObjectChange().
+ *
+ *  World::ensureUnique() copy-on-write clones a World::Object whenever it is modified while an
+ *  external shared_ptr to it is still alive (e.g. RViz's MotionPlanningDisplay briefly holding a
+ *  reference while it live-checks collisions for the interactive goal state). The MOVE_SHAPE fast
+ *  path in notifyObjectChange() updated the FCL collision object's transform in place but never
+ *  refreshed CollisionGeometryData::ptr.obj, so once the pre-move Object was destroyed, the
+ *  collision environment was left holding a dangling pointer. Reading it back out (e.g. via
+ *  getID(), called from AllowedCollisionMatrix::getEntry() during a collision check) is a
+ *  use-after-free, which is what crashed RViz. */
+TEST_F(CollisionDetectionEnvTest, MovedWorldObjectKeepsValidGeometryPointer)
+{
+  auto testable_env = std::make_shared<TestableCollisionEnvFCL>(robot_model_);
+
+  shapes::Shape* shape = new shapes::Box(.1, .1, .1);
+  shapes::ShapeConstPtr shape_ptr(shape);
+
+  Eigen::Isometry3d pos = Eigen::Isometry3d::Identity();
+  pos.translation().z() = 0.3;
+  testable_env->getWorld()->addToObject("box", shape_ptr, pos);
+
+  {
+    // Hold an extra reference to the current Object so the upcoming move is forced through
+    // World::ensureUnique()'s copy-on-write path, mirroring how RViz can end up holding a
+    // reference while a move happens.
+    const collision_detection::World::ObjectConstPtr held = testable_env->getWorld()->getObject("box");
+    ASSERT_TRUE(held);
+
+    pos.translation().z() = 0.32;
+    testable_env->getWorld()->moveObject("box", pos);
+    // `held` is released at the end of this scope, dropping the last external reference to the
+    // pre-move Object. Pre-fix, the cache checked below still points at that now-freed memory.
+  }
+
+  const void* cached_ptr = testable_env->getCachedWorldObjectPtr("box");
+  const void* current_ptr = testable_env->getWorld()->getObject("box").get();
+  EXPECT_EQ(cached_ptr, current_ptr)
+      << "CollisionGeometryData still references a stale World::Object after a copy-on-write move";
+
+  // Pre-fix, this dereferences the dangling pointer while reading the collision object's name -
+  // reproducing the RViz crash reported inside AllowedCollisionMatrix::getEntry().
+  collision_detection::CollisionRequest req;
+  collision_detection::CollisionResult res;
+  testable_env->checkRobotCollision(req, res, *robot_state_, *acm_);
+  EXPECT_TRUE(res.collision);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
