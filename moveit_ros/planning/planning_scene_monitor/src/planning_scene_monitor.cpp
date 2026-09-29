@@ -505,6 +505,8 @@ void PlanningSceneMonitor::scenePublishingThread()
             {
               msg.robot_state.attached_collision_objects.clear();
               msg.robot_state.is_diff = true;
+              msg.link_padding.clear();
+              msg.link_scale.clear();
             }
           }
           std::scoped_lock prevent_shape_cache_updates(shape_handles_lock_);  // we don't want the
