@@ -214,6 +214,48 @@ public:
     }
   }
 
+  void testUnknownJointConstraints(const std::vector<double>& start, const std::vector<double>& goal)
+  {
+    SCOPED_TRACE("testUnknownJointConstraints");
+
+    planning_interface::PlannerConfigurationSettings pconfig_settings;
+    pconfig_settings.group = group_name_;
+    pconfig_settings.name = group_name_;
+    pconfig_settings.config = { { "enforce_joint_model_state_space", "0" } };
+
+    planning_interface::PlannerConfigurationMap pconfig_map{ { pconfig_settings.name, pconfig_settings } };
+    ompl_interface::PlanningContextManager pcm(robot_model_, constraint_sampler_manager_);
+    pcm.setPlannerConfigurations(pconfig_map);
+
+    planning_interface::MotionPlanRequest path_request = createRequest(start, goal);
+    moveit_msgs::msg::JointConstraint unknown_path_constraint;
+    unknown_path_constraint.joint_name = "joint_that_does_not_exist";
+    unknown_path_constraint.position = 0.0;
+    unknown_path_constraint.tolerance_above = 0.05;
+    unknown_path_constraint.tolerance_below = 0.05;
+    unknown_path_constraint.weight = 1.0;
+    path_request.path_constraints.joint_constraints.push_back(unknown_path_constraint);
+
+    moveit_msgs::msg::MoveItErrorCodes path_error;
+    auto path_context = pcm.getPlanningContext(planning_scene_, path_request, path_error, node_, false);
+    EXPECT_EQ(path_context, nullptr);
+    EXPECT_EQ(path_error.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+
+    planning_interface::MotionPlanRequest goal_request = createRequest(start, goal);
+    moveit_msgs::msg::JointConstraint unknown_goal_constraint;
+    unknown_goal_constraint.joint_name = "joint_that_does_not_exist";
+    unknown_goal_constraint.position = 0.0;
+    unknown_goal_constraint.tolerance_above = 0.05;
+    unknown_goal_constraint.tolerance_below = 0.05;
+    unknown_goal_constraint.weight = 1.0;
+    goal_request.goal_constraints.front().joint_constraints.push_back(unknown_goal_constraint);
+
+    moveit_msgs::msg::MoveItErrorCodes goal_error;
+    auto goal_context = pcm.getPlanningContext(planning_scene_, goal_request, goal_error, node_, false);
+    EXPECT_EQ(goal_context, nullptr);
+    EXPECT_EQ(goal_error.val, moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  }
+
 protected:
   void SetUp() override
   {
@@ -322,6 +364,12 @@ TEST_F(PandaTestPlanningContext, testSimpleRequest)
   // use the panda "ready" state from the srdf config as start state
   // we know this state should be within limits and self-collision free
   testSimpleRequest({ 0., -0.785, 0., -2.356, 0, 1.571, 0.785 }, { 0., -0.785, 0., -2.356, 0, 1.571, 0.685 });
+}
+
+TEST_F(PandaTestPlanningContext, testUnknownJointConstraints)
+{
+  testUnknownJointConstraints({ 0., -0.785, 0., -2.356, 0, 1.571, 0.785 },
+                              { 0., -0.785, 0., -2.356, 0, 1.571, 0.685 });
 }
 
 // TODO(seng): This test is temporarily disabled as it is flaky since #1300. Re-enable when #2015 is resolved.

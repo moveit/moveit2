@@ -39,6 +39,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <moveit/ompl_interface/model_based_planning_context.hpp>
 #include <moveit/ompl_interface/detail/state_validity_checker.hpp>
@@ -76,6 +77,24 @@ namespace
 rclcpp::Logger getLogger()
 {
   return moveit::getLogger("moveit.planners.ompl.model_based_planning_context");
+}
+
+const moveit_msgs::msg::JointConstraint* findUnknownJointConstraint(
+    const moveit_msgs::msg::Constraints& constraints, const moveit::core::RobotModelConstPtr& robot_model)
+{
+  const auto& variable_names = robot_model->getVariableNames();
+  for (const auto& joint_constraint : constraints.joint_constraints)
+  {
+    const bool known_joint = robot_model->hasJointModel(joint_constraint.joint_name);
+    const bool known_variable =
+        std::find(variable_names.begin(), variable_names.end(), joint_constraint.joint_name) != variable_names.end();
+    if (!known_joint && !known_variable)
+    {
+      return &joint_constraint;
+    }
+  }
+
+  return nullptr;
 }
 }  // namespace
 
@@ -652,8 +671,21 @@ void ModelBasedPlanningContext::clear()
 }
 
 bool ModelBasedPlanningContext::setPathConstraints(const moveit_msgs::msg::Constraints& path_constraints,
-                                                   moveit_msgs::msg::MoveItErrorCodes* /*error*/)
+                                                   moveit_msgs::msg::MoveItErrorCodes* error)
 {
+  if (const auto* unknown_constraint = findUnknownJointConstraint(path_constraints, getRobotModel()))
+  {
+    RCLCPP_WARN(getLogger(), "%s: Joint '%s' in path constraints is not known to the robot model.", name_.c_str(),
+                unknown_constraint->joint_name.c_str());
+    if (error)
+    {
+      error->val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+    }
+    path_constraints_.reset();
+    path_constraints_msg_ = moveit_msgs::msg::Constraints();
+    return false;
+  }
+
   // ******************* set the path constraints to use
   path_constraints_ = std::make_shared<kinematic_constraints::KinematicConstraintSet>(getRobotModel());
   path_constraints_->add(path_constraints, getPlanningScene()->getTransforms());
@@ -668,8 +700,31 @@ bool ModelBasedPlanningContext::setGoalConstraints(const std::vector<moveit_msgs
 {
   // ******************* check if the input is correct
   goal_constraints_.clear();
+
+  if (const auto* unknown_constraint = findUnknownJointConstraint(path_constraints, getRobotModel()))
+  {
+    RCLCPP_WARN(getLogger(), "%s: Joint '%s' in path constraints is not known to the robot model.", name_.c_str(),
+                unknown_constraint->joint_name.c_str());
+    if (error)
+    {
+      error->val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+    }
+    return false;
+  }
+
   for (const moveit_msgs::msg::Constraints& goal_constraint : goal_constraints)
   {
+    if (const auto* unknown_constraint = findUnknownJointConstraint(goal_constraint, getRobotModel()))
+    {
+      RCLCPP_WARN(getLogger(), "%s: Joint '%s' in goal constraints is not known to the robot model.", name_.c_str(),
+                  unknown_constraint->joint_name.c_str());
+      if (error)
+      {
+        error->val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
+      }
+      return false;
+    }
+
     moveit_msgs::msg::Constraints constr = kinematic_constraints::mergeConstraints(goal_constraint, path_constraints);
     kinematic_constraints::KinematicConstraintSetPtr kset(
         new kinematic_constraints::KinematicConstraintSet(getRobotModel()));
