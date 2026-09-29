@@ -1,4 +1,5 @@
 set(HEADERS
+    include/moveit/motion_planning_rviz_plugin/execution_job.hpp
     include/moveit/motion_planning_rviz_plugin/motion_planning_display.hpp
     include/moveit/motion_planning_rviz_plugin/motion_planning_frame.hpp
     include/moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.hpp
@@ -55,5 +56,12 @@ target_link_libraries(
   rviz_ogre_vendor::OgreOverlay)
 target_include_directories(moveit_motion_planning_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_execution_job test/execution_job_test.cpp)
+  target_include_directories(test_execution_job
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_visualization)
