@@ -40,6 +40,7 @@
 #include <moveit/planning_pipeline/planning_pipeline.hpp>
 #include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 
 namespace move_group
 {
@@ -91,8 +92,13 @@ bool MoveGroupPlanService::computePlanService(const std::shared_ptr<rmw_request_
     planning_interface::MotionPlanResponse mp_res;
     if (!planning_pipeline->generatePlan(ps, req->motion_plan_request, mp_res, context_->debug_))
     {
-      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed.");
-      mp_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      if (mp_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS ||
+          mp_res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNDEFINED)
+      {
+        mp_res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      }
+      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed: %s",
+                   moveit::core::errorCodeToString(mp_res.error_code).c_str());
     }
     mp_res.getMessage(res->motion_plan_response);
   }
