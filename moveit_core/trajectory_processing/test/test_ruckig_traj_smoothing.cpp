@@ -167,6 +167,138 @@ TEST_F(RuckigTests, single_waypoint)
   }
 }
 
+TEST(RuckigTestsPrismatic, prismatic_joint_defaults)
+{
+  moveit::core::RobotModelBuilder builder("prismatic_bot", "base_link");
+  builder.addChain("base_link->link1", "prismatic", {}, { 1.0, 0.0, 0.0 });
+  builder.addGroup({ "base_link", "link1" }, { "base_link-link1-joint" }, "prismatic_group");
+  moveit::core::RobotModelPtr robot_model = builder.build();
+  ASSERT_TRUE(robot_model != nullptr);
+
+  // Set up trajectory with 2 waypoints
+  auto trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, "prismatic_group");
+
+  moveit::core::RobotState robot_state(robot_model);
+  robot_state.setToDefaultValues();
+  robot_state.setVariablePosition("base_link-link1-joint", 0.0);
+  robot_state.update();
+  trajectory->addSuffixWayPoint(robot_state, 0.0);
+
+  robot_state.setVariablePosition("base_link-link1-joint", 1.5);
+  robot_state.update();
+  trajectory->addSuffixWayPoint(robot_state, 2.0);
+
+  trajectory_processing::RuckigSmoothing smoother;
+  EXPECT_TRUE(
+      smoother.applySmoothing(*trajectory, 1.0 /* max vel scaling factor */, 1.0 /* max accel scaling factor */));
+
+  // The distance is 1.5 meters.
+  // The default maximum velocity for a prismatic joint is 0.5 m/s.
+  // The default maximum acceleration is 1.0 m/s^2.
+  // Using Ruckig, the total duration T must satisfy the velocity constraint:
+  // T >= distance / max_velocity = 1.5 / 0.5 = 3.0 seconds.
+  double duration = trajectory->getWayPointDurationFromStart(trajectory->getWayPointCount() - 1);
+  EXPECT_GE(duration, 3.0);
+}
+
+TEST(RuckigTestsPrismatic, multi_joint_indexing)
+{
+  moveit::core::RobotModelBuilder builder("multi_joint_bot", "base_link");
+  builder.addChain("base_link->link1", "revolute", {}, { 0.0, 0.0, 1.0 });
+  builder.addChain("link1->link2", "prismatic", {}, { 1.0, 0.0, 0.0 });
+  builder.addChain("link2->link3", "revolute", {}, { 0.0, 0.0, 1.0 });
+  builder.addGroup({ "base_link", "link1", "link2", "link3" },
+                   { "base_link-link1-joint", "link1-link2-joint", "link2-link3-joint" }, "multi_group");
+  moveit::core::RobotModelPtr robot_model = builder.build();
+  ASSERT_TRUE(robot_model != nullptr);
+
+  trajectory_processing::RuckigSmoothing smoother;
+
+  // Test 1: Only Joint 1 (revolute) moves. It should use the revolute default limit (5.0 rad/s), so duration should be short (< 1.0s).
+  {
+    auto trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, "multi_group");
+    moveit::core::RobotState robot_state(robot_model);
+    robot_state.setToDefaultValues();
+    robot_state.setVariablePosition("base_link-link1-joint", 0.0);
+    robot_state.setVariablePosition("link1-link2-joint", 0.0);
+    robot_state.setVariablePosition("link2-link3-joint", 0.0);
+    robot_state.update();
+    trajectory->addSuffixWayPoint(robot_state, 0.0);
+
+    robot_state.setVariablePosition("base_link-link1-joint", 1.0);
+    robot_state.update();
+    trajectory->addSuffixWayPoint(robot_state, 0.2);
+
+    EXPECT_TRUE(smoother.applySmoothing(*trajectory, 1.0, 1.0));
+    double duration = trajectory->getWayPointDurationFromStart(trajectory->getWayPointCount() - 1);
+    EXPECT_LT(duration, 1.0);
+  }
+
+  // Test 2: Only Joint 2 (prismatic) moves. It should use the prismatic default limit (0.5 m/s), so duration should be
+  // long (>= 3.0s for 1.5m).
+  {
+    auto trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, "multi_group");
+    moveit::core::RobotState robot_state(robot_model);
+    robot_state.setToDefaultValues();
+    robot_state.setVariablePosition("base_link-link1-joint", 0.0);
+    robot_state.setVariablePosition("link1-link2-joint", 0.0);
+    robot_state.setVariablePosition("link2-link3-joint", 0.0);
+    robot_state.update();
+    trajectory->addSuffixWayPoint(robot_state, 0.0);
+
+    robot_state.setVariablePosition("link1-link2-joint", 1.5);
+    robot_state.update();
+    trajectory->addSuffixWayPoint(robot_state, 2.0);
+
+    EXPECT_TRUE(smoother.applySmoothing(*trajectory, 1.0, 1.0));
+    double duration = trajectory->getWayPointDurationFromStart(trajectory->getWayPointCount() - 1);
+    EXPECT_GE(duration, 3.0);
+  }
+
+  // Test 3: Only Joint 3 (revolute) moves. It should use the revolute default limit (5.0 rad/s), so duration should be short (< 1.0s).
+  {
+    auto trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, "multi_group");
+    moveit::core::RobotState robot_state(robot_model);
+    robot_state.setToDefaultValues();
+    robot_state.setVariablePosition("base_link-link1-joint", 0.0);
+    robot_state.setVariablePosition("link1-link2-joint", 0.0);
+    robot_state.setVariablePosition("link2-link3-joint", 0.0);
+    robot_state.update();
+    trajectory->addSuffixWayPoint(robot_state, 0.0);
+
+    robot_state.setVariablePosition("link2-link3-joint", 1.0);
+    robot_state.update();
+    trajectory->addSuffixWayPoint(robot_state, 0.2);
+
+    EXPECT_TRUE(smoother.applySmoothing(*trajectory, 1.0, 1.0));
+    double duration = trajectory->getWayPointDurationFromStart(trajectory->getWayPointCount() - 1);
+    EXPECT_LT(duration, 1.0);
+  }
+
+  // Test 4: All three joints move simultaneously. The duration should be constrained by the slowest joint (Joint 2,
+  // prismatic), so duration >= 3.0s.
+  {
+    auto trajectory = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model, "multi_group");
+    moveit::core::RobotState robot_state(robot_model);
+    robot_state.setToDefaultValues();
+    robot_state.setVariablePosition("base_link-link1-joint", 0.0);
+    robot_state.setVariablePosition("link1-link2-joint", 0.0);
+    robot_state.setVariablePosition("link2-link3-joint", 0.0);
+    robot_state.update();
+    trajectory->addSuffixWayPoint(robot_state, 0.0);
+
+    robot_state.setVariablePosition("base_link-link1-joint", 1.0);
+    robot_state.setVariablePosition("link1-link2-joint", 1.5);
+    robot_state.setVariablePosition("link2-link3-joint", 1.0);
+    robot_state.update();
+    trajectory->addSuffixWayPoint(robot_state, 2.0);
+
+    EXPECT_TRUE(smoother.applySmoothing(*trajectory, 1.0, 1.0));
+    double duration = trajectory->getWayPointDurationFromStart(trajectory->getWayPointCount() - 1);
+    EXPECT_GE(duration, 3.0);
+  }
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
