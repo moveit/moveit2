@@ -39,7 +39,11 @@
 #include <moveit/move_group/move_group_capability.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <moveit_msgs/action/move_group.hpp>
+
+#include <atomic>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 namespace move_group
 {
@@ -50,6 +54,8 @@ class MoveGroupMoveAction : public MoveGroupCapability
 {
 public:
   MoveGroupMoveAction();
+
+  ~MoveGroupMoveAction() override;
 
   void initialize() override;
 
@@ -71,7 +77,19 @@ private:
   std::shared_ptr<rclcpp_action::Server<MGAction>> execute_action_server_;
 
   MoveGroupState move_state_;
-  bool preempt_requested_;
+  // Written by the cancel callback, which runs in the executor thread, and read
+  // by the goal workers. See the note about goal execution below.
+  std::atomic_bool preempt_requested_;
   std::shared_ptr<MGActionGoal> goal_;
+
+  // Goals are executed one at a time by a worker that this capability owns, so
+  // that the worker can be stopped before the capability is destroyed. A new
+  // worker joins the worker of the previous goal itself, because goal_,
+  // move_state_ and context_->plan_execution_ below serve a single goal at a
+  // time. Joining takes place in the worker and not in the acceptor, so that the
+  // executor thread stays free to serve cancellations.
+  std::mutex goal_worker_mutex_;
+  std::thread goal_worker_;
+  std::atomic_bool shutting_down_{ false };
 };
 }  // namespace move_group

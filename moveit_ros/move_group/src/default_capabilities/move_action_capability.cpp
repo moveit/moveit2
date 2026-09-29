@@ -61,6 +61,27 @@ MoveGroupMoveAction::MoveGroupMoveAction()
 {
 }
 
+MoveGroupMoveAction::~MoveGroupMoveAction()
+{
+  // A goal that is still being planned or executed keeps a pointer to this
+  // capability, so stop it and wait for its worker before the members below are
+  // destroyed. Workers that have not started yet notice shutting_down_ and
+  // return without touching anything else.
+  shutting_down_ = true;
+  preemptMoveCallback();
+
+  std::thread worker;
+  {
+    std::lock_guard<std::mutex> lock(goal_worker_mutex_);
+    worker = std::move(goal_worker_);
+  }
+
+  if (worker.joinable())
+  {
+    worker.join();
+  }
+}
+
 void MoveGroupMoveAction::initialize()
 {
   // start the move action server
@@ -77,8 +98,27 @@ void MoveGroupMoveAction::initialize()
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       [this](const std::shared_ptr<MGActionGoal>& goal) {
-        std::thread{ [this](const std::shared_ptr<move_group::MGActionGoal>& goal) { executeMoveCallback(goal); }, goal }
-            .detach();
+        // Runs in the executor thread. Hand the goal to a new worker and let that
+        // worker wait for the goal that is still being planned or executed, so
+        // that this callback does not keep the executor busy.
+        std::lock_guard<std::mutex> lock(goal_worker_mutex_);
+        std::thread previous = std::move(goal_worker_);
+
+        goal_worker_ = std::thread{ [this, previous = std::move(previous)](
+                                        const std::shared_ptr<move_group::MGActionGoal>& goal) mutable {
+                                     if (previous.joinable())
+                                     {
+                                       previous.join();
+                                     }
+
+                                     if (shutting_down_)
+                                     {
+                                       return;
+                                     }
+
+                                     executeMoveCallback(goal);
+                                   },
+                                    goal };
       });
 }
 
