@@ -208,6 +208,55 @@ TEST(ServoUtilsUnitTests, HaltForSingularityScaling)
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::HALT_FOR_SINGULARITY);
 }
 
+TEST(ServoUtilsUnitTests, SingularityScalingFewerThanSixJoints)
+{
+  // A 4-DOF arm: pan joint about z, then three pitch joints about y with
+  // vertical link offsets. Its Jacobian is 6x4, so the thin SVD has only 4
+  // singular values / U columns: indexing them with the task dimension
+  // (6) - 1 read out of bounds and computed the condition number from garbage
+  // memory, halting low-DOF robots regardless of the configured thresholds.
+  moveit::core::RobotModelBuilder builder("four_dof_bot", "base_link");
+  builder.addChain("base_link->torso", "revolute", {}, urdf::Vector3(0, 0, 1));
+  geometry_msgs::msg::Pose origin;
+  origin.orientation.w = 1.0;
+  std::vector<geometry_msgs::msg::Pose> origins(3, origin);
+  origins[0].position.z = 0.3;
+  origins[1].position.z = 0.25;
+  origins[2].position.z = 0.2;
+  builder.addChain("torso->upper_arm->lower_arm->wrist", "revolute", origins, urdf::Vector3(0, 1, 0));
+  builder.addGroupChain("base_link", "wrist", "arm");
+  ASSERT_TRUE(builder.isValid());
+  moveit::core::RobotModelPtr robot_model = builder.build();
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+  const auto joint_model_group = robot_state->getJointModelGroup("arm");
+  robot_state->setToDefaultValues();
+
+  servo::Params servo_params;
+  servo_params.move_group_name = "arm";
+  // A 6x4 Jacobian cannot span the 6D task space, so low-DOF arms have
+  // structurally large condition numbers and need thresholds sized for their
+  // geometry; this test checks indexing correctness, not threshold policy.
+  servo_params.lower_singularity_threshold = 100.0;
+  servo_params.hard_stop_singularity_threshold = 500.0;
+
+  const Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+  // Well-conditioned bent posture: condition number ~33.
+  Eigen::Vector<double, 4> bent_state{ 0.0, 0.4, -0.6, 0.4 };
+  robot_state->setJointGroupActivePositions(joint_model_group, bent_state);
+  auto scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
+  EXPECT_EQ(scaling_result.second, moveit_servo::StatusCode::NO_WARNING);
+  EXPECT_DOUBLE_EQ(scaling_result.first, 1.0);
+
+  // Nearly fully extended posture: condition number ~979, above the hard-stop
+  // threshold, so the robot must halt.
+  Eigen::Vector<double, 4> near_singular_state{ 0.0, 0.02, -0.02, 0.02 };
+  robot_state->setJointGroupActivePositions(joint_model_group, near_singular_state);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
+  EXPECT_EQ(scaling_result.second, moveit_servo::StatusCode::HALT_FOR_SINGULARITY);
+  EXPECT_DOUBLE_EQ(scaling_result.first, 0.0);
+}
+
 TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
 {
   using moveit::core::loadTestingRobotModel;
