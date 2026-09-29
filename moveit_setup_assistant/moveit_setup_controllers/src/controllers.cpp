@@ -51,6 +51,9 @@ bool Controllers::addDefaultControllers()
     return false;
   }
 
+  const std::string controller_type = getDefaultType();
+  FieldPointers additional_fields = getAdditionalControllerFields();
+
   // Loop through groups
   bool success = true;
   for (const std::string& group_name : group_names)
@@ -61,7 +64,17 @@ bool Controllers::addDefaultControllers()
     {
       continue;
     }
-    bool ret = controllers_config_->addController(group_name + "_controller", getDefaultType(), joint_names);
+
+    ControllerInfo controller;
+    controller.name_ = group_name + "_controller";
+    controller.type_ = controller_type;
+    controller.joints_ = joint_names;
+    for (const std::shared_ptr<AdditionalControllerField>& field : additional_fields)
+    {
+      controller.parameters_[field->parameter_name_] = field->getDefaultValue(controller_type);
+    }
+
+    bool ret = controllers_config_->addController(controller);
     success &= ret;
   }
 
