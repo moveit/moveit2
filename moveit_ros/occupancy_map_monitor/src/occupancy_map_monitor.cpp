@@ -112,15 +112,16 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
     // Pass a pointer to the monitor to the updater
     occupancy_map_updater->setMonitor(this);
 
-    // This part is done in the middleware handle because it needs the node
-    middleware_handle_->initializeOccupancyMapUpdater(occupancy_map_updater);
-
-    // Load the params in the updater
+    // Load parameters before initialization so updaters can use them in initialize().
     if (!occupancy_map_updater->setParams(sensor_name))
     {
       RCLCPP_ERROR_STREAM(logger_, "Failed to configure updater of type " << occupancy_map_updater->getType());
       continue;
     }
+
+    // This part is done in the middleware handle because it needs the node.
+    if (!middleware_handle_->initializeOccupancyMapUpdater(occupancy_map_updater))
+      continue;
 
     // Add the successfully initialized updater
     addUpdater(occupancy_map_updater);
