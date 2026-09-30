@@ -140,6 +140,8 @@ pluginlib_export_plugin_description_file(
 if(BUILD_TESTING)
   pluginlib_export_plugin_description_file(
     moveit_core "planning_pipeline_test_plugins_description.xml")
+  pluginlib_export_plugin_description_file(
+    moveit_core "test_trajectory_controller_manager_plugin.xml")
 endif()
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)

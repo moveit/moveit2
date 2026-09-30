@@ -834,36 +834,30 @@ bool TrajectoryExecutionManager::distributeTrajectory(const moveit_msgs::msg::Ro
         parts[i].multi_dof_joint_trajectory.points.resize(trajectory.multi_dof_joint_trajectory.points.size());
         for (std::size_t j = 0; j < trajectory.multi_dof_joint_trajectory.points.size(); ++j)
         {
-          parts[i].multi_dof_joint_trajectory.points[j].time_from_start =
-              trajectory.multi_dof_joint_trajectory.points[j].time_from_start;
-          parts[i].multi_dof_joint_trajectory.points[j].transforms.resize(bijection.size());
+          const auto& source = trajectory.multi_dof_joint_trajectory.points[j];
+          auto& target = parts[i].multi_dof_joint_trajectory.points[j];
+          target.time_from_start = source.time_from_start;
+          target.transforms.resize(bijection.size());
+          if (!source.velocities.empty())
+            target.velocities.resize(bijection.size());
+          if (!source.accelerations.empty())
+            target.accelerations.resize(bijection.size());
+
           for (std::size_t k = 0; k < bijection.size(); ++k)
           {
-            parts[i].multi_dof_joint_trajectory.points[j].transforms[k] =
-                trajectory.multi_dof_joint_trajectory.points[j].transforms[bijection[k]];
-
-            if (!trajectory.multi_dof_joint_trajectory.points[j].velocities.empty())
+            target.transforms[k] = source.transforms[bijection[k]];
+            if (!source.velocities.empty())
             {
-              parts[i].multi_dof_joint_trajectory.points[j].velocities.resize(bijection.size());
-
-              parts[i].multi_dof_joint_trajectory.points[j].velocities[0].linear.x =
-                  trajectory.multi_dof_joint_trajectory.points[j].velocities[0].linear.x * execution_velocity_scaling_;
-
-              parts[i].multi_dof_joint_trajectory.points[j].velocities[0].linear.y =
-                  trajectory.multi_dof_joint_trajectory.points[j].velocities[0].linear.y * execution_velocity_scaling_;
-
-              parts[i].multi_dof_joint_trajectory.points[j].velocities[0].linear.z =
-                  trajectory.multi_dof_joint_trajectory.points[j].velocities[0].linear.z * execution_velocity_scaling_;
-
-              parts[i].multi_dof_joint_trajectory.points[j].velocities[0].angular.x =
-                  trajectory.multi_dof_joint_trajectory.points[j].velocities[0].angular.x * execution_velocity_scaling_;
-
-              parts[i].multi_dof_joint_trajectory.points[j].velocities[0].angular.y =
-                  trajectory.multi_dof_joint_trajectory.points[j].velocities[0].angular.y * execution_velocity_scaling_;
-
-              parts[i].multi_dof_joint_trajectory.points[j].velocities[0].angular.z =
-                  trajectory.multi_dof_joint_trajectory.points[j].velocities[0].angular.z * execution_velocity_scaling_;
+              target.velocities[k] = source.velocities[bijection[k]];
+              target.velocities[k].linear.x *= execution_velocity_scaling_;
+              target.velocities[k].linear.y *= execution_velocity_scaling_;
+              target.velocities[k].linear.z *= execution_velocity_scaling_;
+              target.velocities[k].angular.x *= execution_velocity_scaling_;
+              target.velocities[k].angular.y *= execution_velocity_scaling_;
+              target.velocities[k].angular.z *= execution_velocity_scaling_;
             }
+            if (!source.accelerations.empty())
+              target.accelerations[k] = source.accelerations[bijection[k]];
           }
         }
       }
