@@ -134,9 +134,16 @@ void MoveGroupMoveAction::initialize()
           // member destructor call std::terminate, and the new worker would
           // capture a this that is being destroyed. Reject the goal instead of
           // starting a worker that cannot be joined.
-          auto result = std::make_shared<MGAction::Result>();
-          result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
-          goal->abort(result);
+          if (canPublish())
+          {
+            auto result = std::make_shared<MGAction::Result>();
+            result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+            goal->abort(result);
+          }
+          else
+          {
+            abandonGoal(goal);
+          }
           return;
         }
 
@@ -178,15 +185,24 @@ void MoveGroupMoveAction::initialize()
                                        // it waited is completed as canceled like it
                                        // would have been in executeMoveCallback, and
                                        // the rest are aborted.
-                                       auto result = std::make_shared<MGAction::Result>();
-                                       result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
-                                       if (goal->is_canceling())
+                                       if (canPublish())
                                        {
-                                         goal->canceled(result);
+                                         auto result = std::make_shared<MGAction::Result>();
+                                         result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+                                         if (goal->is_canceling())
+                                         {
+                                           goal->canceled(result);
+                                         }
+                                         else
+                                         {
+                                           goal->abort(result);
+                                         }
                                        }
                                        else
                                        {
-                                         goal->abort(result);
+                                         // The node has been shut down already, so the
+                                         // answer above cannot be published anymore.
+                                         abandonGoal(goal);
                                        }
                                        return;
                                      }
@@ -199,9 +215,16 @@ void MoveGroupMoveAction::initialize()
                                      // executeMoveCallback().
                                      if (goal->is_canceling())
                                      {
-                                       auto result = std::make_shared<MGAction::Result>();
-                                       result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
-                                       goal->canceled(result);
+                                       if (canPublish())
+                                       {
+                                         auto result = std::make_shared<MGAction::Result>();
+                                         result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+                                         goal->canceled(result);
+                                       }
+                                       else
+                                       {
+                                         abandonGoal(goal);
+                                       }
                                        releaseGoal(goal);
                                        return;
                                      }
@@ -242,7 +265,17 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   // @todo: Response messages
   RCLCPP_INFO_STREAM(getLogger(), getActionResultString(action_res->error_code, planned_trajectory_empty,
                                                         goal->get_goal()->planning_options.plan_only));
-  if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  if (!canPublish())
+  {
+    // move_group shuts the context of the node down before it destroys the
+    // capabilities, and rclcpp_action throws from the completions below once that
+    // context is invalid instead of publishing a result that cannot be sent. A
+    // worker that finishes after the shutdown has taken place would terminate the
+    // process from that exception, so the goal is left in a terminal state here
+    // instead of being answered.
+    abandonGoal(goal);
+  }
+  else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     goal->succeed(action_res);
   }
@@ -451,11 +484,36 @@ void MoveGroupMoveAction::setMoveState(MoveGroupState state, const std::shared_p
 {
   move_state_ = state;
 
-  if (goal)
+  if (goal && canPublish())
   {
     auto move_feedback = std::make_shared<MGAction::Feedback>();
     move_feedback->state = stateToStr(state);
     goal->publish_feedback(move_feedback);
+  }
+}
+
+bool MoveGroupMoveAction::canPublish()
+{
+  // Every result, status update and feedback of the action server goes through the
+  // context of the node, and rclcpp_action throws from those calls instead of
+  // dropping the message once the context has been shut down.
+  return context_->moveit_cpp_->getNode()->get_node_base_interface()->get_context()->is_valid();
+}
+
+void MoveGroupMoveAction::abandonGoal(const std::shared_ptr<MGActionGoal>& goal)
+{
+  // Move the goal to a terminal state without answering it. rclcpp_action performs
+  // the transition before it publishes the result, so the goal is completed here
+  // and the exception that follows is the publish that cannot happen anymore. An
+  // active goal would otherwise make the destructor of its handle throw from the
+  // thread that releases the last reference to it.
+  try
+  {
+    goal->abort(std::make_shared<MGAction::Result>());
+  }
+  catch (const std::exception& ex)
+  {
+    RCLCPP_DEBUG(getLogger(), "Goal left without an answer, the node has been shut down: %s", ex.what());
   }
 }
 }  // namespace move_group

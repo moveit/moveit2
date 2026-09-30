@@ -72,6 +72,16 @@ private:
   void preemptMoveCallback();
   void setMoveState(MoveGroupState state, const std::shared_ptr<MGActionGoal>& goal);
 
+  // False once the context of the node has been shut down. Every result, status
+  // update and feedback goes through that context, and rclcpp_action throws from
+  // those calls instead of dropping the message once the context is invalid.
+  bool canPublish();
+  // Moves a goal to a terminal state without answering it, for the case where the
+  // context has been shut down and the publish would throw instead. Leaving the
+  // goal active would make the destructor of its handle throw later on, from the
+  // thread that releases the last reference to it.
+  void abandonGoal(const std::shared_ptr<MGActionGoal>& goal);
+
   // True when this goal has to stop before it starts planning, because a
   // cancellation was accepted for it or because the capability is shutting down.
   // A cancellation is recorded per goal, so it only ever stops the goal it
