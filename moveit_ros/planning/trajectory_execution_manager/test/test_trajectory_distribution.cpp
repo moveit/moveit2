@@ -83,6 +83,17 @@ TEST(TrajectoryExecutionManager, PreservesMultiDofDerivativesByJointName)
   EXPECT_DOUBLE_EQ(output.points[0].velocities[1].linear.x, 1.0);
   EXPECT_DOUBLE_EQ(output.points[0].accelerations[0].linear.x, 4.0);
   EXPECT_DOUBLE_EQ(output.points[0].accelerations[1].linear.x, 3.0);
+
+  auto malformed = trajectory;
+  malformed.multi_dof_joint_trajectory.points[0].velocities.pop_back();
+  EXPECT_FALSE(manager.push(malformed, std::vector<std::string>{ "test_controller" }));
+  malformed = trajectory;
+  malformed.multi_dof_joint_trajectory.points[0].accelerations.pop_back();
+  EXPECT_FALSE(manager.push(malformed, std::vector<std::string>{ "test_controller" }));
+  malformed = trajectory;
+  malformed.multi_dof_joint_trajectory.points[0].transforms.pop_back();
+  EXPECT_FALSE(manager.push(malformed, std::vector<std::string>{ "test_controller" }));
+  EXPECT_EQ(manager.getTrajectories().size(), 1u);
 }
 
 int main(int argc, char** argv)

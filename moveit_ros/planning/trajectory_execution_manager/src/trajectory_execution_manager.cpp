@@ -400,6 +400,21 @@ bool TrajectoryExecutionManager::push(const moveit_msgs::msg::RobotTrajectory& t
     return false;
   }
 
+  const auto joint_count = trajectory.multi_dof_joint_trajectory.joint_names.size();
+  for (const auto& point : trajectory.multi_dof_joint_trajectory.points)
+  {
+    if (point.transforms.size() != joint_count ||
+        (!point.velocities.empty() && point.velocities.size() != joint_count) ||
+        (!point.accelerations.empty() && point.accelerations.size() != joint_count))
+    {
+      RCLCPP_ERROR(logger_,
+                   "Invalid multi-DOF trajectory point: expected %zu transforms and optional derivatives, "
+                   "but received %zu transforms, %zu velocities, and %zu accelerations",
+                   joint_count, point.transforms.size(), point.velocities.size(), point.accelerations.size());
+      return false;
+    }
+  }
+
   // Optionally, convert multi dof waypoints to joint states and replace trajectory for execution
   std::optional<moveit_msgs::msg::RobotTrajectory> replaced_trajectory;
   if (control_multi_dof_joint_variables_ && !trajectory.multi_dof_joint_trajectory.points.empty())
