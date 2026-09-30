@@ -156,13 +156,39 @@ void MoveGroupMoveAction::initialize()
                                      // is still waiting is recorded per goal, and the
                                      // goal consumes its own record in the preemption
                                      // check of executeMoveCallback().
+                                     bool shutting_down = false;
                                      {
                                        std::lock_guard<std::mutex> lock(goal_mutex_);
-                                       if (shutting_down_)
+                                       shutting_down = shutting_down_;
+                                       if (!shutting_down)
                                        {
-                                         return;
+                                         active_goal_ = goal;
                                        }
-                                       active_goal_ = goal;
+                                     }
+                                     if (shutting_down)
+                                     {
+                                       // The destructor set the flag after this
+                                       // worker had been installed but before it got
+                                       // here, so the goal was accepted and an answer
+                                       // is still owed to the client. The goal is
+                                       // known to rclcpp_action at this point, so
+                                       // completing it produces a result instead of
+                                       // leaving a client to wait for one that is
+                                       // never sent. A goal that was canceled while
+                                       // it waited is completed as canceled like it
+                                       // would have been in executeMoveCallback, and
+                                       // the rest are aborted.
+                                       auto result = std::make_shared<MGAction::Result>();
+                                       result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+                                       if (goal->is_canceling())
+                                       {
+                                         goal->canceled(result);
+                                       }
+                                       else
+                                       {
+                                         goal->abort(result);
+                                       }
+                                       return;
                                      }
 
                                      // The cancellation of a goal that was still
