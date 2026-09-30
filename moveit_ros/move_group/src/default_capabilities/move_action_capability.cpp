@@ -102,6 +102,19 @@ void MoveGroupMoveAction::initialize()
         // worker wait for the goal that is still being planned or executed, so
         // that this callback does not keep the executor busy.
         std::lock_guard<std::mutex> lock(goal_worker_mutex_);
+        if (shutting_down_)
+        {
+          // The destructor has already moved the previous worker out of
+          // goal_worker_, so storing a new joinable thread here would make the
+          // member destructor call std::terminate, and the new worker would
+          // capture a this that is being destroyed. Reject the goal instead of
+          // starting a worker that cannot be joined.
+          auto result = std::make_shared<MGAction::Result>();
+          result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+          goal->abort(result);
+          return;
+        }
+
         std::thread previous = std::move(goal_worker_);
 
         goal_worker_ = std::thread{ [this, previous = std::move(previous)](
