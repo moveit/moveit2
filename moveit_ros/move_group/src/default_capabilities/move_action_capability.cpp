@@ -129,6 +129,19 @@ void MoveGroupMoveAction::initialize()
                                        return;
                                      }
 
+                                     // The cancellation callback ignores which goal it
+                                     // refers to and stops the plan execution of the goal
+                                     // that is running, so a goal that was canceled while it
+                                     // waited here would otherwise plan and execute robot
+                                     // motion after its client asked it to stop.
+                                     if (goal->is_canceling())
+                                     {
+                                       auto result = std::make_shared<MGAction::Result>();
+                                       result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+                                       goal->canceled(result);
+                                       return;
+                                     }
+
                                      executeMoveCallback(goal);
                                    },
                                     goal };
@@ -171,7 +184,18 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   }
   else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
   {
-    goal->canceled(action_res);
+    // A PREEMPTED result does not imply that the client asked to cancel this goal: the
+    // destructor and preemptMoveCallback() also set preempt_requested_, and the goal is
+    // then still in the EXECUTING state. canceled() only accepts a goal that is
+    // canceling and throws otherwise, so abort such a goal instead.
+    if (goal->is_canceling())
+    {
+      goal->canceled(action_res);
+    }
+    else
+    {
+      goal->abort(action_res);
+    }
   }
   else
   {
