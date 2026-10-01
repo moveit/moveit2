@@ -152,6 +152,37 @@ public:
     EXPECT_TRUE(robot_state_->satisfiesBounds());
   }
 
+  /** This test takes a state that is inside the joint limits and self-collision free (without padding) as input. **/
+  void testPaddedSelfCollision(const std::vector<double>& position_in_limits)
+  {
+    SCOPED_TRACE("testPaddedSelfCollision");
+
+    // add a large padding to all robot links, so the state is in self-collision with the padded robot
+    planning_scene_->getCollisionEnvNonConst()->setPadding(0.5);
+
+    robot_state_->setJointGroupPositions(joint_model_group_, position_in_limits);
+    ompl::base::ScopedState<> ompl_state(state_space_);
+    state_space_->copyToOMPLState(ompl_state.get(), *robot_state_);
+
+    // by default, self-collisions are checked with the unpadded robot
+    auto checker = std::make_shared<ompl_interface::StateValidityChecker>(planning_context_.get());
+    checker->setVerbose(VERBOSE);
+    EXPECT_TRUE(checker->isValid(ompl_state.get()));
+
+    // enable padded self-collision checking for the planning context
+    std::map<std::string, std::string> config = planning_context_->getSpecificationConfig();
+    config["pad_self_collisions"] = "1";
+    planning_context_->setSpecificationConfig(config);
+
+    auto padded_checker = std::make_shared<ompl_interface::StateValidityChecker>(planning_context_.get());
+    padded_checker->setVerbose(VERBOSE);
+    ompl_state->as<ompl_interface::JointModelStateSpace::StateType>()->clearKnownInformation();
+    EXPECT_FALSE(padded_checker->isValid(ompl_state.get()));
+    double dist;
+    ompl_state->as<ompl_interface::JointModelStateSpace::StateType>()->clearKnownInformation();
+    EXPECT_FALSE(padded_checker->isValid(ompl_state.get(), dist));
+  }
+
   void testPathConstraints(const std::vector<double>& position_in_joint_limits)
   {
     SCOPED_TRACE("testPathConstraints");
@@ -289,6 +320,13 @@ TEST_F(PandaValidity, testSelfCollision)
   testSelfCollision({ 2.31827, -0.169668, 2.5225, -2.98568, -0.36355, 0.808339, 0.0843406 });
 }
 
+TEST_F(PandaValidity, testPaddedSelfCollision)
+{
+  // use the panda "ready" state from the srdf config
+  // we know this state should be within limits and self-collision free
+  testPaddedSelfCollision({ 0., -0.785, 0., -2.356, 0., 1.571, 0.785 });
+}
+
 TEST_F(PandaValidity, testPathConstraints)
 {
   // use the panda "ready" state from the srdf config
@@ -323,6 +361,12 @@ TEST_F(FanucTest, testSelfCollision)
   // the given state has self collision between "base_link" and "link_5"
   // (I just tried a couple of random states until I found one that collided.)
   testSelfCollision({ -2.95993, -0.682185, -2.43873, -0.939784, 3.0544, 0.882294 });
+}
+
+TEST_F(FanucTest, testPaddedSelfCollision)
+{
+  // I assume the Fanucs's zero state is within limits and self-collision free
+  testPaddedSelfCollision({ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
 }
 
 TEST_F(FanucTest, testPathConstraints)
