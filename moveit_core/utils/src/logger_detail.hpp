@@ -56,9 +56,10 @@ namespace detail
 /// the unspecified destruction order of unrelated function-local static
 /// objects. See moveit/moveit2#3827.
 ///
-/// Returns a mutex the caller must lock before reading or writing `node`
-/// afterwards, so a concurrent caller and pre-shutdown callback can't race
-/// on it.
+/// The returned owner must be constructed after the caller-owned static node
+/// slot. It removes the callback before that slot is destroyed (including
+/// when libmoveit_utils is unloaded), and provides the mutex the caller must
+/// lock before reading or writing the slot.
 ///
 /// Two independent, deliberate design choices:
 ///
@@ -71,33 +72,55 @@ namespace detail
 ///    Node would close that cycle. A plain reference cannot itself be part
 ///    of a shared_ptr reference cycle, so this can't happen.
 ///
-/// B. Guard/mutex capture: the callback captures the returned mutex by
-///    *weak_ptr*, not shared_ptr, so that in the "rclcpp::shutdown() is
-///    never called" static-destruction path, the caller-owned mutex --
-///    constructed immediately after `node`, so by the standard's
-///    reverse-order-of-completed-construction rule it is destroyed *before*
-///    `node` -- is already gone by the time `node` itself is destroyed. The
-///    weak_ptr lock then fails if the callback fires while `node` is being
-///    (or has been) destroyed, so the callback never touches the `node`
-///    slot while its own static shared_ptr is itself being torn down,
-///    leaving `node` to be destroyed exactly as it would have been before
-///    this fix.
-inline std::shared_ptr<std::mutex> registerNodeResetOnPreShutdown(rclcpp::Node::SharedPtr& node)
+/// B. Guard/mutex capture: the callback captures the owner's mutex by
+///    *weak_ptr*, not shared_ptr, so the callback cannot retain the guard
+///    after its owner has been destroyed. Removing the callback before
+///    destroying the owner also keeps its callable from surviving this
+///    shared library's unload.
+class NodeResetOnPreShutdown
 {
-  auto mutex = std::make_shared<std::mutex>();
-  std::weak_ptr<std::mutex> weak_mutex = mutex;
-  node->get_node_base_interface()->get_context()->add_pre_shutdown_callback([weak_mutex, &node] {
-    std::shared_ptr<std::mutex> locked = weak_mutex.lock();
-    if (!locked)
-    {
-      return;
-    }
-    std::lock_guard<std::mutex> lock(*locked);
-    // Drop the reference so ~rclcpp::Node runs now, while the RMW context is
-    // still alive, instead of racing against it at static destruction time.
-    node.reset();
-  });
-  return mutex;
+public:
+  explicit NodeResetOnPreShutdown(rclcpp::Node::SharedPtr& node)
+    : context_(node->get_node_base_interface()->get_context()), mutex_(std::make_shared<std::mutex>())
+  {
+    std::weak_ptr<std::mutex> weak_mutex = mutex_;
+    callback_handle_ = context_->add_pre_shutdown_callback([weak_mutex, &node] {
+      std::shared_ptr<std::mutex> locked = weak_mutex.lock();
+      if (!locked)
+      {
+        return;
+      }
+      std::lock_guard<std::mutex> lock(*locked);
+      // Drop the reference so ~rclcpp::Node runs now, while the RMW context is
+      // still alive, instead of racing against it at static destruction time.
+      node.reset();
+    });
+  }
+
+  NodeResetOnPreShutdown(const NodeResetOnPreShutdown&) = delete;
+  NodeResetOnPreShutdown& operator=(const NodeResetOnPreShutdown&) = delete;
+
+  ~NodeResetOnPreShutdown()
+  {
+    // Do not hold mutex_ here: shutdown may be running the callback while it
+    // holds the context's callback-list mutex and waits for mutex_.
+    context_->remove_pre_shutdown_callback(callback_handle_);
+  }
+
+  const std::shared_ptr<std::mutex>& getMutex() const
+  {
+    return mutex_;
+  }
+
+private:
+  rclcpp::Context::SharedPtr context_;
+  std::shared_ptr<std::mutex> mutex_;
+  rclcpp::PreShutdownCallbackHandle callback_handle_;
+};
+
+inline NodeResetOnPreShutdown registerNodeResetOnPreShutdown(rclcpp::Node::SharedPtr& node)
+{
+  return NodeResetOnPreShutdown(node);
 }
 
 }  // namespace detail
