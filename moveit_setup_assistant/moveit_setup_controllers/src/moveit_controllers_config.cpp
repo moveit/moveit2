@@ -190,13 +190,11 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
 
           if (controller.type_ == "FollowJointTrajectory")
           {
-            auto action_ns_it = controller.parameters_.find("action_ns");
-            if (action_ns_it == controller.parameters_.end() || action_ns_it->second.empty())
+            if (controller.parameters_.find("action_ns") == controller.parameters_.end())
             {
               emitter << YAML::Key << "action_ns" << YAML::Value << "follow_joint_trajectory";
             }
-            auto default_it = controller.parameters_.find("default");
-            if (default_it == controller.parameters_.end() || default_it->second.empty())
+            if (controller.parameters_.find("default") == controller.parameters_.end())
             {
               emitter << YAML::Key << "default" << YAML::Value << "true";
             }
@@ -216,10 +214,6 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
 
           for (const auto& pair : controller.parameters_)
           {
-            if (pair.second.empty())
-            {
-              continue;
-            }
             emitter << YAML::Key << pair.first;
             emitter << YAML::Value << pair.second;
           }

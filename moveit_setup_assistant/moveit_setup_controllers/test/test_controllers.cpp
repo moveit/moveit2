@@ -175,18 +175,17 @@ TEST_F(ControllersTest, AddDefaultControllers)
   EXPECT_EQ(ros2_controllers_config->getControllers().size(), group_count);
 }
 
-
 TEST_F(ControllersTest, OutputMoveItControllersFix3314)
 {
   config_data_->preloadWithFullConfig("moveit_resources_fanuc_moveit_config");
   auto moveit_controllers = config_data_->get<MoveItControllersConfig>("moveit_controllers");
-  
+
   std::vector<ControllerInfo>& mcontrollers = moveit_controllers->getControllers();
   ASSERT_EQ(1u, mcontrollers.size());
-  
-  // Set parameters to empty to simulate empty text boxes in UI
-  mcontrollers[0].parameters_["action_ns"] = "";
-  mcontrollers[0].parameters_["default"] = "";
+
+  // Erase parameters to simulate them being absent
+  mcontrollers[0].parameters_.erase("action_ns");
+  mcontrollers[0].parameters_.erase("default");
 
   generateFiles<MoveItControllersConfig>("moveit_controllers");
 
@@ -195,9 +194,17 @@ TEST_F(ControllersTest, OutputMoveItControllersFix3314)
   ASSERT_TRUE(c_node["action_ns"]) << "action_ns missing";
   EXPECT_EQ(c_node["action_ns"].as<std::string>(), "follow_joint_trajectory");
   ASSERT_TRUE(c_node["default"]) << "default missing";
-  // The value is "true" in config string
   EXPECT_EQ(c_node["default"].as<std::string>(), "true");
-  
+
+  // Also check empty parameters
+  mcontrollers[0].parameters_["action_ns"] = "";
+  mcontrollers[0].parameters_["default"] = "";
+  generateFiles<MoveItControllersConfig>("moveit_controllers");
+  YAML::Node generated_empty = YAML::LoadFile(output_dir_ / "config/moveit_controllers.yaml");
+  const YAML::Node& c_node_empty = generated_empty["moveit_simple_controller_manager"]["fanuc_controller"];
+  EXPECT_EQ(c_node_empty["action_ns"].as<std::string>(), "");
+  EXPECT_EQ(c_node_empty["default"].as<std::string>(), "");
+
   // Now try with specific value to ensure no duplication/overwriting with default
   mcontrollers[0].parameters_["action_ns"] = "custom_ns";
   mcontrollers[0].parameters_["default"] = "false";
