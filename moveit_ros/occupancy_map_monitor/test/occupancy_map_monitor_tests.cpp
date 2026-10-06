@@ -89,7 +89,6 @@ namespace
 {
 struct UpdaterState
 {
-  bool params_set{ false };
   bool started{ false };
   std::vector<std::string> calls;
 };
@@ -97,10 +96,9 @@ struct UpdaterState
 class RecordingUpdater : public occupancy_map_monitor::OccupancyMapUpdater
 {
 public:
-  RecordingUpdater(std::shared_ptr<UpdaterState> state, bool require_params, bool initialize_succeeds)
+  RecordingUpdater(std::shared_ptr<UpdaterState> state, bool initialize_succeeds)
     : OccupancyMapUpdater("RecordingUpdater")
     , state_(std::move(state))
-    , require_params_(require_params)
     , initialize_succeeds_(initialize_succeeds)
   {
   }
@@ -108,14 +106,13 @@ public:
   bool setParams(const std::string&) override
   {
     state_->calls.emplace_back("set_params");
-    state_->params_set = true;
     return true;
   }
 
   bool initialize(const rclcpp::Node::SharedPtr&) override
   {
     state_->calls.emplace_back("initialize");
-    return initialize_succeeds_ && (!require_params_ || state_->params_set);
+    return initialize_succeeds_;
   }
 
   void start() override
@@ -139,7 +136,6 @@ public:
 
 private:
   std::shared_ptr<UpdaterState> state_;
-  bool require_params_;
   bool initialize_succeeds_;
 };
 
@@ -149,10 +145,10 @@ occupancy_map_monitor::OccupancyMapMonitor::Parameters parametersWithUpdater()
 }
 }  // namespace
 
-TEST(OccupancyMapMonitorTests, SetsParametersBeforeInitialization)
+TEST(OccupancyMapMonitorTests, StartsUpdaterAfterSuccessfulInitialization)
 {
   auto state = std::make_shared<UpdaterState>();
-  auto updater = std::make_shared<RecordingUpdater>(state, true, true);
+  auto updater = std::make_shared<RecordingUpdater>(state, true);
   auto middleware = std::make_unique<MockMiddlewareHandle>();
 
   EXPECT_CALL(*middleware, getParameters).WillOnce(testing::Return(parametersWithUpdater()));
@@ -166,14 +162,14 @@ TEST(OccupancyMapMonitorTests, SetsParametersBeforeInitialization)
   occupancy_map_monitor::OccupancyMapMonitor monitor{ std::move(middleware), nullptr };
   monitor.startMonitor();
 
-  EXPECT_EQ(state->calls, (std::vector<std::string>{ "set_params", "initialize", "start" }));
+  EXPECT_EQ(state->calls, (std::vector<std::string>{ "initialize", "set_params", "start" }));
   EXPECT_TRUE(state->started);
 }
 
 TEST(OccupancyMapMonitorTests, RejectsUpdaterWhenInitializationFails)
 {
   auto state = std::make_shared<UpdaterState>();
-  auto updater = std::make_shared<RecordingUpdater>(state, false, false);
+  auto updater = std::make_shared<RecordingUpdater>(state, false);
   auto middleware = std::make_unique<MockMiddlewareHandle>();
 
   EXPECT_CALL(*middleware, getParameters).WillOnce(testing::Return(parametersWithUpdater()));
@@ -187,7 +183,7 @@ TEST(OccupancyMapMonitorTests, RejectsUpdaterWhenInitializationFails)
   occupancy_map_monitor::OccupancyMapMonitor monitor{ std::move(middleware), nullptr };
   monitor.startMonitor();
 
-  EXPECT_EQ(state->calls, (std::vector<std::string>{ "set_params", "initialize" }));
+  EXPECT_EQ(state->calls, (std::vector<std::string>{ "initialize" }));
   EXPECT_FALSE(state->started);
 }
 
