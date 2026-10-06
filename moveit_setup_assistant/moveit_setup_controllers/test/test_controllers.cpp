@@ -175,6 +175,48 @@ TEST_F(ControllersTest, AddDefaultControllers)
   EXPECT_EQ(ros2_controllers_config->getControllers().size(), group_count);
 }
 
+TEST_F(ControllersTest, OutputMoveItControllersFix3314)
+{
+  config_data_->preloadWithFullConfig("moveit_resources_fanuc_moveit_config");
+  auto moveit_controllers = config_data_->get<MoveItControllersConfig>("moveit_controllers");
+
+  std::vector<ControllerInfo>& mcontrollers = moveit_controllers->getControllers();
+  ASSERT_EQ(1u, mcontrollers.size());
+
+  // Erase parameters to simulate them being absent
+  mcontrollers[0].parameters_.erase("action_ns");
+  mcontrollers[0].parameters_.erase("default");
+
+  generateFiles<MoveItControllersConfig>("moveit_controllers");
+
+  YAML::Node generated = YAML::LoadFile(output_dir_ / "config/moveit_controllers.yaml");
+  const YAML::Node& c_node = generated["moveit_simple_controller_manager"]["fanuc_controller"];
+  ASSERT_TRUE(c_node["action_ns"]) << "action_ns missing";
+  EXPECT_EQ(c_node["action_ns"].as<std::string>(), "follow_joint_trajectory");
+  ASSERT_TRUE(c_node["default"]) << "default missing";
+  EXPECT_EQ(c_node["default"].as<std::string>(), "true");
+
+  // Also check empty parameters: default should be omitted, action_ns should be kept as empty string
+  mcontrollers[0].parameters_["action_ns"] = "";
+  mcontrollers[0].parameters_["default"] = "";
+  generateFiles<MoveItControllersConfig>("moveit_controllers");
+  YAML::Node generated_empty = YAML::LoadFile(output_dir_ / "config/moveit_controllers.yaml");
+  const YAML::Node& c_node_empty = generated_empty["moveit_simple_controller_manager"]["fanuc_controller"];
+  EXPECT_EQ(c_node_empty["action_ns"].as<std::string>(), "");
+  EXPECT_FALSE(c_node_empty["default"]);
+
+  // Now try with specific value to ensure no duplication/overwriting with default
+  mcontrollers[0].parameters_["action_ns"] = "custom_ns";
+  mcontrollers[0].parameters_["default"] = "false";
+  generateFiles<MoveItControllersConfig>("moveit_controllers");
+  YAML::Node generated2 = YAML::LoadFile(output_dir_ / "config/moveit_controllers.yaml");
+  const YAML::Node& c_node2 = generated2["moveit_simple_controller_manager"]["fanuc_controller"];
+  ASSERT_TRUE(c_node2["action_ns"]);
+  EXPECT_EQ(c_node2["action_ns"].as<std::string>(), "custom_ns");
+  ASSERT_TRUE(c_node2["default"]);
+  EXPECT_EQ(c_node2["default"].as<std::string>(), "false");
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
