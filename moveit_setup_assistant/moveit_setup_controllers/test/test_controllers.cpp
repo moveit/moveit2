@@ -196,14 +196,14 @@ TEST_F(ControllersTest, OutputMoveItControllersFix3314)
   ASSERT_TRUE(c_node["default"]) << "default missing";
   EXPECT_EQ(c_node["default"].as<std::string>(), "true");
 
-  // Also check empty parameters
+  // Also check empty parameters: default should be omitted, action_ns should be kept as empty string
   mcontrollers[0].parameters_["action_ns"] = "";
   mcontrollers[0].parameters_["default"] = "";
   generateFiles<MoveItControllersConfig>("moveit_controllers");
   YAML::Node generated_empty = YAML::LoadFile(output_dir_ / "config/moveit_controllers.yaml");
   const YAML::Node& c_node_empty = generated_empty["moveit_simple_controller_manager"]["fanuc_controller"];
   EXPECT_EQ(c_node_empty["action_ns"].as<std::string>(), "");
-  EXPECT_EQ(c_node_empty["default"].as<std::string>(), "");
+  EXPECT_FALSE(c_node_empty["default"]);
 
   // Now try with specific value to ensure no duplication/overwriting with default
   mcontrollers[0].parameters_["action_ns"] = "custom_ns";

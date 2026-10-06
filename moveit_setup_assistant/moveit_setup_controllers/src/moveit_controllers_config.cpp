@@ -214,6 +214,10 @@ bool MoveItControllersConfig::GeneratedControllersConfig::writeYaml(YAML::Emitte
 
           for (const auto& pair : controller.parameters_)
           {
+            if (pair.second.empty() && pair.first != "action_ns")
+            {
+              continue;
+            }
             emitter << YAML::Key << pair.first;
             emitter << YAML::Value << pair.second;
           }
