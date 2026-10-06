@@ -112,8 +112,9 @@ OccupancyMapMonitor::OccupancyMapMonitor(std::unique_ptr<MiddlewareHandle> middl
     // Pass a pointer to the monitor to the updater
     occupancy_map_updater->setMonitor(this);
 
-    // This part is done in the middleware handle because it needs the node
-    middleware_handle_->initializeOccupancyMapUpdater(occupancy_map_updater);
+    // This part is done in the middleware handle because it needs the node.
+    if (!middleware_handle_->initializeOccupancyMapUpdater(occupancy_map_updater))
+      continue;
 
     // Load the params in the updater
     if (!occupancy_map_updater->setParams(sensor_name))
