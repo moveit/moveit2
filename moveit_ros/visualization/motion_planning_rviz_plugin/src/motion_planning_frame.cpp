@@ -45,6 +45,8 @@
 #include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
 
+#include "motion_planning_frame_parameters.hpp"
+
 #include <geometric_shapes/shape_operations.h>
 
 #include <rviz_common/display_context.hpp>
@@ -674,12 +676,8 @@ void MotionPlanningFrame::initFromMoveGroupNS()
   planning_scene_world_publisher_ =
       node_->create_publisher<moveit_msgs::msg::PlanningSceneWorld>("planning_scene_world", 1);
 
-  // Declare parameter for default planning pipeline
-  if (!node_->has_parameter(planning_display_->getMoveGroupNS() + "default_planning_pipeline"))
-    node_->declare_parameter<std::string>(planning_display_->getMoveGroupNS() + "default_planning_pipeline", "");
-
-  // Query default planning pipeline id
-  node_->get_parameter(planning_display_->getMoveGroupNS() + "default_planning_pipeline", default_planning_pipeline_);
+  // Query default planning pipeline id from the RViz node.
+  default_planning_pipeline_ = detail::getDefaultPlanningPipeline(node_);
 
   // Set initial velocity and acceleration scaling factors from ROS parameters
   double factor;
