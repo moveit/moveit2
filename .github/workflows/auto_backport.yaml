@@ -22,13 +22,15 @@ on:
         type: boolean
 
 permissions:
-  pull-requests: write
   contents: read
-  issues: write
 
 jobs:
   auto-backport:
     name: Evaluate and Label Backports
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     if: >
       github.event_name == 'workflow_dispatch' ||
       (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
