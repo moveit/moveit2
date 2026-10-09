@@ -39,6 +39,7 @@ jobs:
         with:
           ref: ${{ github.event_name == 'pull_request_target' && 'main' || '' }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Evaluate PR and Apply Backport Labels
         uses: kinu-garage/retrobranch@0.2.0
