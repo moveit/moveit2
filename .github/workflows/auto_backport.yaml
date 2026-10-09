@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 0
 
       - name: Evaluate PR and Apply Backport Labels
-        uses: kinu-garage/retrobranch@main
+        uses: kinu-garage/retrobranch@0.2.0
         with:
           pr-number: ${{ github.event.pull_request.number || inputs.pr_number }}
           filter-branches: ${{ inputs.filter_branches }}
