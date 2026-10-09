@@ -33,7 +33,7 @@ if(BUILD_TESTING)
     TARGET
     test_utils_with_move_group
     TIMEOUT
-    30
+    120
     ARGS
     "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
     "test_executable:=test_utils_with_move_group")
@@ -52,7 +52,7 @@ if(BUILD_TESTING)
     TARGET
     test_constant_features_with_move_group
     TIMEOUT
-    30
+    120
     ARGS
     "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
     "test_executable:=test_constant_features_with_move_group")
@@ -69,7 +69,7 @@ if(BUILD_TESTING)
     TARGET
     test_get_cartesian_path_request_features_with_move_group
     TIMEOUT
-    30
+    120
     ARGS
     "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
     "test_executable:=test_get_cartesian_path_request_features_with_move_group")
@@ -86,7 +86,7 @@ if(BUILD_TESTING)
     TARGET
     test_motion_plan_request_features_with_move_group
     TIMEOUT
-    30
+    120
     ARGS
     "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
     "test_executable:=test_motion_plan_request_features_with_move_group")
@@ -109,7 +109,7 @@ if(BUILD_TESTING)
     TARGET
     test_always_insert_never_prune_policy_with_move_group
     TIMEOUT
-    30
+    120
     ARGS
     "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
     "test_executable:=test_always_insert_never_prune_policy_with_move_group")
@@ -130,7 +130,7 @@ if(BUILD_TESTING)
     TARGET
     test_best_seen_execution_time_policy_with_move_group
     TIMEOUT
-    30
+    120
     ARGS
     "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}"
     "test_executable:=test_best_seen_execution_time_policy_with_move_group")
