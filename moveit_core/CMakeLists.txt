@@ -7,7 +7,7 @@ moveit_package()
 
 find_package(ament_cmake REQUIRED)
 find_package(angles REQUIRED)
-find_package(Bullet 2.87 REQUIRED)
+find_package(Bullet CONFIG REQUIRED)
 find_package(common_interfaces REQUIRED)
 find_package(eigen_stl_containers REQUIRED)
 find_package(Eigen3 REQUIRED)

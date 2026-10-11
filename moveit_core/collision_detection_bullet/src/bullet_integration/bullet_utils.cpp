@@ -37,6 +37,7 @@
 #include <BulletCollision/CollisionDispatch/btConvexConvexAlgorithm.h>
 #include <BulletCollision/CollisionShapes/btShapeHull.h>
 #include <BulletCollision/Gimpact/btGImpactShape.h>
+#include <BulletCollision/CollisionShapes/btConeShape.h>
 #include <geometric_shapes/shapes.h>
 #include <memory>
 #include <octomap/octomap.h>

@@ -42,6 +42,7 @@
 #include <rclcpp/logging.hpp>
 #include <rclcpp/time.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
+#include <iomanip>
 #include <numeric>
 #include <optional>
 #include <moveit/utils/logger.hpp>
