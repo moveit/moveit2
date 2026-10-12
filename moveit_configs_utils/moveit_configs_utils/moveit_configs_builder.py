@@ -51,7 +51,7 @@ Example:
 """
 
 from pathlib import Path
-from typing import Optional, List, Dict
+from typing import Any, Optional, Union
 import logging
 import re
 from dataclasses import dataclass, field
@@ -66,12 +66,12 @@ from launch_ros.parameter_descriptions import ParameterValue
 moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
 
 
-def get_pattern_matches(folder, pattern):
+def get_pattern_matches(folder: Path, pattern: re.Pattern[str]) -> list[Any]:
     """Given all the files in the folder, find those that match the pattern.
 
     If there are groups defined, the groups are returned. Otherwise the path to the matches are returned.
     """
-    matches = []
+    matches: list[Any] = []
     if not folder.exists():
         return matches
     for child in folder.iterdir():
@@ -92,34 +92,34 @@ class MoveItConfigs:
     """Class containing MoveIt related parameters."""
 
     # A pathlib Path to the moveit config package
-    package_path: Optional[str] = None
+    package_path: Optional[Path] = None
     # A dictionary that has the contents of the URDF file.
-    robot_description: Dict = field(default_factory=dict)
+    robot_description: dict[str, Any] = field(default_factory=dict)
     # A dictionary that has the contents of the SRDF file.
-    robot_description_semantic: Dict = field(default_factory=dict)
+    robot_description_semantic: dict[str, Any] = field(default_factory=dict)
     # A dictionary IK solver specific parameters.
-    robot_description_kinematics: Dict = field(default_factory=dict)
+    robot_description_kinematics: dict[str, Any] = field(default_factory=dict)
     # A dictionary that contains the planning pipelines parameters.
-    planning_pipelines: Dict = field(default_factory=dict)
+    planning_pipelines: dict[str, Any] = field(default_factory=dict)
     # A dictionary contains parameters for trajectory execution & moveit controller managers.
-    trajectory_execution: Dict = field(default_factory=dict)
+    trajectory_execution: dict[str, Any] = field(default_factory=dict)
     # A dictionary that has the planning scene monitor's parameters.
-    planning_scene_monitor: Dict = field(default_factory=dict)
+    planning_scene_monitor: dict[str, Any] = field(default_factory=dict)
     # A dictionary that has the sensor 3d configuration parameters.
-    sensors_3d: Dict = field(default_factory=dict)
+    sensors_3d: dict[str, Any] = field(default_factory=dict)
     # A dictionary containing move_group's non-default capabilities.
-    move_group_capabilities: Dict = field(
+    move_group_capabilities: dict[str, str] = field(
         default_factory=lambda: {"capabilities": "", "disable_capabilities": ""}
     )
     # A dictionary containing the overridden position/velocity/acceleration limits.
-    joint_limits: Dict = field(default_factory=dict)
+    joint_limits: dict[str, Any] = field(default_factory=dict)
     # A dictionary containing MoveItCpp related parameters.
-    moveit_cpp: Dict = field(default_factory=dict)
+    moveit_cpp: dict[str, Any] = field(default_factory=dict)
     # A dictionary containing the cartesian limits for the Pilz planner.
-    pilz_cartesian_limits: Dict = field(default_factory=dict)
+    pilz_cartesian_limits: dict[str, Any] = field(default_factory=dict)
 
-    def to_dict(self):
-        parameters = {}
+    def to_dict(self) -> dict[str, Any]:
+        parameters: dict[str, Any] = {}
         parameters.update(self.robot_description)
         parameters.update(self.robot_description_semantic)
         parameters.update(self.robot_description_kinematics)
@@ -143,6 +143,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
     __urdf_package: Path
     # Relative path of the URDF file w.r.t. __urdf_package
     __urdf_file_path: Path
+    __urdf_xacro_args: Optional[dict[str, str]]
     # Relative path of the SRDF file  w.r.t. robot_name_moveit_config
     __srdf_file_path: Path
     # String specify the parameter name that the robot description will be loaded to, it will also be used as a prefix
@@ -154,34 +155,34 @@ class MoveItConfigsBuilder(ParameterBuilder):
     def __init__(
         self,
         robot_name: str,
-        robot_description="robot_description",
+        robot_description: str = "robot_description",
         package_name: Optional[str] = None,
-    ):
+    ) -> None:
         super().__init__(package_name or (robot_name + "_moveit_config"))
         self.__moveit_configs = MoveItConfigs(package_path=self._package_path)
         self.__robot_name = robot_name
         setup_assistant_file = self._package_path / ".setup_assistant"
 
-        self.__urdf_package = None
-        self.__urdf_file_path = None
+        urdf_package: Optional[Path] = None
+        urdf_file_path: Optional[Path] = None
+        srdf_file_path: Optional[Path] = None
         self.__urdf_xacro_args = None
-        self.__srdf_file_path = None
 
         modified_urdf_path = Path("config") / (self.__robot_name + ".urdf.xacro")
         if (self._package_path / modified_urdf_path).exists():
-            self.__urdf_package = self._package_path
-            self.__urdf_file_path = modified_urdf_path
+            urdf_package = self._package_path
+            urdf_file_path = modified_urdf_path
 
         if setup_assistant_file.exists():
             setup_assistant_yaml = load_yaml(setup_assistant_file)
             config = setup_assistant_yaml.get("moveit_setup_assistant_config", {})
 
             if urdf_config := config.get("urdf", config.get("URDF")):
-                if self.__urdf_package is None:
-                    self.__urdf_package = Path(
+                if urdf_package is None:
+                    urdf_package = Path(
                         get_package_share_directory(urdf_config["package"])
                     )
-                    self.__urdf_file_path = Path(urdf_config["relative_path"])
+                    urdf_file_path = Path(urdf_config["relative_path"])
 
                 if xacro_args := urdf_config.get("xacro_args"):
                     self.__urdf_xacro_args = dict(
@@ -189,32 +190,31 @@ class MoveItConfigsBuilder(ParameterBuilder):
                     )
 
             if srdf_config := config.get("srdf", config.get("SRDF")):
-                self.__srdf_file_path = Path(srdf_config["relative_path"])
+                srdf_file_path = Path(srdf_config["relative_path"])
 
-        if not self.__urdf_package or not self.__urdf_file_path:
+        if not urdf_package or not urdf_file_path:
             logging.warning(
                 f"\x1b[33;21mCannot infer URDF from `{self._package_path}`. -- using config/{robot_name}.urdf\x1b[0m"
             )
-            self.__urdf_package = self._package_path
-            self.__urdf_file_path = self.__config_dir_path / (
-                self.__robot_name + ".urdf"
-            )
+            urdf_package = self._package_path
+            urdf_file_path = self.__config_dir_path / (self.__robot_name + ".urdf")
 
-        if not self.__srdf_file_path:
+        if not srdf_file_path:
             logging.warning(
                 f"\x1b[33;21mCannot infer SRDF from `{self._package_path}`. -- using config/{robot_name}.srdf\x1b[0m"
             )
-            self.__srdf_file_path = self.__config_dir_path / (
-                self.__robot_name + ".srdf"
-            )
+            srdf_file_path = self.__config_dir_path / (self.__robot_name + ".srdf")
 
+        self.__urdf_package = urdf_package
+        self.__urdf_file_path = urdf_file_path
+        self.__srdf_file_path = srdf_file_path
         self.__robot_description = robot_description
 
     def robot_description(
         self,
-        file_path: Optional[str] = None,
-        mappings: dict[SomeSubstitutionsType, SomeSubstitutionsType] = None,
-    ):
+        file_path: Optional[Union[str, Path]] = None,
+        mappings: Optional[dict[SomeSubstitutionsType, SomeSubstitutionsType]] = None,
+    ) -> "MoveItConfigsBuilder":
         """Load robot description.
 
         :param file_path: Absolute or relative path to the URDF file (w.r.t. robot_name_moveit_config).
@@ -253,9 +253,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
     def robot_description_semantic(
         self,
-        file_path: Optional[str] = None,
-        mappings: dict[SomeSubstitutionsType, SomeSubstitutionsType] = None,
-    ):
+        file_path: Optional[Union[str, Path]] = None,
+        mappings: Optional[dict[SomeSubstitutionsType, SomeSubstitutionsType]] = None,
+    ) -> "MoveItConfigsBuilder":
         """Load semantic robot description.
 
         :param file_path: Absolute or relative path to the SRDF file (w.r.t. robot_name_moveit_config).
@@ -287,7 +287,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
             }
         return self
 
-    def robot_description_kinematics(self, file_path: Optional[str] = None):
+    def robot_description_kinematics(
+        self, file_path: Optional[Union[str, Path]] = None
+    ) -> "MoveItConfigsBuilder":
         """Load IK solver parameters.
 
         :param file_path: Absolute or relative path to the kinematics yaml file (w.r.t. robot_name_moveit_config).
@@ -302,7 +304,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
         }
         return self
 
-    def joint_limits(self, file_path: Optional[str] = None):
+    def joint_limits(
+        self, file_path: Optional[Union[str, Path]] = None
+    ) -> "MoveItConfigsBuilder":
         """Load joint limits overrides.
 
         :param file_path: Absolute or relative path to the joint limits yaml file (w.r.t. robot_name_moveit_config).
@@ -317,7 +321,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
         }
         return self
 
-    def moveit_cpp(self, file_path: Optional[str] = None):
+    def moveit_cpp(
+        self, file_path: Optional[Union[str, Path]] = None
+    ) -> "MoveItConfigsBuilder":
         """Load MoveItCpp parameters.
 
         :param file_path: Absolute or relative path to the MoveItCpp yaml file (w.r.t. robot_name_moveit_config).
@@ -331,9 +337,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
     def trajectory_execution(
         self,
-        file_path: Optional[str] = None,
+        file_path: Optional[Union[str, Path]] = None,
         moveit_manage_controllers: bool = True,
-    ):
+    ) -> "MoveItConfigsBuilder":
         """Load trajectory execution and moveit controller managers' parameters
 
         :param file_path: Absolute or relative path to the controllers yaml file (w.r.t. robot_name_moveit_config).
@@ -390,7 +396,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         publish_transforms_updates: bool = True,
         publish_robot_description: bool = False,
         publish_robot_description_semantic: bool = False,
-    ):
+    ) -> "MoveItConfigsBuilder":
         self.__moveit_configs.planning_scene_monitor = {
             # TODO: Fix parameter namespace upstream -- see planning_scene_monitor.cpp:262
             # "planning_scene_monitor": {
@@ -404,7 +410,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
         }
         return self
 
-    def sensors_3d(self, file_path: Optional[str] = None):
+    def sensors_3d(
+        self, file_path: Optional[Union[str, Path]] = None
+    ) -> "MoveItConfigsBuilder":
         """Load sensors_3d parameters.
 
         :param file_path: Absolute or relative path to the sensors_3d yaml file (w.r.t. robot_name_moveit_config).
@@ -423,10 +431,10 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
     def planning_pipelines(
         self,
-        default_planning_pipeline: str = None,
-        pipelines: List[str] = None,
+        default_planning_pipeline: Optional[str] = None,
+        pipelines: Optional[list[str]] = None,
         load_all: bool = True,
-    ):
+    ) -> "MoveItConfigsBuilder":
         """Load planning pipelines parameters.
 
         :param default_planning_pipeline: Name of the default planning pipeline.
@@ -480,7 +488,9 @@ class MoveItConfigsBuilder(ParameterBuilder):
 
         return self
 
-    def pilz_cartesian_limits(self, file_path: Optional[str] = None):
+    def pilz_cartesian_limits(
+        self, file_path: Optional[Union[str, Path]] = None
+    ) -> "MoveItConfigsBuilder":
         """Load cartesian limits.
 
         :param file_path: Absolute or relative path to the cartesian limits file (w.r.t. robot_name_moveit_config).
@@ -503,7 +513,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
         }
         return self
 
-    def to_moveit_configs(self):
+    def to_moveit_configs(self) -> MoveItConfigs:
         """Get MoveIt configs from robot_name_moveit_config.
 
         :return: An MoveItConfigs instance with all parameters loaded.
@@ -532,7 +542,7 @@ class MoveItConfigsBuilder(ParameterBuilder):
                 self.pilz_cartesian_limits()
         return self.__moveit_configs
 
-    def to_dict(self, include_moveit_configs: bool = True):
+    def to_dict(self, include_moveit_configs: bool = True) -> dict[str, Any]:
         """Get loaded parameters from robot_name_moveit_config as a dictionary.
 
         :param include_moveit_configs: Whether to include the MoveIt config parameters or
