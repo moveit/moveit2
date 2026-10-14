@@ -753,7 +753,7 @@ TEST_F(OneRobot, MultiDofTrajectoryToJointStates)
   // WHEN the optional trajectory result is valid (always assumed)
   ASSERT_TRUE(maybe_trajectory_msg.has_value());
 
-  const auto traj = maybe_trajectory_msg.value();
+  const auto& traj = maybe_trajectory_msg.value();
   const auto& joint_names = traj.joint_names;
 
   size_t joint_variable_count = 0u;

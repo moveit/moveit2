@@ -2,6 +2,33 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.2 (2026-09-16)
+-------------------
+* Fix clang-tidy issues
+* Contributors: Robert Haschke
+
+2.15.1 (2026-08-29)
+-------------------
+* Fix CI on Ubuntu 26.04 (`#3818 <https://github.com/moveit/moveit2/issues/3818>`_)
+* Fix IKFast plugin compilation
+  The generated solver is no longer included inside the plugin namespace's
+  transitive include set: required standard headers are now included at global
+  scope. Fixes the build on Rolling, where rclcpp no longer provides <list>.
+* Guard clang-specific pragma
+* Avoid using deprecated FindBoost.cmake module
+* Contributors: Robert Haschke
+
+2.15.0 (2026-08-12)
+-------------------
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* CMake: remove boost system (`#3727 <https://github.com/moveit/moveit2/issues/3727>`_)
+* Fix malformed XML in cached ik kinematics (`#3599 <https://github.com/moveit/moveit2/issues/3599>`_)
+* Fix deprecations in image_common and tf2_ros (`#3567 <https://github.com/moveit/moveit2/issues/3567>`_)
+* Contributors: Guilhem Saurel, Nathan Brooks, Shivam Maurya, mini-1235
+
 2.14.1 (2025-09-09)
 -------------------
 

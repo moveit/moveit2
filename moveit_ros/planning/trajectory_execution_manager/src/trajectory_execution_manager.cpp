@@ -545,7 +545,9 @@ void TrajectoryExecutionManager::updateControllerState(ControllerInformation& ci
     }
   }
   else if (verbose_)
+  {
     RCLCPP_INFO(logger_, "Information for controller '%s' is assumed to be up to date.", ci.name_.c_str());
+  }
 }
 
 void TrajectoryExecutionManager::updateControllersState(const rclcpp::Duration& age)
@@ -1234,10 +1236,14 @@ void TrajectoryExecutionManager::stopExecution(bool auto_clear)
       }
 
       if (auto_clear)
+      {
         clear();
+      }
     }
     else
+    {
       execution_state_mutex_.unlock();
+    }
   }
   else if (execution_thread_)  // just in case we have some thread waiting to be joined from some point in the past, we
                                // join it now
@@ -1307,7 +1313,9 @@ void TrajectoryExecutionManager::clear()
     trajectories_.clear();
   }
   else
+  {
     RCLCPP_FATAL(logger_, "Expecting execution_complete_ to be true!");
+  }
 }
 
 void TrajectoryExecutionManager::executeThread(const ExecutionCompleteCallback& callback,
@@ -1557,7 +1565,9 @@ bool TrajectoryExecutionManager::executePart(std::size_t part_index)
         }
       }
       else
+      {
         handle->waitForExecution();
+      }
 
       // if something made the trajectory stop, we stop this thread too
       if (execution_complete_)
@@ -1769,7 +1779,9 @@ bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::
         }
       }
       else
+      {
         RCLCPP_DEBUG_STREAM(logger_, "Controller " << controller << " is already active");
+      }
     }
     std::set<std::string> diff;
     std::set_difference(joints_to_be_deactivated.begin(), joints_to_be_deactivated.end(),
@@ -1823,10 +1835,14 @@ bool TrajectoryExecutionManager::ensureActiveControllers(const std::vector<std::
         return controller_manager_->switchControllers(controllers_to_activate, controllers_to_deactivate);
       }
       else
+      {
         return false;
+      }
     }
     else
+    {
       return true;
+    }
   }
   else
   {

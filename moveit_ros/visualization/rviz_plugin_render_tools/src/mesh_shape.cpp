@@ -130,10 +130,14 @@ void MeshShape::endTriangles()
       offset_node_->attachObject(entity_);
     }
     else
+    {
       RVIZ_COMMON_LOG_ERROR("Unable to construct triangle mesh");
+    }
   }
   else
+  {
     RVIZ_COMMON_LOG_ERROR("No triangles added");
+  }
 }
 
 void MeshShape::clear()

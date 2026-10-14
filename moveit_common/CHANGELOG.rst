@@ -2,6 +2,17 @@
 Changelog for package moveit_common
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.2 (2026-09-16)
+-------------------
+
+2.15.1 (2026-08-29)
+-------------------
+
+2.15.0 (2026-08-12)
+-------------------
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Contributors: Shivam Maurya
+
 2.14.1 (2025-09-09)
 -------------------
 

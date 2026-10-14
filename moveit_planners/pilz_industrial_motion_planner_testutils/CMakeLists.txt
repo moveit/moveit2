@@ -12,7 +12,7 @@ find_package(moveit_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS)
+find_package(Boost CONFIG REQUIRED COMPONENTS)
 
 # ##############################################################################
 # Build ##

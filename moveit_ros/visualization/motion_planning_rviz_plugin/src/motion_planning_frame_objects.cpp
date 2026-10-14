@@ -183,10 +183,14 @@ void MotionPlanningFrame::sceneScaleChanged(int value)
         planning_display_->queueRenderSceneGeometry();
       }
       else
+      {
         scaled_object_.reset();
+      }
     }
     else
+    {
       scaled_object_.reset();
+    }
   }
 }
 
@@ -362,7 +366,9 @@ void MotionPlanningFrame::selectedCollisionObjectChanged()
           }
         }
         else
+        {
           ui_->object_status->setText("ERROR: '" + sel[0]->text() + "' should be a collision object but it is not");
+        }
       }
       if (update_scene_marker && ui_->tabWidget->tabText(ui_->tabWidget->currentIndex()).toStdString() == TAB_OBJECTS)
       {
@@ -716,10 +722,14 @@ void MotionPlanningFrame::computeLoadSceneButtonClicked()
               planning_scene_publisher_->publish(diff);
             }
             else
+            {
               planning_scene_publisher_->publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
+            }
           }
           else
+          {
             planning_scene_publisher_->publish(static_cast<const moveit_msgs::msg::PlanningScene&>(*scene_m));
+          }
         }
         else
         {
@@ -1052,7 +1062,9 @@ void MotionPlanningFrame::computeExportGeometryAsText(const std::string& path)
       RCLCPP_INFO(logger_, "Saved current scene geometry to '%s'", p.c_str());
     }
     else
+    {
       RCLCPP_WARN(logger_, "Unable to save current scene geometry to '%s'", p.c_str());
+    }
   }
 }
 

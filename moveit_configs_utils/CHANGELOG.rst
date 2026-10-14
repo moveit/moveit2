@@ -2,6 +2,19 @@
 Changelog for package moveit_configs_utils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.2 (2026-09-16)
+-------------------
+* Give the controller spawners a parameter file (`#3851 <https://github.com/moveit/moveit2/issues/3851>`_)
+* Contributors: Nathan Brooks
+
+2.15.1 (2026-08-29)
+-------------------
+
+2.15.0 (2026-08-12)
+-------------------
+* fix setuptools deprecation (`#3540 <https://github.com/moveit/moveit2/issues/3540>`_)
+* Contributors: mosfet80
+
 2.14.1 (2025-09-09)
 -------------------
 * Update pre-commit-config (`#2805 <https://github.com/moveit/moveit2/issues/2805>`_)
