@@ -717,4 +717,3 @@ struct BroadphaseFilterCallback : public btOverlapFilterCallback
 };
 
 }  // namespace collision_detection_bullet
-
