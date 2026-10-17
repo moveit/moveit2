@@ -90,9 +90,7 @@ class ModelBasedPlanningContext : public planning_interface::PlanningContext
 public:
   ModelBasedPlanningContext(const std::string& name, const ModelBasedPlanningContextSpecification& spec);
 
-  ~ModelBasedPlanningContext() override
-  {
-  }
+  ~ModelBasedPlanningContext() override;
 
   void solve(planning_interface::MotionPlanResponse& res) override;
   void solve(planning_interface::MotionPlanDetailedResponse& res) override;

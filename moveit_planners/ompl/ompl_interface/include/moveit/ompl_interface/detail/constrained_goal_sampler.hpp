@@ -54,6 +54,7 @@ class ConstrainedGoalSampler : public ompl::base::GoalLazySamples
 public:
   ConstrainedGoalSampler(const ModelBasedPlanningContext* pc, kinematic_constraints::KinematicConstraintSetPtr ks,
                          constraint_samplers::ConstraintSamplerPtr cs = constraint_samplers::ConstraintSamplerPtr());
+  ~ConstrainedGoalSampler() override;
 
 private:
   bool sampleUsingConstraintSampler(const ompl::base::GoalLazySamples* gls, ompl::base::State* new_goal);
