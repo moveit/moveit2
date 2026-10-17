@@ -460,9 +460,9 @@ void ModelBasedPlanningContext::simplifySolution(double timeout)
   ompl::time::point start = ompl::time::now();
   ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
   registerTerminationCondition(ptc);
+  PtcRegistration ptc_guard(this);
   ompl_simple_setup_->simplifySolution(ptc);
   last_simplify_time_ = ompl_simple_setup_->getLastSimplificationTime();
-  unregisterTerminationCondition();
 }
 
 void ModelBasedPlanningContext::interpolateSolution()
@@ -859,20 +859,20 @@ void ModelBasedPlanningContext::solve(planning_interface::MotionPlanDetailedResp
 const moveit_msgs::msg::MoveItErrorCodes ModelBasedPlanningContext::solve(double timeout, unsigned int count)
 {
   ompl::time::point start = ompl::time::now();
-  preSolve();
 
   moveit_msgs::msg::MoveItErrorCodes result;
   result.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
   try
   {
+    preSolve();
     if (count <= 1 || multi_query_planning_enabled_)  // multi-query planners should always run in single instances
     {
       RCLCPP_DEBUG(getLogger(), "%s: Solving the planning problem once...", name_.c_str());
       ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
       registerTerminationCondition(ptc);
+      PtcRegistration ptc_guard(this);
       std::ignore = ompl_simple_setup_->solve(ptc);
       last_plan_time_ = ompl_simple_setup_->getLastPlanComputationTime();
-      unregisterTerminationCondition();
       // fill the result status code
       result.val = logPlannerStatus(ompl_simple_setup_);
     }
@@ -900,17 +900,18 @@ const moveit_msgs::msg::MoveItErrorCodes ModelBasedPlanningContext::solve(double
 
         ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
         registerTerminationCondition(ptc);
+        PtcRegistration ptc_guard(this);
         if (ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION)
         {
           result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         }
         last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
-        unregisterTerminationCondition();
       }
       else
       {
         ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
         registerTerminationCondition(ptc);
+        PtcRegistration ptc_guard(this);
         int n = count / max_planning_threads_;
         result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
         for (int i = 0; i < n && !ptc(); ++i)
@@ -963,13 +964,11 @@ const moveit_msgs::msg::MoveItErrorCodes ModelBasedPlanningContext::solve(double
                            moveit_msgs::msg::MoveItErrorCodes::FAILURE;
         }
         last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
-        unregisterTerminationCondition();
       }
     }
   }
   catch (...)
   {
-    unregisterTerminationCondition();
     postSolve();
     throw;
   }

@@ -386,6 +386,23 @@ protected:
   void registerTerminationCondition(const ob::PlannerTerminationCondition& ptc);
   void unregisterTerminationCondition();
 
+  struct [[nodiscard]] PtcRegistration
+  {
+    ModelBasedPlanningContext* ctx;
+    explicit PtcRegistration(ModelBasedPlanningContext* context) : ctx(context)
+    {
+    }
+    ~PtcRegistration()
+    {
+      if (ctx)
+      {
+        ctx->unregisterTerminationCondition();
+      }
+    }
+    PtcRegistration(const PtcRegistration&) = delete;
+    PtcRegistration& operator=(const PtcRegistration&) = delete;
+  };
+
   /** \brief Convert OMPL PlannerStatus to moveit_msgs::msg::MoveItErrorCode */
   int32_t logPlannerStatus(const og::SimpleSetupPtr& ompl_simple_setup);
 
