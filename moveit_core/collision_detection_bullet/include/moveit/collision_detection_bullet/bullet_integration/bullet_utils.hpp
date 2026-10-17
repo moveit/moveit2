@@ -48,11 +48,11 @@ namespace collision_detection_bullet
 {
 #define METERS
 
-const btScalar BULLET_MARGIN = 0.0f;
-const btScalar BULLET_SUPPORT_FUNC_TOLERANCE = 0.01f METERS;
-const btScalar BULLET_LENGTH_TOLERANCE = 0.001f METERS;
-const btScalar BULLET_EPSILON = 1e-3f;                   // numerical precision limit
-const btScalar BULLET_DEFAULT_CONTACT_DISTANCE = 0.00f;  // All pairs closer than this distance get reported
+const btScalar BULLET_MARGIN = 0.0d;
+const btScalar BULLET_SUPPORT_FUNC_TOLERANCE = 0.01d METERS;
+const btScalar BULLET_LENGTH_TOLERANCE = 0.001d METERS;
+const btScalar BULLET_EPSILON = 1e-3d;                   // numerical precision limit
+const btScalar BULLET_DEFAULT_CONTACT_DISTANCE = 0.00d;  // All pairs closer than this distance get reported
 const bool BULLET_COMPOUND_USE_DYNAMIC_AABB = true;
 
 MOVEIT_CLASS_FORWARD(CollisionObjectWrapper);
@@ -341,12 +341,12 @@ public:
  *  \param localNormal The support direction to search for in shape local coordinates
  *  \param outsupport The value of the calculated support mapping
  *  \param outpt The computed support point */
-inline void getAverageSupport(const btConvexShape* shape, const btVector3& localNormal, float& outsupport,
+inline void getAverageSupport(const btConvexShape* shape, const btVector3& localNormal, double& outsupport,
                               btVector3& outpt)
 {
   btVector3 pt_sum(0, 0, 0);
-  float pt_count = 0;
-  float max_support = -1000;
+  double pt_count = 0;
+  double max_support = -1000;
 
   const btPolyhedralConvexShape* pshape = dynamic_cast<const btPolyhedralConvexShape*>(shape);
   if (pshape)
@@ -358,7 +358,7 @@ inline void getAverageSupport(const btConvexShape* shape, const btVector3& local
       btVector3 pt;
       pshape->getVertex(i, pt);
 
-      float sup = pt.dot(localNormal);
+      double sup = pt.dot(localNormal);
       if (sup > max_support + BULLET_EPSILON)
       {
         pt_count = 1;
@@ -477,16 +477,16 @@ inline btScalar addCastSingleResult(btManifoldPoint& cp, const btCollisionObject
   btVector3 normal_local1 = normal_world_from_cast * tf_world1.getBasis();
 
   btVector3 pt_local0;
-  float localsup0;
+  double localsup0;
   getAverageSupport(shape->m_shape, normal_local0, localsup0, pt_local0);
   btVector3 pt_world0 = tf_world0 * pt_local0;
   btVector3 pt_local1;
-  float localsup1;
+  double localsup1;
   getAverageSupport(shape->m_shape, normal_local1, localsup1, pt_local1);
   btVector3 pt_world1 = tf_world1 * pt_local1;
 
-  float sup0 = normal_world_from_cast.dot(pt_world0);
-  float sup1 = normal_world_from_cast.dot(pt_world1);
+  double sup0 = normal_world_from_cast.dot(pt_world0);
+  double sup1 = normal_world_from_cast.dot(pt_world1);
 
   // TODO: this section is potentially problematic. think hard about the math
   if (sup0 - sup1 > BULLET_SUPPORT_FUNC_TOLERANCE)
@@ -500,8 +500,8 @@ inline btScalar addCastSingleResult(btManifoldPoint& cp, const btCollisionObject
   else
   {
     const btVector3& pt_on_cast = cast_shape_is_first ? cp.m_positionWorldOnA : cp.m_positionWorldOnB;
-    float l0c = (pt_on_cast - pt_world0).length();
-    float l1c = (pt_on_cast - pt_world1).length();
+    double l0c = (pt_on_cast - pt_world0).length();
+    double l1c = (pt_on_cast - pt_world1).length();
 
     if (l0c + l1c < BULLET_LENGTH_TOLERANCE)
     {
@@ -717,3 +717,4 @@ struct BroadphaseFilterCallback : public btOverlapFilterCallback
 };
 
 }  // namespace collision_detection_bullet
+
