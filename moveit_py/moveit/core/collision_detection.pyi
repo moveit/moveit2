@@ -1,5 +1,6 @@
-import enum
-from typing import Any
+from __future__ import annotations
+
+from typing import Any, ClassVar
 
 import numpy as np
 
@@ -12,10 +13,24 @@ class AllowedCollisionMatrix:
     def set_entry(self, *args, **kwargs) -> Any: ...
 
 
-class BodyType(enum.Enum):
-    ROBOT_LINK: int
-    ROBOT_ATTACHED: int
-    WORLD_OBJECT: int
+class BodyType:
+    ROBOT_LINK: ClassVar[BodyType]
+    ROBOT_ATTACHED: ClassVar[BodyType]
+    WORLD_OBJECT: ClassVar[BodyType]
+    def __init__(self, value: int) -> None: ...
+    def __int__(self) -> int: ...
+    def __index__(self) -> int: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+    @property
+    def name(self) -> str: ...
+    @property
+    def value(self) -> int: ...
+
+
+ROBOT_LINK: BodyType
+ROBOT_ATTACHED: BodyType
+WORLD_OBJECT: BodyType
 
 
 class Contact:

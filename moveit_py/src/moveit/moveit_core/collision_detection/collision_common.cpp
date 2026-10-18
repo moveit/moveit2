@@ -274,7 +274,7 @@ void initCollisionResult(py::module& m)
             self.cost_sources.insert(sources.begin(), sources.end());
           },
           R"(
-          list[CostSource]: Individual cost sources from computed costs, ordered highest cost first.
+          list[CostSource]: Individual cost sources from computed costs, ordered in descending order of total cost (cost * volume) as defined by CostSource.
           )");
 }
 }  // namespace bind_collision_detection
