@@ -34,6 +34,7 @@
 
 /* Author: Ioan Sucan */
 
+#include <cstdint>
 #include <moveit/plan_execution/plan_execution.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <moveit/trajectory_processing/trajectory_tools.hpp>

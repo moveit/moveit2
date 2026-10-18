@@ -34,9 +34,26 @@
 
 /* Author: Bryce Willey */
 
-#include <rclcpp/version.h>
-
+// ament_index_cpp's get_package_share_directory API changed twice.
+// Guard on ament_index_cpp's own version — not rclcpp — because the
+// changes live in ament_index_cpp and its release cadence is independent
+// of rclcpp's.
+//   1.14+ (Rolling on Resolute):
+//     get_package_share_directory.hpp REMOVED, replaced with
+//     get_package_share_path.hpp exposing get_package_share_path(pkg)
+//     returning std::filesystem::path directly.
+//   1.5+ (Jazzy 1.8.4, Kilted 1.11.4, Lyrical 1.13.3, Rolling-on-Noble 1.13.1):
+//     2-arg out-param overload get_package_share_directory(pkg, path)
+//     available; the 1-arg form is deprecated starting in 1.13.
+//   Older (Humble 1.4.1):
+//     only the non-deprecated 1-arg get_package_share_directory(pkg)
+//     returning std::string is available.
+#include <ament_index_cpp/version.h>
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+#include <ament_index_cpp/get_package_share_path.hpp>
+#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 #include <boost/algorithm/string_regex.hpp>
 #include <filesystem>
 #include <geometry_msgs/msg/pose.hpp>
@@ -66,14 +83,14 @@ moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& package_nam
                                                   const std::string& urdf_relative_path,
                                                   const std::string& srdf_relative_path)
 {
-// For Rolling, L-turtle, and newer
-#if RCLCPP_VERSION_GTE(30, 0, 0)
-  std::filesystem::path urdf_path;
-  ament_index_cpp::get_package_share_directory(package_name, urdf_path);
-  urdf_path /= urdf_relative_path;
-  std::filesystem::path srdf_path;
-  ament_index_cpp::get_package_share_directory(package_name, srdf_path);
-  srdf_path /= srdf_relative_path;
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+  const auto urdf_path = ament_index_cpp::get_package_share_path(package_name) / urdf_relative_path;
+  const auto srdf_path = ament_index_cpp::get_package_share_path(package_name) / srdf_relative_path;
+#elif AMENT_INDEX_CPP_VERSION_GTE(1, 5, 0)
+  std::filesystem::path pkg_share;
+  ament_index_cpp::get_package_share_directory(package_name, pkg_share);
+  const auto urdf_path = pkg_share / urdf_relative_path;
+  const auto srdf_path = pkg_share / srdf_relative_path;
 #else
   const auto urdf_path =
       std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name)) / urdf_relative_path;
@@ -107,8 +124,9 @@ moveit::core::RobotModelPtr loadTestingRobotModel(const std::string& robot_name)
 urdf::ModelInterfaceSharedPtr loadModelInterface(const std::string& robot_name)
 {
   const std::string package_name = "moveit_resources_" + robot_name + "_description";
-// For Rolling, L-turtle, and newer
-#if RCLCPP_VERSION_GTE(30, 0, 0)
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+  std::filesystem::path res_path = ament_index_cpp::get_package_share_path(package_name);
+#elif AMENT_INDEX_CPP_VERSION_GTE(1, 5, 0)
   std::filesystem::path res_path;
   ament_index_cpp::get_package_share_directory(package_name, res_path);
 #else
@@ -141,8 +159,9 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
   if (robot_name == "pr2")
   {
     const std::string package_name = "moveit_resources_" + robot_name + "_description";
-// For Rolling, L-turtle, and newer
-#if RCLCPP_VERSION_GTE(30, 0, 0)
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+    std::filesystem::path res_path = ament_index_cpp::get_package_share_path(package_name);
+#elif AMENT_INDEX_CPP_VERSION_GTE(1, 5, 0)
     std::filesystem::path res_path;
     ament_index_cpp::get_package_share_directory(package_name, res_path);
 #else
@@ -153,8 +172,9 @@ srdf::ModelSharedPtr loadSRDFModel(const std::string& robot_name)
   else
   {
     const std::string package_name = "moveit_resources_" + robot_name + "_moveit_config";
-// For Rolling, L-turtle, and newer
-#if RCLCPP_VERSION_GTE(30, 0, 0)
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+    std::filesystem::path res_path = ament_index_cpp::get_package_share_path(package_name);
+#elif AMENT_INDEX_CPP_VERSION_GTE(1, 5, 0)
     std::filesystem::path res_path;
     ament_index_cpp::get_package_share_directory(package_name, res_path);
 #else

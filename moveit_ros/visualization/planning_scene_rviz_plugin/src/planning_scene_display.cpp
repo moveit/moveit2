@@ -50,6 +50,8 @@
 #include <rviz_common/properties/color_property.hpp>
 #include <rviz_common/properties/enum_property.hpp>
 #include <rviz_common/display_context.hpp>
+#include <rviz_common/logging.hpp>
+#include <rviz_common/frame_manager_iface.hpp>
 // For Rolling, Kilted, and newer
 #if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/buffer.hpp>
@@ -413,7 +415,7 @@ void PlanningSceneDisplay::changedPlanningSceneTopic()
     std::string service_name = planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_SERVICE;
     if (!getMoveGroupNS().empty())
       service_name = rclcpp::names::append(getMoveGroupNS(), service_name);
-    auto bg_func = [=]() {
+    auto bg_func = [this, service_name]() {
       if (planning_scene_monitor_->requestPlanningSceneState(service_name))
       {
         addMainLoopJob([this] { onNewPlanningSceneState(); });

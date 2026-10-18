@@ -120,7 +120,7 @@ class CmdGetterAdapter : public XmlTestdataLoader::AbstractCmdGetterAdapter
 public:
   using FuncType = std::function<CmdType(const std::string&)>;
 
-  CmdGetterAdapter(FuncType func) : AbstractCmdGetterAdapter(), func_(func)
+  CmdGetterAdapter(FuncType func) : AbstractCmdGetterAdapter(), func_(std::move(func))
   {
   }
 

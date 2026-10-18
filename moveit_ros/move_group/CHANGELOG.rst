@@ -2,6 +2,28 @@
 Changelog for package moveit_ros_move_group
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.2 (2026-09-16)
+-------------------
+* Fix clang-tidy issues
+* Contributors: Robert Haschke
+
+2.15.1 (2026-08-29)
+-------------------
+* Fix CI on Ubuntu 26.04 (`#3818 <https://github.com/moveit/moveit2/issues/3818>`_)
+* Avoid using deprecated FindBoost.cmake module
+* Contributors: Robert Haschke
+
+2.15.0 (2026-08-12)
+-------------------
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Remove use of ament_target_dependencies: Take 2 (`#3726 <https://github.com/moveit/moveit2/issues/3726>`_)
+  ament_target_dependencies is replaced by exported CMake targets. Downstream
+  packages should link the namespaced targets (e.g. moveit_ros_planning::moveit_ros_planning).
+* CMake: remove boost system (`#3727 <https://github.com/moveit/moveit2/issues/3727>`_)
+* Replace rclcpp::Rate with rclcpp::WallRate (`#3558 <https://github.com/moveit/moveit2/issues/3558>`_)
+* Fix deprecations in image_common and tf2_ros (`#3567 <https://github.com/moveit/moveit2/issues/3567>`_)
+* Contributors: Cong Liu, Guilhem Saurel, Nathan Brooks, Shivam Maurya
+
 2.14.1 (2025-09-09)
 -------------------
 * Fix link to fmt::fmt imported target (`#3507 <https://github.com/moveit/moveit2/issues/3507>`_)

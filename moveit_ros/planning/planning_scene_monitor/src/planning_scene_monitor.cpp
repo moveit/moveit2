@@ -705,7 +705,9 @@ void PlanningSceneMonitor::updatePublishSettings(bool publish_geom_updates, bool
     startPublishingPlanningScene(event);
   }
   else
+  {
     stopPublishingPlanningScene();
+  }
 }
 
 void PlanningSceneMonitor::newPlanningSceneCallback(const moveit_msgs::msg::PlanningScene::ConstSharedPtr& scene)
@@ -1391,7 +1393,9 @@ void PlanningSceneMonitor::startStateMonitor(const std::string& joint_states_top
     }
   }
   else
+  {
     RCLCPP_ERROR(logger_, "Cannot monitor robot state because planning scene is not configured");
+  }
 }
 
 void PlanningSceneMonitor::stopStateMonitor()

@@ -37,6 +37,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <moveit/macros/class_forward.hpp>
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/utils/moveit_error_code.hpp>

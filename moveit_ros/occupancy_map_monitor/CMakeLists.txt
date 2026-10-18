@@ -17,7 +17,7 @@ find_package(octomap REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(Boost REQUIRED)
+find_package(Boost CONFIG REQUIRED)
 
 include_directories(include)
 include_directories(SYSTEM ${EIGEN3_INCLUDE_DIRS} ${X11_INCLUDE_DIR})

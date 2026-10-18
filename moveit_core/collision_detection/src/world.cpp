@@ -98,10 +98,14 @@ void World::addToObject(const std::string& object_id, const Eigen::Isometry3d& p
     obj->pose_ = pose;
   }
   else
+  {
     ensureUnique(obj);
+  }
 
   for (std::size_t i = 0; i < shapes.size(); ++i)
+  {
     addToObjectInternal(obj, shapes[i], shape_poses[i]);
+  }
 
   notify(obj, Action(action));
 }
@@ -130,7 +134,7 @@ World::ObjectConstPtr World::getObject(const std::string& object_id) const
 
 void World::ensureUnique(ObjectPtr& obj)
 {
-  if (obj && !obj.unique())
+  if (obj && obj.use_count() != 1)
     obj = std::make_shared<Object>(*obj);
 }
 

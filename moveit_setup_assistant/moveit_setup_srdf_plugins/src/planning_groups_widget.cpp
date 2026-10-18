@@ -619,12 +619,18 @@ void PlanningGroupsWidget::deleteGroup()
     // Get the user custom properties of the currently selected row
     PlanGroupType plan_group = item->data(0, Qt::UserRole).value<PlanGroupType>();
     if (plan_group.group_)
+    {
       group_to_delete = plan_group.group_->name_;
+    }
   }
   else
+  {
     current_edit_group_.clear();
+  }
   if (group_to_delete.empty())
+  {
     return;
+  }
 
   // Confirm user wants to delete group
   if (QMessageBox::question(this, "Confirm Group Deletion",

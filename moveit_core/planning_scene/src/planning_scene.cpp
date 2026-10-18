@@ -1068,7 +1068,9 @@ void PlanningScene::saveGeometryToStream(std::ostream& out) const
             out << c.r << ' ' << c.g << ' ' << c.b << ' ' << c.a << '\n';
           }
           else
+          {
             out << "0 0 0 0" << '\n';
+          }
         }
 
         // Write subframes
@@ -1231,7 +1233,9 @@ void PlanningScene::setCurrentState(const moveit_msgs::msg::RobotState& state)
     moveit::core::robotStateMsgToRobotState(getTransforms(), state_no_attached, robot_state_.value());
   }
   else
+  {
     moveit::core::robotStateMsgToRobotState(*scene_transforms_.value(), state_no_attached, robot_state_.value());
+  }
 
   for (std::size_t i = 0; i < state.attached_collision_objects.size(); ++i)
   {
@@ -1868,7 +1872,9 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
                  geometry_msgs::msg::Pose());  // Empty shape pose => Identity
         }
         else
+        {
           append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
+        }
       }
     }
     else
