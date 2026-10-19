@@ -113,7 +113,7 @@ protected:
 
 TEST_F(PlanningSceneInterfaceTest, KnownObjectNamesInROIWithPrimitive)
 {
-  // GIVEN a box at (1, 0, 0), with its primitive at the object's origin
+  // GIVEN a box at (1, 0, 0), with its primitive at (0.5, 0, 0) relative to it
   moveit_msgs::msg::CollisionObject box;
   box.header.frame_id = "world";
   box.id = "box";
@@ -121,13 +121,14 @@ TEST_F(PlanningSceneInterfaceTest, KnownObjectNamesInROIWithPrimitive)
   box.primitives.resize(1);
   box.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;
   box.primitives[0].dimensions = { 0.1, 0.1, 0.1 };
-  box.primitive_poses = { makePose(0.0, 0.0, 0.0) };
+  box.primitive_poses = { makePose(0.5, 0.0, 0.0) };
   mock_services_->collision_objects = { box };
 
-  // THEN it is found in a ROI around (1, 0, 0), but not around the origin
-  EXPECT_EQ(planning_scene_interface_->getKnownObjectNamesInROI(0.9, -0.1, -0.1, 1.1, 0.1, 0.1),
+  // THEN it is found in a ROI around (1.5, 0, 0), but not around (1, 0, 0) nor (0.5, 0, 0)
+  EXPECT_EQ(planning_scene_interface_->getKnownObjectNamesInROI(1.4, -0.1, -0.1, 1.6, 0.1, 0.1),
             std::vector<std::string>({ "box" }));
-  EXPECT_TRUE(planning_scene_interface_->getKnownObjectNamesInROI(-0.1, -0.1, -0.1, 0.1, 0.1, 0.1).empty());
+  EXPECT_TRUE(planning_scene_interface_->getKnownObjectNamesInROI(0.9, -0.1, -0.1, 1.1, 0.1, 0.1).empty());
+  EXPECT_TRUE(planning_scene_interface_->getKnownObjectNamesInROI(0.4, -0.1, -0.1, 0.6, 0.1, 0.1).empty());
 }
 
 TEST_F(PlanningSceneInterfaceTest, KnownObjectNamesInROIWithMesh)
