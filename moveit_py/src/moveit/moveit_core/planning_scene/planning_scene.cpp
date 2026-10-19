@@ -271,7 +271,8 @@ void initPlanningScene(py::module& m)
       .def("is_state_valid",
            py::overload_cast<const moveit::core::RobotState&, const std::string&, bool>(
                &planning_scene::PlanningScene::isStateValid, py::const_),
-           py::arg("robot_state"), py::arg("joint_model_group_name"), py::arg("verbose") = false)
+           py::arg("robot_state"), py::arg("joint_model_group_name"), py::arg("verbose") = false,
+           py::call_guard<py::gil_scoped_release>())
       .def("is_state_colliding",
            py::overload_cast<const std::string&, bool>(&planning_scene::PlanningScene::isStateColliding),
            py::arg("joint_model_group_name"), py::arg("verbose") = false,
@@ -283,7 +284,8 @@ void initPlanningScene(py::module& m)
                verbose (bool): If true, print the link names of the links in collision.
            Returns:
                bool: True if the robot state is in collision, false otherwise.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("is_state_colliding",
            py::overload_cast<const moveit::core::RobotState&, const std::string&, bool>(
@@ -298,7 +300,8 @@ void initPlanningScene(py::module& m)
                verbose (bool): If true, print the link names of the links in collision.
            Returns:
                bool: True if the robot state is in collision, false otherwise.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("is_state_constrained",
            py::overload_cast<const moveit::core::RobotState&, const moveit_msgs::msg::Constraints&, bool>(
@@ -331,7 +334,8 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if the path is valid otherwise false.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       // TODO (peterdavidfagan): remove collision result from input parameters and write separate binding code.
       // TODO (peterdavidfagan): consider merging check_collision and check_collision_unpadded into one function with unpadded_param
@@ -348,7 +352,8 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("check_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
@@ -364,7 +369,8 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("check_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
@@ -382,7 +388,8 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
       // DEPRECATED! Use check_collision instead
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&>(
