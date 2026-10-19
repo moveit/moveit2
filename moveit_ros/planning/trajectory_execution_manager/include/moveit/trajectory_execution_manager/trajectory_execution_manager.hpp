@@ -49,6 +49,7 @@
 #include <memory>
 #include <deque>
 #include <thread>
+#include <atomic>
 
 #include <moveit_trajectory_execution_manager_export.h>
 
@@ -324,7 +325,7 @@ private:
   int current_context_;
   std::vector<rclcpp::Time> time_index_;  // used to find current expected trajectory location
   mutable std::mutex time_index_mutex_;
-  bool execution_complete_;
+  std::atomic<bool> execution_complete_;
 
   std::vector<TrajectoryExecutionContext*> trajectories_;
 

@@ -2,6 +2,14 @@
 Changelog for package moveit_core
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.2 (2026-09-16)
+-------------------
+* Fix FloatingJointModel::getMaximumExtent(): cover full rotation range (`#3854 <https://github.com/moveit/moveit2/issues/3854>`_)
+* Fix logger node teardown before RMW shutdown (`#3833 <https://github.com/moveit/moveit2/issues/3833>`_)
+* Cleanup boost dependencies
+* Fix clang-tidy issues
+* Contributors: Dennis Lanov, Puja Chaudhury, Robert Haschke
+
 2.15.1 (2026-08-29)
 -------------------
 * Fix CI on Ubuntu 26.04 (`#3818 <https://github.com/moveit/moveit2/issues/3818>`_)

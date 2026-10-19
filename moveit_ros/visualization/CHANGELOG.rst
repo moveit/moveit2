@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.2 (2026-09-16)
+-------------------
+* Fix clang-tidy issues
+* Contributors: Robert Haschke
+
 2.15.1 (2026-08-29)
 -------------------
 * Modernize Qt signal-slot connections to use function pointers (`#3823 <https://github.com/moveit/moveit2/issues/3823>`_)

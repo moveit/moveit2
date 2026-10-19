@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_trajectory_cache
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.2 (2026-09-16)
+-------------------
+* Give the controller spawners a parameter file (`#3851 <https://github.com/moveit/moveit2/issues/3851>`_)
+* Fix clang-tidy issues
+* Contributors: Nathan Brooks, Robert Haschke
+
 2.15.1 (2026-08-29)
 -------------------
 
