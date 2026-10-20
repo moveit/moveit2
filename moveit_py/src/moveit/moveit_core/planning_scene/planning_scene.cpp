@@ -453,7 +453,8 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("check_self_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
@@ -469,7 +470,8 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in self collision otherwise false.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("check_self_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
@@ -487,7 +489,8 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in self collision otherwise false.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("save_geometry_to_file", &saveGeometryToFile, py::arg("file_path_and_name"),
            R"(
