@@ -10,6 +10,13 @@ install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 install(DIRECTORY test/data test/launch
         DESTINATION share/${PROJECT_NAME}/rdf_loader/test)
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_synchronized_string_parameter
+                  test/test_synchronized_string_parameter.cpp)
+  target_link_libraries(test_synchronized_string_parameter moveit_rdf_loader)
+endif()
+
 # TODO(sjahr) Debug and re-enable if(BUILD_TESTING)
 # find_package(ament_cmake_gtest REQUIRED) find_package(ros_testing REQUIRED)
 #
