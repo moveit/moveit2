@@ -1,6 +1,20 @@
 ###############################################
 # Modify all parameters related to servoing here
 ###############################################
+# NOTE: this is not a standalone ROS 2 parameter file (there is no node name /
+# ros__parameters wrapper). The demo launch files load it through
+# launch_param_builder's ParameterBuilder("moveit_servo"), which nests every key
+# under the "moveit_servo" namespace that servo's parameter listener expects
+# (servo_node.cpp: ParamListener(node_, "moveit_servo")). Passing this file
+# directly via `parameters=[...]` / --params-file will not work.
+#
+# NOTE: `smoothing_filter_plugin_name` below selects
+# online_signal_smoothing::AccelerationLimitedPlugin, which additionally
+# requires an `update_period` parameter. That parameter cannot live in this
+# file: the plugin reads it from the node's root namespace
+# (acceleration_filter.cpp: ParamListener(node_), no prefix), while everything
+# in this file lands under `moveit_servo.`. Supply it as a separate node-level
+# parameter, as every demo launch file does:  {"update_period": 0.01}
 
 # Optionally override Servo's internal velocity scaling when near singularity or collision (0.0 = use internal velocity scaling)
 # override_velocity_scaling_factor = 0.0 # valid range [0.0:1.0]
