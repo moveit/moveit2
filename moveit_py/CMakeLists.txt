@@ -98,6 +98,15 @@ if(BUILD_TESTING)
       WORKING_DIRECTORY
       "${CMAKE_SOURCE_DIR}")
   endforeach()
+  ament_add_pytest_test(
+    test_moveit_py_shutdown
+    test/integration/test_shutdown.py
+    APPEND_ENV
+    PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}
+    TIMEOUT
+    180
+    WORKING_DIRECTORY
+    "${CMAKE_SOURCE_DIR}")
 endif()
 
 ament_export_targets(moveit_py_utilsTargets HAS_LIBRARY_TARGET)
