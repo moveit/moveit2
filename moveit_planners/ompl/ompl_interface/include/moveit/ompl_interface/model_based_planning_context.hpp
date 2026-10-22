@@ -90,9 +90,7 @@ class ModelBasedPlanningContext : public planning_interface::PlanningContext
 public:
   ModelBasedPlanningContext(const std::string& name, const ModelBasedPlanningContextSpecification& spec);
 
-  ~ModelBasedPlanningContext() override
-  {
-  }
+  ~ModelBasedPlanningContext() override;
 
   void solve(planning_interface::MotionPlanResponse& res) override;
   void solve(planning_interface::MotionPlanDetailedResponse& res) override;
@@ -387,6 +385,23 @@ protected:
 
   void registerTerminationCondition(const ob::PlannerTerminationCondition& ptc);
   void unregisterTerminationCondition();
+
+  struct [[nodiscard]] PtcRegistration
+  {
+    ModelBasedPlanningContext* ctx;
+    explicit PtcRegistration(ModelBasedPlanningContext* context) : ctx(context)
+    {
+    }
+    ~PtcRegistration()
+    {
+      if (ctx)
+      {
+        ctx->unregisterTerminationCondition();
+      }
+    }
+    PtcRegistration(const PtcRegistration&) = delete;
+    PtcRegistration& operator=(const PtcRegistration&) = delete;
+  };
 
   /** \brief Convert OMPL PlannerStatus to moveit_msgs::msg::MoveItErrorCode */
   int32_t logPlannerStatus(const og::SimpleSetupPtr& ompl_simple_setup);
