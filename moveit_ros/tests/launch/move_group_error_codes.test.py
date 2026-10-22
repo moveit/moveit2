@@ -1,0 +1,172 @@
+"""Launch integration tests for MoveItErrorCodes returned by move_group actions."""
+
+import os
+import launch
+import unittest
+import launch_ros
+import launch_testing
+from launch.actions import RegisterEventHandler, TimerAction
+from launch.event_handlers import OnProcessExit
+from ament_index_python.packages import get_package_share_directory
+from moveit_configs_utils import MoveItConfigsBuilder
+
+
+def generate_test_description():
+    """Start move_group with Pilz sequence capabilities and run the error-code gtest."""
+    moveit_config = (
+        MoveItConfigsBuilder("moveit_resources_panda")
+        .robot_description(
+            file_path="config/panda.urdf.xacro",
+        )
+        .robot_description_semantic(file_path="config/panda.srdf")
+        .planning_scene_monitor(
+            publish_robot_description=True, publish_robot_description_semantic=True
+        )
+        .trajectory_execution(file_path="config/gripper_moveit_controllers.yaml")
+        .planning_pipelines(
+            pipelines=["ompl", "chomp", "pilz_industrial_motion_planner", "stomp"]
+        )
+        .to_moveit_configs()
+    )
+
+    move_group_params = moveit_config.to_dict()
+    move_group_params["capabilities"] = (
+        "pilz_industrial_motion_planner/MoveGroupSequenceAction "
+        "pilz_industrial_motion_planner/MoveGroupSequenceService"
+    )
+
+    move_group_node = launch_ros.actions.Node(
+        package="moveit_ros_move_group",
+        executable="move_group",
+        output="screen",
+        parameters=[move_group_params],
+        arguments=["--ros-args", "--log-level", "info"],
+    )
+
+    ros2_controllers_path = os.path.join(
+        get_package_share_directory("moveit_resources_panda_moveit_config"),
+        "config",
+        "ros2_controllers.yaml",
+    )
+    ros2_control_node = launch_ros.actions.Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[ros2_controllers_path],
+        remappings=[
+            ("/controller_manager/robot_description", "/robot_description"),
+        ],
+        output="screen",
+    )
+
+    joint_state_broadcaster_spawner = launch_ros.actions.Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "joint_state_broadcaster",
+            "--controller-manager",
+            "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
+        ],
+        output="screen",
+    )
+
+    panda_arm_controller_spawner = launch_ros.actions.Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "panda_arm_controller",
+            "-c",
+            "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
+        ],
+    )
+
+    panda_hand_controller_spawner = launch_ros.actions.Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "panda_hand_controller",
+            "-c",
+            "/controller_manager",
+            "--param-file",
+            ros2_controllers_path,
+        ],
+    )
+
+    static_tf_node = launch_ros.actions.Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        name="static_transform_publisher",
+        output="log",
+        arguments=["--frame-id", "world", "--child-frame-id", "panda_link0"],
+    )
+
+    robot_state_publisher = launch_ros.actions.Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="robot_state_publisher",
+        output="both",
+        parameters=[moveit_config.robot_description],
+    )
+
+    move_group_error_codes_gtest = launch_ros.actions.Node(
+        executable=launch.substitutions.PathJoinSubstitution(
+            [
+                launch.substitutions.LaunchConfiguration("test_binary_dir"),
+                "move_group_error_codes_test",
+            ]
+        ),
+        parameters=[moveit_config.to_dict()],
+        output="screen",
+    )
+
+    return launch.LaunchDescription(
+        [
+            launch.actions.DeclareLaunchArgument(
+                name="test_binary_dir",
+                description="Binary directory of package "
+                "containing test executables",
+            ),
+            static_tf_node,
+            robot_state_publisher,
+            move_group_node,
+            ros2_control_node,
+            joint_state_broadcaster_spawner,
+            panda_arm_controller_spawner,
+            panda_hand_controller_spawner,
+            RegisterEventHandler(
+                OnProcessExit(
+                    target_action=joint_state_broadcaster_spawner,
+                    on_exit=[
+                        TimerAction(period=5.0, actions=[move_group_error_codes_gtest]),
+                    ],
+                )
+            ),
+            launch_testing.actions.ReadyToTest(),
+        ]
+    ), {
+        "move_group_error_codes_gtest": move_group_error_codes_gtest,
+    }
+
+
+class TestGTestWaitForCompletion(unittest.TestCase):
+    """Wait for the gtest process to finish."""
+
+    def test_gtest_run_complete(self, move_group_error_codes_gtest):
+        """Block until move_group_error_codes_test exits."""
+        self.proc_info.assertWaitForShutdown(
+            move_group_error_codes_gtest, timeout=4000.0
+        )
+
+
+@launch_testing.post_shutdown_test()
+class TestGTestProcessPostShutdown(unittest.TestCase):
+    """Check gtest exit status after launch shutdown."""
+
+    def test_gtest_pass(self, proc_info, move_group_error_codes_gtest):
+        """Assert the gtest process exited with a success code."""
+        launch_testing.asserts.assertExitCodes(
+            proc_info, process=move_group_error_codes_gtest
+        )
