@@ -100,6 +100,24 @@ TEST(PlanningScene, fillInPrimitivePose)
       << "scene did not implicitly fill in identity pose for only primitive";
 }
 
+TEST(PlanningScene, DefaultsEmptyTouchLinksToAttachedLink)
+{
+  auto robot_model = moveit::core::RobotModelBuilder("empty_robot", "base_link").build();
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::AttachedCollisionObject object;
+  object.link_name = robot_model->getModelFrame();
+  object.object.header.frame_id = robot_model->getModelFrame();
+  object.object.id = "attached_sphere";
+  object.object.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(object.object);
+
+  ASSERT_TRUE(scene.processAttachedCollisionObjectMsg(object));
+  const auto* attached_body = scene.getCurrentState().getAttachedBody(object.object.id);
+  ASSERT_NE(attached_body, nullptr);
+  EXPECT_EQ(attached_body->getTouchLinks(), (std::set<std::string>{ object.link_name }));
+}
+
 TEST(PlanningScene, rememberMetadataWhenAttached)
 {
   moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());

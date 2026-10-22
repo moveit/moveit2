@@ -59,6 +59,22 @@ public:
   }
 };
 
+class AlwaysFailureRequestAdapter : public planning_interface::PlanningRequestAdapter
+{
+public:
+  std::string getDescription() const override
+  {
+    return "AlwaysFailureRequestAdapter";
+  }
+
+  moveit::core::MoveItErrorCode adapt(const planning_scene::PlanningSceneConstPtr&,
+                                      planning_interface::MotionPlanRequest&) const override
+  {
+    return moveit::core::MoveItErrorCode(moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID, "test failure",
+                                         getDescription());
+  }
+};
+
 /// @brief A dummy response adapter that does nothing and is always successful
 class AlwaysSuccessResponseAdapter : public planning_interface::PlanningResponseAdapter
 {
@@ -131,6 +147,8 @@ public:
 
 CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test::DummyPlannerManager, planning_interface::PlannerManager)
 CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test::AlwaysSuccessRequestAdapter,
+                            planning_interface::PlanningRequestAdapter)
+CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test::AlwaysFailureRequestAdapter,
                             planning_interface::PlanningRequestAdapter)
 CLASS_LOADER_REGISTER_CLASS(planning_pipeline_test::AlwaysSuccessResponseAdapter,
                             planning_interface::PlanningResponseAdapter)

@@ -277,7 +277,7 @@ bool PlanningPipeline::generatePlan(const planning_scene::PlanningSceneConstPtr&
       assert(req_adapter);
       RCLCPP_INFO(node_->get_logger(), "Calling PlanningRequestAdapter '%s'", req_adapter->getDescription().c_str());
       const auto status = req_adapter->adapt(planning_scene, mutable_request);
-      res.error_code = status.val;
+      res.error_code = status;
       // Publish progress
       publishPipelineState(mutable_request, res, req_adapter->getDescription());
       // If adapter does not succeed, break chain and return false

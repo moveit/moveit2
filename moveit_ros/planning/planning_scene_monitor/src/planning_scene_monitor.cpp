@@ -1340,16 +1340,10 @@ void PlanningSceneMonitor::startWorldGeometryMonitor(const std::string& collisio
 
 void PlanningSceneMonitor::stopWorldGeometryMonitor()
 {
-  if (collision_object_subscriber_)
-  {
+  if (collision_object_subscriber_ || planning_scene_world_subscriber_)
     RCLCPP_INFO(logger_, "Stopping world geometry monitor");
-    collision_object_subscriber_.reset();
-  }
-  else if (planning_scene_world_subscriber_)
-  {
-    RCLCPP_INFO(logger_, "Stopping world geometry monitor");
-    planning_scene_world_subscriber_.reset();
-  }
+  collision_object_subscriber_.reset();
+  planning_scene_world_subscriber_.reset();
   if (octomap_monitor_)
     octomap_monitor_->stopMonitor();
 }
