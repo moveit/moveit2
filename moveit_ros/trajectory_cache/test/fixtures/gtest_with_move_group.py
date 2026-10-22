@@ -66,12 +66,43 @@ def generate_test_description():
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
+                cmd=[
+                    "ros2",
+                    "run",
+                    "controller_manager",
+                    "spawner",
+                    controller,
+                    "--param-file",
+                    ros2_controllers_path,
+                ],
                 output="log",
             )
         ]
 
+<<<<<<< HEAD
+=======
+    # Spawn the joint_state_broadcaster separately so the test binary can be
+    # gated on its activation. The spawner process exits 0 only once the
+    # controller is loaded, configured, and activated, at which point
+    # /joint_states is guaranteed to be publishing. Gating the test on this
+    # event (instead of a fixed wall-clock timer) avoids a startup race where
+    # the test runs before joint_states exists and
+    # MoveGroupInterface::getCurrentState() fails with
+    # "Failed to fetch current robot state".
+    joint_state_broadcaster_spawner = ExecuteProcess(
+        cmd=[
+            "ros2",
+            "run",
+            "controller_manager",
+            "spawner",
+            "joint_state_broadcaster",
+            "--param-file",
+            ros2_controllers_path,
+        ],
+        output="log",
+    )
+
+>>>>>>> 4bdbde2 (Give the controller spawners a parameter file (#3851))
     gtest_node = Node(
         executable=PathJoinSubstitution(
             [
