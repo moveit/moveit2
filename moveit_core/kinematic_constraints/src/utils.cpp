@@ -85,8 +85,9 @@ moveit_msgs::msg::Constraints mergeConstraints(const moveit_msgs::msg::Constrain
         if (low > high)
         {
           RCLCPP_ERROR(getLogger(),
-                       "Attempted to merge incompatible constraints for joint '%s'. Discarding constraint.",
+                       "Attempted to merge incompatible constraints for joint '%s'. Keeping the first constraint.",
                        a.joint_name.c_str());
+          r.joint_constraints.push_back(a);
         }
         else
         {
