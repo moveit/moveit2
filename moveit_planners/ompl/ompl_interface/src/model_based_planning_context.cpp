@@ -403,6 +403,9 @@ void ModelBasedPlanningContext::useConfig()
     cfg.erase(it);
   }
 
+  // 'pad_self_collisions' is consumed by the StateValidityChecker, not by the planner
+  cfg.erase("pad_self_collisions");
+
   // remove the 'type' parameter; the rest are parameters for the planner itself
   it = cfg.find("type");
   if (it == cfg.end())
