@@ -27,3 +27,12 @@ endif()
 # moveit_planning_scene_interface_python DESTINATION bin)
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning_interface)
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_add_gtest(planning_scene_interface_test
+                  test/planning_scene_interface_test.cpp)
+  target_link_libraries(planning_scene_interface_test
+                        moveit_planning_scene_interface)
+endif()
