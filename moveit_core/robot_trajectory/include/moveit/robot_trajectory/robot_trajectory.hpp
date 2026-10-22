@@ -310,6 +310,16 @@ public:
    *  @param The waypoint index before the supplied duration.
    *  @param The waypoint index after (or equal to) the supplied duration.
    *  @param The progress (0 to 1) between the two waypoints, based on time (not based on joint distances).
+   *
+   *  General Case:
+   *  - Usually after == before + 1, except in the edge cases listed below.
+   *  - blend 0.0 implies being exactly at the before waypoint.
+   *  - blend 1.0 implies being exactly at the after waypoint.
+   *  Edge Cases:
+   *  - Empty Trajectory: before == 0, after == 0, blend == 0.0
+   *  - Negative Duration: before == 0, after == 0, blend == 0.0
+   *  - Duration > Total Duration: before == size() - 1, after == size() - 1, blend == 1.0
+   *  - Single Waypoint Trajectory: before == 0, after == 0, blend == 1.0
    */
   void findWayPointIndicesForDurationAfterStart(double duration, int& before, int& after, double& blend) const;
 
