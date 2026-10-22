@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterable, Text, Optional
+from typing import Any, Optional, Sequence, Text
 
 from launch.frontend import expose_substitution
 from launch.launch_context import LaunchContext
@@ -7,6 +7,10 @@ from launch.some_substitutions_type import SomeSubstitutionsType
 from launch.substitution import Substitution
 from launch.utilities import normalize_to_list_of_substitutions
 from launch_param_builder import load_xacro
+
+
+def _describe(subs: SomeSubstitutionsType) -> Text:
+    return " + ".join(s.describe() for s in normalize_to_list_of_substitutions(subs))
 
 
 @expose_substitution("xacro")
@@ -29,13 +33,15 @@ class Xacro(Substitution):
             self.__mappings = mappings
 
     @classmethod
-    def parse(cls, data: Iterable[SomeSubstitutionsType]):
+    def parse(
+        cls, data: Sequence[SomeSubstitutionsType]
+    ) -> tuple[type["Xacro"], dict[str, Any]]:
         """Parse `XacroSubstitution` substitution."""
         if len(data) != 1:
             raise TypeError(
                 "xacro substitution expects only support one argument use 'command' subsititutoin for parsing args"
             )
-        kwargs = {}
+        kwargs: dict[str, Any] = {}
         kwargs["file_path"] = data[0]
         return cls, kwargs
 
@@ -52,7 +58,7 @@ class Xacro(Substitution):
     def describe(self) -> Text:
         """Return a description of this substitution as a string."""
         mappings_formatted = ", ".join(
-            [f"{k.describe()}:={v.describe()}" for k, v in self.mappings.items()]
+            [f"{_describe(k)}:={_describe(v)}" for k, v in self.mappings.items()]
         )
         return f"Xacro(file_path = {self.file_path}, mappings = {mappings_formatted})"
 
@@ -63,7 +69,7 @@ class Xacro(Substitution):
         from launch.utilities import perform_substitutions
 
         expanded_file_path = perform_substitutions(context, self.__file_path)
-        expanded_mappings = {}
+        expanded_mappings: dict[str, str] = {}
         for key, value in self.__mappings.items():
             normalized_key = normalize_to_list_of_substitutions(key)
             normalized_value = normalize_to_list_of_substitutions(value)
