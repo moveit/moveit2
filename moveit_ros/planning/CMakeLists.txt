@@ -17,6 +17,7 @@ find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(srdfdom REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -70,6 +71,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     pluginlib
     rclcpp
     rclcpp_components
+    sensor_msgs
     srdfdom
     std_msgs
     tf2
@@ -100,8 +102,13 @@ add_subdirectory(robot_model_loader)
 add_subdirectory(srdf_publisher_node)
 add_subdirectory(trajectory_execution_manager)
 
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_ros_planning::moveit_ros_planning to link all libraries at once.
+add_library(moveit_ros_planning INTERFACE)
+target_link_libraries(moveit_ros_planning INTERFACE ${THIS_PACKAGE_LIBRARIES})
+
 install(
-  TARGETS ${THIS_PACKAGE_LIBRARIES}
+  TARGETS moveit_ros_planning ${THIS_PACKAGE_LIBRARIES}
   EXPORT moveit_ros_planningTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

@@ -275,8 +275,8 @@ void DefaultCollisionsWidget::loadCollisionTable()
     linear_model->setParent(sorted_model);
     matrix_model->setParent(linear_model);
   }
-  connect(link_name_filter_, SIGNAL(textChanged(QString)), model, SLOT(setFilterRegExp(QString)));
-  QMetaObject::invokeMethod(model, "setFilterRegExp", Q_ARG(QString, link_name_filter_->text()));
+  connect(link_name_filter_, SIGNAL(textChanged(QString)), model, SLOT(setFilterRegularExpression(QString)));
+  QMetaObject::invokeMethod(model, "setFilterRegularExpression", Q_ARG(QString, link_name_filter_->text()));
 
   collision_table_->setModel(model);
   // delete old and remember new model

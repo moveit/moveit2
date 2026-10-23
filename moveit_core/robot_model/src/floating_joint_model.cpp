@@ -109,7 +109,7 @@ double FloatingJointModel::getMaximumExtent(const Bounds& other_bounds) const
   double dx = other_bounds[0].max_position_ - other_bounds[0].min_position_;
   double dy = other_bounds[1].max_position_ - other_bounds[1].min_position_;
   double dz = other_bounds[2].max_position_ - other_bounds[2].min_position_;
-  return sqrt(dx * dx + dy * dy + dz * dz) + M_PI * 0.5 * angular_distance_weight_;
+  return sqrt(dx * dx + dy * dy + dz * dz) + M_PI * angular_distance_weight_;
 }
 
 double FloatingJointModel::distance(const double* values1, const double* values2) const
@@ -201,7 +201,9 @@ bool FloatingJointModel::normalizeRotation(double* values) const
     return true;
   }
   else
+  {
     return false;
+  }
 }
 
 unsigned int FloatingJointModel::getStateSpaceDimension() const

@@ -564,7 +564,9 @@ void RobotPosesWidget::doneEditing()
     }
   }
   else
+  {
     searched_data = current_edit_pose_;  // overwrite edited pose
+  }
 
   // Save the new pose name or create the new pose ----------------------------
   bool is_new = false;

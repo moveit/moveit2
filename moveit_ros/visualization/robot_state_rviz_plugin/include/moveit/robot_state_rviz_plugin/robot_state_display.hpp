@@ -36,6 +36,8 @@
 
 #pragma once
 
+#include <rclcpp/version.h>
+
 #include <rviz_common/display.hpp>
 
 #ifndef Q_MOC_RUN
@@ -44,6 +46,8 @@
 #include <moveit_msgs/msg/display_robot_state.hpp>
 #include <rclcpp/rclcpp.hpp>
 #endif
+
+#include <chrono>
 
 namespace rviz_common
 {
@@ -71,7 +75,17 @@ public:
   ~RobotStateDisplay() override;
 
   void load(const rviz_common::Config& config) override;
+
+  // For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  using rviz_common::Display::update;
+  // `using` handles update(float, float) deprecation warning and redirect
+  void update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt) override;
+// For Kilted and older
+#else
   void update(float wall_dt, float ros_dt) override;
+#endif
+
   void reset() override;
 
   const moveit::core::RobotModelConstPtr& getRobotModel() const

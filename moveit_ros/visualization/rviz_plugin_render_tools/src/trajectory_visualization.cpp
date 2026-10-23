@@ -55,9 +55,11 @@
 #include <rviz_common/properties/string_property.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/window_manager_interface.hpp>
+#include <rviz_common/logging.hpp>
 
 #include <rclcpp/qos.hpp>
 
+#include <cmath>
 #include <string>
 
 using namespace std::placeholders;
@@ -419,7 +421,7 @@ void TrajectoryVisualization::dropTrajectory()
   drop_displaying_trajectory_ = true;
 }
 
-void TrajectoryVisualization::update(double wall_dt, double sim_dt)
+void TrajectoryVisualization::update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds sim_dt)
 {
   if (drop_displaying_trajectory_)
   {
@@ -475,11 +477,11 @@ void TrajectoryVisualization::update(double wall_dt, double sim_dt)
     int waypoint_count = displaying_trajectory_message_->getWayPointCount();
     if (use_sim_time_property_->getBool())
     {
-      current_state_time_ += sim_dt;
+      current_state_time_ += std::chrono::duration_cast<std::chrono::duration<double>>(sim_dt).count();
     }
     else
     {
-      current_state_time_ += wall_dt;
+      current_state_time_ += std::chrono::duration_cast<std::chrono::duration<double>>(wall_dt).count();
     }
     double tm = getStateDisplayTime();
 
@@ -547,6 +549,11 @@ void TrajectoryVisualization::update(double wall_dt, double sim_dt)
                                   (animating_path_ || trail_display_property_->getBool() ||
                                    (trajectory_slider_panel_ && trajectory_slider_panel_->isVisible())));
   display_path_robot_->updateAttachedObjectColors(default_attached_object_color_);
+}
+
+void TrajectoryVisualization::update(double wall_dt, double sim_dt)
+{
+  update(std::chrono::nanoseconds(std::lround(wall_dt)), std::chrono::nanoseconds(std::lround(sim_dt)));
 }
 
 void TrajectoryVisualization::incomingDisplayTrajectory(const moveit_msgs::msg::DisplayTrajectory::ConstSharedPtr& msg)

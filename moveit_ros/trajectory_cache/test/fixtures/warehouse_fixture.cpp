@@ -19,6 +19,7 @@
 #include <thread>
 
 #include <gtest/gtest.h>
+#include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <moveit/warehouse/moveit_message_storage.hpp>
 
@@ -57,8 +58,10 @@ void WarehouseFixture::TearDown()
 
 void WarehouseFixture::spinNode()
 {
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node_);
   while (is_spinning_ && rclcpp::ok())
   {
-    rclcpp::spin_some(node_);
+    executor.spin_some();
   }
 }

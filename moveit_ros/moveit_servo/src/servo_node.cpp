@@ -39,6 +39,7 @@
  */
 
 #if __has_include(<realtime_tools/realtime_helpers.hpp>)
+#include <cstdint>
 #include <realtime_tools/realtime_helpers.hpp>
 #else
 #include <realtime_tools/thread_priority.hpp>
@@ -49,6 +50,19 @@
 
 namespace moveit_servo
 {
+
+namespace
+{
+// This function is used to convert times in case planning_scene_monitor uses RCL_SYSTEM_TIME
+rclcpp::Time convertClockType(const rclcpp::Time& time, rcl_clock_type_t new_clock_type)
+{
+  if (time.get_clock_type() != new_clock_type)
+  {
+    return rclcpp::Time(time.nanoseconds(), new_clock_type);
+  }
+  return time;
+}
+}  // namespace
 
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr ServoNode::get_node_base_interface()
 {
@@ -325,10 +339,16 @@ void ServoNode::servoLoop()
   std::optional<KinematicState> next_joint_state = std::nullopt;
   rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
 
-  // wait for first robot joint state update
   const auto servo_node_start = node_->now();
-  while (planning_scene_monitor_->getLastUpdateTime().get_clock_type() != node_->get_clock()->get_clock_type() ||
-         servo_node_start > planning_scene_monitor_->getLastUpdateTime())
+
+  // convert_clock_type() is used in case planning_scene_monitor uses RCL_SYSTEM_TIME
+  // while Servo uses RCL_ROS_TIME
+  while (servo_node_start >
+         convertClockType(planning_scene_monitor_->getLastUpdateTime(), servo_node_start.get_clock_type()))
+  {
+    RCLCPP_INFO(node_->get_logger(), "Waiting for planning scene monitor to receive robot state update.");
+    rclcpp::sleep_for(std::chrono::seconds(1));
+  }
   {
     RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
     rclcpp::sleep_for(std::chrono::seconds(1));

@@ -37,7 +37,26 @@
 #pragma once
 
 #include <ament_index_cpp/get_package_prefix.hpp>
+// ament_index_cpp's get_package_share_directory API changed twice.
+// Guard on ament_index_cpp's own version — not rclcpp — because the
+// changes live in ament_index_cpp and its release cadence is independent
+// of rclcpp's.
+//   1.14+ (Rolling on Resolute):
+//     get_package_share_directory.hpp REMOVED, replaced with
+//     get_package_share_path.hpp exposing get_package_share_path(pkg)
+//     returning std::filesystem::path directly.
+//   1.5+ (Jazzy 1.8.4, Kilted 1.11.4, Lyrical 1.13.3, Rolling-on-Noble 1.13.1):
+//     2-arg out-param overload get_package_share_directory(pkg, path)
+//     available; the 1-arg form is deprecated starting in 1.13.
+//   Older (Humble 1.4.1):
+//     only the non-deprecated 1-arg get_package_share_directory(pkg)
+//     returning std::string is available.
+#include <ament_index_cpp/version.h>
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+#include <ament_index_cpp/get_package_share_path.hpp>
+#else
 #include <ament_index_cpp/get_package_share_directory.hpp>
+#endif
 #include <filesystem>
 #include <string>
 #include <tinyxml2.h>
@@ -52,7 +71,15 @@ inline std::filesystem::path getSharePath(const std::string& package_name)
 {
   try
   {
+#if AMENT_INDEX_CPP_VERSION_GTE(1, 14, 0)
+    return ament_index_cpp::get_package_share_path(package_name);
+#elif AMENT_INDEX_CPP_VERSION_GTE(1, 5, 0)
+    std::filesystem::path path;
+    ament_index_cpp::get_package_share_directory(package_name, path);
+    return path;
+#else
     return std::filesystem::path(ament_index_cpp::get_package_share_directory(package_name));
+#endif
   }
   catch (const std::runtime_error& e)
   {

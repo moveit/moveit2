@@ -35,10 +35,19 @@
 /* Author: Jonas Tietz */
 
 #include "tf_publisher_capability.hpp"
+
+#include <rclcpp/version.h>
+
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/utils/message_checks.hpp>
 #include <moveit/move_group/capability_names.hpp>
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/transform_broadcaster.hpp>
+// For Jazzy and older
+#else
 #include <tf2_ros/transform_broadcaster.h>
+#endif
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/robot_state/attached_body.hpp>
@@ -76,9 +85,16 @@ void publishSubframes(tf2_ros::TransformBroadcaster& broadcaster, const moveit::
 
 void TfPublisher::publishPlanningSceneFrames()
 {
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  tf2_ros::TransformBroadcaster broadcaster(tf2_ros::TransformBroadcaster::RequiredInterfaces{
+      context_->moveit_cpp_->getNode()->get_node_parameters_interface(),
+      context_->moveit_cpp_->getNode()->get_node_topics_interface() });
+#else
   tf2_ros::TransformBroadcaster broadcaster(context_->moveit_cpp_->getNode());
+#endif
   geometry_msgs::msg::TransformStamped transform;
-  rclcpp::Rate rate(rate_);
+  rclcpp::WallRate rate(rate_);
 
   while (keep_running_)
   {

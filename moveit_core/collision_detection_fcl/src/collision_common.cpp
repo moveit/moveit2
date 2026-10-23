@@ -782,7 +782,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
         //        cache_it->second->collision_geometry_data_->getID().c_str());
         return cache_it->second;
       }
-      else if (cache_it->second.unique())
+      else if (cache_it->second.use_count() == 1)
       {
         const_cast<FCLGeometry*>(cache_it->second.get())->updateCollisionGeometryData(data, shape_index, false);
         //          RCLCPP_DEBUG(getLogger(), "Collision data structures for object %s retrieved from
@@ -806,7 +806,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
     auto cache_it = othercache.map_.find(wptr);
     if (cache_it != othercache.map_.end())
     {
-      if (cache_it->second.unique())
+      if (cache_it->second.use_count() == 1)
       {
         // remove from old cache
         FCLGeometryConstPtr obj_cache = cache_it->second;
@@ -839,7 +839,7 @@ FCLGeometryConstPtr createCollisionGeometry(const shapes::ShapeConstPtr& shape, 
       auto cache_it = othercache.map_.find(wptr);
       if (cache_it != othercache.map_.end())
       {
-        if (cache_it->second.unique())
+        if (cache_it->second.use_count() == 1)
         {
           // remove from old cache
           FCLGeometryConstPtr obj_cache = cache_it->second;

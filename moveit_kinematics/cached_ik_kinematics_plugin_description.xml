@@ -1,10 +1,10 @@
 <library path="moveit_cached_ik_kinematics_plugin">
-  <class name="cached_ik_kinematics_plugin/CachedKDLKinematicsPlugin" type="cached_ik_kinematics_plugin::CachedIKKinematicsPlugin<kdl_kinematics_plugin::KDLKinematicsPlugin>" base_class_type="kinematics::KinematicsBase">
+  <class name="cached_ik_kinematics_plugin/CachedKDLKinematicsPlugin" type="cached_ik_kinematics_plugin::CachedIKKinematicsPlugin&lt;kdl_kinematics_plugin::KDLKinematicsPlugin&gt;" base_class_type="kinematics::KinematicsBase">
     <description>
       A kinematics plugin for persistently caching IK solutions computed with the KDL kinematics plugin.
     </description>
   </class>
-  <class name="cached_ik_kinematics_plugin/CachedSrvKinematicsPlugin" type="cached_ik_kinematics_plugin::CachedIKKinematicsPlugin<srv_kinematics_plugin::SrvKinematicsPlugin>" base_class_type="kinematics::KinematicsBase">
+  <class name="cached_ik_kinematics_plugin/CachedSrvKinematicsPlugin" type="cached_ik_kinematics_plugin::CachedIKKinematicsPlugin&lt;srv_kinematics_plugin::SrvKinematicsPlugin&gt;" base_class_type="kinematics::KinematicsBase">
     <description>
       A kinematics plugin for persistently caching IK solutions computed with the Srv kinematics plugin.
     </description>

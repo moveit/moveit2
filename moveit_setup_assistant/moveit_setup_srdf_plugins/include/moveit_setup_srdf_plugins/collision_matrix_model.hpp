@@ -65,7 +65,7 @@ public:
   void setEnabled(const QModelIndexList& indexes, bool value);
 
 public Q_SLOTS:
-  void setFilterRegExp(const QString& filter);
+  void setFilterRegularExpression(const QString& filter);
 
 private:
   LinkPairMap::iterator item(const QModelIndex& index);

@@ -38,6 +38,7 @@
 
 #include <QtGui/QSyntaxHighlighter>
 #include <QRegularExpression>
+#include <QStringView>
 #include <map>
 
 namespace moveit_setup
@@ -63,7 +64,7 @@ private:
   using Rules = std::map<int, Rule>;
   Rules rules_;
 
-  Rules::const_iterator highlight(Rules::const_iterator active, QStringRef text, int start, bool search_end, int& end);
+  Rules::const_iterator highlight(Rules::const_iterator active, QStringView text, int start, bool search_end, int& end);
 };
 
 }  // namespace moveit_setup

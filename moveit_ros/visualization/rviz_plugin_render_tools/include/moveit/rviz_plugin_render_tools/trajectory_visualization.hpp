@@ -36,6 +36,8 @@
 
 #pragma once
 
+#include <rclcpp/version.h>
+
 #include <moveit/macros/class_forward.hpp>
 #include <rviz_common/display.hpp>
 #include <rviz_common/panel_dock_widget.hpp>
@@ -88,7 +90,15 @@ public:
 
   ~TrajectoryVisualization() override;
 
-  virtual void update(double wall_dt, double sim_dt);
+  virtual void update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds sim_dt);
+// For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  [[deprecated("Use update(std::chrono::nanoseconds, std::chrono::nanoseconds) instead")]] virtual void
+  update(double wall_dt, double ros_dt);
+// For Kilted and older
+#else
+  virtual void update(double wall_dt, double ros_dt);
+#endif
   virtual void reset();
 
   void onInitialize(const rclcpp::Node::SharedPtr& node, Ogre::SceneNode* scene_node,

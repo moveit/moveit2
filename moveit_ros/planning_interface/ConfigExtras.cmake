@@ -5,7 +5,7 @@
 # python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}) endif()
 
 find_package(
-  Boost REQUIRED
-  COMPONENTS date_time filesystem program_options
+  Boost CONFIG REQUIRED
+  COMPONENTS date_time program_options
              # ${BOOST_PYTHON_COMPONENT}
-             system thread)
+             thread)

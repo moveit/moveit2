@@ -34,9 +34,19 @@
 
 /* Author: Ioan Sucan */
 
+#include <rclcpp/version.h>
+
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
+// For Rolling, L-turtle, and newer
+
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/transform_listener.hpp>
+// For Jazzy and older
+#else
 #include <tf2_ros/transform_listener.h>
+#endif
 #include <moveit/move_group/move_group_capability.hpp>
 #include <moveit/trajectory_execution_manager/trajectory_execution_manager.hpp>
 #include <boost/tokenizer.hpp>
@@ -120,7 +130,9 @@ public:
       }
     }
     else
+    {
       RCLCPP_ERROR(getLogger(), "No MoveGroup context created. Nothing will work.");
+    }
   }
 
   MoveGroupContextPtr getContext()
@@ -331,7 +343,9 @@ int main(int argc, char** argv)
     rclcpp::shutdown();
   }
   else
+  {
     RCLCPP_ERROR(nh->get_logger(), "Planning scene not configured");
+  }
 
   return 0;
 }

@@ -16,6 +16,7 @@
  * @author methylDragon
  */
 
+#include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include <moveit/robot_state/conversions.hpp>
@@ -1044,10 +1045,12 @@ int main(int argc, char** argv)
   std::atomic<bool> running = true;
 
   std::thread spin_thread([&]() {
+    rclcpp::executors::SingleThreadedExecutor executor;
+    executor.add_node(test_node);
+    executor.add_node(move_group_node);
     while (rclcpp::ok() && running)
     {
-      rclcpp::spin_some(test_node);
-      rclcpp::spin_some(move_group_node);
+      executor.spin_some();
     }
   });
 

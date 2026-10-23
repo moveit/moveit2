@@ -1,11 +1,4 @@
 # Extras module needed for dependencies to find boost components
 
-find_package(
-  Boost
-  REQUIRED
-  system
-  filesystem
-  date_time
-  program_options
-  thread
-  chrono)
+find_package(Boost CONFIG REQUIRED COMPONENTS date_time program_options thread
+                                              chrono)

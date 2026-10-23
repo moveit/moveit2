@@ -41,8 +41,16 @@ target_include_directories(
   moveit_ros_trajectory_cache_utils_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
-ament_target_dependencies(moveit_ros_trajectory_cache_utils_lib
-                          ${TRAJECTORY_CACHE_DEPENDENCIES})
+target_link_libraries(
+  moveit_ros_trajectory_cache_utils_lib
+  ${geometry_msgs_TARGETS}
+  moveit_ros_planning_interface::moveit_ros_planning_interface
+  moveit_ros_warehouse::moveit_ros_warehouse
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  ${trajectory_msgs_TARGETS}
+  warehouse_ros::warehouse_ros)
 
 # Features library
 add_library(
@@ -50,14 +58,21 @@ add_library(
   src/features/motion_plan_request_features.cpp
   src/features/get_cartesian_path_request_features.cpp)
 generate_export_header(moveit_ros_trajectory_cache_features_lib)
-target_link_libraries(moveit_ros_trajectory_cache_features_lib
-                      moveit_ros_trajectory_cache_utils_lib)
+target_link_libraries(
+  moveit_ros_trajectory_cache_features_lib
+  moveit_ros_trajectory_cache_utils_lib
+  ${geometry_msgs_TARGETS}
+  moveit_ros_planning_interface::moveit_ros_planning_interface
+  moveit_ros_warehouse::moveit_ros_warehouse
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  ${trajectory_msgs_TARGETS}
+  warehouse_ros::warehouse_ros)
 target_include_directories(
   moveit_ros_trajectory_cache_features_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
-ament_target_dependencies(moveit_ros_trajectory_cache_features_lib
-                          ${TRAJECTORY_CACHE_DEPENDENCIES})
 
 # Cache insert policies library
 add_library(
@@ -68,13 +83,19 @@ generate_export_header(moveit_ros_trajectory_cache_cache_insert_policies_lib)
 target_link_libraries(
   moveit_ros_trajectory_cache_cache_insert_policies_lib
   moveit_ros_trajectory_cache_features_lib
-  moveit_ros_trajectory_cache_utils_lib)
+  moveit_ros_trajectory_cache_utils_lib
+  ${geometry_msgs_TARGETS}
+  moveit_ros_planning_interface::moveit_ros_planning_interface
+  moveit_ros_warehouse::moveit_ros_warehouse
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  ${trajectory_msgs_TARGETS}
+  warehouse_ros::warehouse_ros)
 target_include_directories(
   moveit_ros_trajectory_cache_cache_insert_policies_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
-ament_target_dependencies(moveit_ros_trajectory_cache_cache_insert_policies_lib
-                          ${TRAJECTORY_CACHE_DEPENDENCIES})
 
 # Trajectory cache library
 add_library(moveit_ros_trajectory_cache_lib SHARED src/trajectory_cache.cpp)
@@ -83,16 +104,29 @@ target_link_libraries(
   moveit_ros_trajectory_cache_lib
   moveit_ros_trajectory_cache_cache_insert_policies_lib
   moveit_ros_trajectory_cache_features_lib
-  moveit_ros_trajectory_cache_utils_lib)
+  moveit_ros_trajectory_cache_utils_lib
+  ${geometry_msgs_TARGETS}
+  moveit_ros_planning_interface::moveit_ros_planning_interface
+  moveit_ros_warehouse::moveit_ros_warehouse
+  rclcpp::rclcpp
+  tf2::tf2
+  tf2_ros::tf2_ros
+  ${trajectory_msgs_TARGETS}
+  warehouse_ros::warehouse_ros)
 target_include_directories(
   moveit_ros_trajectory_cache_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_ros_trajectory_cache>)
-ament_target_dependencies(moveit_ros_trajectory_cache_lib
-                          ${TRAJECTORY_CACHE_DEPENDENCIES})
+
+# Create an umbrella INTERFACE target so downstream packages can use
+# moveit_ros_trajectory_cache::moveit_ros_trajectory_cache to link all libraries
+# at once.
+add_library(moveit_ros_trajectory_cache INTERFACE)
+target_link_libraries(moveit_ros_trajectory_cache
+                      INTERFACE ${TRAJECTORY_CACHE_LIBRARIES})
 
 install(
-  TARGETS ${TRAJECTORY_CACHE_LIBRARIES}
+  TARGETS moveit_ros_trajectory_cache ${TRAJECTORY_CACHE_LIBRARIES}
   EXPORT moveit_ros_trajectory_cacheTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib

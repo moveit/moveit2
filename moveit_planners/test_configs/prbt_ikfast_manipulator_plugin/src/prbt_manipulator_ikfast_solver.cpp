@@ -31,13 +31,11 @@ static_assert(IKFAST_VERSION==61); // version found in ikfast.h
 #include <cmath>
 #include <vector>
 #include <limits>
-#include <algorithm>
 #include <complex>
 
 #ifndef IKFAST_ASSERT
 #include <stdexcept>
 #include <sstream>
-#include <iostream>
 
 #ifdef _MSC_VER
 #ifndef __PRETTY_FUNCTION__

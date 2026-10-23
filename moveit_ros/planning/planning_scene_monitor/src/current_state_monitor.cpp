@@ -215,7 +215,9 @@ bool CurrentStateMonitor::haveCompleteStateHelper(const rclcpp::Time& oldest_all
                    joint->getName().c_str(), (oldest_allowed_update_time - it->second).seconds());
     }
     else
+    {
       continue;
+    }
 
     if (missing_joints)
     {
@@ -314,7 +316,9 @@ bool CurrentStateMonitor::waitForCompleteState(const std::string& group, double 
       }
     }
     else
+    {
       ok = false;
+    }
   }
   return ok;
 }

@@ -44,7 +44,7 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QPushButton>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QSplitter>
 #include <QVBoxLayout>
 

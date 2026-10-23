@@ -37,6 +37,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <moveit/macros/class_forward.hpp>
 #include <moveit/robot_state/robot_state.hpp>
 #include <moveit/utils/moveit_error_code.hpp>
@@ -48,6 +49,7 @@
 #include <moveit_msgs/action/move_group.hpp>
 #include <moveit_msgs/action/execute_trajectory.hpp>
 #include <rclcpp/logger.hpp>
+#include <rclcpp/version.h>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
@@ -56,7 +58,13 @@
 
 #include <memory>
 #include <utility>
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/buffer.hpp>
+// For Jazzy and older
+#else
 #include <tf2_ros/buffer.h>
+#endif
 
 #include <moveit_move_group_interface_export.h>
 

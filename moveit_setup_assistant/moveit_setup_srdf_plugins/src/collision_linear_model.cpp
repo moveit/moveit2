@@ -39,6 +39,7 @@
 
 #include <QItemSelection>
 #include <QPainter>
+#include <QRegularExpression>
 #include <cmath>
 namespace moveit_setup
 {
@@ -253,8 +254,17 @@ void SortFilterProxyModel::setShowAll(bool show_all)
   if (show_all_ == show_all)
     return;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+  beginFilterChange();
+#endif
+
   show_all_ = show_all;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+  endFilterChange(QSortFilterProxyModel::Direction::Rows);
+#else
   invalidateFilter();
+#endif
 }
 
 bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& source_parent) const
@@ -264,8 +274,8 @@ bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& s
       m->data(m->index(source_row, 2), Qt::CheckStateRole) != Qt::Checked)
     return false;  // not accepted due to check state
 
-  const QRegExp regexp = filterRegExp();
-  if (regexp.isEmpty())
+  const QRegularExpression regexp = filterRegularExpression();
+  if (regexp.pattern().isEmpty())
     return true;
 
   return m->data(m->index(source_row, 0, source_parent), Qt::DisplayRole).toString().contains(regexp) ||
@@ -275,7 +285,7 @@ bool SortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& s
 // define a fallback comparison operator for QVariants
 bool compareVariants(const QVariant& left, const QVariant& right)
 {
-  if (left.userType() == QVariant::Type::Int)
+  if (left.userType() == QMetaType::Int)
   {
     return left.toInt() < right.toInt();
   }

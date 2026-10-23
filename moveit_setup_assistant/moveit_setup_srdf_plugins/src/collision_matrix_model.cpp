@@ -42,6 +42,7 @@
 #include <QPalette>
 #include <QApplication>
 #include <QItemSelection>
+#include <QRegularExpression>
 #include <unordered_map>
 
 namespace moveit_setup
@@ -194,10 +195,10 @@ void CollisionMatrixModel::setEnabled(const QModelIndexList& indexes, bool value
     setData(idx, value ? Qt::Checked : Qt::Unchecked, Qt::CheckStateRole);
 }
 
-void CollisionMatrixModel::setFilterRegExp(const QString& filter)
+void CollisionMatrixModel::setFilterRegularExpression(const QString& filter)
 {
   beginResetModel();
-  QRegExp regexp(filter);
+  QRegularExpression regexp(QRegularExpression::escape(filter));
   visual_to_index_.clear();
   for (int idx = 0, end = q_names_.size(); idx != end; ++idx)
   {

@@ -283,7 +283,7 @@ TrajectoryGenerator::cartesianTrapVelocityProfile(double max_velocity_scaling_fa
                                                   const std::unique_ptr<KDL::Path>& path) const
 {
   std::unique_ptr<KDL::VelocityProfile> vp_trans = std::make_unique<KDL::VelocityProfile_Trap>(
-      max_velocity_scaling_factor * planner_limits_.getCartesianLimits().max_trans_vel,
+      max_velocity_scaling_factor * max_cartesian_speed_,
       max_acceleration_scaling_factor * planner_limits_.getCartesianLimits().max_trans_acc);
 
   if (path->PathLength() > std::numeric_limits<double>::epsilon())  // avoid division by zero
@@ -377,6 +377,20 @@ TrajectoryGenerator::MotionPlanInfo::MotionPlanInfo(const planning_scene::Planni
     {
       start_joint_position[names[i]] = positions[j];
     }
+  }
+}
+
+void TrajectoryGenerator::setMaxCartesianSpeed(const moveit_msgs::msg::MotionPlanRequest& req)
+{
+  if (req.max_cartesian_speed > 0.0 && !req.cartesian_speed_limited_link.empty())
+  {
+    max_cartesian_speed_ = req.max_cartesian_speed;
+    RCLCPP_INFO(getLogger(), "received max_cartesian_speed: %f", max_cartesian_speed_);
+  }
+  else
+  {
+    max_cartesian_speed_ = planner_limits_.getCartesianLimits().max_trans_vel;
+    RCLCPP_INFO(getLogger(), "using default max_cartesian_speed: %f", max_cartesian_speed_);
   }
 }
 

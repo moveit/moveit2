@@ -9,7 +9,6 @@ find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
-find_package(pybind11_vendor REQUIRED)
 find_package(pybind11 REQUIRED)
 
 # enables using the Python extensions from the build space for testing

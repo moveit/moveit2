@@ -36,9 +36,14 @@
 
 /* Author: Ioan Sucan, Sachin Chitta */
 
+#include <cstdint>
 #include <stdexcept>
 #include <sstream>
 #include <memory>
+
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/version.h>
+
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/warehouse/constraints_storage.hpp>
 #include <moveit/kinematic_constraints/utils.hpp>
@@ -68,9 +73,13 @@
 #include <tf2/utils.h>
 #endif
 #include <tf2_eigen/tf2_eigen.hpp>
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/transform_listener.hpp>
+// For Jazzy and older
+#else
 #include <tf2_ros/transform_listener.h>
-#include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
+#endif
 
 namespace moveit
 {
@@ -78,8 +87,6 @@ namespace planning_interface
 {
 const std::string MoveGroupInterface::ROBOT_DESCRIPTION =
     "robot_description";  // name of the robot description (a param name, so it can be changed externally)
-
-const std::string GRASP_PLANNING_SERVICE_NAME = "plan_grasps";  // name of the service that can be used to plan grasps
 
 namespace
 {
@@ -453,10 +460,14 @@ public:
         c->enforceBounds();
         getTargetRobotState() = *c;
         if (!getTargetRobotState().satisfiesBounds(getGoalJointTolerance()))
+        {
           return false;
+        }
       }
       else
+      {
         return false;
+      }
 
       // we may need to do approximate IK
       kinematics::KinematicsQueryOptions o;
@@ -489,7 +500,9 @@ public:
       }
     }
     else
+    {
       return false;
+    }
   }
 
   void setEndEffectorLink(const std::string& end_effector)
@@ -676,7 +689,9 @@ public:
             RCLCPP_INFO(logger_, "Planning request rejected");
           }
           else
+          {
             RCLCPP_INFO(logger_, "Planning request accepted");
+          }
         };
     send_goal_opts.result_callback =
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult& result) {
@@ -753,7 +768,9 @@ public:
             RCLCPP_INFO(logger_, "Plan and Execute request rejected");
           }
           else
+          {
             RCLCPP_INFO(logger_, "Plan and Execute request accepted");
+          }
         };
     send_goal_opts.result_callback =
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::WrappedResult& result) {
@@ -816,7 +833,9 @@ public:
             RCLCPP_INFO(logger_, "Execute request rejected");
           }
           else
+          {
             RCLCPP_INFO(logger_, "Execute request accepted");
+          }
         };
     send_goal_opts.result_callback =
         [&](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::WrappedResult& result) {
@@ -893,7 +912,9 @@ public:
         return response->fraction;
       }
       else
+      {
         return -1.0;
+      }
     }
     else
     {
@@ -1064,10 +1085,14 @@ public:
       }
     }
     else
+    {
       RCLCPP_ERROR(logger_, "Unable to construct MotionPlanRequest representation");
+    }
 
     if (path_constraints_)
+    {
       request.path_constraints = *path_constraints_;
+    }
     if (trajectory_constraints_)
       request.trajectory_constraints = *trajectory_constraints_;
   }
@@ -1094,10 +1119,14 @@ public:
         return true;
       }
       else
+      {
         return false;
+      }
     }
     else
+    {
       return false;
+    }
   }
 
   void clearPathConstraints()

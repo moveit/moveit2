@@ -10,7 +10,9 @@ set_target_properties(moveit_lazy_free_space_updater
 if(APPLE)
   target_link_libraries(moveit_lazy_free_space_updater OpenMP::OpenMP_CXX)
 endif()
-ament_target_dependencies(moveit_lazy_free_space_updater rclcpp
-                          moveit_ros_occupancy_map_monitor sensor_msgs)
+target_link_libraries(
+  moveit_lazy_free_space_updater rclcpp::rclcpp
+  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  ${sensor_msgs_TARGETS})
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_perception)

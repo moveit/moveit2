@@ -197,7 +197,7 @@ public:
   {
     std::scoped_lock slock(cache_lock_);
     kinematics::KinematicsBasePtr& cached = instances_[jmg];
-    if (cached.unique())
+    if (cached.use_count() == 1)
       return std::move(cached);  // pass on unique instance
 
     // create a new instance and store in instances_

@@ -6,7 +6,13 @@ from ament_index_python.packages import get_package_share_directory
 from moveit_configs_utils import MoveItConfigsBuilder
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, TimerAction
+from launch.actions import (
+    DeclareLaunchArgument,
+    ExecuteProcess,
+    RegisterEventHandler,
+    TimerAction,
+)
+from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_testing.actions import ReadyToTest
@@ -34,7 +40,7 @@ def generate_test_description():
         package="tf2_ros",
         executable="static_transform_publisher",
         output="log",
-        arguments=["0.0", "0.0", "0.0", "0.0", "0.0", "0.0", "world", "panda_link0"],
+        arguments=["--frame-id", "world", "--child-frame-id", "panda_link0"],
     )
 
     robot_state_publisher = Node(
@@ -62,15 +68,42 @@ def generate_test_description():
     for controller in [
         "panda_arm_controller",
         "panda_hand_controller",
-        "joint_state_broadcaster",
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 run controller_manager spawner {}".format(controller)],
-                shell=True,
+                cmd=[
+                    "ros2",
+                    "run",
+                    "controller_manager",
+                    "spawner",
+                    controller,
+                    "--param-file",
+                    ros2_controllers_path,
+                ],
                 output="log",
             )
         ]
+
+    # Spawn the joint_state_broadcaster separately so the test binary can be
+    # gated on its activation. The spawner process exits 0 only once the
+    # controller is loaded, configured, and activated, at which point
+    # /joint_states is guaranteed to be publishing. Gating the test on this
+    # event (instead of a fixed wall-clock timer) avoids a startup race where
+    # the test runs before joint_states exists and
+    # MoveGroupInterface::getCurrentState() fails with
+    # "Failed to fetch current robot state".
+    joint_state_broadcaster_spawner = ExecuteProcess(
+        cmd=[
+            "ros2",
+            "run",
+            "controller_manager",
+            "spawner",
+            "joint_state_broadcaster",
+            "--param-file",
+            ros2_controllers_path,
+        ],
+        output="log",
+    )
 
     gtest_node = Node(
         executable=PathJoinSubstitution(
@@ -94,8 +127,16 @@ def generate_test_description():
             robot_state_publisher,
             ros2_control_node,
             *load_controllers,
+            joint_state_broadcaster_spawner,
             TimerAction(period=1.0, actions=[run_move_group_node]),
-            TimerAction(period=3.0, actions=[gtest_node]),
+            # Launch the test binary only once joint_state_broadcaster has
+            # activated, guaranteeing /joint_states is available.
+            RegisterEventHandler(
+                OnProcessExit(
+                    target_action=joint_state_broadcaster_spawner,
+                    on_exit=[gtest_node],
+                )
+            ),
             ReadyToTest(),
         ]
     ), {
