@@ -1584,6 +1584,26 @@ public:
    * The returned transformation is always a valid isometry. */
   const Eigen::Isometry3d& getFrameTransform(const std::string& frame_id, bool* frame_found = nullptr) const;
 
+  /** \brief Get the transformation matrix from the frame identified by \e source_frame_id to the frame identified by \e
+   * destination_frame_id
+   *
+   * If source_frame_id or destination_frame_id was not found, \e frame_found is set to false and an identity transform
+   * is returned.
+   *
+   * The returned transformation is always a valid isometry. */
+  Eigen::Isometry3d getFrameTransform(const std::string& destination_frame_id, const std::string& source_frame_id,
+                                      bool* frames_found = nullptr);
+
+  /** \brief Get the transformation matrix from the frame identified by \e source_frame_id to the frame identified by \e
+   * destination_frame_id
+   *
+   * If source_frame_id or destination_frame_id was not found, \e frame_found is set to false and an identity transform
+   * is returned.
+   *
+   * The returned transformation is always a valid isometry. */
+  Eigen::Isometry3d getFrameTransform(const std::string& destination_frame_id, const std::string& source_frame_id,
+                                      bool* frames_found = nullptr) const;
+
   /** \brief Get the transformation matrix from the model frame (root of model) to the frame identified by \e frame_id
    *
    * If this frame is attached to a robot link, the link pointer is returned in \e robot_link.
