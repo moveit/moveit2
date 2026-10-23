@@ -294,9 +294,6 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   const double hard_stop_singularity_threshold = servo_params.hard_stop_singularity_threshold;
   const double leaving_singularity_threshold_multiplier = servo_params.leaving_singularity_threshold_multiplier;
 
-  // Get size of total controllable dimensions.
-  const size_t dims = target_delta_x.size();
-
   // Get the current Jacobian and compute SVD
   const Eigen::JacobiSVD<Eigen::MatrixXd> current_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
       robot_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
@@ -305,15 +302,22 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   // Compute pseudo inverse
   const Eigen::MatrixXd pseudo_inverse = current_svd.matrixV() * matrix_s.inverse() * current_svd.matrixU().transpose();
 
+  // Index of the least singular value. For robots with fewer joints than task
+  // dimensions (e.g. a 4-DOF arm and a 6D twist), the thin SVD has only
+  // num_joints singular values/columns, so indexing with dims - 1 would read
+  // out of bounds and produce a garbage condition number.
+  const Eigen::Index least_sv_index = current_svd.singularValues().size() - 1;
+
   // Get the singular vector corresponding to least singular value.
   // This vector represents the least responsive dimension. By convention this is the last column of the matrix U.
   // The sign of the singular vector from result of SVD is not reliable, so we need to do extra checking to make sure of
   // the sign. See R. Bro, "Resolving the Sign Ambiguity in the Singular Value Decomposition".
-  Eigen::VectorXd vector_towards_singularity = current_svd.matrixU().col(dims - 1);
+  Eigen::VectorXd vector_towards_singularity = current_svd.matrixU().col(least_sv_index);
 
   // Compute the current condition number. The ratio of max and min singular values.
   // By convention these are the first and last element of the diagonal.
-  const double current_condition_number = current_svd.singularValues()(0) / current_svd.singularValues()(dims - 1);
+  const double current_condition_number =
+      current_svd.singularValues()(0) / current_svd.singularValues()(least_sv_index);
 
   // Take a small step in the direction of vector_towards_singularity
   const Eigen::VectorXd delta_x = vector_towards_singularity * servo_params.singularity_step_scale;
@@ -329,7 +333,8 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
       robot_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
 
   // Compute condition number for the new Jacobian.
-  const double next_condition_number = next_svd.singularValues()(0) / next_svd.singularValues()(dims - 1);
+  const double next_condition_number =
+      next_svd.singularValues()(0) / next_svd.singularValues()(next_svd.singularValues().size() - 1);
 
   // If the condition number has increased, we are moving towards singularity and the direction of the
   // vector_towards_singularity is correct. If the condition number has decreased, it means the sign of
