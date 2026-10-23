@@ -63,7 +63,10 @@ bool ControllersConfig::addController(const ControllerInfo& new_controller)
   if (searched_ros_controller && searched_ros_controller->type_ == new_controller.type_)
     return false;
 
-  controllers_.push_back(new_controller);
+  ControllerInfo controller_to_add = new_controller;
+  controller_to_add.parameters_.insert(std::make_pair("action_ns", "follow_joint_trajectory"));
+  controller_to_add.parameters_.insert(std::make_pair("default", "True"));
+  controllers_.push_back(std::move(controller_to_add));
   return true;
 }
 
