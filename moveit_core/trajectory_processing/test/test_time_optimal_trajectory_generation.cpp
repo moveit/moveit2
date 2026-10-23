@@ -82,7 +82,7 @@ void expectQueriesMatchUncachedCopies(Path& cached_path, const std::vector<doubl
   for (const double query : queries)
   {
     SCOPED_TRACE(query);
-    const Path uncached_path(cached_path);
+    const Path uncached_path(cached_path);  // NOLINT(performance-unnecessary-copy-initialization)
     EXPECT_TRUE(cached_path.getConfig(query).isApprox(uncached_path.getConfig(query)));
     EXPECT_TRUE(cached_path.getTangent(query).isApprox(uncached_path.getTangent(query)));
     EXPECT_TRUE(cached_path.getCurvature(query).isApprox(uncached_path.getCurvature(query)));
@@ -122,10 +122,11 @@ TEST(time_optimal_trajectory_generation, PathSegmentCacheSupportsConcurrentQueri
   const Path path = createSegmentedPath();
   std::atomic_bool matches{ true };
   std::vector<std::thread> threads;
+  threads.reserve(4);
   for (std::size_t thread_index = 0; thread_index < 4; ++thread_index)
   {
     threads.emplace_back([&path, &matches, thread_index]() {
-      Path baseline(path);
+      Path baseline(path);  // NOLINT(performance-unnecessary-copy-initialization)
       for (std::size_t query_index = 0; query_index < 500; ++query_index)
       {
         const double query =
