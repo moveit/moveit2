@@ -11,8 +11,35 @@ install(TARGETS logger_dut DESTINATION lib/${PROJECT_NAME})
 # src/logger_detail.hpp shared with logger.cpp, without exposing it through the
 # public moveit/utils/logger.hpp API.
 find_package(ament_cmake_gtest REQUIRED)
-ament_add_gtest(test_logger test_logger.cpp)
+ament_add_gtest(test_logger test_logger.cpp TIMEOUT 60)
 target_link_libraries(test_logger moveit_utils)
+
+# The executable does not link moveit_utils: it loads a bridge which links the
+# actual library, exercises one logger entry point, then drops that loader
+# reference. Each combination runs in its own process for static logger state.
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  add_library(logger_unload_dut SHARED logger_unload_dut.cpp)
+  target_link_libraries(logger_unload_dut moveit_utils)
+  ament_add_gtest_executable(test_logger_unload test_logger_unload.cpp)
+  target_link_libraries(test_logger_unload rclcpp::rclcpp ${CMAKE_DL_LIBS})
+  target_compile_definitions(
+    test_logger_unload
+    PRIVATE MOVEIT_UTILS_PATH="$<TARGET_FILE:moveit_utils>"
+            LOGGER_UNLOAD_DUT_PATH="$<TARGET_FILE:logger_unload_dut>")
+  foreach(entry get set)
+    foreach(order unload-first shutdown-first no-unload)
+      ament_add_gtest_test(
+        test_logger_unload
+        TEST_NAME
+        test_logger_unload_${entry}_${order}
+        TIMEOUT
+        60
+        ENV
+        "MOVEIT_LOGGER_UNLOAD_ENTRY=${entry}"
+        "MOVEIT_LOGGER_UNLOAD_ORDER=${order}")
+    endforeach()
+  endforeach()
+endif()
 
 # Regression test for getGlobalRootLogger()'s before-rclcpp::init() fallback.
 # Deliberately its own single-test executable/process -- see the file comment in

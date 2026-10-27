@@ -57,14 +57,14 @@ rclcpp::Logger& getGlobalRootLogger()
     try
     {
       static rclcpp::Node::SharedPtr moveit_node = rclcpp::Node::make_shared(name);
-      static std::shared_ptr<std::mutex> s_mutex = detail::registerNodeResetOnPreShutdown(moveit_node);
+      static auto registration = detail::registerNodeResetOnPreShutdown(moveit_node);
 
       // The pre-shutdown callback registered above can run concurrently on
       // another thread as soon as it's registered (e.g. if rclcpp::shutdown()
       // races with this, the very first, call to getGlobalRootLogger()), and
       // may reset moveit_node to null. Lock the same mutex the callback locks
       // before reading moveit_node, so the read and the reset can't race.
-      std::lock_guard<std::mutex> lock(*s_mutex);
+      std::lock_guard<std::mutex> lock(*registration.getMutex());
       if (moveit_node)
       {
         return moveit_node->get_logger();
@@ -88,12 +88,15 @@ rclcpp::Logger& getGlobalRootLogger()
 void setNodeLoggerName(const std::string& name)
 {
   static rclcpp::Node::SharedPtr s_node = std::make_shared<rclcpp::Node>("moveit", name);
-  static std::shared_ptr<std::mutex> s_mutex = detail::registerNodeResetOnPreShutdown(s_node);
+  static auto registration = detail::registerNodeResetOnPreShutdown(s_node);
+  // Initialize the global logger before locking this node slot: the first
+  // call may register another callback on the same context.
+  rclcpp::Logger& logger = getGlobalRootLogger();
 
-  std::lock_guard<std::mutex> lock(*s_mutex);
+  std::lock_guard<std::mutex> lock(*registration.getMutex());
   if (s_node)
   {
-    getGlobalRootLogger() = s_node->get_logger();
+    logger = s_node->get_logger();
   }
   // If the node has already been reset by a pre-shutdown callback from an
   // earlier rclcpp::shutdown(), leave the global logger untouched rather
