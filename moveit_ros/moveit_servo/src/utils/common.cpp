@@ -300,10 +300,6 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   // Get the current Jacobian and compute SVD
   const Eigen::JacobiSVD<Eigen::MatrixXd> current_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
       robot_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
-  const Eigen::MatrixXd matrix_s = current_svd.singularValues().asDiagonal();
-
-  // Compute pseudo inverse
-  const Eigen::MatrixXd pseudo_inverse = current_svd.matrixV() * matrix_s.inverse() * current_svd.matrixU().transpose();
 
   // Get the singular vector corresponding to least singular value.
   // This vector represents the least responsive dimension. By convention this is the last column of the matrix U.
@@ -315,18 +311,22 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   // By convention these are the first and last element of the diagonal.
   const double current_condition_number = current_svd.singularValues()(0) / current_svd.singularValues()(dims - 1);
 
-  // Take a small step in the direction of vector_towards_singularity
-  const Eigen::VectorXd delta_x = vector_towards_singularity * servo_params.singularity_step_scale;
-
-  // Compute the new joint angles if we take the small step delta_x
-  Eigen::VectorXd next_joint_angles;
-  robot_state->copyJointGroupPositions(joint_model_group, next_joint_angles);
-  next_joint_angles += pseudo_inverse * delta_x;
+  // Take a small joint-space step along the right singular vector paired with vector_towards_singularity
+  // (J * v = sigma_min * u, so it moves the end effector along u). Stepping with pseudo_inverse * delta_x
+  // scales the step by 1 / sigma_min: near a singularity it is no longer small, and the condition number
+  // it yields says nothing about the sign of vector_towards_singularity.
+  Eigen::VectorXd current_joint_angles;
+  robot_state->copyJointGroupPositions(joint_model_group, current_joint_angles);
+  const Eigen::VectorXd next_joint_angles =
+      current_joint_angles + current_svd.matrixV().col(dims - 1) * servo_params.singularity_step_scale;
 
   // Compute the Jacobian SVD for the new robot state.
   robot_state->setJointGroupPositions(joint_model_group, next_joint_angles);
   const Eigen::JacobiSVD<Eigen::MatrixXd> next_svd = Eigen::JacobiSVD<Eigen::MatrixXd>(
       robot_state->getJacobian(joint_model_group), Eigen::ComputeThinU | Eigen::ComputeThinV);
+
+  // Restore the caller's state: the test step must not leak out of this function.
+  robot_state->setJointGroupPositions(joint_model_group, current_joint_angles);
 
   // Compute condition number for the new Jacobian.
   const double next_condition_number = next_svd.singularValues()(0) / next_svd.singularValues()(dims - 1);
@@ -358,8 +358,10 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
   // Compute the scale based on the current condition number.
   double velocity_scale = 1.0;
   const bool is_above_lower_limit = current_condition_number > lower_singularity_threshold;
-  const bool is_below_hard_stop_limit = current_condition_number < hard_stop_singularity_threshold;
-  if (is_above_lower_limit && is_below_hard_stop_limit)
+  // Use the direction-dependent upper threshold: when moving away, the robot may continue past the
+  // hard stop, otherwise a robot that crossed it could never servo back out of the singularity.
+  const bool is_below_upper_limit = current_condition_number < upper_threshold;
+  if (is_above_lower_limit && is_below_upper_limit)
   {
     velocity_scale -=
         (current_condition_number - lower_singularity_threshold) / (upper_threshold - lower_singularity_threshold);
@@ -367,8 +369,8 @@ std::pair<double, StatusCode> velocityScalingFactorForSingularity(const moveit::
     servo_status = moving_towards_singularity ? StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY :
                                                 StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY;
   }
-  // If condition number has crossed hard stop limit, halt the robot.
-  else if (!is_below_hard_stop_limit)
+  // If condition number has crossed the upper threshold for this direction, halt the robot.
+  else if (!is_below_upper_limit)
   {
     servo_status = StatusCode::HALT_FOR_SINGULARITY;
     velocity_scale = 0.0;
