@@ -43,6 +43,8 @@
   <depend>rviz2</depend>
   <depend>tf2_eigen</depend>
 
+  <test_depend>ament_cmake_gtest</test_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
     <rviz plugin="${prefix}/robot_state_rviz_plugin_description.xml"/>
