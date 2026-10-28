@@ -33,6 +33,9 @@
   <test_depend>pilz_industrial_motion_planner</test_depend>
   <test_depend>ros_testing</test_depend>
   <test_depend>tf2_ros</test_depend>
+  <test_depend>rclcpp_action</test_depend>
+  <test_depend>moveit_msgs</test_depend>
+  <test_depend>geometry_msgs</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
