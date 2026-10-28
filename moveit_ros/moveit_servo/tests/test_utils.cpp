@@ -234,6 +234,72 @@ TEST(ServoUtilsUnitTests, LeavingSingularityScaling)
   ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY);
 }
 
+TEST(ServoUtilsUnitTests, LeavingSingularityPastHardStop)
+{
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+
+  servo::Params servo_params;
+  servo_params.move_group_name = "panda_arm";
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  robot_state->setToDefaultValues();
+
+  // Condition number ~37: past the hard stop (30), below the leaving threshold (17 + (30 - 17) * 2 = 43).
+  Eigen::Vector<double, 7> state_past_hard_stop{ -0.187, 0.459, -0.081, -0.826, 0.062, 1.502, 0.765 };
+
+  // Moving further into the singularity still halts.
+  Eigen::Vector<double, 6> towards_singularity{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  robot_state->setJointGroupActivePositions(joint_model_group, state_past_hard_stop);
+  auto scaling_result =
+      moveit_servo::velocityScalingFactorForSingularity(robot_state, towards_singularity, servo_params);
+  ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::HALT_FOR_SINGULARITY);
+  ASSERT_EQ(scaling_result.first, 0.0);
+
+  // Moving away is decelerated but not halted, so the robot can servo back out.
+  Eigen::Vector<double, 6> away_from_singularity{ -0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  robot_state->setJointGroupActivePositions(joint_model_group, state_past_hard_stop);
+  scaling_result = moveit_servo::velocityScalingFactorForSingularity(robot_state, away_from_singularity, servo_params);
+  ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_LEAVING_SINGULARITY);
+  ASSERT_GT(scaling_result.first, 0.0);
+}
+
+TEST(ServoUtilsUnitTests, SingularityDirectionNearSingularity)
+{
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+
+  servo::Params servo_params;
+  servo_params.move_group_name = "panda_arm";
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  robot_state->setToDefaultValues();
+
+  // Condition number ~26, in the deceleration band. Here a step of pseudo_inverse * delta_x is too large
+  // to tell the sign of the singular direction: it reported this approaching command as leaving.
+  Eigen::Vector<double, 7> state_near_singularity{ -1.053, -0.377, 1.508, -1.553, -2.845, 0.775, -0.117 };
+  Eigen::Vector<double, 6> cartesian_delta{ 0.005, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
+  // The command does approach the singularity: it is mostly along the singular direction u, and an
+  // infinitesimal joint step along the matching v (J * v = sigma_min * u) raises the condition number.
+  const auto condition_number = [&](const Eigen::VectorXd& positions) {
+    robot_state->setJointGroupActivePositions(joint_model_group, positions);
+    const Eigen::JacobiSVD<Eigen::MatrixXd> svd(robot_state->getJacobian(joint_model_group));
+    return svd.singularValues()(0) / svd.singularValues()(5);
+  };
+  const double current = condition_number(state_near_singularity);
+  const Eigen::JacobiSVD<Eigen::MatrixXd> svd(robot_state->getJacobian(joint_model_group),
+                                              Eigen::ComputeThinU | Eigen::ComputeThinV);
+  ASSERT_GT(std::abs(svd.matrixU().col(5).dot(cartesian_delta.normalized())), 0.7);
+  const double sign = svd.matrixU().col(5).dot(cartesian_delta) > 0 ? 1.0 : -1.0;
+  ASSERT_GT(condition_number(state_near_singularity + sign * 1e-6 * svd.matrixV().col(5)), current);
+
+  robot_state->setJointGroupActivePositions(joint_model_group, state_near_singularity);
+  const auto scaling_result =
+      moveit_servo::velocityScalingFactorForSingularity(robot_state, cartesian_delta, servo_params);
+  ASSERT_EQ(scaling_result.second, moveit_servo::StatusCode::DECELERATE_FOR_APPROACHING_SINGULARITY);
+}
+
 TEST(ServoUtilsUnitTests, ExtractRobotState)
 {
   using moveit::core::loadTestingRobotModel;
