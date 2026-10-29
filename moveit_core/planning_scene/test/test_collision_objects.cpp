@@ -164,6 +164,80 @@ TEST(PlanningScene, rememberMetadataWhenAttached)
   EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene forgot specified type after attach/detach";
 }
 
+TEST(PlanningScene, preserveExistingObjectOnFailedAdd)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = robot_model->getModelFrame();
+  co.id = "test_obstacle";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(co);
+
+  ASSERT_TRUE(scene.processCollisionObjectMsg(co));
+  ASSERT_TRUE(scene.getWorld()->hasObject(co.id));
+  ASSERT_EQ(scene.getWorld()->getObject(co.id)->shapes_.size(), 1u);
+
+  // Attempt replacement with invalid geometry: more primitive poses than primitives
+  moveit_msgs::msg::CollisionObject invalid_co = co;
+  geometry_msgs::msg::Pose extra_pose;
+  extra_pose.orientation.w = 1.0;
+  invalid_co.primitive_poses.push_back(extra_pose);
+
+  EXPECT_FALSE(scene.processCollisionObjectMsg(invalid_co))
+      << "processCollisionObjectMsg should fail when primitive_poses.size() > primitives.size()";
+
+  // Existing object should still exist in the collision world with original shape
+  EXPECT_TRUE(scene.getWorld()->hasObject(co.id))
+      << "existing collision object was removed despite replacement ADD operation failing validation";
+  if (scene.getWorld()->hasObject(co.id))
+  {
+    EXPECT_EQ(scene.getWorld()->getObject(co.id)->shapes_.size(), 1u);
+  }
+
+  // Attempt replacement with unknown frame ID
+  moveit_msgs::msg::CollisionObject unknown_frame_co = co;
+  unknown_frame_co.header.frame_id = "nonexistent_frame";
+  EXPECT_FALSE(scene.processCollisionObjectMsg(unknown_frame_co));
+  EXPECT_TRUE(scene.getWorld()->hasObject(co.id));
+
+  // Attempt replacement with no shapes
+  moveit_msgs::msg::CollisionObject empty_shapes_co = co;
+  empty_shapes_co.primitives.clear();
+  empty_shapes_co.primitive_poses.clear();
+  EXPECT_FALSE(scene.processCollisionObjectMsg(empty_shapes_co));
+  EXPECT_TRUE(scene.getWorld()->hasObject(co.id));
+
+  // Attempt replacement with mismatched subframe poses and names
+  moveit_msgs::msg::CollisionObject invalid_subframes_co = co;
+  geometry_msgs::msg::Pose subframe_pose;
+  subframe_pose.orientation.w = 1.0;
+  invalid_subframes_co.subframe_poses.push_back(subframe_pose);
+  EXPECT_FALSE(scene.processCollisionObjectMsg(invalid_subframes_co));
+  EXPECT_TRUE(scene.getWorld()->hasObject(co.id));
+
+  // Successful replacement with valid new geometry replaces the object
+  moveit_msgs::msg::CollisionObject valid_replacement = co;
+  valid_replacement.primitives.clear();
+  valid_replacement.primitive_poses.clear();
+  shape_msgs::msg::SolidPrimitive box;
+  box.type = shape_msgs::msg::SolidPrimitive::BOX;
+  box.dimensions = { 1.0, 2.0, 3.0 };
+  valid_replacement.primitives.push_back(box);
+  geometry_msgs::msg::Pose box_pose;
+  box_pose.orientation.w = 1.0;
+  valid_replacement.primitive_poses.push_back(box_pose);
+
+  EXPECT_TRUE(scene.processCollisionObjectMsg(valid_replacement));
+  EXPECT_TRUE(scene.getWorld()->hasObject(co.id));
+  if (scene.getWorld()->hasObject(co.id))
+  {
+    ASSERT_EQ(scene.getWorld()->getObject(co.id)->shapes_.size(), 1u);
+    EXPECT_EQ(scene.getWorld()->getObject(co.id)->shapes_[0]->type, shapes::BOX);
+  }
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
