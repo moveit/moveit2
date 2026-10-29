@@ -39,6 +39,7 @@
 #include <moveit/motion_planning_rviz_plugin/motion_planning_display.hpp>
 #include <moveit/robot_state/conversions.hpp>
 
+#include <iomanip>
 #include <QMessageBox>
 #include <QInputDialog>
 
