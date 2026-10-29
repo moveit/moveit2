@@ -24,6 +24,16 @@ install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_trajectory_execution_manager_export.h
   DESTINATION include/moveit_ros_planning)
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+
+  ament_add_gtest(test_no_controller_manager
+                  test/test_no_controller_manager.cpp)
+  target_link_libraries(
+    test_no_controller_manager moveit_trajectory_execution_manager
+    moveit_core::moveit_test_utils rclcpp::rclcpp)
+endif()
+
 if(CATKIN_ENABLE_TESTING)
   # This needs further cleanup before it can run
   # add_library(test_controller_manager_plugin
