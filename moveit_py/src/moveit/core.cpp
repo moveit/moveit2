@@ -58,6 +58,9 @@ PYBIND11_MODULE(core, m)
   options.disable_function_signatures();
 
   // Construct module classes
+  moveit_py::bind_collision_detection::initBodyType(m);
+  moveit_py::bind_collision_detection::initContact(m);
+  moveit_py::bind_collision_detection::initCostSource(m);
   moveit_py::bind_collision_detection::initCollisionRequest(m);
   moveit_py::bind_collision_detection::initCollisionResult(m);
   moveit_py::bind_collision_detection::initWorld(m);
