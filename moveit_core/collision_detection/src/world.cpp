@@ -159,8 +159,11 @@ bool World::knowsTransform(const std::string& name) const
       // rfind searches name for object.first in the first index (returns 0 if found)
       if (name.rfind(object.first, 0) == 0 && name[object.first.length()] == '/')
       {
-        return object.second->global_subframe_poses_.find(name.substr(object.first.length() + 1)) !=
-               object.second->global_subframe_poses_.end();
+        const auto it = object.second->global_subframe_poses_.find(name.substr(object.first.length() + 1));
+        if (it != object.second->global_subframe_poses_.end())
+        {
+          return true;
+        }
       }
     }
   }
