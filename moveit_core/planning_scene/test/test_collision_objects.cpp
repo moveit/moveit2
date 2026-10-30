@@ -197,6 +197,14 @@ TEST(PlanningScene, rejectMismatchedWorldSubframeArrays)
   co.subframe_poses.push_back(subframe_pose);
   EXPECT_TRUE(scene.processCollisionObjectMsg(co));
   EXPECT_TRUE(scene.knowsFrameTransform(co.id + "/tool"));
+
+  // APPEND must also reject mismatched subframes without changing the object.
+  const auto accepted = scene.getWorld()->getObject(co.id);
+  ASSERT_TRUE(accepted);
+  co.operation = moveit_msgs::msg::CollisionObject::APPEND;
+  co.subframe_names.clear();
+  EXPECT_FALSE(scene.processCollisionObjectMsg(co));
+  EXPECT_EQ(scene.getWorld()->getObject(co.id), accepted);
 }
 
 TEST(PlanningScene, rejectMismatchedAttachedSubframeArrays)
@@ -230,6 +238,13 @@ TEST(PlanningScene, rejectMismatchedAttachedSubframeArrays)
   aco.object.subframe_poses.push_back(subframe_pose);
   EXPECT_TRUE(scene.processAttachedCollisionObjectMsg(aco));
   EXPECT_TRUE(scene.getCurrentState().hasAttachedBody(aco.object.id));
+
+  const auto* accepted = scene.getCurrentState().getAttachedBody(aco.object.id);
+  ASSERT_NE(accepted, nullptr);
+  aco.object.operation = moveit_msgs::msg::CollisionObject::APPEND;
+  aco.object.subframe_poses.push_back(subframe_pose);
+  EXPECT_FALSE(scene.processAttachedCollisionObjectMsg(aco));
+  EXPECT_EQ(scene.getCurrentState().getAttachedBody(aco.object.id), accepted);
 }
 
 int main(int argc, char** argv)
