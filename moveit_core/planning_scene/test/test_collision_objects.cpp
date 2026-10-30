@@ -164,6 +164,89 @@ TEST(PlanningScene, rememberMetadataWhenAttached)
   EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene forgot specified type after attach/detach";
 }
 
+TEST(PlanningScene, rejectMismatchedWorldSubframeArrays)
+{
+  auto robot_model = moveit::core::RobotModelBuilder("empty_robot", "base_link").build();
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = robot_model->getModelFrame();
+  co.id = "world_sphere";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(co);
+
+  ASSERT_TRUE(scene.processCollisionObjectMsg(co));
+  const auto original = scene.getWorld()->getObject(co.id);
+  ASSERT_TRUE(original);
+
+  geometry_msgs::msg::Pose subframe_pose;
+  subframe_pose.orientation.w = 1.0;
+
+  // More poses than names must not replace the existing world object.
+  co.subframe_poses.push_back(subframe_pose);
+  EXPECT_FALSE(scene.processCollisionObjectMsg(co));
+  EXPECT_EQ(scene.getWorld()->getObject(co.id), original);
+
+  // More names than poses must also be rejected without changing the object.
+  co.subframe_poses.clear();
+  co.subframe_names = { "tool" };
+  EXPECT_FALSE(scene.processCollisionObjectMsg(co));
+  EXPECT_EQ(scene.getWorld()->getObject(co.id), original);
+
+  // The valid, matching form must remain accepted.
+  co.subframe_poses.push_back(subframe_pose);
+  EXPECT_TRUE(scene.processCollisionObjectMsg(co));
+  EXPECT_TRUE(scene.knowsFrameTransform(co.id + "/tool"));
+
+  // APPEND must also reject mismatched subframes without changing the object.
+  const auto accepted = scene.getWorld()->getObject(co.id);
+  ASSERT_TRUE(accepted);
+  co.operation = moveit_msgs::msg::CollisionObject::APPEND;
+  co.subframe_names.clear();
+  EXPECT_FALSE(scene.processCollisionObjectMsg(co));
+  EXPECT_EQ(scene.getWorld()->getObject(co.id), accepted);
+}
+
+TEST(PlanningScene, rejectMismatchedAttachedSubframeArrays)
+{
+  auto robot_model = moveit::core::RobotModelBuilder("empty_robot", "base_link").build();
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::AttachedCollisionObject aco;
+  aco.link_name = "base_link";
+  aco.object.header.frame_id = robot_model->getModelFrame();
+  aco.object.id = "attached_sphere";
+  aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(aco.object);
+
+  ASSERT_TRUE(scene.processAttachedCollisionObjectMsg(aco));
+  const auto* original = scene.getCurrentState().getAttachedBody(aco.object.id);
+  ASSERT_NE(original, nullptr);
+
+  geometry_msgs::msg::Pose subframe_pose;
+  subframe_pose.orientation.w = 1.0;
+
+  aco.object.subframe_poses.push_back(subframe_pose);
+  EXPECT_FALSE(scene.processAttachedCollisionObjectMsg(aco));
+  EXPECT_EQ(scene.getCurrentState().getAttachedBody(aco.object.id), original);
+
+  aco.object.subframe_poses.clear();
+  aco.object.subframe_names = { "tool" };
+  EXPECT_FALSE(scene.processAttachedCollisionObjectMsg(aco));
+  EXPECT_EQ(scene.getCurrentState().getAttachedBody(aco.object.id), original);
+
+  aco.object.subframe_poses.push_back(subframe_pose);
+  EXPECT_TRUE(scene.processAttachedCollisionObjectMsg(aco));
+  EXPECT_TRUE(scene.getCurrentState().hasAttachedBody(aco.object.id));
+
+  const auto* accepted = scene.getCurrentState().getAttachedBody(aco.object.id);
+  ASSERT_NE(accepted, nullptr);
+  aco.object.operation = moveit_msgs::msg::CollisionObject::APPEND;
+  aco.object.subframe_poses.push_back(subframe_pose);
+  EXPECT_FALSE(scene.processAttachedCollisionObjectMsg(aco));
+  EXPECT_EQ(scene.getCurrentState().getAttachedBody(aco.object.id), accepted);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
