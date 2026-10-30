@@ -47,6 +47,22 @@ const std::vector<std::string> RESPONSE_ADAPTERS{ "planning_pipeline_test/Always
                                                   "planning_pipeline_test/AlwaysSuccessResponseAdapter" };
 const std::vector<std::string> PLANNER_PLUGINS{ "planning_pipeline_test/DummyPlannerManager",
                                                 "planning_pipeline_test/DummyPlannerManager" };
+
+// Configure a pipeline from the node parameters and return the message of the thrown exception (empty if none)
+std::string getConfigurationErrorMessage(const moveit::core::RobotModelConstPtr& robot_model,
+                                         const std::shared_ptr<rclcpp::Node>& node,
+                                         const std::string& parameter_namespace)
+{
+  try
+  {
+    planning_pipeline::PlanningPipeline pipeline(robot_model, node, parameter_namespace);
+  }
+  catch (const std::runtime_error& e)
+  {
+    return e.what();
+  }
+  return "";
+}
 }  // namespace
 class TestPlanningPipeline : public testing::Test
 {
@@ -113,6 +129,48 @@ TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
                    robot_model_, node_, "", std::vector<std::string>({ "UNKNOWN" }), REQUEST_ADAPTERS,
                    RESPONSE_ADAPTERS),
                std::runtime_error);
+}
+
+TEST_F(TestPlanningPipeline, LegacyPlanningPluginParameter)
+{
+  const std::string migration_hint = "'ompl.planning_plugin' has been replaced by 'ompl.planning_plugins'";
+  const rclcpp::Parameter legacy_parameter("ompl.planning_plugin", "ompl_interface/OMPLPlanner");
+
+  // GIVEN a configuration that sets the legacy parameter 'planning_plugin' instead of 'planning_plugins'
+  const auto node = rclcpp::Node::make_shared("legacy_parameter_override_test",
+                                              rclcpp::NodeOptions().parameter_overrides({ legacy_parameter }));
+  // WHEN the pipeline is configured from the node parameters
+  // THEN an exception is thrown that points to the renamed parameter
+  std::string message = getConfigurationErrorMessage(robot_model_, node, "ompl");
+  EXPECT_NE(message.find("Planning plugin name is empty"), std::string::npos) << message;
+  EXPECT_NE(message.find(migration_hint), std::string::npos) << message;
+
+  // GIVEN the same configuration on a node that declares parameters from overrides, like move_group
+  const auto declaring_node = rclcpp::Node::make_shared("legacy_parameter_declared_test",
+                                                        rclcpp::NodeOptions()
+                                                            .allow_undeclared_parameters(true)
+                                                            .automatically_declare_parameters_from_overrides(true)
+                                                            .parameter_overrides({ legacy_parameter }));
+  // WHEN the pipeline is configured from the node parameters
+  // THEN an exception is thrown that points to the renamed parameter
+  message = getConfigurationErrorMessage(robot_model_, declaring_node, "ompl");
+  EXPECT_NE(message.find(migration_hint), std::string::npos) << message;
+
+  // GIVEN the legacy parameter for a pipeline without namespace
+  const auto root_node = rclcpp::Node::make_shared(
+      "legacy_parameter_root_test", rclcpp::NodeOptions().parameter_overrides(
+                                        { rclcpp::Parameter("planning_plugin", "ompl_interface/OMPLPlanner") }));
+  // WHEN the pipeline is configured from the node parameters
+  // THEN an exception is thrown that points to the renamed parameter without a namespace
+  message = getConfigurationErrorMessage(robot_model_, root_node, "");
+  EXPECT_NE(message.find("'planning_plugin' has been replaced by 'planning_plugins'"), std::string::npos) << message;
+
+  // GIVEN a configuration without any planner plugin parameter
+  // WHEN the pipeline is configured from the node parameters
+  // THEN an exception is thrown without the migration hint
+  message = getConfigurationErrorMessage(robot_model_, node_, "ompl");
+  EXPECT_NE(message.find("Planning plugin name is empty"), std::string::npos) << message;
+  EXPECT_EQ(message.find("has been replaced"), std::string::npos) << message;
 }
 
 int main(int argc, char** argv)

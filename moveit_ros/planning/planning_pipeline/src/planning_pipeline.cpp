@@ -136,8 +136,22 @@ void PlanningPipeline::configure()
   if (pipeline_parameters_.planning_plugins.empty() || pipeline_parameters_.planning_plugins.at(0) == "UNKNOWN")
   {
     const std::string classes_str = fmt::format("{}", fmt::join(planner_plugin_loader_->getDeclaredClasses(), ", "));
-    throw std::runtime_error("Planning plugin name is empty or not defined in namespace '" + parameter_namespace_ +
-                             "'. Please choose one of the available plugins: " + classes_str);
+    std::string message = "Planning plugin name is empty or not defined in namespace '" + parameter_namespace_ +
+                          "'. Please choose one of the available plugins: " + classes_str;
+    // Configurations written before the planning pipeline supported multiple planners use the singular parameter.
+    // Parameter overrides cover launch files, YAML files and the command line, also for nodes that declare
+    // parameters from overrides like move_group.
+    const std::string parameter_prefix = (parameter_namespace_.empty() || parameter_namespace_.back() == '.') ?
+                                             parameter_namespace_ :
+                                             parameter_namespace_ + ".";
+    const std::string legacy_parameter = parameter_prefix + "planning_plugin";
+    if (node_->get_node_parameters_interface()->get_parameter_overrides().count(legacy_parameter) > 0)
+    {
+      message += ". The parameter '" + legacy_parameter + "' has been replaced by '" + parameter_prefix +
+                 "planning_plugins', which takes a list of plugin names. See "
+                 "https://github.com/moveit/moveit2/blob/main/MIGRATION.md";
+    }
+    throw std::runtime_error(message);
   }
 
   for (const auto& planner_name : pipeline_parameters_.planning_plugins)
