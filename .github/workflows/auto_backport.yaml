@@ -1,0 +1,53 @@
+name: Auto Backport Labeler
+
+on:
+  pull_request_target:
+    types:
+      - closed
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to evaluate"
+        required: true
+        type: number
+      filter_branches:
+        description: "Optional comma-separated list of target branch names to evaluate (e.g. 'jazzy,humble' or 'humble')"
+        required: false
+        default: ""
+        type: string
+      dry_run:
+        description: "Dry run (do not add labels or post comments)"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  auto-backport:
+    name: Evaluate and Label Backports
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request_target' && 'main' || '' }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Evaluate PR and Apply Backport Labels
+        uses: kinu-garage/retrobranch@0.2.0
+        with:
+          pr-number: ${{ github.event.pull_request.number || inputs.pr_number }}
+          filter-branches: ${{ inputs.filter_branches }}
+          config-file: ".github/mergify.yml"
+          dry-run: ${{ inputs.dry_run || false }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
