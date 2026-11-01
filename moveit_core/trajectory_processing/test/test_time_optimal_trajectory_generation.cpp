@@ -39,6 +39,8 @@
 #include <gtest/gtest.h>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
 #include <moveit/utils/robot_model_test_utils.hpp>
+#include <srdfdom/model.h>
+#include <urdf_parser/urdf_parser.h>
 
 using trajectory_processing::Path;
 using trajectory_processing::TimeOptimalTrajectoryGeneration;
@@ -635,6 +637,143 @@ TEST(time_optimal_trajectory_generation, testTimeStepZeroMakesTrajectoryInvalid)
   EXPECT_FALSE(Trajectory::create(*Path::create({ Eigen::Vector2d(0, 0), Eigen::Vector2d(1, 1) }),
                                   /*max_velocity=*/Eigen::Vector2d(1, 1), /*max_acceleration=*/Eigen::Vector2d(1, 1),
                                   /*time_step=*/0));
+}
+
+TEST(time_optimal_trajectory_generation, testMimicJointBounds)
+{
+  const std::string urdf_str = "<?xml version=\"1.0\" ?>"
+                               "<robot name=\"test_mimic_robot\">"
+                               "  <link name=\"base_link\"/>"
+                               "  <link name=\"link1\"/>"
+                               "  <joint name=\"joint1\" type=\"revolute\">"
+                               "    <parent link=\"base_link\"/>"
+                               "    <child link=\"link1\"/>"
+                               "    <origin xyz=\"0 0 0\" rpy=\"0 0 0\"/>"
+                               "    <axis xyz=\"0 0 1\"/>"
+                               "    <limit lower=\"-3.14\" upper=\"3.14\" effort=\"10.0\" velocity=\"5.0\"/>"
+                               "  </joint>"
+                               "  <link name=\"link2\"/>"
+                               "  <joint name=\"mimic_joint\" type=\"revolute\">"
+                               "    <parent link=\"link1\"/>"
+                               "    <child link=\"link2\"/>"
+                               "    <origin xyz=\"0 0 0\" rpy=\"0 0 0\"/>"
+                               "    <axis xyz=\"0 0 1\"/>"
+                               "    <limit lower=\"-3.14\" upper=\"3.14\" effort=\"10.0\" velocity=\"5.0\"/>"
+                               "    <mimic joint=\"joint1\" multiplier=\"1.0\" offset=\"0.0\"/>"
+                               "  </joint>"
+                               "  <link name=\"link3\"/>"
+                               "  <joint name=\"joint2\" type=\"revolute\">"
+                               "    <parent link=\"link2\"/>"
+                               "    <child link=\"link3\"/>"
+                               "    <origin xyz=\"0 0 0\" rpy=\"0 0 0\"/>"
+                               "    <axis xyz=\"0 0 1\"/>"
+                               "    <limit lower=\"-3.14\" upper=\"3.14\" effort=\"10.0\" velocity=\"0.5\"/>"
+                               "  </joint>"
+                               "</robot>";
+
+  const std::string srdf_str = "<?xml version=\"1.0\" ?>"
+                               "<robot name=\"test_mimic_robot\">"
+                               "  <group name=\"arm\">"
+                               "    <joint name=\"joint1\"/>"
+                               "    <joint name=\"mimic_joint\"/>"
+                               "    <joint name=\"joint2\"/>"
+                               "  </group>"
+                               "</robot>";
+
+  urdf::ModelInterfaceSharedPtr urdf_model = urdf::parseURDF(urdf_str);
+  ASSERT_TRUE(urdf_model != nullptr);
+  auto srdf_model = std::make_shared<srdf::Model>();
+  ASSERT_TRUE(srdf_model->initString(*urdf_model, srdf_str));
+  auto robot_model = std::make_shared<moveit::core::RobotModel>(urdf_model, srdf_model);
+  ASSERT_TRUE(robot_model != nullptr);
+
+  for (const std::string joint_name : { "joint1", "mimic_joint", "joint2" })
+  {
+    auto* jm = robot_model->getJointModel(joint_name);
+    ASSERT_TRUE(jm != nullptr);
+    auto bounds = jm->getVariableBounds(joint_name);
+    bounds.acceleration_bounded_ = true;
+    bounds.max_acceleration_ = (joint_name == "joint2") ? 1.0 : 10.0;
+    bounds.min_acceleration_ = -bounds.max_acceleration_;
+    jm->setVariableBounds(joint_name, bounds);
+  }
+
+  const auto* group = robot_model->getJointModelGroup("arm");
+  ASSERT_TRUE(group != nullptr);
+  EXPECT_EQ(group->getVariableCount(), 3u);
+  EXPECT_EQ(group->getActiveVariableCount(), 2u);
+
+  // 1. Test computeTimeStamps with model bounds
+  {
+    robot_trajectory::RobotTrajectory trajectory(robot_model, group);
+    moveit::core::RobotState waypoint_state(robot_model);
+    waypoint_state.setToDefaultValues();
+
+    waypoint_state.setVariablePosition("joint1", 0.0);
+    waypoint_state.setVariablePosition("mimic_joint", 0.0);
+    waypoint_state.setVariablePosition("joint2", 0.0);
+    trajectory.addSuffixWayPoint(waypoint_state, 0.0);
+
+    waypoint_state.setVariablePosition("joint1", 1.0);
+    waypoint_state.setVariablePosition("mimic_joint", 1.0);
+    waypoint_state.setVariablePosition("joint2", 1.0);
+    trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+
+    TimeOptimalTrajectoryGeneration totg;
+    ASSERT_TRUE(totg.computeTimeStamps(trajectory));
+    EXPECT_GT(trajectory.getWayPointCount(), 2u);
+
+    // Verify velocity and acceleration limits are strictly respected on joint2
+    for (size_t i = 0; i < trajectory.getWayPointCount(); ++i)
+    {
+      const auto& pt = trajectory.getWayPoint(i);
+      double v2 = std::abs(pt.getVariableVelocity("joint2"));
+      double a2 = std::abs(pt.getVariableAcceleration("joint2"));
+      EXPECT_LE(v2, 0.5 + 1e-3) << "Waypoint " << i << " violated joint2 velocity limit: " << v2;
+      EXPECT_LE(a2, 1.0 + 1e-3) << "Waypoint " << i << " violated joint2 acceleration limit: " << a2;
+
+      // Verify mimic joint follows joint1
+      double p1 = pt.getVariablePosition("joint1");
+      double pm = pt.getVariablePosition("mimic_joint");
+      double v1 = pt.getVariableVelocity("joint1");
+      double vm = pt.getVariableVelocity("mimic_joint");
+      EXPECT_NEAR(pm, p1, 1e-3);
+      EXPECT_NEAR(vm, v1, 1e-3);
+    }
+  }
+
+  // 2. Test computeTimeStamps with custom limits override
+  {
+    robot_trajectory::RobotTrajectory trajectory(robot_model, group);
+    moveit::core::RobotState waypoint_state(robot_model);
+    waypoint_state.setToDefaultValues();
+
+    waypoint_state.setVariablePosition("joint1", 0.0);
+    waypoint_state.setVariablePosition("mimic_joint", 0.0);
+    waypoint_state.setVariablePosition("joint2", 0.0);
+    trajectory.addSuffixWayPoint(waypoint_state, 0.0);
+
+    waypoint_state.setVariablePosition("joint1", 1.0);
+    waypoint_state.setVariablePosition("mimic_joint", 1.0);
+    waypoint_state.setVariablePosition("joint2", 1.0);
+    trajectory.addSuffixWayPoint(waypoint_state, 0.1);
+
+    std::unordered_map<std::string, double> custom_vel_limits{ { "joint2", 0.2 } };
+    std::unordered_map<std::string, double> custom_acc_limits{ { "joint2", 0.5 } };
+
+    TimeOptimalTrajectoryGeneration totg;
+    ASSERT_TRUE(totg.computeTimeStamps(trajectory, custom_vel_limits, custom_acc_limits));
+    EXPECT_GT(trajectory.getWayPointCount(), 2u);
+
+    for (size_t i = 0; i < trajectory.getWayPointCount(); ++i)
+    {
+      const auto& pt = trajectory.getWayPoint(i);
+      double v2 = std::abs(pt.getVariableVelocity("joint2"));
+      double a2 = std::abs(pt.getVariableAcceleration("joint2"));
+      EXPECT_LE(v2, 0.2 + 1e-3) << "Waypoint " << i << " violated joint2 custom velocity limit: " << v2;
+      EXPECT_LE(a2, 0.5 + 1e-3) << "Waypoint " << i << " violated joint2 custom acceleration limit: " << a2;
+    }
+  }
 }
 
 int main(int argc, char** argv)
