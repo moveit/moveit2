@@ -1838,10 +1838,10 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
     utilities::poseMsgToEigen(object.pose, object_pose);
   }
 
-  auto append = [&object_pose, &shapes, &shape_poses,
-                 &switch_object_pose_and_shape_pose](shapes::Shape* s, const geometry_msgs::msg::Pose& pose_msg) {
+  auto append = [&object_pose, &shapes, &shape_poses, &switch_object_pose_and_shape_pose](
+                    shapes::Shape* s, const geometry_msgs::msg::Pose& pose_msg) -> bool {
     if (!s)
-      return;
+      return false;
     Eigen::Isometry3d pose;
     utilities::poseMsgToEigen(pose_msg, pose);
     if (!switch_object_pose_and_shape_pose)
@@ -1854,11 +1854,13 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
       object_pose = pose;
     }
     shapes.emplace_back(shapes::ShapeConstPtr(s));
+    return true;
   };
 
-  auto treat_shape_vectors = [&append](const auto& shape_vector,        // the shape_msgs of each type
+  auto treat_shape_vectors = [this, &object,
+                              &append](const auto& shape_vector,        // the shape_msgs of each type
                                        const auto& shape_poses_vector,  // std::vector<const geometry_msgs::Pose>
-                                       const std::string& shape_type) {
+                                       const std::string& shape_type) -> bool {
     if (shape_vector.size() > shape_poses_vector.size())
     {
       RCLCPP_DEBUG_STREAM(getLogger(), "Number of " << shape_type
@@ -1868,25 +1870,48 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
       {
         if (i >= shape_poses_vector.size())
         {
-          append(shapes::constructShapeFromMsg(shape_vector[i]),
-                 geometry_msgs::msg::Pose());  // Empty shape pose => Identity
+          if (!append(shapes::constructShapeFromMsg(shape_vector[i]),
+                      geometry_msgs::msg::Pose()))  // Empty shape pose => Identity
+          {
+            RCLCPP_ERROR(getLogger(), "Failed to construct shape from %s message for collision object '%s'",
+                         shape_type.c_str(), object.id.c_str());
+            return false;
+          }
         }
         else
         {
-          append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
+          if (!append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]))
+          {
+            RCLCPP_ERROR(getLogger(), "Failed to construct shape from %s message for collision object '%s'",
+                         shape_type.c_str(), object.id.c_str());
+            return false;
+          }
         }
       }
     }
     else
     {
       for (std::size_t i = 0; i < shape_vector.size(); ++i)
-        append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]);
+      {
+        if (!append(shapes::constructShapeFromMsg(shape_vector[i]), shape_poses_vector[i]))
+        {
+          RCLCPP_ERROR(getLogger(), "Failed to construct shape from %s message for collision object '%s'",
+                       shape_type.c_str(), object.id.c_str());
+          return false;
+        }
+      }
     }
+    return true;
   };
 
-  treat_shape_vectors(object.primitives, object.primitive_poses, std::string("primitive_poses"));
-  treat_shape_vectors(object.meshes, object.mesh_poses, std::string("meshes"));
-  treat_shape_vectors(object.planes, object.plane_poses, std::string("planes"));
+  if (!treat_shape_vectors(object.primitives, object.primitive_poses, std::string("primitives")) ||
+      !treat_shape_vectors(object.meshes, object.mesh_poses, std::string("meshes")) ||
+      !treat_shape_vectors(object.planes, object.plane_poses, std::string("planes")))
+  {
+    shapes.clear();
+    shape_poses.clear();
+    return false;
+  }
   return true;
 }
 
@@ -1904,17 +1929,18 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
     return false;
   }
 
-  // replace the object if ADD is specified instead of APPEND
-  if (object.operation == moveit_msgs::msg::CollisionObject::ADD && world_->hasObject(object.id))
-    world_->removeObject(object.id);
-
-  const Eigen::Isometry3d& world_to_object_header_transform = getFrameTransform(object.header.frame_id);
+  const Eigen::Isometry3d world_to_object_header_transform = getFrameTransform(object.header.frame_id);
   Eigen::Isometry3d header_to_pose_transform;
   std::vector<shapes::ShapeConstPtr> shapes;
   EigenSTL::vector_Isometry3d shape_poses;
   if (!shapesAndPosesFromCollisionObjectMessage(object, header_to_pose_transform, shapes, shape_poses))
     return false;
+
   const Eigen::Isometry3d object_frame_transform = world_to_object_header_transform * header_to_pose_transform;
+
+  // replace the object if ADD is specified instead of APPEND
+  if (object.operation == moveit_msgs::msg::CollisionObject::ADD && world_->hasObject(object.id))
+    world_->removeObject(object.id);
 
   world_->addToObject(object.id, object_frame_transform, shapes, shape_poses);
 

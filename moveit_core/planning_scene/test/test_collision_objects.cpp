@@ -164,6 +164,166 @@ TEST(PlanningScene, rememberMetadataWhenAttached)
   EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene forgot specified type after attach/detach";
 }
 
+TEST(PlanningScene, failedShapeConversionRejectsCollisionObject)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = robot_model->getModelFrame();
+  co.id = "invalid_primitive_object";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+
+  // Add 1 valid sphere primitive
+  makeSphere(co);
+
+  // Add 1 malformed primitive (unknown type and empty dimensions)
+  shape_msgs::msg::SolidPrimitive malformed_primitive;
+  malformed_primitive.type = 0;
+  co.primitives.push_back(malformed_primitive);
+
+  geometry_msgs::msg::Pose pose;
+  pose.orientation.w = 1.0;
+  co.primitive_poses.push_back(pose);
+
+  // processCollisionObjectMsg must fail
+  EXPECT_FALSE(scene.processCollisionObjectMsg(co));
+
+  // The collision world must not contain the partially accepted object
+  EXPECT_FALSE(scene.getWorld()->hasObject(co.id));
+}
+
+TEST(PlanningScene, failedShapeConversionPreservesExistingCollisionObject)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = robot_model->getModelFrame();
+  co.id = "existing_object";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(co);
+
+  EXPECT_TRUE(scene.processCollisionObjectMsg(co));
+  ASSERT_TRUE(scene.getWorld()->hasObject(co.id));
+  EXPECT_EQ(scene.getWorld()->getObject(co.id)->shapes_.size(), 1u);
+
+  // Try replacing with an ADD message that has a malformed shape
+  moveit_msgs::msg::CollisionObject bad_co;
+  bad_co.header.frame_id = robot_model->getModelFrame();
+  bad_co.id = "existing_object";
+  bad_co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  shape_msgs::msg::SolidPrimitive malformed_primitive;
+  malformed_primitive.type = 0;
+  bad_co.primitives.push_back(malformed_primitive);
+  geometry_msgs::msg::Pose pose;
+  pose.orientation.w = 1.0;
+  bad_co.primitive_poses.push_back(pose);
+
+  EXPECT_FALSE(scene.processCollisionObjectMsg(bad_co));
+
+  // Verify the existing object was NOT removed or corrupted
+  ASSERT_TRUE(scene.getWorld()->hasObject("existing_object"));
+  EXPECT_EQ(scene.getWorld()->getObject("existing_object")->shapes_.size(), 1u);
+}
+
+TEST(PlanningScene, shapesAndPosesFromCollisionObjectMessageFailsOnInvalidGeometry)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  // Test invalid primitive
+  {
+    moveit_msgs::msg::CollisionObject co;
+    co.header.frame_id = robot_model->getModelFrame();
+    co.id = "bad_prim";
+    shape_msgs::msg::SolidPrimitive malformed_primitive;
+    malformed_primitive.type = 255;  // Invalid primitive type
+    co.primitives.push_back(malformed_primitive);
+
+    Eigen::Isometry3d object_pose;
+    std::vector<shapes::ShapeConstPtr> shapes;
+    EigenSTL::vector_Isometry3d shape_poses;
+
+    EXPECT_FALSE(scene.shapesAndPosesFromCollisionObjectMessage(co, object_pose, shapes, shape_poses));
+    EXPECT_TRUE(shapes.empty());
+    EXPECT_TRUE(shape_poses.empty());
+  }
+
+  // Test invalid mesh
+  {
+    moveit_msgs::msg::CollisionObject co;
+    co.header.frame_id = robot_model->getModelFrame();
+    co.id = "bad_mesh";
+    shape_msgs::msg::Mesh empty_mesh;
+    co.meshes.push_back(empty_mesh);
+
+    Eigen::Isometry3d object_pose;
+    std::vector<shapes::ShapeConstPtr> shapes;
+    EigenSTL::vector_Isometry3d shape_poses;
+
+    EXPECT_FALSE(scene.shapesAndPosesFromCollisionObjectMessage(co, object_pose, shapes, shape_poses));
+    EXPECT_TRUE(shapes.empty());
+    EXPECT_TRUE(shape_poses.empty());
+  }
+}
+
+TEST(PlanningScene, failedShapeConversionRejectsAttachedCollisionObject)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::AttachedCollisionObject aco;
+  aco.link_name = robot_model->getModelFrame();
+  aco.object.header.frame_id = robot_model->getModelFrame();
+  aco.object.id = "bad_attached_object";
+  aco.object.operation = moveit_msgs::msg::CollisionObject::ADD;
+
+  makeSphere(aco.object);
+
+  shape_msgs::msg::SolidPrimitive malformed_primitive;
+  malformed_primitive.type = 0;
+  aco.object.primitives.push_back(malformed_primitive);
+
+  geometry_msgs::msg::Pose pose;
+  pose.orientation.w = 1.0;
+  aco.object.primitive_poses.push_back(pose);
+
+  EXPECT_FALSE(scene.processAttachedCollisionObjectMsg(aco));
+  EXPECT_FALSE(scene.getCurrentState().hasAttachedBody(aco.object.id));
+}
+
+TEST(PlanningScene, replaceObjectWithHeaderFrameReferencingExistingObjectSubframe)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = robot_model->getModelFrame();
+  co.id = "self_referencing_obj";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(co);
+
+  geometry_msgs::msg::Pose subframe_pose;
+  subframe_pose.position.x = 1.0;
+  subframe_pose.orientation.w = 1.0;
+  co.subframe_poses.push_back(subframe_pose);
+  co.subframe_names.push_back("subframe_1");
+
+  ASSERT_TRUE(scene.processCollisionObjectMsg(co));
+  ASSERT_TRUE(scene.knowsFrameTransform("self_referencing_obj/subframe_1"));
+
+  // Replace using an ADD message whose header.frame_id is the existing object's subframe
+  moveit_msgs::msg::CollisionObject replace_co;
+  replace_co.header.frame_id = "self_referencing_obj/subframe_1";
+  replace_co.id = "self_referencing_obj";
+  replace_co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(replace_co);
+
+  EXPECT_TRUE(scene.processCollisionObjectMsg(replace_co));
+  EXPECT_TRUE(scene.getWorld()->hasObject(replace_co.id));
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
