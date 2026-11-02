@@ -1929,18 +1929,18 @@ bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionO
     return false;
   }
 
-  const Eigen::Isometry3d& world_to_object_header_transform = getFrameTransform(object.header.frame_id);
+  const Eigen::Isometry3d world_to_object_header_transform = getFrameTransform(object.header.frame_id);
   Eigen::Isometry3d header_to_pose_transform;
   std::vector<shapes::ShapeConstPtr> shapes;
   EigenSTL::vector_Isometry3d shape_poses;
   if (!shapesAndPosesFromCollisionObjectMessage(object, header_to_pose_transform, shapes, shape_poses))
     return false;
 
+  const Eigen::Isometry3d object_frame_transform = world_to_object_header_transform * header_to_pose_transform;
+
   // replace the object if ADD is specified instead of APPEND
   if (object.operation == moveit_msgs::msg::CollisionObject::ADD && world_->hasObject(object.id))
     world_->removeObject(object.id);
-
-  const Eigen::Isometry3d object_frame_transform = world_to_object_header_transform * header_to_pose_transform;
 
   world_->addToObject(object.id, object_frame_transform, shapes, shape_poses);
 

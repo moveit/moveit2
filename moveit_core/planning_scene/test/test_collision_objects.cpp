@@ -293,6 +293,37 @@ TEST(PlanningScene, failedShapeConversionRejectsAttachedCollisionObject)
   EXPECT_FALSE(scene.getCurrentState().hasAttachedBody(aco.object.id));
 }
 
+TEST(PlanningScene, replaceObjectWithHeaderFrameReferencingExistingObjectSubframe)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = robot_model->getModelFrame();
+  co.id = "self_referencing_obj";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(co);
+
+  geometry_msgs::msg::Pose subframe_pose;
+  subframe_pose.position.x = 1.0;
+  subframe_pose.orientation.w = 1.0;
+  co.subframe_poses.push_back(subframe_pose);
+  co.subframe_names.push_back("subframe_1");
+
+  ASSERT_TRUE(scene.processCollisionObjectMsg(co));
+  ASSERT_TRUE(scene.knowsFrameTransform("self_referencing_obj/subframe_1"));
+
+  // Replace using an ADD message whose header.frame_id is the existing object's subframe
+  moveit_msgs::msg::CollisionObject replace_co;
+  replace_co.header.frame_id = "self_referencing_obj/subframe_1";
+  replace_co.id = "self_referencing_obj";
+  replace_co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(replace_co);
+
+  EXPECT_TRUE(scene.processCollisionObjectMsg(replace_co));
+  EXPECT_TRUE(scene.getWorld()->hasObject(replace_co.id));
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
