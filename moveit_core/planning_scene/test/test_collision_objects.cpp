@@ -225,6 +225,25 @@ TEST(PlanningScene, rejectMismatchedSubframesInAttachedCollisionObject)
   EXPECT_TRUE(scene.processAttachedCollisionObjectMsg(aco));
   EXPECT_TRUE(scene.getCurrentState().hasAttachedBody(aco.object.id));
   EXPECT_TRUE(scene.knowsFrameTransform(aco.object.id + "/tool_tip"));
+
+  // Test attachment of an existing world object with mismatched subframe arrays
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = robot_model->getModelFrame();
+  co.id = "world_object_for_attach";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  makeSphere(co);
+  ASSERT_TRUE(scene.processCollisionObjectMsg(co));
+  ASSERT_TRUE(scene.getWorld()->hasObject(co.id));
+
+  moveit_msgs::msg::AttachedCollisionObject aco_existing;
+  aco_existing.link_name = robot_model->getModelFrame();
+  aco_existing.object.id = co.id;
+  aco_existing.object.operation = moveit_msgs::msg::CollisionObject::ADD;
+  // No geometry specified (attaching existing world object), but subframes mismatch
+  aco_existing.object.subframe_poses.push_back(subframe_pose);
+  EXPECT_FALSE(scene.processAttachedCollisionObjectMsg(aco_existing));
+  EXPECT_FALSE(scene.getCurrentState().hasAttachedBody(co.id));
+  EXPECT_TRUE(scene.getWorld()->hasObject(co.id)) << "World object should not be removed on rejected attachment";
 }
 
 int main(int argc, char** argv)

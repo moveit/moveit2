@@ -1570,6 +1570,15 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
     const moveit::core::LinkModel* link_model = getRobotModel()->getLinkModel(object.link_name);
     if (link_model)
     {
+      if (object.object.subframe_poses.size() != object.object.subframe_names.size())
+      {
+        RCLCPP_ERROR(getLogger(),
+                     "Number of subframe poses (%zu) does not match number of subframe names (%zu) for object '%s'",
+                     object.object.subframe_poses.size(), object.object.subframe_names.size(),
+                     object.object.id.c_str());
+        return false;
+      }
+
       // items to build the attached object from (filled from existing world object or message)
       Eigen::Isometry3d object_pose_in_link;
       std::vector<shapes::ShapeConstPtr> shapes;
@@ -1611,15 +1620,6 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
         const Eigen::Isometry3d link_to_header_frame =
             robot_state_.value().getGlobalLinkTransform(link_model).inverse() * world_to_header_frame;
         object_pose_in_link = link_to_header_frame * header_frame_to_object_pose;
-
-        if (object.object.subframe_poses.size() != object.object.subframe_names.size())
-        {
-          RCLCPP_ERROR(getLogger(),
-                       "Number of subframe poses (%zu) does not match number of subframe names (%zu) for object '%s'",
-                       object.object.subframe_poses.size(), object.object.subframe_names.size(),
-                       object.object.id.c_str());
-          return false;
-        }
 
         Eigen::Isometry3d subframe_pose;
         for (std::size_t i = 0; i < object.object.subframe_poses.size(); ++i)
