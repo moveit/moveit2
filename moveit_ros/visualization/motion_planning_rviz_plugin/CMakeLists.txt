@@ -56,4 +56,13 @@ target_link_libraries(
 target_include_directories(moveit_motion_planning_rviz_plugin
                            PRIVATE "${OGRE_PREFIX_DIR}/include")
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_motion_planning_frame_parameters
+                  test/test_motion_planning_frame_parameters.cpp)
+  target_include_directories(test_motion_planning_frame_parameters
+                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  target_link_libraries(test_motion_planning_frame_parameters rclcpp::rclcpp)
+endif()
+
 install(DIRECTORY include/ DESTINATION include/moveit_ros_visualization)
