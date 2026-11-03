@@ -169,7 +169,8 @@ void OMPLInterface::loadPlannerConfigurations()
       { "projection_evaluator", rclcpp::ParameterType::PARAMETER_STRING },
       { "longest_valid_segment_fraction", rclcpp::ParameterType::PARAMETER_DOUBLE },
       { "enforce_joint_model_state_space", rclcpp::ParameterType::PARAMETER_BOOL },
-      { "enforce_constrained_state_space", rclcpp::ParameterType::PARAMETER_BOOL }
+      { "enforce_constrained_state_space", rclcpp::ParameterType::PARAMETER_BOOL },
+      { "pad_self_collisions", rclcpp::ParameterType::PARAMETER_BOOL }
     };
 
     const std::string group_name_param = parameter_namespace_ + "." + group_name;

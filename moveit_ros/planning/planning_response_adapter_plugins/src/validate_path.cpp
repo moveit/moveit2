@@ -65,6 +65,7 @@ public:
         std::make_unique<default_response_adapter_parameters::ParamListener>(node, parameter_namespace);
     // Read parameters
     const auto params = param_listener->get_params();
+    pad_self_collisions_ = params.pad_self_collisions;
 
     if (!params.display_contacts_topic.empty())
     {
@@ -98,7 +99,27 @@ public:
     arr.markers.push_back(m);
 
     std::vector<std::size_t> indices;
-    if (!planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &indices))
+    bool path_valid =
+        planning_scene->isPathValid(*res.trajectory, req.path_constraints, req.group_name, false, &indices);
+    if (path_valid && pad_self_collisions_)
+    {
+      // isPathValid() checks self-collisions with the unpadded robot, so additionally check with the padded robot
+      collision_detection::CollisionRequest c_req;
+      c_req.group_name = req.group_name;
+      c_req.pad_self_collisions = true;
+      for (std::size_t i = 0; i < state_count; ++i)
+      {
+        collision_detection::CollisionResult c_res;
+        planning_scene->checkSelfCollision(c_req, c_res, res.trajectory->getWayPoint(i));
+        if (c_res.collision)
+        {
+          indices.push_back(i);
+        }
+      }
+      path_valid = indices.empty();
+    }
+
+    if (!path_valid)
     {
       // check to see if there is any problem with the states that are found to be invalid
       res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
@@ -132,6 +153,7 @@ public:
           c_req.max_contacts = 10;
           c_req.max_contacts_per_pair = 3;
           c_req.verbose = false;
+          c_req.pad_self_collisions = pad_self_collisions_;
           planning_scene->checkCollision(c_req, c_res, robot_state);
           if (c_res.contact_count > 0)
           {
@@ -150,6 +172,7 @@ public:
 private:
   rclcpp::Logger logger_;
   rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr contacts_publisher_;
+  bool pad_self_collisions_ = false;
 };
 }  // namespace default_planning_response_adapters
 
