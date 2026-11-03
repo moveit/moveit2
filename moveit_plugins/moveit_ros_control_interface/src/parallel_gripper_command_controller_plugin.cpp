@@ -50,10 +50,19 @@ class ParallelGripperCommandControllerAllocator : public ControllerHandleAllocat
 public:
   moveit_controller_manager::MoveItControllerHandlePtr alloc(const rclcpp::Node::SharedPtr& node,
                                                              const std::string& name,
-                                                             const std::vector<std::string>& /* resources */) override
+                                                             const std::vector<std::string>& resources) override
   {
-    return std::make_shared<moveit_simple_controller_manager::ParallelGripperCommandControllerHandle>(node, name,
-                                                                                                      "gripper_cmd");
+    // The parallel gripper controller commands a single joint. Its first command interface is always
+    // "<joint>/position", so the first resource is the joint to command. Without it the handle could never
+    // send a goal, so don't allocate one; the controller manager retries on the next discovery.
+    if (resources.empty())
+    {
+      return nullptr;
+    }
+    auto handle = std::make_shared<moveit_simple_controller_manager::ParallelGripperCommandControllerHandle>(
+        node, name, "gripper_cmd");
+    handle->setCommandJoint(resources.front());
+    return handle;
   }
 };
 

@@ -267,6 +267,15 @@ class Ros2ControlManager : public moveit_controller_manager::MoveItControllerMan
       {
         resources.push_back(parseJointNameFromResource(resource));
       }
+      // ros2_control only reports claimed interfaces for active controllers. Fall back to the required command
+      // interfaces so that handles of inactive controllers are allocated with the same resources.
+      if (resources.empty())
+      {
+        for (const auto& resource : controller.required_command_interfaces)
+        {
+          resources.push_back(parseJointNameFromResource(resource));
+        }
+      }
 
       moveit_controller_manager::MoveItControllerHandlePtr handle =
           alloc_it->second->alloc(node_, name, resources);  // allocate handle

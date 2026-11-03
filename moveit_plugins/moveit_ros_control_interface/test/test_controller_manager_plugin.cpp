@@ -32,16 +32,22 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
+#include <chrono>
+#include <mutex>
+#include <optional>
+#include <thread>
 #include <unordered_set>
 #include <vector>
 
 #include <gtest/gtest.h>
 
+#include <control_msgs/action/parallel_gripper_command.hpp>
 #include <controller_manager_msgs/srv/detail/list_controllers__struct.hpp>
 #include <controller_manager_msgs/srv/detail/switch_controller__struct.hpp>
 #include <eigen3/Eigen/Eigen>
 #include <moveit/controller_manager/controller_manager.hpp>
 #include <pluginlib/class_loader.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
 
 class MockControllersManagerService final : public rclcpp::Node
 {
@@ -158,6 +164,133 @@ TEST(ControllerManagerPlugin, SwitchControllers)
   executor.cancel();
   ros_thread.join();
 }
+
+// Mock controller manager exposing a single parallel gripper controller, plus the controller's action server.
+class MockParallelGripperControllerManager final : public rclcpp::Node
+{
+public:
+  explicit MockParallelGripperControllerManager(bool active) : Node("parallel_gripper_controller_manager")
+  {
+    list_controller_service_ = create_service<controller_manager_msgs::srv::ListControllers>(
+        "controller_manager/list_controllers",
+        [active](const std::shared_ptr<controller_manager_msgs::srv::ListControllers::Request>& /*request*/,
+                 const std::shared_ptr<controller_manager_msgs::srv::ListControllers::Response>& response) {
+          controller_manager_msgs::msg::ControllerState controller;
+          controller.name = "gripper_controller";
+          controller.type = "parallel_gripper_action_controller/GripperActionController";
+          controller.state = active ? "active" : "inactive";
+          // ros2_control only reports claimed interfaces for active controllers
+          controller.required_command_interfaces = { "gripper_joint/position", "gripper_joint/max_effort" };
+          if (active)
+          {
+            controller.claimed_interfaces = controller.required_command_interfaces;
+          }
+          response->controller = { controller };
+        });
+
+    using GripperCommand = control_msgs::action::ParallelGripperCommand;
+    action_server_ = rclcpp_action::create_server<GripperCommand>(
+        this, "gripper_controller/gripper_cmd",
+        [this](const rclcpp_action::GoalUUID& /*uuid*/, const std::shared_ptr<const GripperCommand::Goal>& goal) {
+          std::scoped_lock<std::mutex> lock(goal_mutex_);
+          received_goal_ = *goal;
+          return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+        },
+        [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<GripperCommand>>& /*goal_handle*/) {
+          return rclcpp_action::CancelResponse::ACCEPT;
+        },
+        [](const std::shared_ptr<rclcpp_action::ServerGoalHandle<GripperCommand>>& goal_handle) {
+          goal_handle->succeed(std::make_shared<GripperCommand::Result>());
+        });
+  }
+
+  std::optional<control_msgs::action::ParallelGripperCommand::Goal> receivedGoal()
+  {
+    std::scoped_lock<std::mutex> lock(goal_mutex_);
+    return received_goal_;
+  }
+
+private:
+  rclcpp::Service<controller_manager_msgs::srv::ListControllers>::SharedPtr list_controller_service_;
+  rclcpp_action::Server<control_msgs::action::ParallelGripperCommand>::SharedPtr action_server_;
+  std::mutex goal_mutex_;
+  std::optional<control_msgs::action::ParallelGripperCommand::Goal> received_goal_;
+};
+
+// Spins a node in a background thread for the lifetime of this object, so the thread is joined even if an assertion
+// fails.
+class ScopedSpinner
+{
+public:
+  explicit ScopedSpinner(const rclcpp::Node::SharedPtr& node)
+  {
+    executor_.add_node(node);
+    thread_ = std::thread([this]() { executor_.spin(); });
+  }
+  ~ScopedSpinner()
+  {
+    executor_.cancel();
+    thread_.join();
+  }
+
+private:
+  rclcpp::executors::SingleThreadedExecutor executor_;
+  std::thread thread_;
+};
+
+class ParallelGripperControllerHandle : public testing::TestWithParam<bool /* controller is active */>
+{
+};
+
+TEST_P(ParallelGripperControllerHandle, CommandsJointClaimedByController)
+{
+  pluginlib::ClassLoader<moveit_controller_manager::MoveItControllerManager> loader(
+      "moveit_core", "moveit_controller_manager::MoveItControllerManager");
+  auto instance = loader.createUniqueInstance("moveit_ros_control_interface/Ros2ControlManager");
+
+  const auto mock_service = std::make_shared<MockParallelGripperControllerManager>(GetParam());
+  const ScopedSpinner spinner(mock_service);
+  instance->initialize(mock_service);
+
+  // GIVEN the handle allocated for the parallel gripper controller
+  std::vector<std::string> controller_names;
+  instance->getControllersList(controller_names);
+  ASSERT_EQ(controller_names, std::vector<std::string>({ "/gripper_controller" }));
+  const auto handle = instance->getControllerHandle("/gripper_controller");
+  ASSERT_TRUE(handle);
+
+  // WHEN a gripper trajectory is sent
+  moveit_msgs::msg::RobotTrajectory trajectory;
+  trajectory.joint_trajectory.joint_names = { "gripper_joint" };
+  trajectory.joint_trajectory.points.resize(1);
+  trajectory.joint_trajectory.points[0].positions = { 0.02 };
+
+  // THEN the goal is sent to the controller's action server for the joint claimed by the controller.
+  // Retry until the action client has discovered the server.
+  bool sent = false;
+  const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(5);
+  while (!sent && std::chrono::steady_clock::now() < deadline)
+  {
+    sent = handle->sendTrajectory(trajectory);
+    if (!sent)
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+  }
+  EXPECT_TRUE(sent);
+  if (sent)
+  {
+    EXPECT_TRUE(handle->waitForExecution(rclcpp::Duration::from_seconds(5.0)));
+  }
+
+  const auto goal = mock_service->receivedGoal();
+  ASSERT_TRUE(goal.has_value());
+  EXPECT_EQ(goal->command.name, std::vector<std::string>({ "gripper_joint" }));
+  EXPECT_EQ(goal->command.position, std::vector<double>({ 0.02 }));
+}
+
+INSTANTIATE_TEST_SUITE_P(ControllerManagerPlugin, ParallelGripperControllerHandle, testing::Bool(),
+                         [](const testing::TestParamInfo<bool>& info) { return info.param ? "Active" : "Inactive"; });
 
 TEST(ControllerManagerPlugin, LoadMoveItControllerManagerPlugin)
 {
