@@ -107,7 +107,8 @@ int main(int argc, char** argv)
       ps_msg.is_diff = true;
 
       unsigned int attempts = 0;
-      while (pub_scene->get_subscription_count() < 1 && ++attempts < 100)
+      while ((full_scene ? pub_scene->get_subscription_count() : pub_world_scene->get_subscription_count()) < 1 &&
+             ++attempts < 100)
         rclcpp::sleep_for(500ms);
 
       if (full_scene)
