@@ -54,18 +54,16 @@
 #include <moveit/utils/logger.hpp>
 #include <gtest/gtest.h>
 #include <rclcpp/rclcpp.hpp>
+#include <chrono>
+#include <future>
 #include <memory>
 #include <string>
 
 namespace
 {
 
-// Each white-box test below uses its own private rclcpp::Context (rather
-// than the process default one) so tests are fully isolated from one
-// another: rclcpp pre/on-shutdown callbacks are never removed from a
-// Context once registered and persist across repeated init() calls on that
-// same context, so reusing the global default context across tests would
-// let one test's callback fire again during a later test's shutdown.
+// Each white-box test uses a fresh private context so neither callbacks
+// nor initialized logger state can carry over from another test.
 rclcpp::NodeOptions makeOptionsWithFreshContext(std::shared_ptr<rclcpp::Context>& context_out)
 {
   context_out = std::make_shared<rclcpp::Context>();
@@ -80,12 +78,13 @@ TEST(RegisterNodeResetOnPreShutdownTest, ExplicitShutdownDestroysNode)
   std::shared_ptr<rclcpp::Context> context;
   rclcpp::NodeOptions options = makeOptionsWithFreshContext(context);
 
-  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("logger_reset_test", options);
+  bool destroyed_while_context_valid = false;
+  rclcpp::Node::SharedPtr node(new rclcpp::Node("logger_reset_test", options), [&](rclcpp::Node* ptr) {
+    destroyed_while_context_valid = context->is_valid();
+    delete ptr;
+  });
   std::weak_ptr<rclcpp::Node> weak_node = node;
-  // Must stay in scope (not just be constructed) until after context->shutdown()
-  // below: it is what the pre-shutdown callback's weak_ptr needs to lock
-  // successfully in order to reset `node`.
-  std::shared_ptr<std::mutex> mutex = moveit::detail::registerNodeResetOnPreShutdown(node);
+  auto registration = moveit::detail::registerNodeResetOnPreShutdown(node);
 
   EXPECT_FALSE(weak_node.expired());
 
@@ -98,6 +97,7 @@ TEST(RegisterNodeResetOnPreShutdownTest, ExplicitShutdownDestroysNode)
 
   EXPECT_EQ(node, nullptr) << "the caller's own node slot must be reset by the callback";
   EXPECT_TRUE(weak_node.expired()) << "node must be destroyed before rcl_shutdown(), not after";
+  EXPECT_TRUE(destroyed_while_context_valid) << "the node deleter must run before RMW shutdown";
 }
 
 // Regression test for a race CodeRabbit flagged in getGlobalRootLogger():
@@ -116,29 +116,18 @@ TEST(RegisterNodeResetOnPreShutdownTest, LockedReadAfterResetDoesNotDereferenceN
   rclcpp::NodeOptions options = makeOptionsWithFreshContext(context);
 
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("race_test_node", options);
-  std::shared_ptr<std::mutex> mutex = moveit::detail::registerNodeResetOnPreShutdown(node);
+  auto registration = moveit::detail::registerNodeResetOnPreShutdown(node);
 
   // Simulate a shutdown racing ahead of the first locked read.
   context->shutdown("simulate a shutdown racing ahead of the first read");
   ASSERT_EQ(node, nullptr);
 
-  std::lock_guard<std::mutex> lock(*mutex);
+  std::lock_guard<std::mutex> lock(*registration.getMutex());
   EXPECT_FALSE(static_cast<bool>(node)) << "node must be safely observed as reset while holding the lock";
 }
 
-// Proves the callback does not strongly capture either the node or the
-// mutex, by exercising the "rclcpp::shutdown() is never called" path and
-// checking actual object destruction via weak_ptr expiry (not merely a
-// process exit code):
-//
-// - if the callback strongly captured the mutex, weak_mutex would not
-//   expire while the context (which owns the callback) remained alive;
-// - if the callback strongly captured the Node, weak_node would not expire
-//   either, since the context owns the callback and the Node owns the
-//   context;
-// - with the intended weak/non-owning captures, both expire once the
-//   caller's own `node` and `mutex` variables go out of scope, even though
-//   the (still-alive) context's registered callback references them.
+// Registration destruction must remove the callback and release its guard
+// without retaining the node when explicit shutdown is omitted.
 TEST(RegisterNodeResetOnPreShutdownTest, DoesNotRetainNodeOrGuardWithoutExplicitShutdown)
 {
   std::shared_ptr<rclcpp::Context> context;
@@ -149,21 +138,106 @@ TEST(RegisterNodeResetOnPreShutdownTest, DoesNotRetainNodeOrGuardWithoutExplicit
   {
     rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("cycle_test_node", options);
     weak_node = node;
-    std::shared_ptr<std::mutex> mutex = moveit::detail::registerNodeResetOnPreShutdown(node);
-    weak_mutex = mutex;
+    auto registration = moveit::detail::registerNodeResetOnPreShutdown(node);
+    weak_mutex = registration.getMutex();
     EXPECT_FALSE(weak_node.expired());
     EXPECT_FALSE(weak_mutex.expired());
-    // Both `node` and `mutex` (the only strong owners of the node and the
-    // mutex, respectively) go out of scope here, *without* ever calling
-    // context->shutdown() -- this is the "no explicit shutdown" case.
+    // Registration is destroyed before node, just as with the library's
+    // function-local statics during unloading or process exit.
   }
 
   EXPECT_TRUE(weak_mutex.expired()) << "mutex must not be kept alive by the callback's capture of it";
   EXPECT_TRUE(weak_node.expired()) << "node must not be kept alive by the callback's capture of it";
 
-  // The context itself, and its now-dangling (weak-only, already-expired)
-  // callback registration, can be safely torn down too.
+  // The context can still shut down after its registration owner is gone.
   context->shutdown("test cleanup");
+}
+
+TEST(RegisterNodeResetOnPreShutdownTest, DestructionRemovesOnlyItsCallback)
+{
+  std::shared_ptr<rclcpp::Context> context;
+  rclcpp::NodeOptions options = makeOptionsWithFreshContext(context);
+  rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("registration_scope_test", options);
+  bool other_callback_called = false;
+  context->add_pre_shutdown_callback([&] { other_callback_called = true; });
+  const auto callbacks_before = context->get_pre_shutdown_callbacks().size();
+
+  {
+    auto registration = moveit::detail::registerNodeResetOnPreShutdown(node);
+    EXPECT_EQ(context->get_pre_shutdown_callbacks().size(), callbacks_before + 1);
+  }
+
+  EXPECT_EQ(context->get_pre_shutdown_callbacks().size(), callbacks_before);
+  EXPECT_NE(node, nullptr) << "unregistering must leave the caller-owned node intact";
+  node.reset();
+  EXPECT_TRUE(context->shutdown("shutdown after registration removal"));
+  EXPECT_TRUE(other_callback_called);
+}
+
+TEST(RegisterNodeResetOnPreShutdownTest, ReleasesContextAfterUnregistering)
+{
+  std::weak_ptr<rclcpp::Context> weak_context;
+  rclcpp::Node::SharedPtr node;
+  std::unique_ptr<moveit::detail::NodeResetOnPreShutdown> registration;
+  {
+    std::shared_ptr<rclcpp::Context> context;
+    rclcpp::NodeOptions options = makeOptionsWithFreshContext(context);
+    weak_context = context;
+    node = std::make_shared<rclcpp::Node>("context_owner_test", options);
+    registration = std::make_unique<moveit::detail::NodeResetOnPreShutdown>(node);
+  }
+
+  node.reset();
+  EXPECT_FALSE(weak_context.expired()) << "registration keeps the context alive until removal";
+  registration.reset();
+  EXPECT_TRUE(weak_context.expired()) << "registration must not create a context ownership cycle";
+}
+
+// Run under test_logger's CTest process timeout as a final bound for a mutex
+// deadlock. The deliberately blocked node deleter also has its own timeout.
+// This tests registration removal with library code still mapped; it does
+// not attempt concurrent dlclose while a callback is executing.
+TEST(RegisterNodeResetOnPreShutdownTest, RemovalWaitsForActiveShutdownCallback)
+{
+  using namespace std::chrono_literals;
+  std::shared_ptr<rclcpp::Context> context;
+  rclcpp::NodeOptions options = makeOptionsWithFreshContext(context);
+  std::promise<void> node_deletion_started;
+  auto node_deletion_started_future = node_deletion_started.get_future();
+  std::promise<void> release_node_deletion;
+  auto release_node_deletion_future = release_node_deletion.get_future();
+  rclcpp::Node::SharedPtr node(new rclcpp::Node("concurrent_removal_test", options), [&](rclcpp::Node* ptr) {
+    node_deletion_started.set_value();
+    EXPECT_EQ(release_node_deletion_future.wait_for(5s), std::future_status::ready);
+    delete ptr;
+  });
+  const auto callbacks_before = context->get_pre_shutdown_callbacks().size();
+  auto registration = std::make_unique<moveit::detail::NodeResetOnPreShutdown>(node);
+
+  auto shutdown = std::async(std::launch::async, [&] { return context->shutdown("concurrent removal"); });
+  const auto deletion_started = node_deletion_started_future.wait_for(5s);
+  EXPECT_EQ(deletion_started, std::future_status::ready);
+
+  std::promise<void> removal_started;
+  auto removal_started_future = removal_started.get_future();
+  auto removal = std::async(std::launch::async, [&] {
+    removal_started.set_value();
+    registration.reset();
+  });
+  EXPECT_EQ(removal_started_future.wait_for(5s), std::future_status::ready);
+  if (deletion_started == std::future_status::ready)
+  {
+    EXPECT_EQ(removal.wait_for(50ms), std::future_status::timeout)
+        << "removal must wait while the callback is using the node slot and mutex";
+  }
+  release_node_deletion.set_value();
+
+  EXPECT_EQ(shutdown.wait_for(5s), std::future_status::ready);
+  EXPECT_EQ(removal.wait_for(5s), std::future_status::ready);
+  EXPECT_TRUE(shutdown.get());
+  removal.get();
+  EXPECT_EQ(node, nullptr);
+  EXPECT_EQ(context->get_pre_shutdown_callbacks().size(), callbacks_before);
 }
 
 // Black-box test of the actual public API, using the process-wide default
