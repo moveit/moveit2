@@ -241,10 +241,20 @@ TEST(PlanningScene, rejectMismatchedAttachedSubframeArrays)
 
   const auto* accepted = scene.getCurrentState().getAttachedBody(aco.object.id);
   ASSERT_NE(accepted, nullptr);
+  Eigen::Isometry3d expected_subframe_pose;
+  tf2::fromMsg(subframe_pose, expected_subframe_pose);
+  ASSERT_EQ(accepted->getSubframes().count("tool"), 1u);
+  EXPECT_TRUE(accepted->getSubframes().at("tool").isApprox(expected_subframe_pose));
+  const auto accepted_shape_count = accepted->getShapes().size();
+
   aco.object.operation = moveit_msgs::msg::CollisionObject::APPEND;
   aco.object.subframe_poses.push_back(subframe_pose);
   EXPECT_FALSE(scene.processAttachedCollisionObjectMsg(aco));
-  EXPECT_EQ(scene.getCurrentState().getAttachedBody(aco.object.id), accepted);
+  const auto* after_rejection = scene.getCurrentState().getAttachedBody(aco.object.id);
+  ASSERT_NE(after_rejection, nullptr);
+  EXPECT_EQ(after_rejection->getShapes().size(), accepted_shape_count);
+  ASSERT_EQ(after_rejection->getSubframes().count("tool"), 1u);
+  EXPECT_TRUE(after_rejection->getSubframes().at("tool").isApprox(expected_subframe_pose));
 }
 
 int main(int argc, char** argv)
