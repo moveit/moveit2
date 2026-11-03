@@ -50,6 +50,16 @@
 #include <rviz_common/properties/color_property.hpp>
 #include <rviz_common/properties/enum_property.hpp>
 #include <rviz_common/display_context.hpp>
+<<<<<<< HEAD
+=======
+#include <rviz_common/logging.hpp>
+#include <rviz_common/frame_manager_iface.hpp>
+// For Rolling, Kilted, and newer
+#if RCLCPP_VERSION_GTE(29, 6, 0)
+#include <tf2_ros/buffer.hpp>
+// For Jazzy and older
+#else
+>>>>>>> 82b575f (Include rviz_common/logging.hpp where RVIZ_COMMON_LOG_* is used (#3861))
 #include <tf2_ros/buffer.h>
 
 #include <OgreSceneManager.h>
