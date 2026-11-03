@@ -4,6 +4,7 @@ import launch_ros
 from ament_index_python.packages import get_package_share_directory
 from launch_param_builder import ParameterBuilder
 from moveit_configs_utils import MoveItConfigsBuilder
+from moveit_configs_utils.launches import generate_spawn_controllers_launch
 
 
 def generate_launch_description():
@@ -58,24 +59,6 @@ def generate_launch_description():
         output="screen",
     )
 
-    joint_state_broadcaster_spawner = launch_ros.actions.Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=[
-            "joint_state_broadcaster",
-            "--controller-manager-timeout",
-            "300",
-            "--controller-manager",
-            "/controller_manager",
-        ],
-    )
-
-    panda_arm_controller_spawner = launch_ros.actions.Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["panda_arm_controller", "-c", "/controller_manager"],
-    )
-
     # Launch as much as possible in components
     container = launch_ros.actions.ComposableNodeContainer(
         name="moveit_servo_demo_container",
@@ -119,8 +102,9 @@ def generate_launch_description():
         [
             rviz_node,
             ros2_control_node,
-            joint_state_broadcaster_spawner,
-            panda_arm_controller_spawner,
+            generate_spawn_controllers_launch(
+                moveit_config, controller_manager_timeout=300
+            ),
             servo_node,
             container,
         ]
