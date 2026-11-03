@@ -92,9 +92,10 @@ TEST_F(SRDFTest, Empty)
 
   // do nothing
 
-  generateXML();
+  ASSERT_NO_FATAL_FAILURE(generateXML());
 
   auto root = srdf_xml_.FirstChildElement("robot");
+  ASSERT_NE(root, nullptr) << "No <robot> element in generated SRDF";
   EXPECT_EQ(std::string(root->Attribute("name")), std::string("fanuc"));
   EXPECT_TRUE(root->NoChildren());
 }
@@ -111,9 +112,10 @@ TEST_F(SRDFTest, SetJoints)
   std::vector<std::string> joints = { "joint_1", "joint_2" };
   pg.setJoints(group_name, joints);
 
-  generateXML();
+  ASSERT_NO_FATAL_FAILURE(generateXML());
 
   auto root = srdf_xml_.FirstChildElement("robot");
+  ASSERT_NE(root, nullptr) << "No <robot> element in generated SRDF";
   auto group_el = root->FirstChildElement("group");
   ASSERT_NE(group_el, nullptr);
   EXPECT_EQ(std::string(group_el->Attribute("name")), group_name);
@@ -123,7 +125,7 @@ TEST_F(SRDFTest, SetJoints)
   joints.push_back("joint_4");
   pg.setJoints(group_name, joints);
 
-  generateXML();
+  ASSERT_NO_FATAL_FAILURE(generateXML());
 
   root = srdf_xml_.FirstChildElement("robot");
   group_el = root->FirstChildElement("group");
@@ -143,9 +145,10 @@ TEST_F(SRDFTest, SetLinks)
   std::vector<std::string> links = { "base_link", "link_1" };
   pg.setLinks(group_name, links);
 
-  generateXML();
+  ASSERT_NO_FATAL_FAILURE(generateXML());
 
   auto root = srdf_xml_.FirstChildElement("robot");
+  ASSERT_NE(root, nullptr) << "No <robot> element in generated SRDF";
   auto group_el = root->FirstChildElement("group");
   ASSERT_NE(group_el, nullptr);
   EXPECT_EQ(std::string(group_el->Attribute("name")), group_name);
@@ -155,7 +158,7 @@ TEST_F(SRDFTest, SetLinks)
   links.push_back("link_3");
   pg.setLinks(group_name, links);
 
-  generateXML();
+  ASSERT_NO_FATAL_FAILURE(generateXML());
 
   root = srdf_xml_.FirstChildElement("robot");
   group_el = root->FirstChildElement("group");
@@ -175,9 +178,10 @@ TEST_F(SRDFTest, SetJointsThenLinks)
   std::vector<std::string> joints = { "joint_1", "joint_2" };
   pg.setJoints(group_name, joints);
 
-  generateXML();
+  ASSERT_NO_FATAL_FAILURE(generateXML());
 
   auto root = srdf_xml_.FirstChildElement("robot");
+  ASSERT_NE(root, nullptr) << "No <robot> element in generated SRDF";
   auto group_el = root->FirstChildElement("group");
   ASSERT_NE(group_el, nullptr);
   EXPECT_EQ(std::string(group_el->Attribute("name")), group_name);
@@ -187,7 +191,7 @@ TEST_F(SRDFTest, SetJointsThenLinks)
   std::vector<std::string> links = { "base_link", "link_1" };
   pg.setLinks(group_name, links);
 
-  generateXML();
+  ASSERT_NO_FATAL_FAILURE(generateXML());
 
   root = srdf_xml_.FirstChildElement("robot");
   group_el = root->FirstChildElement("group");
