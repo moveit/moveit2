@@ -88,7 +88,7 @@ public:
     else
     {
       collision_detection::CollisionResult::ContactMap contacts;
-      planning_scene->getCollidingPairs(contacts);
+      planning_scene->getCollidingPairs(contacts, start_state);
 
       std::string contact_information = std::to_string(contacts.size()) + " contact(s) detected : ";
 
