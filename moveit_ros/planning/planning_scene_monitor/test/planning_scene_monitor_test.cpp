@@ -45,6 +45,19 @@
 // Main class
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/robot_state/conversions.hpp>
+#include <moveit/collision_detection/occupancy_map.hpp>
+#include <moveit_msgs/srv/get_planning_scene.hpp>
+#include <moveit_msgs/srv/load_map.hpp>
+#include <geometric_shapes/shapes.h>
+#include <octomap/OcTree.h>
+
+#include <chrono>
+#include <cstdio>
+#include <future>
+#include <string>
+#include <thread>
+
+#include <unistd.h>
 
 class PlanningSceneMonitorTest : public ::testing::Test
 {
@@ -145,6 +158,64 @@ TEST_F(PlanningSceneMonitorTest, UpdateTypes)
   msg.is_diff = false;
 
   TRIGGERS_UPDATE(msg, UpdateType::UPDATE_SCENE);
+}
+
+// get_planning_scene must not serialise the octree while an octomap updater writes it
+TEST_F(PlanningSceneMonitorTest, GetPlanningSceneServiceWaitsForOctreeWriteLock)
+{
+  using namespace std::chrono_literals;
+  planning_scene_monitor_->startWorldGeometryMonitor("", "", true);
+  planning_scene_monitor_->providePlanningSceneService("test_get_planning_scene");
+
+  // Put the monitor's own tree into the scene by loading a small map through its load_map service
+  const std::string map_file = "/tmp/psm_test_octree_lock_" + std::to_string(::getpid()) + ".bt";
+  {
+    octomap::OcTree tree(0.05);
+    tree.updateNode(octomap::point3d(1.0, 1.0, 1.0), true);
+    ASSERT_TRUE(tree.writeBinary(map_file));
+  }
+  auto load_client = test_node_->create_client<moveit_msgs::srv::LoadMap>("load_map");
+  ASSERT_TRUE(load_client->wait_for_service(5s));
+  auto load_request = std::make_shared<moveit_msgs::srv::LoadMap::Request>();
+  load_request->filename = map_file;
+  auto load_future = load_client->async_send_request(load_request);
+  ASSERT_EQ(load_future.wait_for(5s), std::future_status::ready);
+  ASSERT_TRUE(load_future.get()->success);
+  std::remove(map_file.c_str());
+
+  std::shared_ptr<collision_detection::OccMapTree> octree;
+  for (int i = 0; i < 50 && !octree; ++i)
+  {
+    {
+      planning_scene_monitor::LockedPlanningSceneRO ls(planning_scene_monitor_);
+      auto map = ls->getWorld()->getObject(planning_scene::PlanningScene::OCTOMAP_NS);
+      if (map && map->shapes_.size() == 1)
+      {
+        const auto* shape = static_cast<const shapes::OcTree*>(map->shapes_[0].get());
+        octree = std::const_pointer_cast<collision_detection::OccMapTree>(
+            std::dynamic_pointer_cast<const collision_detection::OccMapTree>(shape->octree));
+      }
+    }
+    if (!octree)
+      std::this_thread::sleep_for(100ms);
+  }
+  ASSERT_TRUE(octree) << "the monitor's octree never reached the planning scene";
+
+  auto scene_client = test_node_->create_client<moveit_msgs::srv::GetPlanningScene>("test_get_planning_scene");
+  ASSERT_TRUE(scene_client->wait_for_service(5s));
+  auto scene_request = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
+  scene_request->components.components = moveit_msgs::msg::PlanningSceneComponents::OCTOMAP;
+
+  // An updater holds the write lock: the service must wait for it
+  octree->lockWrite();
+  auto scene_future = scene_client->async_send_request(scene_request);
+  const auto status_while_locked = scene_future.wait_for(1s);
+  octree->unlockWrite();
+  EXPECT_EQ(status_while_locked, std::future_status::timeout)
+      << "get_planning_scene serialised the octree while its write lock was held";
+
+  ASSERT_EQ(scene_future.wait_for(5s), std::future_status::ready);
+  EXPECT_FALSE(scene_future.get()->scene.world.octomap.octomap.data.empty());
 }
 
 int main(int argc, char** argv)
