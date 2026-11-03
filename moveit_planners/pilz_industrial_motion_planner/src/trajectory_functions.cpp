@@ -45,12 +45,67 @@
 #include <tf2_eigen/tf2_eigen.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <moveit/utils/logger.hpp>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 namespace
 {
 rclcpp::Logger getLogger()
 {
   return moveit::getLogger("pilz_trajectory_functions");
+}
+
+// Keep equivalent revolute IK solutions near the preceding sample before
+// computing derivatives. Only complete turns are permitted: clamping an angle
+// would change the requested Cartesian pose.
+void harmonizeIKSolution(const moveit::core::JointModelGroup* group,
+                         const pilz_industrial_motion_planner::JointLimitsContainer& limits,
+                         const std::map<std::string, double>& previous, std::map<std::string, double>& solution)
+{
+  constexpr double TWO_PI = 2.0 * M_PI;
+  for (const auto* joint : group->getActiveJointModels())
+  {
+    // A full turn of a mimic source can change dependent geometry (for example
+    // with a non-integer mimic multiplier), even if its own link pose is unchanged.
+    if (joint->getType() != moveit::core::JointModel::REVOLUTE || !joint->getMimicRequests().empty())
+      continue;
+
+    const auto& name = joint->getName();
+    double& angle = solution.at(name);
+    const double reference = previous.at(name);
+    if (!std::isfinite(angle) || !std::isfinite(reference))
+      continue;
+
+    double lower = -std::numeric_limits<double>::infinity();
+    double upper = std::numeric_limits<double>::infinity();
+    const auto& bounds = joint->getVariableBounds().front();
+    if (bounds.position_bounded_)
+    {
+      lower = bounds.min_position_;
+      upper = bounds.max_position_;
+    }
+    if (limits.hasLimit(name))
+    {
+      const auto limit = limits.getLimit(name);
+      if (limit.has_position_limits)
+      {
+        lower = std::max(lower, limit.min_position);
+        upper = std::min(upper, limit.max_position);
+      }
+    }
+
+    const double minimum_turns = std::ceil((lower - angle) / TWO_PI);
+    const double maximum_turns = std::floor((upper - angle) / TWO_PI);
+    if (minimum_turns > maximum_turns)
+      continue;  // No equivalent exists; never manufacture a different pose.
+
+    const double turns = std::clamp(std::round((reference - angle) / TWO_PI), minimum_turns, maximum_turns);
+    const double candidate = angle + TWO_PI * turns;
+    // Also guard rounding at position bounds and non-finite arithmetic.
+    if (std::isfinite(candidate) && candidate >= lower && candidate <= upper)
+      angle = candidate;
+  }
 }
 }  // namespace
 
@@ -248,6 +303,8 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
       return false;
     }
 
+    harmonizeIKSolution(robot_model->getJointModelGroup(group_name), joint_limits, ik_solution_last, ik_solution);
+
     // check the joint limits
     double duration_current_sample = sampling_time;
     // last interval can be shorter than the sampling time
@@ -356,6 +413,8 @@ bool pilz_industrial_motion_planner::generateJointTrajectory(
       joint_trajectory.points.clear();
       return false;
     }
+
+    harmonizeIKSolution(robot_model->getJointModelGroup(group_name), joint_limits, ik_solution_last, ik_solution);
 
     // verify the joint limits
     if (i == 0)

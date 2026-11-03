@@ -3,6 +3,7 @@ set(UNIT_TEST_SOURCEFILES
     unittest_velocity_profile_atrap
     unittest_trajectory_generator
     unittest_trajectory_functions
+    unittest_trajectory_angle_continuity
     unittest_trajectory_blender_transition_window
     unittest_trajectory_generator_common
     unittest_trajectory_generator_circ
@@ -43,6 +44,12 @@ target_link_libraries(
   trajectory_generation_common joint_limits_common Boost::headers)
 add_ros_test(launch/unittest_trajectory_functions.test.py ARGS
              "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
+
+# Trajectory angle continuity regression tests
+ament_add_gtest(unittest_trajectory_angle_continuity
+                src/unittest_trajectory_angle_continuity.cpp)
+target_link_libraries(unittest_trajectory_angle_continuity
+                      trajectory_generation_common joint_limits_common Boost::headers)
 
 # unittest for trajectory blender transition window
 ament_add_gtest_executable(
