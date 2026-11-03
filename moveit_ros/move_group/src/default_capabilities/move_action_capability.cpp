@@ -56,9 +56,32 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-MoveGroupMoveAction::MoveGroupMoveAction()
-  : MoveGroupCapability("move_action"), move_state_(IDLE), preempt_requested_{ false }
+MoveGroupMoveAction::MoveGroupMoveAction() : MoveGroupCapability("move_action"), move_state_(IDLE)
 {
+}
+
+MoveGroupMoveAction::~MoveGroupMoveAction()
+{
+  // A goal that is still being planned or executed keeps a pointer to this
+  // capability, so stop it and wait for its worker before the members below are
+  // destroyed. Workers that have not started yet notice shutting_down_ and
+  // return without touching anything else.
+  {
+    std::lock_guard<std::mutex> lock(goal_mutex_);
+    shutting_down_ = true;
+  }
+  preemptMoveCallback();
+
+  std::thread worker;
+  {
+    std::lock_guard<std::mutex> lock(goal_worker_mutex_);
+    worker = std::move(goal_worker_);
+  }
+
+  if (worker.joinable())
+  {
+    worker.join();
+  }
 }
 
 void MoveGroupMoveAction::initialize()
@@ -71,14 +94,144 @@ void MoveGroupMoveAction::initialize()
         RCLCPP_INFO(getLogger(), "MoveGroupMoveAction: Received request");
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
       },
-      [this](const std::shared_ptr<MGActionGoal>& /*unused*/) {
+      [this](const std::shared_ptr<MGActionGoal>& goal) {
         RCLCPP_INFO(getLogger(), "MoveGroupMoveAction: Received request to cancel goal");
-        preemptMoveCallback();
+        // rcl_action decides which goals it asks about before it calls this
+        // callback, and rclcpp_action can still call it for a goal that reached a
+        // terminal state in between. There is no worker left for such a goal, so
+        // reject the cancellation instead of recording it.
+        if (!goal->is_active())
+        {
+          return rclcpp_action::CancelResponse::REJECT;
+        }
+
+        bool is_running = false;
+        {
+          std::lock_guard<std::mutex> lock(goal_mutex_);
+          is_running = active_goal_ && active_goal_->get_goal_id() == goal->get_goal_id();
+          // The record stops this goal before it starts planning when it is still
+          // waiting for its worker. Every goal consumes only its own record.
+          canceled_goals_.insert(goal->get_goal_id());
+        }
+        if (is_running)
+        {
+          // Only the goal that owns the plan execution is stopped here. Stopping
+          // it for a goal that is still waiting would stop the goal that is
+          // running instead of the one the client asked to cancel.
+          preemptMoveCallback();
+        }
         return rclcpp_action::CancelResponse::ACCEPT;
       },
       [this](const std::shared_ptr<MGActionGoal>& goal) {
-        std::thread{ [this](const std::shared_ptr<move_group::MGActionGoal>& goal) { executeMoveCallback(goal); }, goal }
-            .detach();
+        // Runs in the executor thread. Hand the goal to a new worker and let that
+        // worker wait for the goal that is still being planned or executed, so
+        // that this callback does not keep the executor busy.
+        std::lock_guard<std::mutex> lock(goal_worker_mutex_);
+        if (shutting_down_)
+        {
+          // The destructor has already moved the previous worker out of
+          // goal_worker_, so storing a new joinable thread here would make the
+          // member destructor call std::terminate, and the new worker would
+          // capture a this that is being destroyed. Reject the goal instead of
+          // starting a worker that cannot be joined.
+          if (canPublish())
+          {
+            auto result = std::make_shared<MGAction::Result>();
+            result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+            goal->abort(result);
+          }
+          else
+          {
+            abandonGoal(goal);
+          }
+          return;
+        }
+
+        std::thread previous = std::move(goal_worker_);
+
+        goal_worker_ = std::thread{ [this, previous = std::move(previous)](
+                                        const std::shared_ptr<move_group::MGActionGoal>& goal) mutable {
+                                     if (previous.joinable())
+                                     {
+                                       previous.join();
+                                     }
+
+                                     // The cancel callback runs in the executor thread
+                                     // and exchanges the goal that owns the plan
+                                     // execution with this worker through goal_mutex_.
+                                     // A cancellation that is accepted for a goal that
+                                     // is still waiting is recorded per goal, and the
+                                     // goal consumes its own record in the preemption
+                                     // check of executeMoveCallback().
+                                     bool shutting_down = false;
+                                     {
+                                       std::lock_guard<std::mutex> lock(goal_mutex_);
+                                       shutting_down = shutting_down_;
+                                       if (!shutting_down)
+                                       {
+                                         active_goal_ = goal;
+                                       }
+                                     }
+                                     if (shutting_down)
+                                     {
+                                       // The destructor set the flag after this
+                                       // worker had been installed but before it got
+                                       // here, so the goal was accepted and an answer
+                                       // is still owed to the client. The goal is
+                                       // known to rclcpp_action at this point, so
+                                       // completing it produces a result instead of
+                                       // leaving a client to wait for one that is
+                                       // never sent. A goal that was canceled while
+                                       // it waited is completed as canceled like it
+                                       // would have been in executeMoveCallback, and
+                                       // the rest are aborted.
+                                       if (canPublish())
+                                       {
+                                         auto result = std::make_shared<MGAction::Result>();
+                                         result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+                                         if (goal->is_canceling())
+                                         {
+                                           goal->canceled(result);
+                                         }
+                                         else
+                                         {
+                                           goal->abort(result);
+                                         }
+                                       }
+                                       else
+                                       {
+                                         // The node has been shut down already, so the
+                                         // answer above cannot be published anymore.
+                                         abandonGoal(goal);
+                                       }
+                                       return;
+                                     }
+
+                                     // The cancellation of a goal that was still
+                                     // waiting has been applied by rclcpp_action by
+                                     // now, so the goal can be completed without
+                                     // planning. A cancellation that is still being
+                                     // applied is caught by the preemption check in
+                                     // executeMoveCallback().
+                                     if (goal->is_canceling())
+                                     {
+                                       if (canPublish())
+                                       {
+                                         auto result = std::make_shared<MGAction::Result>();
+                                         result->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
+                                         goal->canceled(result);
+                                       }
+                                       else
+                                       {
+                                         abandonGoal(goal);
+                                       }
+                                       releaseGoal(goal);
+                                       return;
+                                     }
+
+                                     executeMoveCallback(goal);
+                                   },
+                                    goal };
       });
 }
 
@@ -112,13 +265,34 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   // @todo: Response messages
   RCLCPP_INFO_STREAM(getLogger(), getActionResultString(action_res->error_code, planned_trajectory_empty,
                                                         goal->get_goal()->planning_options.plan_only));
-  if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
+  if (!canPublish())
+  {
+    // move_group shuts the context of the node down before it destroys the
+    // capabilities, and rclcpp_action throws from the completions below once that
+    // context is invalid instead of publishing a result that cannot be sent. A
+    // worker that finishes after the shutdown has taken place would terminate the
+    // process from that exception, so the goal is left in a terminal state here
+    // instead of being answered.
+    abandonGoal(goal);
+  }
+  else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS)
   {
     goal->succeed(action_res);
   }
   else if (action_res->error_code.val == moveit_msgs::msg::MoveItErrorCodes::PREEMPTED)
   {
-    goal->canceled(action_res);
+    // A PREEMPTED result does not imply that the client asked to cancel this goal:
+    // shutdown preempts a goal as well, and such a goal is still in the EXECUTING
+    // state. canceled() only accepts a goal that is canceling and throws otherwise,
+    // so abort such a goal instead.
+    if (goal->is_canceling())
+    {
+      goal->canceled(action_res);
+    }
+    else
+    {
+      goal->abort(action_res);
+    }
   }
   else
   {
@@ -126,7 +300,7 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
   }
 
   setMoveState(IDLE, goal_);
-  preempt_requested_ = false;
+  releaseGoal(goal);
   goal_.reset();
 }
 
@@ -175,7 +349,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
   };
 
   plan_execution::ExecutableMotionPlan plan;
-  if (preempt_requested_)
+  if (isPreemptRequested(goal))
   {
     RCLCPP_INFO(getLogger(), "Preempt requested before the goal is planned and executed.");
     action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
@@ -197,7 +371,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 
   planning_interface::MotionPlanResponse res;
 
-  if (preempt_requested_)
+  if (isPreemptRequested(goal))
   {
     RCLCPP_INFO(getLogger(), "Preempt requested before the goal is planned.");
     action_res->error_code.val = moveit_msgs::msg::MoveItErrorCodes::PREEMPTED;
@@ -280,9 +454,29 @@ void MoveGroupMoveAction::startMoveLookCallback()
   setMoveState(LOOK, goal_);
 }
 
+bool MoveGroupMoveAction::isPreemptRequested(const std::shared_ptr<MGActionGoal>& goal)
+{
+  std::lock_guard<std::mutex> lock(goal_mutex_);
+  return shutting_down_ || canceled_goals_.count(goal->get_goal_id()) > 0;
+}
+
+void MoveGroupMoveAction::releaseGoal(const std::shared_ptr<MGActionGoal>& goal)
+{
+  std::lock_guard<std::mutex> lock(goal_mutex_);
+  if (active_goal_ && active_goal_->get_goal_id() == goal->get_goal_id())
+  {
+    active_goal_.reset();
+  }
+  // Consume the cancellation that was recorded for this goal, so that it cannot
+  // preempt another goal.
+  canceled_goals_.erase(goal->get_goal_id());
+}
+
 void MoveGroupMoveAction::preemptMoveCallback()
 {
-  preempt_requested_ = true;
+  // Stops the plan execution that is running now. A cancellation is recorded per
+  // goal in the cancel callback, and a shutdown is seen by the workers through
+  // shutting_down_.
   context_->plan_execution_->stop();
 }
 
@@ -290,11 +484,36 @@ void MoveGroupMoveAction::setMoveState(MoveGroupState state, const std::shared_p
 {
   move_state_ = state;
 
-  if (goal)
+  if (goal && canPublish())
   {
     auto move_feedback = std::make_shared<MGAction::Feedback>();
     move_feedback->state = stateToStr(state);
     goal->publish_feedback(move_feedback);
+  }
+}
+
+bool MoveGroupMoveAction::canPublish()
+{
+  // Every result, status update and feedback of the action server goes through the
+  // context of the node, and rclcpp_action throws from those calls instead of
+  // dropping the message once the context has been shut down.
+  return context_->moveit_cpp_->getNode()->get_node_base_interface()->get_context()->is_valid();
+}
+
+void MoveGroupMoveAction::abandonGoal(const std::shared_ptr<MGActionGoal>& goal)
+{
+  // Move the goal to a terminal state without answering it. rclcpp_action performs
+  // the transition before it publishes the result, so the goal is completed here
+  // and the exception that follows is the publish that cannot happen anymore. An
+  // active goal would otherwise make the destructor of its handle throw from the
+  // thread that releases the last reference to it.
+  try
+  {
+    goal->abort(std::make_shared<MGAction::Result>());
+  }
+  catch (const std::exception& ex)
+  {
+    RCLCPP_DEBUG(getLogger(), "Goal left without an answer, the node has been shut down: %s", ex.what());
   }
 }
 }  // namespace move_group
