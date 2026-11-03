@@ -85,8 +85,9 @@ public:
    * @brief      Initializes the occupancy map updater.  This must be called because of the interface of OccupancyMapUpdater.
    *
    * @param[in]  occupancy_map_updater  The occupancy map updater
+   * @return     True if initialization succeeded
    */
-  void initializeOccupancyMapUpdater(OccupancyMapUpdaterPtr occupancy_map_updater) override;
+  bool initializeOccupancyMapUpdater(OccupancyMapUpdaterPtr occupancy_map_updater) override;
 
   /**
    * @brief      Creates a save map service.
