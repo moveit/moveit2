@@ -179,7 +179,7 @@ void OMPLInterface::loadPlannerConfigurations()
     for (const auto& [name, type] : KNOWN_GROUP_PARAMS)
     {
       std::string param_name{ group_name_param };
-      param_name += ".";
+      param_name += '.';
       param_name += name;
       if (node_->has_parameter(param_name))
       {

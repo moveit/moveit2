@@ -65,7 +65,7 @@ QString subframePosesToQstring(const moveit::core::FixedTransformsMap& subframes
     status_text += QString::fromStdString(subframe.first) + "', '";
   }
   status_text.chop(3);
-  status_text += ".";
+  status_text += '.';
   return status_text;
 }
 }  // namespace
@@ -263,9 +263,12 @@ static QString decideStatusText(const collision_detection::CollisionEnv::ObjectC
     {
       status_text += QString::fromStdString(std::to_string(shape_names.size())) + " shapes:";
       for (const QString& shape_name : shape_names)
-        status_text += " " + shape_name;
+      {
+        status_text += ' ';
+        status_text += shape_name;
+      }
     }
-    status_text += ".";
+    status_text += '.';
   }
   if (!obj->subframe_poses_.empty())
   {
@@ -518,7 +521,7 @@ void MotionPlanningFrame::copySelectedCollisionObject()
     name.insert(0, "Copy of ");
     if (ps->getWorld()->hasObject(name))
     {
-      name += " ";
+      name += ' ';
       unsigned int n = 1;
       while (ps->getWorld()->hasObject(name + std::to_string(n)))
         n++;

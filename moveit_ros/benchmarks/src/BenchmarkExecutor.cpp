@@ -1202,7 +1202,7 @@ void BenchmarkExecutor::writeOutput(const BenchmarkRequest& benchmark_request, c
   std::string filename = options.output_directory;
   if (!filename.empty() && filename[filename.size() - 1] != '/')
   {
-    filename.append("/");
+    filename.push_back('/');
   }
 
   // Ensure directories exist
