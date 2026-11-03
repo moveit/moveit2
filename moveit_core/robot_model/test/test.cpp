@@ -172,6 +172,29 @@ TEST(FloatingJointTest, interpolation_test)
   }
 }
 
+TEST(FloatingJointTest, maximum_extent_test)
+{
+  // Create a simple floating joint model with some dummy parameters (these are not used by the test)
+  moveit::core::FloatingJointModel fjm("joint", 0, 0);
+
+  // Bound the translation between -1 and 1 in all dimensions, as above.
+  moveit::core::JointModel::Bounds bounds;
+  bounds = fjm.getVariableBounds();
+  bounds[0].min_position_ = -1.0;
+  bounds[0].max_position_ = 1.0;
+  bounds[1].min_position_ = -1.0;
+  bounds[1].max_position_ = 1.0;
+  bounds[2].min_position_ = -1.0;
+  bounds[2].max_position_ = 1.0;
+
+  // Opposite corners of the translation bounds, half a turn apart in rotation. This is the
+  // largest value distance() can report for these bounds, so getMaximumExtent() must cover it.
+  const double jv1[7] = { -1.0, -1.0, -1.0, 0.0, 0.0, 0.0, 1.0 };
+  const double jv2[7] = { 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0 };
+
+  EXPECT_LE(fjm.distance(jv1, jv2), fjm.getMaximumExtent(bounds));
+}
+
 TEST(PlanarJointTest, ComputeVariablePositionsNormalizeYaw)
 {
   // Create a simple planar joint model with some dummy parameters
