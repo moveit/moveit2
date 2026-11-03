@@ -35,9 +35,13 @@
 /* Author: Peter David Fagan */
 
 #include "moveit_cpp.hpp"
+#include <atomic>
+#include <chrono>
+#include <mutex>
 #include <pybind11/pytypes.h>
 #include <moveit/utils/logger.hpp>
 #include <string>
+#include <thread>
 
 namespace moveit_py
 {
@@ -47,6 +51,92 @@ rclcpp::Logger getLogger()
 {
   return moveit::getLogger("moveit.py.cpp_initializer");
 }
+
+namespace
+{
+// Keep the executor alive until its callbacks have returned, including when construction throws.
+class ExecutorThread
+{
+public:
+  explicit ExecutorThread(const rclcpp::Node::SharedPtr& node)
+    : executor_(std::make_shared<rclcpp::executors::SingleThreadedExecutor>())
+    , stop_requested_(std::make_shared<std::atomic_bool>(false))
+  {
+    executor_->add_node(node);
+    execution_thread_ = std::thread([node, executor = executor_, stop_requested = stop_requested_]() {
+      try
+      {
+        while (!stop_requested->load() && rclcpp::ok(node->get_node_base_interface()->get_context()))
+          executor->spin_once(std::chrono::milliseconds(100));
+      }
+      catch (const std::exception& exception)
+      {
+        if (!stop_requested->load() && rclcpp::ok(node->get_node_base_interface()->get_context()))
+          RCLCPP_ERROR(getLogger(), "MoveItPy executor stopped: %s", exception.what());
+      }
+    });
+    execution_thread_id_ = execution_thread_.get_id();
+  }
+
+  ~ExecutorThread()
+  {
+    stop();
+  }
+
+  ExecutorThread(const ExecutorThread&) = delete;
+  ExecutorThread& operator=(const ExecutorThread&) = delete;
+
+  bool isCurrentThread() const
+  {
+    return execution_thread_id_ == std::this_thread::get_id();
+  }
+
+  void stop()
+  {
+    std::lock_guard<std::mutex> lock(stop_mutex_);
+    stop_requested_->store(true);
+    if (!execution_thread_.joinable() || execution_thread_.get_id() == std::this_thread::get_id())
+      return;
+
+    try
+    {
+      executor_->cancel();
+    }
+    catch (const std::exception&)
+    {
+      // The bounded spin_once wait also allows cleanup after the ROS context has stopped.
+    }
+    execution_thread_.join();
+  }
+
+private:
+  std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
+  std::shared_ptr<std::atomic_bool> stop_requested_;
+  std::mutex stop_mutex_;
+  std::thread execution_thread_;
+  std::thread::id execution_thread_id_;
+};
+
+struct MoveItPyDeleter
+{
+  std::shared_ptr<ExecutorThread> executor_thread;
+
+  void operator()(moveit_cpp::MoveItCpp* moveit_cpp) const
+  {
+    if (executor_thread->isCurrentThread())
+    {
+      // A callback can release the last holder. Join it from another thread before deleting its state.
+      std::thread([executor_thread = executor_thread, moveit_cpp]() {
+        executor_thread->stop();
+        delete moveit_cpp;
+      }).detach();
+      return;
+    }
+    executor_thread->stop();
+    delete moveit_cpp;
+  }
+};
+}  // namespace
 
 std::shared_ptr<moveit_cpp::PlanningComponent>
 getPlanningComponent(std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp_ptr, const std::string& planning_component)
@@ -99,17 +189,10 @@ void initMoveitPy(py::module& m)
                }
              }
 
-             // Initialize ROS, pass launch arguments with rclcpp::init()
+             // Instance-specific parameters and remappings belong to NodeOptions, not the shared context.
              if (!rclcpp::ok())
              {
-               std::vector<const char*> chars;
-               chars.reserve(launch_arguments.size());
-               for (const auto& arg : launch_arguments)
-               {
-                 chars.push_back(arg.c_str());
-               }
-
-               rclcpp::init(launch_arguments.size(), chars.data());
+               rclcpp::init(0, nullptr);
                RCLCPP_INFO(getLogger(), "Initialize rclcpp");
              }
 
@@ -122,28 +205,17 @@ void initMoveitPy(py::module& m)
 
              RCLCPP_INFO(getLogger(), "Initialize node and executor");
              rclcpp::Node::SharedPtr node = rclcpp::Node::make_shared(node_name, name_space, node_options);
-             std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor =
-                 std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
 
              RCLCPP_INFO(getLogger(), "Spin separate thread");
-             auto spin_node = [node, executor]() {
-               executor->add_node(node);
-               executor->spin();
-             };
-             std::thread execution_thread(spin_node);
-             execution_thread.detach();
-
-             auto custom_deleter = [executor](moveit_cpp::MoveItCpp* moveit_cpp) {
-               executor->cancel();
-               rclcpp::shutdown();
-               delete moveit_cpp;
-             };
-
-             std::shared_ptr<moveit_cpp::MoveItCpp> moveit_cpp_ptr(new moveit_cpp::MoveItCpp(node), custom_deleter);
+             auto executor_thread = std::make_shared<ExecutorThread>(node);
+             std::shared_ptr<moveit_cpp::MoveItCpp> moveit_cpp_ptr(new moveit_cpp::MoveItCpp(node),
+                                                                   MoveItPyDeleter{ executor_thread });
 
              if (provide_planning_service)
              {
-               moveit_cpp_ptr->getPlanningSceneMonitorNonConst()->providePlanningSceneService();
+               const auto service_name = node->get_node_base_interface()->resolve_topic_or_service_name(
+                   planning_scene_monitor::PlanningSceneMonitor::DEFAULT_PLANNING_SCENE_SERVICE, true);
+               moveit_cpp_ptr->getPlanningSceneMonitorNonConst()->providePlanningSceneService(service_name);
              };
 
              return moveit_cpp_ptr;
@@ -174,9 +246,15 @@ void initMoveitPy(py::module& m)
           )")
 
       .def(
-          "shutdown", [](std::shared_ptr<moveit_cpp::MoveItCpp>& /*moveit_cpp*/) { rclcpp::shutdown(); },
+          "shutdown",
+          [](std::shared_ptr<moveit_cpp::MoveItCpp>& moveit_cpp) {
+            if (auto* deleter = std::get_deleter<MoveItPyDeleter>(moveit_cpp))
+              deleter->executor_thread->stop();
+          },
+          py::call_guard<py::gil_scoped_release>(),
           R"(
-          Shutdown the moveit_cpp node.
+          Stop this instance's executor and wait for its callbacks to finish.
+          Repeated calls are safe. Other instances and the shared ROS context remain running.
           )")
 
       .def("get_planning_scene_monitor", &moveit_cpp::MoveItCpp::getPlanningSceneMonitorNonConst,
