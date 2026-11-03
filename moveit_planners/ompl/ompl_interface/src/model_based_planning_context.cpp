@@ -107,6 +107,11 @@ ModelBasedPlanningContext::ModelBasedPlanningContext(const std::string& name,
   constraints_library_ = std::make_shared<ConstraintsLibrary>(this);
 }
 
+ModelBasedPlanningContext::~ModelBasedPlanningContext()
+{
+  stopSampling();
+}
+
 void ModelBasedPlanningContext::configure(const rclcpp::Node::SharedPtr& node, bool use_constraints_approximations)
 {
   loadConstraintApproximations(node);
@@ -455,9 +460,9 @@ void ModelBasedPlanningContext::simplifySolution(double timeout)
   ompl::time::point start = ompl::time::now();
   ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
   registerTerminationCondition(ptc);
+  PtcRegistration ptc_guard(this);
   ompl_simple_setup_->simplifySolution(ptc);
   last_simplify_time_ = ompl_simple_setup_->getLastSimplificationTime();
-  unregisterTerminationCondition();
 }
 
 void ModelBasedPlanningContext::interpolateSolution()
@@ -627,6 +632,7 @@ void ModelBasedPlanningContext::setCompleteInitialState(const moveit::core::Robo
 
 void ModelBasedPlanningContext::clear()
 {
+  stopSampling();
   if (!multi_query_planning_enabled_)
   {
     ompl_simple_setup_->clear();
@@ -728,6 +734,10 @@ void ModelBasedPlanningContext::startSampling()
 
 void ModelBasedPlanningContext::stopSampling()
 {
+  if (!ompl_simple_setup_ || !ompl_simple_setup_->getGoal())
+  {
+    return;
+  }
   bool gls = ompl_simple_setup_->getGoal()->hasType(ob::GOAL_LAZY_SAMPLES);
   if (gls)
   {
@@ -849,110 +859,118 @@ void ModelBasedPlanningContext::solve(planning_interface::MotionPlanDetailedResp
 const moveit_msgs::msg::MoveItErrorCodes ModelBasedPlanningContext::solve(double timeout, unsigned int count)
 {
   ompl::time::point start = ompl::time::now();
-  preSolve();
 
   moveit_msgs::msg::MoveItErrorCodes result;
   result.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
-  if (count <= 1 || multi_query_planning_enabled_)  // multi-query planners should always run in single instances
+  try
   {
-    RCLCPP_DEBUG(getLogger(), "%s: Solving the planning problem once...", name_.c_str());
-    ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
-    registerTerminationCondition(ptc);
-    std::ignore = ompl_simple_setup_->solve(ptc);
-    last_plan_time_ = ompl_simple_setup_->getLastPlanComputationTime();
-    unregisterTerminationCondition();
-    // fill the result status code
-    result.val = logPlannerStatus(ompl_simple_setup_);
-  }
-  else
-  {
-    RCLCPP_DEBUG(getLogger(), "%s: Solving the planning problem %u times...", name_.c_str(), count);
-    ompl_parallel_plan_.clearHybridizationPaths();
-    if (count <= max_planning_threads_)
+    preSolve();
+    if (count <= 1 || multi_query_planning_enabled_)  // multi-query planners should always run in single instances
     {
-      ompl_parallel_plan_.clearPlanners();
-      if (ompl_simple_setup_->getPlannerAllocator())
-      {
-        for (unsigned int i = 0; i < count; ++i)
-        {
-          ompl_parallel_plan_.addPlannerAllocator(ompl_simple_setup_->getPlannerAllocator());
-        }
-      }
-      else
-      {
-        for (unsigned int i = 0; i < count; ++i)
-        {
-          ompl_parallel_plan_.addPlanner(ompl::tools::SelfConfig::getDefaultPlanner(ompl_simple_setup_->getGoal()));
-        }
-      }
-
+      RCLCPP_DEBUG(getLogger(), "%s: Solving the planning problem once...", name_.c_str());
       ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
       registerTerminationCondition(ptc);
-      if (ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION)
-      {
-        result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-      }
-      last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
-      unregisterTerminationCondition();
+      PtcRegistration ptc_guard(this);
+      std::ignore = ompl_simple_setup_->solve(ptc);
+      last_plan_time_ = ompl_simple_setup_->getLastPlanComputationTime();
+      // fill the result status code
+      result.val = logPlannerStatus(ompl_simple_setup_);
     }
     else
     {
-      ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
-      registerTerminationCondition(ptc);
-      int n = count / max_planning_threads_;
-      result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
-      for (int i = 0; i < n && !ptc(); ++i)
+      RCLCPP_DEBUG(getLogger(), "%s: Solving the planning problem %u times...", name_.c_str(), count);
+      ompl_parallel_plan_.clearHybridizationPaths();
+      if (count <= max_planning_threads_)
       {
         ompl_parallel_plan_.clearPlanners();
         if (ompl_simple_setup_->getPlannerAllocator())
         {
-          for (unsigned int i = 0; i < max_planning_threads_; ++i)
+          for (unsigned int i = 0; i < count; ++i)
           {
             ompl_parallel_plan_.addPlannerAllocator(ompl_simple_setup_->getPlannerAllocator());
           }
         }
         else
         {
-          for (unsigned int i = 0; i < max_planning_threads_; ++i)
+          for (unsigned int i = 0; i < count; ++i)
           {
             ompl_parallel_plan_.addPlanner(ompl::tools::SelfConfig::getDefaultPlanner(ompl_simple_setup_->getGoal()));
           }
         }
 
-        bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
-        // Was this latest call successful too?
-        result.val = (result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && r) ?
-                         moveit_msgs::msg::MoveItErrorCodes::SUCCESS :
-                         moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+        ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
+        registerTerminationCondition(ptc);
+        PtcRegistration ptc_guard(this);
+        if (ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION)
+        {
+          result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+        }
+        last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
       }
-      n = count % max_planning_threads_;
-      if (n && !ptc())
+      else
       {
-        ompl_parallel_plan_.clearPlanners();
-        if (ompl_simple_setup_->getPlannerAllocator())
+        ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
+        registerTerminationCondition(ptc);
+        PtcRegistration ptc_guard(this);
+        int n = count / max_planning_threads_;
+        result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+        for (int i = 0; i < n && !ptc(); ++i)
         {
-          for (int i = 0; i < n; ++i)
+          ompl_parallel_plan_.clearPlanners();
+          if (ompl_simple_setup_->getPlannerAllocator())
           {
-            ompl_parallel_plan_.addPlannerAllocator(ompl_simple_setup_->getPlannerAllocator());
+            for (unsigned int i = 0; i < max_planning_threads_; ++i)
+            {
+              ompl_parallel_plan_.addPlannerAllocator(ompl_simple_setup_->getPlannerAllocator());
+            }
           }
-        }
-        else
-        {
-          for (int i = 0; i < n; ++i)
+          else
           {
-            ompl_parallel_plan_.addPlanner(ompl::tools::SelfConfig::getDefaultPlanner(ompl_simple_setup_->getGoal()));
+            for (unsigned int i = 0; i < max_planning_threads_; ++i)
+            {
+              ompl_parallel_plan_.addPlanner(ompl::tools::SelfConfig::getDefaultPlanner(ompl_simple_setup_->getGoal()));
+            }
           }
-        }
 
-        bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
-        // Was this latest call successful too?
-        result.val = (result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && r) ?
-                         moveit_msgs::msg::MoveItErrorCodes::SUCCESS :
-                         moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+          bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
+          // Was this latest call successful too?
+          result.val = (result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && r) ?
+                           moveit_msgs::msg::MoveItErrorCodes::SUCCESS :
+                           moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+        }
+        n = count % max_planning_threads_;
+        if (n && !ptc())
+        {
+          ompl_parallel_plan_.clearPlanners();
+          if (ompl_simple_setup_->getPlannerAllocator())
+          {
+            for (int i = 0; i < n; ++i)
+            {
+              ompl_parallel_plan_.addPlannerAllocator(ompl_simple_setup_->getPlannerAllocator());
+            }
+          }
+          else
+          {
+            for (int i = 0; i < n; ++i)
+            {
+              ompl_parallel_plan_.addPlanner(ompl::tools::SelfConfig::getDefaultPlanner(ompl_simple_setup_->getGoal()));
+            }
+          }
+
+          bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
+          // Was this latest call successful too?
+          result.val = (result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && r) ?
+                           moveit_msgs::msg::MoveItErrorCodes::SUCCESS :
+                           moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+        }
+        last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
       }
-      last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
-      unregisterTerminationCondition();
     }
+  }
+  catch (...)
+  {
+    postSolve();
+    throw;
   }
 
   postSolve();
