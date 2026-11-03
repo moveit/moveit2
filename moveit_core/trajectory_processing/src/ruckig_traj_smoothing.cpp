@@ -422,8 +422,8 @@ void RuckigSmoothing::getNextRuckigInput(const moveit::core::RobotStateConstPtr&
   }
 }
 
-bool RuckigSmoothing::checkOvershoot(ruckig::Trajectory<ruckig::DynamicDOFs, ruckig::StandardVector>& ruckig_trajectory,
-                                     const size_t num_dof, ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
+bool RuckigSmoothing::checkOvershoot(ruckig::Trajectory<ruckig::DynamicDOFs>& ruckig_trajectory, const size_t num_dof,
+                                     ruckig::InputParameter<ruckig::DynamicDOFs>& ruckig_input,
                                      const double overshoot_threshold)
 {
   // For every timestep
