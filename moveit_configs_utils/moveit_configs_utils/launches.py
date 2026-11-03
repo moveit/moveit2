@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+from typing import Optional, Union
 
 from launch import LaunchDescription
 from launch.actions import (
@@ -18,9 +20,10 @@ from moveit_configs_utils.launch_utils import (
     add_debuggable_node,
     DeclareBooleanLaunchArg,
 )
+from moveit_configs_utils.moveit_configs_builder import MoveItConfigs
 
 
-def generate_rsp_launch(moveit_config):
+def generate_rsp_launch(moveit_config: MoveItConfigs) -> LaunchDescription:
     """Launch file for robot state publisher (rsp)"""
 
     ld = LaunchDescription()
@@ -44,8 +47,9 @@ def generate_rsp_launch(moveit_config):
     return ld
 
 
-def generate_moveit_rviz_launch(moveit_config):
+def generate_moveit_rviz_launch(moveit_config: MoveItConfigs) -> LaunchDescription:
     """Launch file for rviz"""
+    assert moveit_config.package_path is not None
     ld = LaunchDescription()
 
     ld.add_action(DeclareBooleanLaunchArg("debug", default_value=False))
@@ -75,7 +79,7 @@ def generate_moveit_rviz_launch(moveit_config):
     return ld
 
 
-def generate_setup_assistant_launch(moveit_config):
+def generate_setup_assistant_launch(moveit_config: MoveItConfigs) -> LaunchDescription:
     """Launch file for MoveIt Setup Assistant"""
     ld = LaunchDescription()
 
@@ -90,7 +94,9 @@ def generate_setup_assistant_launch(moveit_config):
     return ld
 
 
-def generate_static_virtual_joint_tfs_launch(moveit_config):
+def generate_static_virtual_joint_tfs_launch(
+    moveit_config: MoveItConfigs,
+) -> LaunchDescription:
     ld = LaunchDescription()
 
     name_counter = 0
@@ -116,12 +122,16 @@ def generate_static_virtual_joint_tfs_launch(moveit_config):
     return ld
 
 
-def generate_spawn_controllers_launch(moveit_config, controller_manager_timeout=None):
+def generate_spawn_controllers_launch(
+    moveit_config: MoveItConfigs,
+    controller_manager_timeout: Optional[Union[int, float]] = None,
+) -> LaunchDescription:
     controller_names = moveit_config.trajectory_execution.get(
         "moveit_simple_controller_manager", {}
     ).get("controller_names", [])
     ld = LaunchDescription()
     # Pass the same ros2_controllers.yaml to the controller spawners as to the controller_manager
+    assert moveit_config.package_path is not None
     ros2_controllers_path = moveit_config.package_path / "config/ros2_controllers.yaml"
     spawner_args = (
         ["--param-file", str(ros2_controllers_path)]
@@ -147,8 +157,9 @@ def generate_spawn_controllers_launch(moveit_config, controller_manager_timeout=
     return ld
 
 
-def generate_warehouse_db_launch(moveit_config):
+def generate_warehouse_db_launch(moveit_config: MoveItConfigs) -> LaunchDescription:
     """Launch file for warehouse database"""
+    assert moveit_config.package_path is not None
     ld = LaunchDescription()
     ld.add_action(
         DeclareLaunchArgument(
@@ -201,7 +212,8 @@ def generate_warehouse_db_launch(moveit_config):
     return ld
 
 
-def generate_move_group_launch(moveit_config):
+def generate_move_group_launch(moveit_config: MoveItConfigs) -> LaunchDescription:
+    assert moveit_config.package_path is not None
     ld = LaunchDescription()
 
     ld.add_action(DeclareBooleanLaunchArg("debug", default_value=False))
@@ -269,7 +281,9 @@ def generate_move_group_launch(moveit_config):
     return ld
 
 
-def generate_demo_launch(moveit_config, launch_package_path=None):
+def generate_demo_launch(
+    moveit_config: MoveItConfigs, launch_package_path: Optional[Path] = None
+) -> LaunchDescription:
     """
     Launches a self contained demo
 
@@ -283,7 +297,8 @@ def generate_demo_launch(moveit_config, launch_package_path=None):
      * warehouse_db (optional)
      * ros2_control_node + controller spawners
     """
-    if launch_package_path == None:
+    assert moveit_config.package_path is not None
+    if launch_package_path is None:
         launch_package_path = moveit_config.package_path
 
     ld = LaunchDescription()
