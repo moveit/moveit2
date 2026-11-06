@@ -42,6 +42,7 @@
 #pragma once
 
 // ROS2
+#include <rclcpp/executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 // System
@@ -150,6 +151,9 @@ private:
   int num_possible_redundant_joints_;
 
   rclcpp::Client<moveit_msgs::srv::GetPositionIK>::SharedPtr ik_service_client_;
+  rclcpp::Node::SharedPtr ik_node_;
+  rclcpp::Executor::SharedPtr ik_executor_;
+  std::thread ik_thread_;
 
   rclcpp::Node::SharedPtr node_;
 
