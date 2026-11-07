@@ -490,7 +490,8 @@ TEST(time_optimal_trajectory_generation, testLargeAccel2)
 
     ASSERT_EQ(acceleration.size(), 7);
     for (std::size_t i = 0; i < 7; ++i)
-      EXPECT_NEAR(acceleration(i), 0.0, 100.0) << "Invalid acceleration at position " << sample_count << " (time: " << t << ")\n";
+      EXPECT_LE(std::abs(acceleration(i)), max_accelerations(i) * 1.01)
+          << "Acceleration limit exceeded for joint " << i << " at time " << t;
   }
 }
 

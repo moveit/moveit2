@@ -591,9 +591,15 @@ bool Trajectory::integrateForward(std::list<TrajectoryStep>& trajectory, double 
       {
         continue;
       }
-      path_vel = old_path_vel +
-                 (next_discontinuity->first - old_path_pos) * (path_vel - old_path_vel) / (path_pos - old_path_pos);
-      path_pos = next_discontinuity->first;
+      // Same problem from the other side: if the previous step is already at the switching point, moving this step
+      // back onto it would add an almost identical TrajectoryStep. The tiny segment between them makes the sampled
+      // acceleration explode (https://github.com/moveit/moveit2/issues/3565).
+      if (next_discontinuity->first - old_path_pos >= EPS)
+      {
+        path_vel = old_path_vel +
+                   (next_discontinuity->first - old_path_pos) * (path_vel - old_path_vel) / (path_pos - old_path_pos);
+        path_pos = next_discontinuity->first;
+      }
     }
 
     if (path_pos > path_.getLength())
