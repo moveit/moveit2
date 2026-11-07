@@ -343,15 +343,17 @@ void ServoNode::servoLoop()
 
   // convert_clock_type() is used in case planning_scene_monitor uses RCL_SYSTEM_TIME
   // while Servo uses RCL_ROS_TIME
-  while (servo_node_start >
-         convertClockType(planning_scene_monitor_->getLastUpdateTime(), servo_node_start.get_clock_type()))
+  // Also check for shutdown, so the node can still exit while no robot state arrives.
+  while (rclcpp::ok() && !stop_servo_ &&
+         servo_node_start >
+             convertClockType(planning_scene_monitor_->getLastUpdateTime(), servo_node_start.get_clock_type()))
   {
     RCLCPP_INFO(node_->get_logger(), "Waiting for planning scene monitor to receive robot state update.");
     rclcpp::sleep_for(std::chrono::seconds(1));
   }
+  if (!rclcpp::ok() || stop_servo_)
   {
-    RCLCPP_INFO(node_->get_logger(), "Waiting to receive robot state update.");
-    rclcpp::sleep_for(std::chrono::seconds(1));
+    return;
   }
   KinematicState current_state = servo_->getCurrentRobotState(true /* block for current robot state */);
   last_commanded_state_ = current_state;
