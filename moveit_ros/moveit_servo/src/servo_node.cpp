@@ -204,10 +204,15 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
                         (request->command_type <= static_cast<int8_t>(CommandType::MAX));
   if (is_valid)
   {
-    // Drop commands received before the switch, so they are not reported as commands of the wrong type.
+    const auto command_type = static_cast<CommandType>(request->command_type);
     std::lock_guard<std::mutex> lock_guard(lock_);
-    new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-    servo_->setCommandType(static_cast<CommandType>(request->command_type));
+    // Drop commands received before a switch, so they are not reported as commands of the wrong type.
+    // Requesting the active type must keep them, otherwise an active command would never time out and halt.
+    if (command_type != servo_->getCommandType())
+    {
+      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+    }
+    servo_->setCommandType(command_type);
   }
   else
   {
