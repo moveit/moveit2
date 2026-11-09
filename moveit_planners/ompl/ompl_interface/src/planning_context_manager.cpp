@@ -67,6 +67,11 @@
 #include <ompl/geometric/planners/prm/LazyPRMstar.h>
 #include <ompl/geometric/planners/prm/SPARS.h>
 #include <ompl/geometric/planners/prm/SPARStwo.h>
+#include <ompl/geometric/planners/informedtrees/ABITstar.h>
+#include <ompl/geometric/planners/informedtrees/AITstar.h>
+#include <ompl/geometric/planners/informedtrees/BITstar.h>
+#include <ompl/geometric/planners/informedtrees/EIRMstar.h>
+#include <ompl/geometric/planners/informedtrees/EITstar.h>
 
 #include <ompl/base/ConstrainedSpaceInformation.h>
 #include <ompl/base/spaces/constraint/ProjectedStateSpace.h>
@@ -294,11 +299,16 @@ void PlanningContextManager::registerPlannerAllocatorHelper(const std::string& p
 
 void PlanningContextManager::registerDefaultPlanners()
 {
+  registerPlannerAllocatorHelper<og::ABITstar>("geometric::ABITstar");
+  registerPlannerAllocatorHelper<og::AITstar>("geometric::AITstar");
   registerPlannerAllocatorHelper<og::AnytimePathShortening>("geometric::AnytimePathShortening");
   registerPlannerAllocatorHelper<og::BFMT>("geometric::BFMT");
+  registerPlannerAllocatorHelper<og::BITstar>("geometric::BITstar");
   registerPlannerAllocatorHelper<og::BiEST>("geometric::BiEST");
   registerPlannerAllocatorHelper<og::BiTRRT>("geometric::BiTRRT");
   registerPlannerAllocatorHelper<og::BKPIECE1>("geometric::BKPIECE");
+  registerPlannerAllocatorHelper<og::EIRMstar>("geometric::EIRMstar");
+  registerPlannerAllocatorHelper<og::EITstar>("geometric::EITstar");
   registerPlannerAllocatorHelper<og::EST>("geometric::EST");
   registerPlannerAllocatorHelper<og::FMT>("geometric::FMT");
   registerPlannerAllocatorHelper<og::KPIECE1>("geometric::KPIECE");
