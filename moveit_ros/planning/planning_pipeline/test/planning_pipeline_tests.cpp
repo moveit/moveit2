@@ -115,6 +115,35 @@ TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
                std::runtime_error);
 }
 
+TEST_F(TestPlanningPipeline, TrajectoryIsForwardedAsConstraintsToNextPlanner)
+{
+  // GIVEN a robot model with a planning group
+  moveit::core::RobotModelBuilder builder("two_joint_robot", "base_link");
+  builder.addChain("base_link->link1->link2", "continuous");
+  builder.addGroupChain("base_link", "link2", "arm");
+  ASSERT_TRUE(builder.isValid());
+  const auto robot_model = builder.build();
+
+  // GIVEN a pipeline whose first planner creates a trajectory, and whose second planner only succeeds if that
+  // trajectory is part of its request as one set of joint constraints per waypoint
+  const std::vector<std::string> planner_plugins{ "planning_pipeline_test/TrajectoryPlannerManager",
+                                                  "planning_pipeline_test/CheckTrajectoryConstraintsPlannerManager" };
+  pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(robot_model, node_, "", planner_plugins,
+                                                                        REQUEST_ADAPTERS, RESPONSE_ADAPTERS);
+
+  // WHEN generatePlan is called
+  planning_interface::MotionPlanResponse motion_plan_response;
+  planning_interface::MotionPlanRequest motion_plan_request;
+  motion_plan_request.group_name = "arm";
+  const auto planning_scene_ptr = std::make_shared<planning_scene::PlanningScene>(robot_model);
+
+  // THEN it is successful, and the trajectory of the first planner is still part of the response
+  EXPECT_TRUE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
+  EXPECT_TRUE(motion_plan_response.error_code);
+  ASSERT_NE(motion_plan_response.trajectory, nullptr);
+  EXPECT_EQ(motion_plan_response.trajectory->getWayPointCount(), 2u);
+}
+
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
