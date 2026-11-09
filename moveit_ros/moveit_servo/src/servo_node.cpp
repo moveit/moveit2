@@ -48,11 +48,16 @@
 #include <moveit/utils/logger.hpp>
 #include <moveit_servo/servo_node.hpp>
 
+// Disable -Wold-style-cast because all _THROTTLE macros trigger this
+#pragma GCC diagnostic ignored "-Wold-style-cast"
+
 namespace moveit_servo
 {
 
 namespace
 {
+constexpr int COMMAND_TYPE_WARNING_PERIOD_MS = 5000;
+
 // This function is used to convert times in case planning_scene_monitor uses RCL_SYSTEM_TIME
 rclcpp::Time convertClockType(const rclcpp::Time& time, rcl_clock_type_t new_clock_type)
 {
@@ -199,7 +204,15 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
                         (request->command_type <= static_cast<int8_t>(CommandType::MAX));
   if (is_valid)
   {
-    servo_->setCommandType(static_cast<CommandType>(request->command_type));
+    const auto command_type = static_cast<CommandType>(request->command_type);
+    std::lock_guard<std::mutex> lock_guard(lock_);
+    // Drop commands received before a switch, so they are not reported as commands of the wrong type.
+    // Requesting the active type must keep them, otherwise an active command would never time out and halt.
+    if (command_type != servo_->getCommandType())
+    {
+      new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
+    }
+    servo_->setCommandType(command_type);
   }
   else
   {
@@ -412,7 +425,8 @@ void ServoNode::servoLoop()
       else if (new_joint_jog_msg_ || new_twist_msg_ || new_pose_msg_)
       {
         new_joint_jog_msg_ = new_twist_msg_ = new_pose_msg_ = false;
-        RCLCPP_WARN_STREAM(node_->get_logger(), "Command type has not been set, cannot accept input");
+        RCLCPP_WARN_STREAM_THROTTLE(node_->get_logger(), *node_->get_clock(), COMMAND_TYPE_WARNING_PERIOD_MS,
+                                    "Command type has not been set, cannot accept input");
       }
 
       if (next_joint_state && (servo_->getStatus() != StatusCode::INVALID) &&
