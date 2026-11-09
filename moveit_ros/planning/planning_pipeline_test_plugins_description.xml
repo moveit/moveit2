@@ -6,6 +6,18 @@
     </description>
   </class>
 
+  <class name="planning_pipeline_test/TrajectoryPlannerManager" type="planning_pipeline_test::TrajectoryPlannerManager" base_class_type="planning_interface::PlannerManager">
+    <description>
+      A dummy planner manager whose planner always returns the same trajectory
+    </description>
+  </class>
+
+  <class name="planning_pipeline_test/CheckTrajectoryConstraintsPlannerManager" type="planning_pipeline_test::CheckTrajectoryConstraintsPlannerManager" base_class_type="planning_interface::PlannerManager">
+    <description>
+      A dummy planner manager whose planner only succeeds if the request contains the expected trajectory constraints
+    </description>
+  </class>
+
   <class name="planning_pipeline_test/AlwaysSuccessRequestAdapter" type="planning_pipeline_test::AlwaysSuccessRequestAdapter" base_class_type="planning_interface::PlanningRequestAdapter">
     <description>
       A dummy request adapter that does nothing and is always successful
