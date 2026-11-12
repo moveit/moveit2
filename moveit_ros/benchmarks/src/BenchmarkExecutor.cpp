@@ -111,6 +111,13 @@ BenchmarkExecutor::BenchmarkExecutor(const rclcpp::Node::SharedPtr& node, const 
 
 BenchmarkExecutor::~BenchmarkExecutor()
 {
+  // The storages hold the warehouse connection, a plugin instance created by db_loader_.
+  // Destroy them before db_loader_, which is declared after them.
+  planning_scene_storage_.reset();
+  planning_scene_world_storage_.reset();
+  robot_state_storage_.reset();
+  constraints_storage_.reset();
+  trajectory_constraints_storage_.reset();
 }
 
 [[nodiscard]] bool BenchmarkExecutor::initialize(const std::vector<std::string>& planning_pipeline_names)
