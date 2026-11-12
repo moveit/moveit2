@@ -59,7 +59,7 @@ public:
       try
       {
         constraint_sampler_plugin_loader_ =
-            std::make_unique<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator>>(
+            std::make_shared<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator>>(
                 "moveit_core", "constraint_samplers::ConstraintSamplerAllocator");
       }
       catch (pluginlib::PluginlibException& ex)
@@ -73,8 +73,13 @@ public:
       {
         try
         {
-          constraint_samplers::ConstraintSamplerAllocatorPtr csa =
-              constraint_sampler_plugin_loader_->createUniqueInstance(*beg);
+          auto instance = constraint_sampler_plugin_loader_->createUniqueInstance(*beg);
+          // The allocators are shared with the ConstraintSamplerManager, which can outlive this loader.
+          // Let them keep the loader alive, as it must not be destroyed before the instances it created.
+          constraint_samplers::ConstraintSamplerAllocatorPtr csa(
+              instance.get(), [loader = constraint_sampler_plugin_loader_, deleter = instance.get_deleter()](
+                                  constraint_samplers::ConstraintSamplerAllocator* p) { deleter(p); });
+          instance.release();
           csm->registerSamplerAllocator(csa);
           RCLCPP_INFO(logger_, "Loaded constraint sampling plugin %s", std::string(*beg).c_str());
         }
@@ -89,7 +94,7 @@ public:
 
 private:
   const rclcpp::Node::SharedPtr node_;
-  std::unique_ptr<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator>>
+  std::shared_ptr<pluginlib::ClassLoader<constraint_samplers::ConstraintSamplerAllocator>>
       constraint_sampler_plugin_loader_;
   rclcpp::Logger logger_;
 };
