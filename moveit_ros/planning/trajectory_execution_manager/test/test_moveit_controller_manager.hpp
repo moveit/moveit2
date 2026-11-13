@@ -34,6 +34,11 @@
 
 /* Author: Ioan Sucan */
 
+/* Desc: Fake controller manager plugin for testing the
+   TrajectoryExecutionManager without a live robot or ros2_control.
+   The fake handles accept every trajectory and report success
+   immediately. */
+
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
@@ -60,7 +65,7 @@ public:
     return true;
   }
 
-  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration(0.0)) override
+  bool waitForExecution(const rclcpp::Duration& timeout = rclcpp::Duration::from_seconds(0.0)) override
   {
     (void)timeout;
     return false;
@@ -72,13 +77,13 @@ public:
   }
 };
 
-class TestRos2ControlManager : public moveit_controller_manager::Ros2ControlManager
+class TestControllerManager : public moveit_controller_manager::MoveItControllerManager
 {
 public:
   static const int ACTIVE = 1;
   static const int DEFAULT = 2;
 
-  TestRos2ControlManager()
+  TestControllerManager()
   {
     controllers_["right_arm"] = DEFAULT;
     controllers_["left_arm"] = ACTIVE + DEFAULT;
@@ -138,9 +143,10 @@ public:
     joints = controller_joints_[name];
   }
 
-  moveit_controller_manager::Ros2ControlManager::ControllerState getControllerState(const std::string& name) override
+  moveit_controller_manager::MoveItControllerManager::ControllerState
+  getControllerState(const std::string& name) override
   {
-    moveit_controller_manager::Ros2ControlManager::ControllerState state;
+    moveit_controller_manager::MoveItControllerManager::ControllerState state;
     state.active_ = controllers_[name] & ACTIVE;
     state.default_ = false;
     return state;

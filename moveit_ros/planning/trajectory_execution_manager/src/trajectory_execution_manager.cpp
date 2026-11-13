@@ -1210,6 +1210,9 @@ void TrajectoryExecutionManager::stopExecutionInternal()
 
 void TrajectoryExecutionManager::stopExecution(bool auto_clear)
 {
+  // Whether this call actually requested the stop (as opposed to finding an
+  // execution that had already completed on its own).
+  bool stop_requested = false;
   if (!execution_complete_)
   {
     execution_state_mutex_.lock();
@@ -1225,28 +1228,29 @@ void TrajectoryExecutionManager::stopExecution(bool auto_clear)
       // we set the status here; executePart() will not set status when execution_complete_ is true ahead of time
       last_execution_status_ = moveit_controller_manager::ExecutionStatus::PREEMPTED;
       execution_state_mutex_.unlock();
+      // Wake any thread blocked in waitForExecution(): without this, a stop
+      // requested while another thread waits for completion leaves that
+      // thread sleeping on execution_complete_condition_ forever (the flag
+      // is set but nobody notifies), hanging move_group on an aborted goal.
+      execution_complete_condition_.notify_all();
       RCLCPP_INFO(logger_, "Stopped trajectory execution.");
-
-      // wait for the execution thread to finish
-      std::scoped_lock lock(execution_thread_mutex_);
-      if (execution_thread_)
-      {
-        execution_thread_->join();
-        execution_thread_.reset();
-      }
-
-      if (auto_clear)
-      {
-        clear();
-      }
+      stop_requested = true;
     }
     else
     {
       execution_state_mutex_.unlock();
     }
   }
-  else if (execution_thread_)  // just in case we have some thread waiting to be joined from some point in the past, we
-                               // join it now
+
+  // Join (and drop) the execution thread, if any. The join happens while
+  // holding execution_thread_mutex_, and execute() installs its thread under
+  // the same mutex: that serializes the two, so a concurrent execute() can
+  // never install a new joinable thread that this call would then destroy
+  // (destroying a joinable std::thread calls std::terminate()), and execute()
+  // can never start a new execution while the previous thread is still
+  // running (two execution threads would concurrently touch
+  // known_controllers_ and friends). Joining under the mutex is safe: the
+  // execution thread itself never takes execution_thread_mutex_.
   {
     std::scoped_lock lock(execution_thread_mutex_);
     if (execution_thread_)
@@ -1254,6 +1258,11 @@ void TrajectoryExecutionManager::stopExecution(bool auto_clear)
       execution_thread_->join();
       execution_thread_.reset();
     }
+  }
+
+  if (stop_requested && auto_clear)
+  {
+    clear();
   }
 }
 
@@ -1285,8 +1294,14 @@ void TrajectoryExecutionManager::execute(const ExecutionCompleteCallback& callba
 
   // start the execution thread
   execution_complete_ = false;
-  execution_thread_ = std::make_unique<std::thread>(&TrajectoryExecutionManager::executeThread, this, callback,
-                                                    part_callback, auto_clear);
+  // Guard the assignment with the same mutex stopExecution() joins under:
+  // otherwise a concurrent stopExecution() could destroy this just-created
+  // joinable thread (std::terminate()).
+  {
+    std::scoped_lock lock(execution_thread_mutex_);
+    execution_thread_ = std::make_unique<std::thread>(&TrajectoryExecutionManager::executeThread, this, callback,
+                                                      part_callback, auto_clear);
+  }
 }
 
 moveit_controller_manager::ExecutionStatus TrajectoryExecutionManager::waitForExecution()
