@@ -37,6 +37,7 @@
 #pragma once
 
 #include <octomap/octomap.h>
+#include <Eigen/Geometry>
 
 #include <memory>
 #include <string>
@@ -108,6 +109,21 @@ public:
   void setUpdateCallback(const std::function<void()>& update_callback)
   {
     update_callback_ = update_callback;
+  }
+
+  /** @brief Clear all voxels in the specified bounding region */
+  void clearRegion(const Eigen::Vector3d& min_bound, const Eigen::Vector3d& max_bound)
+  {
+    octomap::point3d min_pt(min_bound.x(), min_bound.y(), min_bound.z());
+    octomap::point3d max_pt(max_bound.x(), max_bound.y(), max_bound.z());
+
+    this->lockWrite();
+    for (auto it = this->begin_leafs_bbx(min_pt, max_pt); it != this->end_leafs_bbx(); ++it)
+    {
+      it->setLogOdds(octomap::logodds(0.01));
+    }
+    this->updateInnerOccupancy();
+    this->unlockWrite();
   }
 
 private:
