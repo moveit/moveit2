@@ -164,6 +164,50 @@ TEST(PlanningScene, rememberMetadataWhenAttached)
   EXPECT_EQ(scene.getObjectType(co.id), co.type) << "scene forgot specified type after attach/detach";
 }
 
+TEST(PlanningScene, failedMoveLeavesObjectUnchanged)
+{
+  moveit::core::RobotModelPtr robot_model(moveit::core::RobotModelBuilder("empty_robot", "base_link").build());
+  planning_scene::PlanningScene scene(robot_model);
+
+  // Add an object with two primitive shapes at the identity pose
+  moveit_msgs::msg::CollisionObject co;
+  co.header.frame_id = robot_model->getModelFrame();
+  co.id = "test_object";
+  co.operation = moveit_msgs::msg::CollisionObject::ADD;
+  co.pose.orientation.w = 1.0;
+  makeSphere(co);
+  makeSphere(co);
+  ASSERT_TRUE(scene.processCollisionObjectMsg(co)) << "failed to add object";
+
+  const Eigen::Isometry3d original_pose = scene.getFrameTransform(co.id);
+  const auto original_object = scene.getWorld()->getObject(co.id);
+  ASSERT_TRUE(original_object);
+  const EigenSTL::vector_Isometry3d original_shape_poses = original_object->shape_poses_;
+  ASSERT_EQ(original_shape_poses.size(), 2u);
+
+  // MOVE to a different object pose, but supply only one shape pose for the two-shape object
+  moveit_msgs::msg::CollisionObject move;
+  move.header.frame_id = robot_model->getModelFrame();
+  move.id = co.id;
+  move.operation = moveit_msgs::msg::CollisionObject::MOVE;
+  move.pose.position.x = 2.0;
+  move.pose.orientation.w = 1.0;
+  geometry_msgs::msg::Pose shape_pose;
+  shape_pose.orientation.w = 1.0;
+  move.primitive_poses.push_back(shape_pose);
+
+  EXPECT_FALSE(scene.processCollisionObjectMsg(move)) << "MOVE with mismatched shape pose count should fail";
+  EXPECT_TRUE(scene.getFrameTransform(co.id).isApprox(original_pose)) << "failed MOVE modified the object pose";
+  const auto object_after = scene.getWorld()->getObject(co.id);
+  ASSERT_TRUE(object_after);
+  ASSERT_EQ(object_after->shape_poses_.size(), original_shape_poses.size());
+  for (std::size_t i = 0; i < original_shape_poses.size(); ++i)
+  {
+    EXPECT_TRUE(object_after->shape_poses_[i].isApprox(original_shape_poses[i]))
+        << "failed MOVE modified shape pose " << i;
+  }
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
