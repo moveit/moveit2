@@ -216,6 +216,49 @@ CostFn getCollisionCostFunction(const std::shared_ptr<const planning_scene::Plan
 }
 
 /**
+ * Creates a cost function for distances to collisions of group states in the planning scene.
+ *
+ * @param planning_scene    The planning scene instance to use for distance checking
+ * @param group             The group to use for computing link transforms from joint positions
+ *
+ * @return                  Cost function that computes smooth costs for close-to-collision path segments
+ */
+CostFn getCollisionDistanceCostFunction(const std::shared_ptr<const planning_scene::PlanningScene>& planning_scene,
+                                        const moveit::core::JointModelGroup* group, double min_distance = 0.03)
+{
+  const auto& joints = group ? group->getActiveJointModels() : planning_scene->getRobotModel()->getActiveJointModels();
+
+  StateValidatorFn distance_check_fn = [=](const Eigen::VectorXd& positions) {
+    static moveit::core::RobotState state(planning_scene->getCurrentState());
+
+    // Update robot state values
+    setJointPositions(positions, joints, state);
+    state.update();
+
+    // NOTE: if we need support for filtering links or attached objects, we can do this using DistanceRequests
+    return min_distance - planning_scene->distanceToCollisionUnpadded(state);
+  };
+
+  CostFn cost_fn = [=](const Eigen::MatrixXd& values, Eigen::VectorXd& costs, bool& validity) {
+    // Assume zero cost and valid trajectory from the start
+    costs.setZero(values.cols());
+    validity = true;
+
+    // Iterate over sample waypoints and check for collision distances
+    for (int timestep = 0; timestep < values.cols(); ++timestep)
+    {
+      Eigen::VectorXd current = values.col(timestep);
+      costs(timestep) += distance_check_fn(current);
+      validity = validity && costs(timestep) <= 0.0;
+    }
+
+    return true;
+  };
+
+  return cost_fn;
+}
+
+/**
  * Creates a cost function for binary constraint checks applied to group states.
  * This function uses a StateValidatorFn for computing smooth penalty costs from binary
  * constraint checks using getCostFunctionFromStateValidator().
