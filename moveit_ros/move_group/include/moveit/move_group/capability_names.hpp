@@ -54,6 +54,8 @@ static const std::string IK_SERVICE_NAME = "compute_ik";  // name of ik service
 static const std::string FK_SERVICE_NAME = "compute_fk";  // name of fk service
 static const std::string STATE_VALIDITY_SERVICE_NAME =
     "check_state_validity";  // name of the service that validates states
+static const std::string MULTI_STATE_VALIDITY_SERVICE_NAME =
+    "check_multi_state_validity";  // name of the service that validates multiple joint states
 static const std::string CARTESIAN_PATH_SERVICE_NAME =
     "compute_cartesian_path";  // name of the service that computes cartesian paths
 static const std::string GET_PLANNING_SCENE_SERVICE_NAME =
