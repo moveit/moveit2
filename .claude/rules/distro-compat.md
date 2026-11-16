@@ -7,6 +7,7 @@ paths:
   - "**/package.xml"
   - "**/*.launch.py"
   - "**/*.launch.xml"
+  - "moveit_configs_utils/**/*.py"
   - "moveit2*.repos"
   - ".github/workflows/**"
 ---

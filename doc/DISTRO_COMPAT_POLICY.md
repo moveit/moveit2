@@ -237,7 +237,7 @@ Every PR that adds, changes, or removes a distro-conditional code path must add 
 
 ### §2.6 — C++ language standard
 
-Humble and Jazzy build MoveIt as C++17. Lyrical and Rolling build it as C++20, because their `rclcpp` exports `cxx_std_20` ([ros2/ament_cmake_ros#62](https://github.com/ros2/ament_cmake_ros/pull/62)). Write C++17 that also builds without warnings as C++20, and do not guard on `__cplusplus`. Topic 4, "Removing a distro", raises the floor.
+Humble and Jazzy build MoveIt as C++17. On Lyrical and Rolling, targets that link `rclcpp`, which is nearly all of MoveIt, build as C++20, because their `rclcpp` exports `cxx_std_20` ([ros2/ament_cmake_ros#62](https://github.com/ros2/ament_cmake_ros/pull/62)). Write C++17 that also builds without warnings as C++20, and do not guard on `__cplusplus`. Topic 4, "Removing a distro", raises the floor.
 
 ---
 
