@@ -54,7 +54,7 @@ When a header, type, or API differs between distros, guard the code. Choose the 
 | Behavior or signature change in rclcpp | `RCLCPP_VERSION_GTE(...)` (from `<rclcpp/version.h>`) |
 | General distro change with no specific package | `RCLCPP_VERSION_GTE(...)`, and verify the threshold (see the `RCLCPP_VERSION` fallback) |
 
-**Example** (header change; requires C++17, which `moveit_core` already uses):
+**Example** (header change; `__has_include` requires C++17, the oldest standard on `main`, see §2.6):
 
 ```cpp
 // ament_index_cpp added get_package_share_path.hpp in 1.13.2 (Rolling line),
@@ -235,6 +235,10 @@ Every PR that adds, changes, or removes a distro-conditional code path must add 
 
 **Cleanup**: Release-note entries remain, because they are history. Remove a workaround entry together with the workaround code.
 
+### §2.6 — C++ language standard
+
+Humble and Jazzy build MoveIt as C++17. Lyrical and Rolling build it as C++20, because their `rclcpp` exports `cxx_std_20` ([ros2/ament_cmake_ros#62](https://github.com/ros2/ament_cmake_ros/pull/62)). Write C++17 that also builds without warnings as C++20, and do not guard on `__cplusplus`. Topic 4, "Removing a distro", raises the floor.
+
 ---
 
 ## Topic 3: Dependencies without an apt binary
@@ -340,5 +344,6 @@ When a distro reaches end of life under [REP 2000](https://www.ros.org/reps/rep-
 3. Deletes the `config/foo.<distro>.yaml` override files (§2.3).
 4. Removes the `find_package(... QUIET)` blocks and indirection variables that served only that distro (§2.4). Simplify them if one path remains.
 5. Adds a `MIGRATION.md` entry for the removed support (§2.5).
+6. If the removed distro was the last C++17 distro (§2.6), raises the default in `moveit_common/cmake/moveit_package.cmake` and updates §2.6.
 
 The matrix in `ci.yaml` is the only list of supported distros. Do not keep a second list.
