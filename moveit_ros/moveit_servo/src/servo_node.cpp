@@ -218,7 +218,7 @@ void ServoNode::switchCommandType(const std::shared_ptr<moveit_msgs::srv::ServoC
   {
     RCLCPP_WARN_STREAM(node_->get_logger(), "Unknown command type " << request->command_type << " requested");
   }
-  response->success = (request->command_type == static_cast<int8_t>(servo_->getCommandType()));
+  response->success = is_valid && (request->command_type == static_cast<int8_t>(servo_->getCommandType()));
 }
 
 void ServoNode::jointJogCallback(const control_msgs::msg::JointJog::ConstSharedPtr& msg)
