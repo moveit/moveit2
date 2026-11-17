@@ -25,7 +25,7 @@ protected:
 TEST_F(MotionPlanningFrameParametersTest, ReadsRvizParameterInsteadOfNamespacedLookalike)
 {
   rclcpp::NodeOptions options;
-  options.parameter_overrides({ rclcpp::Parameter("default_planning_pipeline", "ompl") });
+  options.parameter_overrides({rclcpp::Parameter("default_planning_pipeline", "ompl")});
 
   auto node = std::make_shared<rclcpp::Node>("motion_planning_frame_parameters_test", options);
   node->declare_parameter<std::string>("/robotdefault_planning_pipeline", "pilz_industrial_motion_planner");
