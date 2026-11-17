@@ -450,6 +450,10 @@ void initRobotState(py::module& m)
                geometry_pose (geometry_msgs.msg.Pose): The pose of the end-effector to solve the inverse kinematics for.
                tip_name (str): The name of the link that is the tip of the end-effector.
                timeout (float): The amount of time to wait for the IK solution to be found.
+
+           Note:
+               Releases the GIL. Do not use this robot state from another Python thread during the call:
+               it writes the joint values.
            )",
           py::call_guard<py::gil_scoped_release>())
 

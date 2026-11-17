@@ -284,6 +284,10 @@ void initPlanningScene(py::module& m)
                verbose (bool): If true, print the link names of the links in collision.
            Returns:
                bool: True if the robot state is in collision, false otherwise.
+
+           Note:
+               Releases the GIL. Do not use this planning scene from another Python thread during the call:
+               it may update the collision transforms of the scene's current state.
            )",
            py::call_guard<py::gil_scoped_release>())
 
@@ -352,6 +356,10 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
+
+           Note:
+               Releases the GIL. Do not use this planning scene from another Python thread during the call:
+               it may update the collision transforms of the scene's current state.
            )",
            py::call_guard<py::gil_scoped_release>())
 
@@ -369,6 +377,10 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
+
+           Note:
+               Releases the GIL. Do not use the passed robot state from another Python thread during the call:
+               its collision transforms may be updated.
            )",
            py::call_guard<py::gil_scoped_release>())
 
@@ -388,6 +400,10 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
+
+           Note:
+               Releases the GIL. Do not use the passed robot state from another Python thread during the call:
+               its collision transforms may be updated.
            )",
            py::call_guard<py::gil_scoped_release>())
       // DEPRECATED! Use check_collision instead
@@ -453,6 +469,10 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
+
+           Note:
+               Releases the GIL. Do not use this planning scene from another Python thread during the call:
+               it may update the collision transforms of the scene's current state.
            )",
            py::call_guard<py::gil_scoped_release>())
 
@@ -470,6 +490,10 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in self collision otherwise false.
+
+           Note:
+               Releases the GIL. Do not use the passed robot state from another Python thread during the call:
+               its collision transforms may be updated.
            )",
            py::call_guard<py::gil_scoped_release>())
 
@@ -489,6 +513,10 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in self collision otherwise false.
+
+           Note:
+               Releases the GIL. Do not use the passed robot state from another Python thread during the call:
+               its collision transforms may be updated.
            )",
            py::call_guard<py::gil_scoped_release>())
 
