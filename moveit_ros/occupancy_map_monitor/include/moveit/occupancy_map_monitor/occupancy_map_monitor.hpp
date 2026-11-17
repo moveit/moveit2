@@ -240,6 +240,15 @@ public:
   ShapeHandle excludeShape(const shapes::ShapeConstPtr& shape);
 
   /**
+   * \brief Clear all voxels in the octomap that collide with the given shape at the given pose.
+   *        Useful for clearing out voxels that are occupied by added collision object in the planning scene
+   *
+   * @param[in]  shape  The shape to be cleared from the octomap
+   * @param[in]  pose   The pose of the shape in the world frame
+   */
+  void clearShape(const shapes::ShapeConstPtr& shape, const Eigen::Isometry3d& pose);
+
+  /**
    * \brief Forget about this shape handle and the shapes it corresponds to
    *
    * @param[in]  handle  The handle to forget.
