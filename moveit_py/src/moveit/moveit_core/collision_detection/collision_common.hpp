@@ -38,6 +38,7 @@
 
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
+#include <pybind11/operators.h>
 #include <pybind11/stl.h>
 #include <moveit/collision_detection/collision_common.hpp>
 
@@ -47,6 +48,9 @@ namespace moveit_py
 {
 namespace bind_collision_detection
 {
+void initBodyType(py::module& m);
+void initContact(py::module& m);
+void initCostSource(py::module& m);
 void initCollisionRequest(py::module& m);
 void initCollisionResult(py::module& m);
 }  // namespace bind_collision_detection

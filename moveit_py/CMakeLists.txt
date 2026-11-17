@@ -83,7 +83,10 @@ configure_build_install_location(planning)
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
-  set(_pytest_tests test/unit/test_robot_model.py test/unit/test_robot_state.py)
+  set(_pytest_tests
+      test/unit/test_robot_model.py
+      test/unit/test_robot_state.py
+      test/unit/test_collision_detection.py)
   foreach(test_path ${_pytest_tests})
     get_filename_component(_test_name ${test_path} NAME_WE)
     ament_add_pytest_test(
