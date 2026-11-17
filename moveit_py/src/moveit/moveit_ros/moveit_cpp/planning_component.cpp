@@ -333,11 +333,19 @@ void initPlanningComponent(py::module& m)
            py::arg("multi_plan_parameters") = nullptr, py::arg("planning_scene") = nullptr,
            py::arg("solution_selection_function") = nullptr, py::arg("stopping_criterion_callback") = nullptr,
            py::return_value_policy::move,
+           // Planning takes seconds and needs no Python: let other Python threads run meanwhile, as
+           // MoveItPy.execute does. A Python callback passed in takes the GIL back itself (pybind11's
+           // std::function caster acquires it around the call).
+           py::call_guard<py::gil_scoped_release>(),
            R"(
            Plan a motion plan using the current start and goal states.
 
 	   Args:
                plan_parameters (moveit_py.core.PlanParameters): The parameters to use for planning.
+
+           Note:
+               Releases the GIL. Do not use this planning component, its start state, or the passed planning
+               scene from another Python thread during the call.
            )")
 
       .def("set_path_constraints", &moveit_cpp::PlanningComponent::setPathConstraints, py::arg("path_constraints"),
