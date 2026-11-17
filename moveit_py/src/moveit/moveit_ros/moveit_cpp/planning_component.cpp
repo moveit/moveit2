@@ -340,11 +340,12 @@ void initPlanningComponent(py::module& m)
            R"(
            Plan a motion plan using the current start and goal states.
 
-           Releases the GIL. Do not use this planning component, its start state, or the passed planning scene
-           from another Python thread during the call.
-
 	   Args:
                plan_parameters (moveit_py.core.PlanParameters): The parameters to use for planning.
+
+           Note:
+               Releases the GIL. Do not use this planning component, its start state, or the passed planning
+               scene from another Python thread during the call.
            )")
 
       .def("set_path_constraints", &moveit_cpp::PlanningComponent::setPathConstraints, py::arg("path_constraints"),

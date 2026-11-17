@@ -288,6 +288,8 @@ void initPlanningScene(py::module& m)
            Note:
                Releases the GIL. Do not use this planning scene from another Python thread during the call:
                it may update the collision transforms of the scene's current state.
+               Holding planning_scene_monitor.read_only() is not enough: that lock is shared, so two threads
+               inside it can still run this call on the same scene at once.
            )",
            py::call_guard<py::gil_scoped_release>())
 
@@ -360,6 +362,8 @@ void initPlanningScene(py::module& m)
            Note:
                Releases the GIL. Do not use this planning scene from another Python thread during the call:
                it may update the collision transforms of the scene's current state.
+               Holding planning_scene_monitor.read_only() is not enough: that lock is shared, so two threads
+               inside it can still run this call on the same scene at once.
            )",
            py::call_guard<py::gil_scoped_release>())
 
@@ -473,6 +477,8 @@ void initPlanningScene(py::module& m)
            Note:
                Releases the GIL. Do not use this planning scene from another Python thread during the call:
                it may update the collision transforms of the scene's current state.
+               Holding planning_scene_monitor.read_only() is not enough: that lock is shared, so two threads
+               inside it can still run this call on the same scene at once.
            )",
            py::call_guard<py::gil_scoped_release>())
 
