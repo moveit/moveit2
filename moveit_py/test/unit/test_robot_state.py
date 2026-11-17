@@ -113,6 +113,72 @@ class TestRobotState(unittest.TestCase):
             robot_state.get_joint_group_positions("panda_arm").tolist(),
         )
 
+    def test_set_joint_group_positions_from_list(self):
+        """Python sequences are accepted via NumPy forcecast conversion."""
+        robot_model = get_robot_model()
+        robot_state = RobotState(robot_model)
+        robot_state.update()
+        joint_group_positions = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+        robot_state.set_joint_group_positions(
+            joint_model_group_name="panda_arm", position_values=joint_group_positions
+        )
+
+        np.testing.assert_allclose(
+            joint_group_positions,
+            robot_state.get_joint_group_positions("panda_arm"),
+        )
+
+    def test_set_joint_group_active_positions(self):
+        """Active-joint setter must accept NumPy input (issue #3718 crash path)."""
+        robot_model = get_robot_model()
+        robot_state = RobotState(robot_model)
+        robot_state.update()
+        joint_group_positions = np.array(
+            [0.0, 0.0, 1.57, 0.0, 1.57, 0.0, 0.0], dtype=np.float32
+        )
+        robot_state.set_joint_group_active_positions(
+            "panda_arm",
+            joint_group_positions,
+        )
+
+        np.testing.assert_allclose(
+            joint_group_positions,
+            robot_state.get_joint_group_positions("panda_arm"),
+        )
+
+    def test_set_joint_group_positions_from_column_array(self):
+        """Preserve Eigen VectorXd's support for n-by-1 NumPy arrays."""
+        robot_model = get_robot_model()
+        robot_state = RobotState(robot_model)
+        robot_state.update()
+        joint_group_positions = np.arange(7, dtype=np.int32).reshape(-1, 1)
+
+        robot_state.set_joint_group_positions(
+            "panda_arm",
+            joint_group_positions,
+        )
+
+        np.testing.assert_allclose(
+            joint_group_positions.ravel(),
+            robot_state.get_joint_group_positions("panda_arm"),
+        )
+
+    def test_set_joint_group_positions_reject_invalid_shapes_and_sizes(self):
+        """Invalid input must raise instead of reaching unchecked C++ pointer reads."""
+        robot_model = get_robot_model()
+        robot_state = RobotState(robot_model)
+        robot_state.update()
+
+        with self.assertRaises(ValueError):
+            robot_state.set_joint_group_positions("panda_arm", [0.0] * 6)
+        with self.assertRaises(ValueError):
+            robot_state.set_joint_group_active_positions("panda_arm", [0.0] * 6)
+        with self.assertRaises(ValueError):
+            robot_state.set_joint_group_positions(
+                "panda_arm",
+                np.zeros((1, 7)),
+            )
+
     def test_set_joint_group_velocities(self):
         """
         Test that the joint group velocities can be set
