@@ -86,7 +86,14 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
                       "within %f seconds.",
                       name_.c_str(), name_.c_str(), d_timeout);
   }
-  if (!keep_open)
+  if (keep_open)
+  {
+    // waitForMessage() subscribed on a temporary node that nobody spins, so listen on the caller's node instead
+    string_subscriber_ = node_->create_subscription<std_msgs::msg::String>(
+        name_, rclcpp::QoS(1).transient_local().reliable(),
+        [this](const std_msgs::msg::String::ConstSharedPtr& msg) { return stringCallback(msg); });
+  }
+  else
   {
     string_subscriber_.reset();
   }
