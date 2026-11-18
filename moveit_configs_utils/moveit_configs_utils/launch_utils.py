@@ -1,3 +1,6 @@
+from typing import Any, Optional
+
+from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
@@ -8,7 +11,14 @@ from launch_ros.actions import Node
 class DeclareBooleanLaunchArg(DeclareLaunchArgument):
     """This launch action declares a launch argument with true and false as the only valid values"""
 
-    def __init__(self, name, *, default_value=False, description=None, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        *,
+        default_value: bool = False,
+        description: Optional[str] = None,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(
             name,
             default_value=str(default_value),
@@ -19,14 +29,14 @@ class DeclareBooleanLaunchArg(DeclareLaunchArgument):
 
 
 def add_debuggable_node(
-    ld,
-    package,
-    executable,
-    condition_name="debug",
-    commands_file=None,
-    extra_debug_args=None,
-    **kwargs,
-):
+    ld: LaunchDescription,
+    package: str,
+    executable: str,
+    condition_name: str = "debug",
+    commands_file: Optional[str] = None,
+    extra_debug_args: Optional[list[str]] = None,
+    **kwargs: Any,
+) -> None:
     """Adds two versions of a Node to the launch description, one with gdb debugging, controlled by a launch config"""
     standard_node = Node(
         package=package,
