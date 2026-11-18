@@ -2,6 +2,11 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add @130s as a release maintainer (`#3948 <https://github.com/moveit/moveit2/issues/3948>`_)
+* Contributors: Isaac Saito
+
 2.15.2 (2026-09-16)
 -------------------
 
