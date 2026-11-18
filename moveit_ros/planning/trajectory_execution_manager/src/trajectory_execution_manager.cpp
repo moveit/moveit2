@@ -157,35 +157,39 @@ void TrajectoryExecutionManager::initialize()
                            "`moveit_ros_control_interface/Ros2ControlMultiManager.`");
     }
 
-    if (!controller.empty())
+    if (controller.empty())
     {
-      try
-      {
-        // We make a node called moveit_simple_controller_manager so it's able to
-        // receive callbacks on another thread. We then copy parameters from the move_group node
-        // and then add it to the multithreadedexecutor
-        rclcpp::NodeOptions opt;
-        opt.allow_undeclared_parameters(true);
-        opt.automatically_declare_parameters_from_overrides(true);
-        controller_mgr_node_ =
-            std::make_shared<rclcpp::Node>("moveit_simple_controller_manager", node_->get_namespace(), opt);
+      RCLCPP_INFO(logger_, "Parameter '~moveit_controller_manager' is empty, so no controller manager is loaded. "
+                           "No paths can be executed.");
+      return;
+    }
 
-        auto all_params = node_->get_node_parameters_interface()->get_parameter_overrides();
-        for (const auto& param : all_params)
-          controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
+    try
+    {
+      // We make a node called moveit_simple_controller_manager so it's able to
+      // receive callbacks on another thread. We then copy parameters from the move_group node
+      // and then add it to the multithreadedexecutor
+      rclcpp::NodeOptions opt;
+      opt.allow_undeclared_parameters(true);
+      opt.automatically_declare_parameters_from_overrides(true);
+      controller_mgr_node_ =
+          std::make_shared<rclcpp::Node>("moveit_simple_controller_manager", node_->get_namespace(), opt);
 
-        controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
-        controller_manager_->initialize(controller_mgr_node_);
-        private_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-        private_executor_->add_node(controller_mgr_node_);
+      auto all_params = node_->get_node_parameters_interface()->get_parameter_overrides();
+      for (const auto& param : all_params)
+        controller_mgr_node_->set_parameter(rclcpp::Parameter(param.first, param.second));
 
-        // start executor on a different thread now
-        private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
-      }
-      catch (pluginlib::PluginlibException& ex)
-      {
-        RCLCPP_FATAL_STREAM(logger_, "Exception while loading controller manager '" << controller << "': " << ex.what());
-      }
+      controller_manager_ = controller_manager_loader_->createUniqueInstance(controller);
+      controller_manager_->initialize(controller_mgr_node_);
+      private_executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+      private_executor_->add_node(controller_mgr_node_);
+
+      // start executor on a different thread now
+      private_executor_thread_ = std::thread([this]() { private_executor_->spin(); });
+    }
+    catch (pluginlib::PluginlibException& ex)
+    {
+      RCLCPP_FATAL_STREAM(logger_, "Exception while loading controller manager '" << controller << "': " << ex.what());
     }
   }
 
