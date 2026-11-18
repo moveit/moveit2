@@ -2,6 +2,11 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Solve the IK velocity step via JJ^T eigendecomposition, not JacobiSVD (`#3804 <https://github.com/moveit/moveit2/issues/3804>`_)
+* Contributors: hugogo1998
+
 2.15.2 (2026-09-16)
 -------------------
 * Fix clang-tidy issues
