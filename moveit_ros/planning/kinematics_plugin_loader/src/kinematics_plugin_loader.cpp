@@ -46,6 +46,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <utility>
 #include <moveit/utils/logger.hpp>
 
 namespace kinematics_plugin_loader
@@ -150,7 +151,13 @@ public:
       }
       try
       {
-        result = kinematics_loader_->createUniqueInstance(solver);
+        // A plugin instance must be destroyed before the class loader that created it. The solvers are stored in the
+        // RobotModel, which is shared freely and can outlive this object (and the RobotModelLoader owning it), so
+        // every instance keeps the class loader alive.
+        auto instance = kinematics_loader_->createUniqueInstance(solver);
+        auto deleter = instance.get_deleter();
+        result.reset(instance.release(), [loader = kinematics_loader_, deleter = std::move(deleter)](
+                                             kinematics::KinematicsBase* solver_instance) { deleter(solver_instance); });
         if (result)
         {
           // choose the tip of the IK solver
