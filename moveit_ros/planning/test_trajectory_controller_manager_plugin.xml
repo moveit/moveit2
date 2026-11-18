@@ -1,0 +1,5 @@
+<library path="test_trajectory_controller_manager_plugin">
+  <class name="trajectory_execution_manager_test/ControllerManager" type="trajectory_execution_manager_test::ControllerManager" base_class_type="moveit_controller_manager::MoveItControllerManager">
+    <description>A controller manager used by trajectory distribution tests</description>
+  </class>
+</library>
