@@ -60,6 +60,13 @@ public:
 
   ~CheckStartStateCollision() override = default;
 
+  void initialize(const rclcpp::Node::SharedPtr& node, const std::string& parameter_namespace) override
+  {
+    auto param_listener =
+        std::make_unique<default_request_adapter_parameters::ParamListener>(node, parameter_namespace);
+    pad_self_collisions_ = param_listener->get_params().pad_self_collisions;
+  }
+
   [[nodiscard]] std::string getDescription() const override
   {
     return std::string("CheckStartStateCollision");
@@ -76,6 +83,7 @@ public:
 
     collision_detection::CollisionRequest creq;
     creq.group_name = req.group_name;
+    creq.pad_self_collisions = pad_self_collisions_;
     collision_detection::CollisionResult cres;
     // TODO(sjahr): Would verbose make sense?
     planning_scene->checkCollision(creq, cres, start_state);
@@ -87,8 +95,13 @@ public:
     }
     else
     {
-      collision_detection::CollisionResult::ContactMap contacts;
-      planning_scene->getCollidingPairs(contacts);
+      // re-run the check with the same padding settings to collect the contacts
+      creq.contacts = true;
+      creq.max_contacts = planning_scene->getRobotModel()->getLinkModelsWithCollisionGeometry().size() + 1;
+      creq.max_contacts_per_pair = 1;
+      cres.clear();
+      planning_scene->checkCollision(creq, cres, start_state);
+      const collision_detection::CollisionResult::ContactMap& contacts = cres.contacts;
 
       std::string contact_information = std::to_string(contacts.size()) + " contact(s) detected : ";
 
@@ -106,6 +119,7 @@ public:
 
 private:
   rclcpp::Logger logger_;
+  bool pad_self_collisions_ = false;
 };
 }  // namespace default_planning_request_adapters
 
