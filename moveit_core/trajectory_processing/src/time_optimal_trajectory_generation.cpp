@@ -51,6 +51,8 @@ namespace trajectory_processing
 namespace
 {
 constexpr double DEFAULT_TIMESTEP = 1e-3;
+// Increment along the path (in path length units, not seconds) when scanning for velocity switching points.
+constexpr double PATH_POS_SEARCH_STEP = 1e-3;
 constexpr double EPS = 1e-6;
 constexpr double DEFAULT_SCALING_FACTOR = 1.0;
 
@@ -519,10 +521,10 @@ bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& 
                                                double& before_acceleration, double& after_acceleration) const
 {
   bool start = false;
-  path_pos -= DEFAULT_TIMESTEP;
+  path_pos -= PATH_POS_SEARCH_STEP;
   do
   {
-    path_pos += DEFAULT_TIMESTEP;
+    path_pos += PATH_POS_SEARCH_STEP;
 
     if (getMinMaxPhaseSlope(path_pos, getVelocityMaxPathVelocity(path_pos), false) >=
         getVelocityMaxPathVelocityDeriv(path_pos))
@@ -538,7 +540,7 @@ bool Trajectory::getNextVelocitySwitchingPoint(double path_pos, TrajectoryStep& 
     return true;  // end of trajectory reached
   }
 
-  double before_path_pos = path_pos - DEFAULT_TIMESTEP;
+  double before_path_pos = path_pos - PATH_POS_SEARCH_STEP;
   double after_path_pos = path_pos;
   while (after_path_pos - before_path_pos > EPS)
   {
