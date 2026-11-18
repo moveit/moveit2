@@ -444,6 +444,11 @@ std::vector<std::string> PlanningGroups::getOMPLPlanners() const
   planner_names.push_back("LazyPRMstar");
   planner_names.push_back("SPARS");
   planner_names.push_back("SPARStwo");
+  planner_names.push_back("AITstar");
+  planner_names.push_back("ABITstar");
+  planner_names.push_back("BITstar");
+  planner_names.push_back("EITstar");
+  planner_names.push_back("EIRMstar");
 
   return planner_names;
 }
