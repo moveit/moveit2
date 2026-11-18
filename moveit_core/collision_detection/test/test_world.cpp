@@ -458,6 +458,43 @@ TEST(World, ObjectPoseAndSubframes)
   EXPECT_EQ(1.0, pose(2, 3));  // z
 }
 
+TEST(World, KnowsTransformOverlappingPrefixes)
+{
+  World world;
+
+  // Add object "robot" without subframe "tool/tip"
+  shapes::ShapePtr box = std::make_shared<shapes::Box>(1, 1, 1);
+  world.addToObject("robot", box, Eigen::Isometry3d::Identity());
+
+  // Add object "robot/tool" with subframe "tip"
+  world.addToObject("robot/tool", box, Eigen::Isometry3d::Identity());
+  moveit::core::FixedTransformsMap subframes;
+  subframes["tip"] = Eigen::Isometry3d(Eigen::Translation3d(1, 2, 3));
+  world.setSubframesOfObject("robot/tool", subframes);
+
+  // Directly check object transforms
+  EXPECT_TRUE(world.knowsTransform("robot"));
+  EXPECT_TRUE(world.knowsTransform("robot/tool"));
+
+  // Check subframe "robot/tool/tip":
+  // Both objects "robot" and "robot/tool" match the prefix check.
+  // "robot" does not have subframe "tool/tip", but "robot/tool" has "tip".
+  // knowsTransform() must return true consistently with getTransform() (Issue #3943).
+  EXPECT_TRUE(world.knowsTransform("robot/tool/tip"));
+
+  bool found = false;
+  const Eigen::Isometry3d& tf = world.getTransform("robot/tool/tip", found);
+  EXPECT_TRUE(found);
+  EXPECT_EQ(1.0, tf(0, 3));
+  EXPECT_EQ(2.0, tf(1, 3));
+  EXPECT_EQ(3.0, tf(2, 3));
+
+  // Non-existent subframes should return false for both
+  EXPECT_FALSE(world.knowsTransform("robot/tool/nonexistent"));
+  world.getTransform("robot/tool/nonexistent", found);
+  EXPECT_FALSE(found);
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
