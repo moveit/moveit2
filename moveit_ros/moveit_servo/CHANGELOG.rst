@@ -2,6 +2,11 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.3 (2026-11-18)
+-------------------
+* Fix Servo pose joint limit halting (`#3841 <https://github.com/moveit/moveit2/issues/3841>`_)
+* Contributors: Vincent
+
 2.15.2 (2026-09-16)
 -------------------
 * Give the controller spawners a parameter file (`#3851 <https://github.com/moveit/moveit2/issues/3851>`_)
