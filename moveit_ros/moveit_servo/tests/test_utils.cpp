@@ -49,6 +49,118 @@
 namespace
 {
 
+TEST(ServoUtilsUnitTests, ChainGroupWithoutIKSolverFallsBackToLinkFrames)
+{
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+  robot_state->setToDefaultValues();
+
+  // "panda_arm" is declared in the SRDF as a chain from panda_link0 to panda_link8 and, in this fixture, has no
+  // IK solver configured. getIKSolverBaseFrame()/getIKSolverTipFrame() should fall back to the chain's root and
+  // tip links, matching the base/tip that RobotState::getJacobian() uses internally.
+  const auto* joint_model_group = robot_state->getJointModelGroup("panda_arm");
+  ASSERT_TRUE(joint_model_group->getSolverInstance() == nullptr);
+  ASSERT_TRUE(joint_model_group->isChain());
+
+  const auto base_frame = moveit_servo::getIKSolverBaseFrame(robot_state, "panda_arm");
+  const auto tip_frame = moveit_servo::getIKSolverTipFrame(robot_state, "panda_arm");
+  ASSERT_TRUE(base_frame.has_value());
+  ASSERT_TRUE(tip_frame.has_value());
+  EXPECT_EQ(*base_frame, "panda_link0");
+  EXPECT_EQ(*tip_frame, "panda_link8");
+}
+
+TEST(ServoUtilsUnitTests, NonChainGroupWithoutIKSolverFailsSafely)
+{
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+  robot_state->setToDefaultValues();
+
+  // "panda_arm_hand" branches at the wrist (into the two finger joints), so it is not a kinematic chain and has
+  // no unambiguous base/tip frame. Without an IK solver, the frame lookups must fail safely instead of guessing.
+  const auto* joint_model_group = robot_state->getJointModelGroup("panda_arm_hand");
+  ASSERT_TRUE(joint_model_group->getSolverInstance() == nullptr);
+  ASSERT_FALSE(joint_model_group->isChain());
+
+  EXPECT_FALSE(moveit_servo::getIKSolverBaseFrame(robot_state, "panda_arm_hand").has_value());
+  EXPECT_FALSE(moveit_servo::getIKSolverTipFrame(robot_state, "panda_arm_hand").has_value());
+}
+
+TEST(ServoUtilsUnitTests, TwistCommandReachesJacobianFallbackWithoutIKSolver)
+{
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+
+  servo::Params servo_params;
+  servo_params.move_group_name = "panda_arm";
+  servo_params.publish_period = 0.01;
+  servo_params.command_in_type = "unitless";
+  servo_params.scale.linear = 1.0;
+  servo_params.scale.rotational = 1.0;
+
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  ASSERT_TRUE(joint_model_group->getSolverInstance() == nullptr);
+
+  Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
+  robot_state->setJointGroupActivePositions(joint_model_group, state_ready);
+
+  // Resolve the planning frame exactly as Servo::jointDeltaFromCommand() does, then drive jointDeltaFromTwist()
+  // with it. This exercises the same path a TWIST command takes, reaching the pre-existing no-solver Jacobian
+  // fallback in jointDeltaFromIK() end-to-end.
+  const auto planning_frame_maybe = moveit_servo::getIKSolverBaseFrame(robot_state, servo_params.move_group_name);
+  ASSERT_TRUE(planning_frame_maybe.has_value());
+
+  Eigen::Vector<double, 6> twist_velocities{ 0.01, 0.0, 0.0, 0.0, 0.0, 0.0 };
+  moveit_servo::TwistCommand twist{ *planning_frame_maybe, twist_velocities };
+
+  const auto delta_result =
+      moveit_servo::jointDeltaFromTwist(twist, robot_state, servo_params, *planning_frame_maybe, {});
+  EXPECT_NE(delta_result.first, moveit_servo::StatusCode::INVALID);
+  EXPECT_TRUE(delta_result.second.allFinite());
+  EXPECT_FALSE(delta_result.second.isZero());
+}
+
+TEST(ServoUtilsUnitTests, PoseCommandReachesJacobianFallbackWithoutIKSolver)
+{
+  using moveit::core::loadTestingRobotModel;
+  moveit::core::RobotModelPtr robot_model = loadTestingRobotModel("panda");
+  moveit::core::RobotStatePtr robot_state = std::make_shared<moveit::core::RobotState>(robot_model);
+
+  servo::Params servo_params;
+  servo_params.move_group_name = "panda_arm";
+  servo_params.publish_period = 0.01;
+  servo_params.scale.linear = 1.0;
+  servo_params.scale.rotational = 1.0;
+
+  const auto joint_model_group = robot_state->getJointModelGroup(servo_params.move_group_name);
+  ASSERT_TRUE(joint_model_group->getSolverInstance() == nullptr);
+
+  Eigen::Vector<double, 7> state_ready{ 0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785 };
+  robot_state->setJointGroupActivePositions(joint_model_group, state_ready);
+
+  // Resolve both frames exactly as Servo::jointDeltaFromCommand() does for a POSE command, then drive
+  // jointDeltaFromPose() with a target pose offset from the current one, reaching the same no-solver Jacobian
+  // fallback in jointDeltaFromIK() that the TWIST test above exercises.
+  const auto planning_frame_maybe = moveit_servo::getIKSolverBaseFrame(robot_state, servo_params.move_group_name);
+  const auto ee_frame_maybe = moveit_servo::getIKSolverTipFrame(robot_state, servo_params.move_group_name);
+  ASSERT_TRUE(planning_frame_maybe.has_value());
+  ASSERT_TRUE(ee_frame_maybe.has_value());
+
+  Eigen::Isometry3d target_pose = robot_state->getGlobalLinkTransform(*planning_frame_maybe).inverse() *
+                                  robot_state->getGlobalLinkTransform(*ee_frame_maybe);
+  target_pose.translation().x() += 0.01;
+  moveit_servo::PoseCommand pose{ *planning_frame_maybe, target_pose };
+
+  const auto delta_result =
+      moveit_servo::jointDeltaFromPose(pose, robot_state, servo_params, *planning_frame_maybe, *ee_frame_maybe, {});
+  EXPECT_NE(delta_result.first, moveit_servo::StatusCode::INVALID);
+  EXPECT_TRUE(delta_result.second.allFinite());
+  EXPECT_FALSE(delta_result.second.isZero());
+}
+
 TEST(ServoUtilsUnitTests, JointLimitVelocityScaling)
 {
   using moveit::core::loadTestingRobotModel;
