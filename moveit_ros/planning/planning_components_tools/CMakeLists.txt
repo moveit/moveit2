@@ -51,4 +51,14 @@ install(
           moveit_evaluate_collision_checking_speed
           moveit_publish_scene_from_text
   RUNTIME DESTINATION lib/${PROJECT_NAME})
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(
+    test_publish_scene_from_text
+    test/test_publish_scene_from_text.py
+    ENV
+    "PUBLISH_SCENE_FROM_TEXT_EXECUTABLE=$<TARGET_FILE:moveit_publish_scene_from_text>"
+    TIMEOUT
+    60)
+endif()
 # lint_cmake:
