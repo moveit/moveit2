@@ -37,5 +37,5 @@
 #include "test_moveit_controller_manager.hpp"
 #include <pluginlib/class_list_macros.hpp>
 
-PLUGINLIB_EXPORT_CLASS(test_moveit_controller_manager::TestRos2ControlManager,
-                       moveit_controller_manager::Ros2ControlManager);
+PLUGINLIB_EXPORT_CLASS(test_moveit_controller_manager::TestControllerManager,
+                       moveit_controller_manager::MoveItControllerManager);

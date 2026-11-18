@@ -24,18 +24,26 @@ install(
   FILES ${CMAKE_CURRENT_BINARY_DIR}/moveit_trajectory_execution_manager_export.h
   DESTINATION include/moveit_ros_planning)
 
-if(CATKIN_ENABLE_TESTING)
-  # This needs further cleanup before it can run
-  # add_library(test_controller_manager_plugin
-  # test/test_moveit_controller_manager_plugin.cpp)
-  # set_target_properties(test_controller_manager_plugin PROPERTIES VERSION
-  # "${${PROJECT_NAME}_VERSION}")
-  # target_link_libraries(test_controller_manager_plugin
-  # moveit_trajectory_execution_manager ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-  #
-  # find_package(moveit_resources_panda_moveit_config REQUIRED)
-  # find_package(rostest REQUIRED) add_rostest_gtest(test_execution_manager
-  # test/test_execution_manager.test test/test_execution_manager.cpp)
-  # target_link_libraries(test_execution_manager
-  # moveit_trajectory_execution_manager ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+
+  # Fake controller manager plugin used by the tests below. It is installed
+  # so that pluginlib can discover it when the tests run.
+  add_library(test_controller_manager_plugin SHARED test/test_moveit_controller_manager_plugin.cpp)
+  target_link_libraries(test_controller_manager_plugin moveit_core::moveit_core rclcpp::rclcpp
+                        ${moveit_msgs_TARGETS})
+  install(TARGETS test_controller_manager_plugin
+          LIBRARY DESTINATION lib
+          ARCHIVE DESTINATION lib
+          RUNTIME DESTINATION bin)
+  ament_add_gtest(test_execution_thread_safety test/test_execution_thread_safety.cpp)
+  target_link_libraries(test_execution_thread_safety
+                        moveit_trajectory_execution_manager
+                        moveit_planning_scene_monitor
+                        moveit_core::moveit_core
+                        rclcpp::rclcpp
+                        tf2_ros::tf2_ros
+                        urdf::urdf
+                        srdfdom::srdfdom
+                        ${moveit_msgs_TARGETS})
 endif()
