@@ -294,7 +294,8 @@ servo:
     default_value: 2.0,
     description: "When 'lower_singularity_threshold' is triggered, \
                   but we are moving away from singularity, move this many times faster \
-                  than if we were moving further into singularity",
+                  than if we were moving further into singularity. Moving away, the robot halts \
+                  only above lower + (hard_stop - lower) * multiplier instead of at hard_stop",
     validation: {
       gt<>: 0.0
     }
@@ -303,7 +304,8 @@ servo:
   singularity_step_scale: {
     type: double,
     default_value: 0.01,
-    description: "The test vector towards singularity is scaled by this factor during singularity check",
+    description: "Size of the joint-space test step (rad for revolute joints) taken towards the singularity \
+                  to tell whether a command approaches or leaves it",
     validation: {
       gt<>: 0.0
     }
