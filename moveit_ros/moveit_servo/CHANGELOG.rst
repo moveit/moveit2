@@ -2,8 +2,8 @@
 Changelog for package moveit_servo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.3 (2026-11-18)
+-------------------
 * Fix Servo pose joint limit halting (`#3841 <https://github.com/moveit/moveit2/issues/3841>`_)
 * Contributors: Vincent
 

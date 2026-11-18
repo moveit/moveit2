@@ -2,8 +2,8 @@
 Changelog for package moveit_setup_app_plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.3 (2026-11-18)
+-------------------
 * Change email address associated with maintainer (`#3673 <https://github.com/moveit/moveit2/issues/3673>`_)
 * Contributors: David V. Lu!!
 
