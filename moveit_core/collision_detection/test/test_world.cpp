@@ -458,6 +458,88 @@ TEST(World, ObjectPoseAndSubframes)
   EXPECT_EQ(1.0, pose(2, 3));  // z
 }
 
+// Copied worlds share object storage until a write. Bulk shape moves must clone
+// that storage first, matching moveShapeInObject(). Reproduction from
+// https://github.com/moveit/moveit2/issues/3940 (BulkShapeMoveMutatesSharedWorldSnapshot).
+TEST(World, MoveShapesInObjectDoesNotMutateCopiedWorld)
+{
+  World original;
+
+  shapes::ShapePtr shape_a = std::make_shared<shapes::Box>(0.2, 0.2, 0.2);
+  shapes::ShapePtr shape_b = std::make_shared<shapes::Box>(0.3, 0.3, 0.3);
+  const Eigen::Isometry3d identity = Eigen::Isometry3d::Identity();
+  original.addToObject("table", std::vector<shapes::ShapeConstPtr>{ shape_a, shape_b },
+                       EigenSTL::vector_Isometry3d{ identity, identity });
+
+  World snapshot(original);
+  ASSERT_EQ(original.getObject("table").get(), snapshot.getObject("table").get());
+
+  EigenSTL::vector_Isometry3d moved{ identity, identity };
+  moved[0].translation().x() = 1.0;
+  moved[1].translation().x() = 2.0;
+  ASSERT_TRUE(snapshot.moveShapesInObject("table", moved));
+
+  const World::ObjectConstPtr updated = snapshot.getObject("table");
+  const World::ObjectConstPtr untouched = original.getObject("table");
+  ASSERT_TRUE(static_cast<bool>(updated));
+  ASSERT_TRUE(static_cast<bool>(untouched));
+  EXPECT_NE(updated.get(), untouched.get());
+
+  EXPECT_DOUBLE_EQ(1.0, updated->shape_poses_[0].translation().x());
+  EXPECT_DOUBLE_EQ(2.0, updated->shape_poses_[1].translation().x());
+  EXPECT_DOUBLE_EQ(1.0, updated->global_shape_poses_[0].translation().x());
+  EXPECT_DOUBLE_EQ(2.0, updated->global_shape_poses_[1].translation().x());
+
+  EXPECT_DOUBLE_EQ(0.0, untouched->shape_poses_[0].translation().x());
+  EXPECT_DOUBLE_EQ(0.0, untouched->shape_poses_[1].translation().x());
+  EXPECT_DOUBLE_EQ(0.0, untouched->global_shape_poses_[0].translation().x());
+  EXPECT_DOUBLE_EQ(0.0, untouched->global_shape_poses_[1].translation().x());
+}
+
+// Same copy-on-write contract for subframes. Reproduction from
+// https://github.com/moveit/moveit2/issues/3940 (SettingSubframesMutatesSharedWorldSnapshot).
+TEST(World, SetSubframesOfObjectDoesNotMutateCopiedWorld)
+{
+  World original;
+
+  shapes::ShapePtr shape = std::make_shared<shapes::Box>(0.2, 0.2, 0.2);
+  original.addToObject("mug", shape, Eigen::Isometry3d::Identity());
+
+  World snapshot(original);
+  ASSERT_EQ(original.getObject("mug").get(), snapshot.getObject("mug").get());
+
+  moveit::core::FixedTransformsMap frames;
+  Eigen::Isometry3d spout = Eigen::Isometry3d::Identity();
+  spout.translation().z() = 0.15;
+  frames["spout"] = spout;
+  ASSERT_TRUE(snapshot.setSubframesOfObject("mug", frames));
+
+  const World::ObjectConstPtr updated = snapshot.getObject("mug");
+  const World::ObjectConstPtr untouched = original.getObject("mug");
+  ASSERT_TRUE(static_cast<bool>(updated));
+  ASSERT_TRUE(static_cast<bool>(untouched));
+  EXPECT_NE(updated.get(), untouched.get());
+
+  ASSERT_EQ(1u, updated->subframe_poses_.count("spout"));
+  EXPECT_DOUBLE_EQ(0.15, updated->subframe_poses_.at("spout").translation().z());
+  ASSERT_EQ(1u, updated->global_subframe_poses_.count("spout"));
+  EXPECT_DOUBLE_EQ(0.15, updated->global_subframe_poses_.at("spout").translation().z());
+
+  EXPECT_EQ(0u, untouched->subframe_poses_.count("spout"));
+  EXPECT_EQ(0u, untouched->global_subframe_poses_.count("spout"));
+
+  bool found = false;
+  const Eigen::Isometry3d& snapshot_pose = snapshot.getTransform("mug/spout", found);
+  EXPECT_TRUE(found);
+  EXPECT_DOUBLE_EQ(0.15, snapshot_pose.translation().z());
+
+  found = true;
+  original.getTransform("mug/spout", found);
+  EXPECT_FALSE(found);
+  EXPECT_FALSE(original.knowsTransform("mug/spout"));
+  EXPECT_TRUE(snapshot.knowsTransform("mug/spout"));
+}
+
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
