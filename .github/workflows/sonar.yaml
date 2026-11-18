@@ -19,6 +19,9 @@ jobs:
         $(f="moveit2_$(sed 's/-.*$//' <<< "rolling-ci").repos"; test -r $f && echo $f)
       # Pull any updates to the upstream workspace (after restoring it from cache)
       AFTER_SETUP_UPSTREAM_WORKSPACE: vcs pull $BASEDIR/upstream_ws/src
+      AFTER_INSTALL_TARGET_DEPENDENCIES: |
+        # silent octomap warnings until upstream fix (OctoMap/octomap#434) is released:
+        sed -i 's/#include *<ciso646>//' /usr/include/octomap/OcTreeKey.h
       AFTER_SETUP_DOWNSTREAM_WORKSPACE: vcs pull $BASEDIR/downstream_ws/src
       # Clear the ccache stats before and log the stats after the build
       AFTER_SETUP_CCACHE: ccache --zero-stats --max-size=10.0G
@@ -110,13 +113,10 @@ jobs:
       - name: Print coverage.info
         if: steps.ici.outputs.target_test_results == '0'
         run: cat ${{ github.workspace }}/.work/target_ws/coverage.info
-      - name: Install sonar-scanner
-        if: steps.ici.outputs.target_test_results == '0'
-        uses: SonarSource/sonarcloud-github-c-cpp@v3
       - name: Run sonar-scanner
         if: steps.ici.outputs.target_test_results == '0'
+        uses: SonarSource/sonarqube-scan-action@v8.5.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: sonar-scanner -X --define project.settings=.work/target_ws/src/moveit2/sonar-project.properties
-        working-directory: ${{ github.workspace }}
+        with:
+          args: -X --define project.settings=.work/target_ws/src/moveit2/sonar-project.properties
