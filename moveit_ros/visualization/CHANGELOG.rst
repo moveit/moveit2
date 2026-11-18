@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_visualization
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.3 (2026-11-18)
+-------------------
 * Fix rolling build: link tf2_kdl target and add missing rclcpp includes (`#3977 <https://github.com/moveit/moveit2/issues/3977>`_)
 * rviz joints tab: show goal state model onFinishedExecution() (`#3886 <https://github.com/moveit/moveit2/issues/3886>`_)
 * Include rviz_common/logging.hpp where RVIZ_COMMON_LOG\_* is used (`#3861 <https://github.com/moveit/moveit2/issues/3861>`_)

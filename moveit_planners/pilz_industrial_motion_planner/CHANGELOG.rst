@@ -2,8 +2,8 @@
 Changelog for package pilz_industrial_motion_planner
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.3 (2026-11-18)
+-------------------
 * Small code-readability improvements (`#3765 <https://github.com/moveit/moveit2/issues/3765>`_)
 * Contributors: Gaël Écorchard
 

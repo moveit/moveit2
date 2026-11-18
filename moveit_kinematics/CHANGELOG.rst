@@ -2,8 +2,8 @@
 Changelog for package moveit_kinematics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.3 (2026-11-18)
+-------------------
 * Solve the IK velocity step via JJ^T eigendecomposition, not JacobiSVD (`#3804 <https://github.com/moveit/moveit2/issues/3804>`_)
 * Contributors: hugogo1998
 

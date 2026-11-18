@@ -2,8 +2,8 @@
 Changelog for package moveit_ros_warehouse
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.3 (2026-11-18)
+-------------------
 * remove unused boost-filesystem (`#3644 <https://github.com/moveit/moveit2/issues/3644>`_)
 * Contributors: Michael Carlstrom
 

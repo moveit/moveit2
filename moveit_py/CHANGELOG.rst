@@ -2,8 +2,8 @@
 Changelog for package moveit_py
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.15.3 (2026-11-18)
+-------------------
 * moveit_py: release the GIL in plan(), the collision checks and set_from_ik (`#3935 <https://github.com/moveit/moveit2/issues/3935>`_)
 * Contributors: illyakaynov-vbti
 
