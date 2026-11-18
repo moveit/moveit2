@@ -39,7 +39,12 @@
 #include <moveit/move_group/move_group_capability.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <moveit_msgs/action/move_group.hpp>
+
+#include <atomic>
 #include <memory>
+#include <mutex>
+#include <set>
+#include <thread>
 
 namespace move_group
 {
@@ -50,6 +55,8 @@ class MoveGroupMoveAction : public MoveGroupCapability
 {
 public:
   MoveGroupMoveAction();
+
+  ~MoveGroupMoveAction() override;
 
   void initialize() override;
 
@@ -65,13 +72,53 @@ private:
   void preemptMoveCallback();
   void setMoveState(MoveGroupState state, const std::shared_ptr<MGActionGoal>& goal);
 
+  // False once the context of the node has been shut down. Every result, status
+  // update and feedback goes through that context, and rclcpp_action throws from
+  // those calls instead of dropping the message once the context is invalid.
+  bool canPublish();
+  // Moves a goal to a terminal state without answering it, for the case where the
+  // context has been shut down and the publish would throw instead. Leaving the
+  // goal active would make the destructor of its handle throw later on, from the
+  // thread that releases the last reference to it.
+  void abandonGoal(const std::shared_ptr<MGActionGoal>& goal);
+
+  // True when this goal has to stop before it starts planning, because a
+  // cancellation was accepted for it or because the capability is shutting down.
+  // A cancellation is recorded per goal, so it only ever stops the goal it
+  // belongs to.
+  bool isPreemptRequested(const std::shared_ptr<MGActionGoal>& goal);
+  // Lets go of the plan execution and of the cancellation that belongs to this
+  // goal. A cancellation that belongs to another goal is kept.
+  void releaseGoal(const std::shared_ptr<MGActionGoal>& goal);
+
   bool planUsingPlanningPipeline(const planning_interface::MotionPlanRequest& req,
                                  plan_execution::ExecutableMotionPlan& plan);
 
   std::shared_ptr<rclcpp_action::Server<MGAction>> execute_action_server_;
 
   MoveGroupState move_state_;
-  bool preempt_requested_;
   std::shared_ptr<MGActionGoal> goal_;
+  // Guards active_goal_ and canceled_goals_ below. The cancellation callback
+  // runs in the executor thread and exchanges them with the goal workers.
+  std::mutex goal_mutex_;
+  // The goal that owns the shared plan execution right now. The cancellation
+  // callback stops the plan execution only when the goal it refers to is this
+  // one, so that cancelling a goal that is still waiting does not stop the goal
+  // that is running.
+  std::shared_ptr<MGActionGoal> active_goal_;
+  // Cancellations that were accepted while their goal was not running yet. Every
+  // goal consumes its own entry before it starts planning, so that a
+  // cancellation cannot preempt another goal.
+  std::set<rclcpp_action::GoalUUID> canceled_goals_;
+
+  // Goals are executed one at a time by a worker that this capability owns, so
+  // that the worker can be stopped before the capability is destroyed. A new
+  // worker joins the worker of the previous goal itself, because goal_,
+  // move_state_ and context_->plan_execution_ below serve a single goal at a
+  // time. Joining takes place in the worker and not in the acceptor, so that the
+  // executor thread stays free to serve cancellations.
+  std::mutex goal_worker_mutex_;
+  std::thread goal_worker_;
+  std::atomic_bool shutting_down_{ false };
 };
 }  // namespace move_group
