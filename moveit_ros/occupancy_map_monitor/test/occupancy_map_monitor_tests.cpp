@@ -35,6 +35,7 @@
 /* Author: Tyler Weaver */
 
 #include <moveit/occupancy_map_monitor/occupancy_map_monitor.hpp>
+#include <moveit/occupancy_map_monitor/occupancy_map_updater.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -57,7 +58,7 @@ struct MockMiddlewareHandle : public occupancy_map_monitor::OccupancyMapMonitor:
   MOCK_METHOD(occupancy_map_monitor::OccupancyMapMonitor::Parameters, getParameters, (), (const, override));
   MOCK_METHOD(occupancy_map_monitor::OccupancyMapUpdaterPtr, loadOccupancyMapUpdater,
               (const std::string& sensor_plugin), (override));
-  MOCK_METHOD(void, initializeOccupancyMapUpdater,
+  MOCK_METHOD(bool, initializeOccupancyMapUpdater,
               (occupancy_map_monitor::OccupancyMapUpdaterPtr occupancy_map_updater), (override));
   MOCK_METHOD(void, createSaveMapService,
               (occupancy_map_monitor::OccupancyMapMonitor::MiddlewareHandle::SaveMapServiceCallback callback),
@@ -82,6 +83,108 @@ TEST(OccupancyMapMonitorTests, ConstructorTest)
   occupancy_map_monitor::OccupancyMapMonitor occupancy_map_monitor{
     std::move(mock_middleware_handle), std::make_shared<tf2_ros::Buffer>(std::make_shared<rclcpp::Clock>())
   };
+}
+
+namespace
+{
+struct UpdaterState
+{
+  bool started{ false };
+  std::vector<std::string> calls;
+};
+
+class RecordingUpdater : public occupancy_map_monitor::OccupancyMapUpdater
+{
+public:
+  RecordingUpdater(std::shared_ptr<UpdaterState> state, bool initialize_succeeds)
+    : OccupancyMapUpdater("RecordingUpdater")
+    , state_(std::move(state))
+    , initialize_succeeds_(initialize_succeeds)
+  {
+  }
+
+  bool setParams(const std::string&) override
+  {
+    state_->calls.emplace_back("set_params");
+    return true;
+  }
+
+  bool initialize(const rclcpp::Node::SharedPtr&) override
+  {
+    state_->calls.emplace_back("initialize");
+    return initialize_succeeds_;
+  }
+
+  void start() override
+  {
+    state_->calls.emplace_back("start");
+    state_->started = true;
+  }
+
+  void stop() override
+  {
+  }
+
+  occupancy_map_monitor::ShapeHandle excludeShape(const shapes::ShapeConstPtr&) override
+  {
+    return 1;
+  }
+
+  void forgetShape(occupancy_map_monitor::ShapeHandle) override
+  {
+  }
+
+private:
+  std::shared_ptr<UpdaterState> state_;
+  bool initialize_succeeds_;
+};
+
+occupancy_map_monitor::OccupancyMapMonitor::Parameters parametersWithUpdater()
+{
+  return { 0.1, "", { { "sensor", "recording_updater" } } };
+}
+}  // namespace
+
+TEST(OccupancyMapMonitorTests, StartsUpdaterAfterSuccessfulInitialization)
+{
+  auto state = std::make_shared<UpdaterState>();
+  auto updater = std::make_shared<RecordingUpdater>(state, true);
+  auto middleware = std::make_unique<MockMiddlewareHandle>();
+
+  EXPECT_CALL(*middleware, getParameters).WillOnce(testing::Return(parametersWithUpdater()));
+  EXPECT_CALL(*middleware, loadOccupancyMapUpdater).WillOnce(testing::Return(updater));
+  EXPECT_CALL(*middleware, initializeOccupancyMapUpdater).WillOnce(testing::Invoke([](const auto& value) {
+    return value->initialize(nullptr);
+  }));
+  EXPECT_CALL(*middleware, createSaveMapService).Times(1);
+  EXPECT_CALL(*middleware, createLoadMapService).Times(1);
+
+  occupancy_map_monitor::OccupancyMapMonitor monitor{ std::move(middleware), nullptr };
+  monitor.startMonitor();
+
+  EXPECT_EQ(state->calls, (std::vector<std::string>{ "initialize", "set_params", "start" }));
+  EXPECT_TRUE(state->started);
+}
+
+TEST(OccupancyMapMonitorTests, RejectsUpdaterWhenInitializationFails)
+{
+  auto state = std::make_shared<UpdaterState>();
+  auto updater = std::make_shared<RecordingUpdater>(state, false);
+  auto middleware = std::make_unique<MockMiddlewareHandle>();
+
+  EXPECT_CALL(*middleware, getParameters).WillOnce(testing::Return(parametersWithUpdater()));
+  EXPECT_CALL(*middleware, loadOccupancyMapUpdater).WillOnce(testing::Return(updater));
+  EXPECT_CALL(*middleware, initializeOccupancyMapUpdater).WillOnce(testing::Invoke([](const auto& value) {
+    return value->initialize(nullptr);
+  }));
+  EXPECT_CALL(*middleware, createSaveMapService).Times(1);
+  EXPECT_CALL(*middleware, createLoadMapService).Times(1);
+
+  occupancy_map_monitor::OccupancyMapMonitor monitor{ std::move(middleware), nullptr };
+  monitor.startMonitor();
+
+  EXPECT_EQ(state->calls, (std::vector<std::string>{ "initialize" }));
+  EXPECT_FALSE(state->started);
 }
 
 int main(int argc, char** argv)

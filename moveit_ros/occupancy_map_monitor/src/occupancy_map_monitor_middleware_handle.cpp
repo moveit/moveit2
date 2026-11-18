@@ -136,12 +136,14 @@ OccupancyMapUpdaterPtr OccupancyMapMonitorMiddlewareHandle::loadOccupancyMapUpda
   return nullptr;
 }
 
-void OccupancyMapMonitorMiddlewareHandle::initializeOccupancyMapUpdater(OccupancyMapUpdaterPtr occupancy_map_updater)
+bool OccupancyMapMonitorMiddlewareHandle::initializeOccupancyMapUpdater(OccupancyMapUpdaterPtr occupancy_map_updater)
 {
   if (!occupancy_map_updater->initialize(node_))
   {
     RCLCPP_ERROR(logger_, "Unable to initialize map updater of type %s", occupancy_map_updater->getType().c_str());
+    return false;
   }
+  return true;
 }
 
 void OccupancyMapMonitorMiddlewareHandle::createSaveMapService(
