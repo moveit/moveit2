@@ -30,25 +30,30 @@ if(BUILD_TESTING)
   set(test_plugin_package moveit_ros_planning_trajectory_test_plugins)
   set(test_plugin_prefix "${CMAKE_CURRENT_BINARY_DIR}/${test_plugin_package}")
   set(test_plugin_share "${test_plugin_prefix}/share/${test_plugin_package}")
-  file(MAKE_DIRECTORY
-       "${test_plugin_prefix}/share/ament_index/resource_index/packages"
-       "${test_plugin_prefix}/share/ament_index/resource_index/moveit_core__pluginlib__plugin"
-       "${test_plugin_share}")
-  file(WRITE
-       "${test_plugin_prefix}/share/ament_index/resource_index/packages/${test_plugin_package}"
-       "")
-  file(WRITE "${test_plugin_share}/package.xml"
-       "<?xml version=\"1.0\"?>\n"
-       "<package format=\"3\">\n"
-       "  <name>${test_plugin_package}</name>\n"
-       "  <version>0.0.0</version>\n"
-       "  <description>Isolated controller manager plugin for tests</description>\n"
-       "  <maintainer email=\"moveit-users@googlegroups.com\">MoveIt</maintainer>\n"
-       "  <license>BSD-3-Clause</license>\n"
-       "</package>\n")
-  file(WRITE
-       "${test_plugin_prefix}/share/ament_index/resource_index/moveit_core__pluginlib__plugin/${test_plugin_package}"
-       "share/${test_plugin_package}/test_trajectory_controller_manager_plugin.xml\n")
+  file(
+    MAKE_DIRECTORY
+    "${test_plugin_prefix}/share/ament_index/resource_index/packages"
+    "${test_plugin_prefix}/share/ament_index/resource_index/moveit_core__pluginlib__plugin"
+    "${test_plugin_share}")
+  file(
+    WRITE
+    "${test_plugin_prefix}/share/ament_index/resource_index/packages/${test_plugin_package}"
+    "")
+  file(
+    WRITE "${test_plugin_share}/package.xml"
+    "<?xml version=\"1.0\"?>\n"
+    "<package format=\"3\">\n"
+    "  <name>${test_plugin_package}</name>\n"
+    "  <version>0.0.0</version>\n"
+    "  <description>Isolated controller manager plugin for tests</description>\n"
+    "  <maintainer email=\"moveit-users@googlegroups.com\">MoveIt</maintainer>\n"
+    "  <license>BSD-3-Clause</license>\n"
+    "</package>\n")
+  file(
+    WRITE
+    "${test_plugin_prefix}/share/ament_index/resource_index/moveit_core__pluginlib__plugin/${test_plugin_package}"
+    "share/${test_plugin_package}/test_trajectory_controller_manager_plugin.xml\n"
+  )
   configure_file(
     "${CMAKE_CURRENT_SOURCE_DIR}/../test_trajectory_controller_manager_plugin.xml"
     "${test_plugin_share}/test_trajectory_controller_manager_plugin.xml"
