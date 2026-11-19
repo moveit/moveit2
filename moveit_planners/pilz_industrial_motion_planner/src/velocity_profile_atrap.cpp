@@ -37,24 +37,7 @@
 namespace pilz_industrial_motion_planner
 {
 VelocityProfileATrap::VelocityProfileATrap(double max_vel, double max_acc, double max_dec)
-  : max_vel_(fabs(max_vel))
-  , max_acc_(fabs(max_acc))
-  , max_dec_(fabs(max_dec))
-  , start_pos_(0)
-  , end_pos_(0)
-  , start_vel_(0)
-  , a1_(0)
-  , a2_(0)
-  , a3_(0)
-  , b1_(0)
-  , b2_(0)
-  , b3_(0)
-  , c1_(0)
-  , c2_(0)
-  , c3_(0)
-  , t_a_(0)
-  , t_b_(0)
-  , t_c_(0)
+  : max_vel_(fabs(max_vel)), max_acc_(fabs(max_acc)), max_dec_(fabs(max_dec))
 {
 }
 

@@ -192,21 +192,21 @@ private:
   const double max_vel_;
   const double max_acc_;
   const double max_dec_;
-  double start_pos_;
-  double end_pos_;
+  double start_pos_{ 0.0 };
+  double end_pos_{ 0.0 };
 
   /// for initial velocity
-  double start_vel_;
+  double start_vel_{ 0.0 };
 
   /// three phases of trapezoid
-  double a1_, a2_, a3_;  /// coef. from ^0 -> ^2 of first phase
-  double b1_, b2_, b3_;  /// of second phase
-  double c1_, c2_, c3_;  /// of third phase
+  double a1_{ 0.0 }, a2_{ 0.0 }, a3_{ 0.0 };  /// coef. from ^0 -> ^2 of first phase
+  double b1_{ 0.0 }, b2_{ 0.0 }, b3_{ 0.0 };  /// of second phase
+  double c1_{ 0.0 }, c2_{ 0.0 }, c3_{ 0.0 };  /// of third phase
 
   /// time of three phases
-  double t_a_;  /// the duration of first phase
-  double t_b_;  /// the duration of second phase
-  double t_c_;  /// the duration of third phase
+  double t_a_{ 0.0 };  /// the duration of first phase
+  double t_b_{ 0.0 };  /// the duration of second phase
+  double t_c_{ 0.0 };  /// the duration of third phase
 };
 
 std::ostream& operator<<(std::ostream& os,
