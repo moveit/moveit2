@@ -39,6 +39,7 @@
 #include <moveit_msgs/msg/robot_trajectory.hpp>
 #include <moveit/robot_trajectory/robot_trajectory.hpp>
 #include <moveit/trajectory_processing/time_optimal_trajectory_generation.hpp>
+#include <moveit/trajectory_processing/limit_cartesian_speed.hpp>
 
 namespace trajectory_processing
 {
@@ -80,11 +81,17 @@ bool applyTOTGTimeParameterization(robot_trajectory::RobotTrajectory& trajectory
 bool applyRuckigSmoothing(robot_trajectory::RobotTrajectory& trajectory, double velocity_scaling_factor,
                           double acceleration_scaling_factor, bool mitigate_overshoot = false,
                           double overshoot_threshold = 0.01);
-
 /**
  * @brief Converts a `trajectory_processing::Trajectory` into a `JointTrajectory` message with a given sampling rate.
  */
 [[nodiscard]] trajectory_msgs::msg::JointTrajectory
 createTrajectoryMessage(const std::vector<std::string>& joint_names,
                         const trajectory_processing::Trajectory& trajectory, const int sampling_rate);
+
+/**
+ * \brief Updates the time stamps of a `robot_trajectory::RobotTrajectory` based on the provided time differences.
+ * \param [in,out] rob_trajectory The robot trajectory to be updated.
+ * \param [in] time_diff A vector containing the time differences between consecutive waypoints.
+ */
+void updateTrajectory(robot_trajectory::RobotTrajectory& rob_trajectory, const std::vector<double>& time_diff);
 }  // namespace trajectory_processing
