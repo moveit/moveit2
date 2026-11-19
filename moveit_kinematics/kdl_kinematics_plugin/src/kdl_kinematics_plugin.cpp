@@ -63,9 +63,7 @@ rclcpp::Logger getLogger()
 
 static rclcpp::Clock steady_clock = rclcpp::Clock(RCL_ROS_TIME);
 
-KDLKinematicsPlugin::KDLKinematicsPlugin() : initialized_(false)
-{
-}
+KDLKinematicsPlugin::KDLKinematicsPlugin() = default;
 
 void KDLKinematicsPlugin::getRandomConfiguration(Eigen::VectorXd& jnt_array) const
 {

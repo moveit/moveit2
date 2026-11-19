@@ -131,14 +131,14 @@ protected:
   void saveCache() const;
 
   /** number of joints in the system */
-  unsigned int num_joints_;
+  unsigned int num_joints_{ 0 };
 
   /** for all cache entries, the poses are at least minPoseDistance_ apart ... */
-  double min_pose_distance_;
+  double min_pose_distance_{ 0.0 };
   /** ... or the configurations are at least minConfigDistance2_^.5 apart. */
-  double min_config_distance2_;
+  double min_config_distance2_{ 0.0 };
   /** maximum size of the cache */
-  unsigned int max_cache_size_;
+  unsigned int max_cache_size_{ 0 };
   /** file name for loading / saving cache */
   std::filesystem::path cache_file_name_;
 
