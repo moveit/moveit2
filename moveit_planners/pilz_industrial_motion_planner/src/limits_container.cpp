@@ -46,9 +46,7 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-LimitsContainer::LimitsContainer() : has_joint_limits_(false), has_cartesian_limits_(false)
-{
-}
+LimitsContainer::LimitsContainer() = default;
 
 bool LimitsContainer::hasJointLimits() const
 {

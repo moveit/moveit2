@@ -87,13 +87,13 @@ public:
 
 private:
   /// Flag if joint limits where set
-  bool has_joint_limits_;
+  bool has_joint_limits_{ false };
 
   /// The joint limits
   JointLimitsContainer joint_limits_;
 
   /// Flag if cartesian limits have been set
-  bool has_cartesian_limits_;
+  bool has_cartesian_limits_{ false };
 
   /// The cartesian limits
   cartesian_limits::Params cartesian_limits_;
