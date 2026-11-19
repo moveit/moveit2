@@ -38,6 +38,7 @@
 #include <new>
 #include <vector>
 
+#include <moveit_msgs/srv/get_position_ik.hpp>
 #include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.hpp>
 
 using srv_kinematics_plugin::SrvKinematicsPlugin;
@@ -57,17 +58,23 @@ protected:
     plugin_->~SrvKinematicsPlugin();
   }
 
+  // Callers use the public KinematicsBase interface; the override in SrvKinematicsPlugin is protected.
+  kinematics::KinematicsBase& base()
+  {
+    return *plugin_;
+  }
+
   alignas(SrvKinematicsPlugin) unsigned char storage_[sizeof(SrvKinematicsPlugin)];
   SrvKinematicsPlugin* plugin_{ nullptr };
 };
 
 TEST_F(SrvKinematicsPluginRedundantJoints, AcceptsEmptySet)
 {
-  EXPECT_TRUE(plugin_->setRedundantJoints(std::vector<unsigned int>{}));
+  EXPECT_TRUE(base().setRedundantJoints(std::vector<unsigned int>{}));
 }
 
 TEST_F(SrvKinematicsPluginRedundantJoints, RejectsAnyRedundantJoint)
 {
-  EXPECT_FALSE(plugin_->setRedundantJoints(std::vector<unsigned int>{ 0 }));
-  EXPECT_FALSE(plugin_->setRedundantJoints(std::vector<unsigned int>{ 0, 1 }));
+  EXPECT_FALSE(base().setRedundantJoints(std::vector<unsigned int>{ 0 }));
+  EXPECT_FALSE(base().setRedundantJoints(std::vector<unsigned int>{ 0, 1 }));
 }
