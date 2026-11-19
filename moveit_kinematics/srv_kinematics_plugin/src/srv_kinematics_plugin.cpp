@@ -58,9 +58,7 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-SrvKinematicsPlugin::SrvKinematicsPlugin() : active_(false)
-{
-}
+SrvKinematicsPlugin::SrvKinematicsPlugin() = default;
 
 bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
                                      const std::string& group_name, const std::string& base_frame,
