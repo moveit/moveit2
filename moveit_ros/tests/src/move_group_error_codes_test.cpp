@@ -101,8 +101,7 @@ protected:
         << "sequence_move_group server not available";
 
     auto joint_state_sub = node_->create_subscription<sensor_msgs::msg::JointState>(
-        "/joint_states", rclcpp::SensorDataQoS(),
-        [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) {
+        "/joint_states", rclcpp::SensorDataQoS(), [this](const sensor_msgs::msg::JointState::ConstSharedPtr& msg) {
           if (!msg->position.empty())
           {
             received_joint_state_ = true;
