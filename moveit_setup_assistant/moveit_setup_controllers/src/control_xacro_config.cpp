@@ -38,6 +38,7 @@
 #include <moveit_setup_framework/data_warehouse.hpp>
 #include <tinyxml2.h>
 #include <algorithm>
+#include <map>
 
 namespace moveit_setup
 {
@@ -121,6 +122,27 @@ void ControlXacroConfig::loadFromDescription()
 
   // Load the joint names for all joints used by the groups
   auto srdf_config = config_data_->get<SRDFConfig>("srdf");
+
+  joint_default_positions_.clear();
+  if (auto robot_model = srdf_config->getRobotModel())
+  {
+    std::map<std::string, double> variable_defaults;
+    robot_model->getVariableDefaultPositions(variable_defaults);
+    for (const auto& joint_name : robot_model->getJointModelNames())
+    {
+      const auto* joint_model = robot_model->getJointModel(joint_name);
+      if (!joint_model)
+      {
+        continue;
+      }
+      std::vector<double> values;
+      for (const auto& variable : joint_model->getVariableNames())
+      {
+        values.push_back(variable_defaults[variable]);
+      }
+      joint_default_positions_[joint_name] = values;
+    }
+  }
   for (const std::string& group_name : srdf_config->getGroupNames())
   {
     for (const std::string& joint_name : srdf_config->getJointNames(group_name, true, false))  // exclude passive
@@ -174,11 +196,18 @@ void ControlXacroConfig::setControlInterfaces(const ControlInterfaces& ci)
 
     new_joint_interfaces_[joint_name] = default_ci_;
 
-    // Setup the initial state
+    // Use the robot model's default position instead of assuming zero; zero
+    // can be outside the joint limits and the mock hardware then starts there.
     std::vector<double> joint_value;
-    // TODO: There could be an option to load a group state from the RobotPoses
-    //       For now, just assume one DOF, and it is zero
-    joint_value.push_back(0.0);
+    const auto defaults = joint_default_positions_.find(joint_name);
+    if (defaults != joint_default_positions_.end() && !defaults->second.empty())
+    {
+      joint_value = defaults->second;
+    }
+    else
+    {
+      joint_value.push_back(0.0);
+    }
     initial_group_state_.joint_values_[joint_name] = joint_value;
   }
 

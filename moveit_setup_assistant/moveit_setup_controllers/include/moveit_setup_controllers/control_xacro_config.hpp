@@ -192,6 +192,7 @@ protected:
 
   ControlInterfaces default_ci_, available_ci_;
   srdf::Model::GroupState initial_group_state_;
+  std::unordered_map<std::string, std::vector<double>> joint_default_positions_;
 
   bool changed_;
 };
