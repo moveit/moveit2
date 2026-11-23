@@ -271,7 +271,8 @@ void initPlanningScene(py::module& m)
       .def("is_state_valid",
            py::overload_cast<const moveit::core::RobotState&, const std::string&, bool>(
                &planning_scene::PlanningScene::isStateValid, py::const_),
-           py::arg("robot_state"), py::arg("joint_model_group_name"), py::arg("verbose") = false)
+           py::arg("robot_state"), py::arg("joint_model_group_name"), py::arg("verbose") = false,
+           py::call_guard<py::gil_scoped_release>())
       .def("is_state_colliding",
            py::overload_cast<const std::string&, bool>(&planning_scene::PlanningScene::isStateColliding),
            py::arg("joint_model_group_name"), py::arg("verbose") = false,
@@ -283,7 +284,14 @@ void initPlanningScene(py::module& m)
                verbose (bool): If true, print the link names of the links in collision.
            Returns:
                bool: True if the robot state is in collision, false otherwise.
-           )")
+
+           Note:
+               Releases the GIL. Do not use this planning scene from another Python thread during the call:
+               it may update the collision transforms of the scene's current state.
+               Holding planning_scene_monitor.read_only() is not enough: that lock is shared, so two threads
+               inside it can still run this call on the same scene at once.
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("is_state_colliding",
            py::overload_cast<const moveit::core::RobotState&, const std::string&, bool>(
@@ -298,7 +306,8 @@ void initPlanningScene(py::module& m)
                verbose (bool): If true, print the link names of the links in collision.
            Returns:
                bool: True if the robot state is in collision, false otherwise.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("is_state_constrained",
            py::overload_cast<const moveit::core::RobotState&, const moveit_msgs::msg::Constraints&, bool>(
@@ -331,7 +340,8 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if the path is valid otherwise false.
-           )")
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       // TODO (peterdavidfagan): remove collision result from input parameters and write separate binding code.
       // TODO (peterdavidfagan): consider merging check_collision and check_collision_unpadded into one function with unpadded_param
@@ -348,7 +358,14 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
-           )")
+
+           Note:
+               Releases the GIL. Do not use this planning scene from another Python thread during the call:
+               it may update the collision transforms of the scene's current state.
+               Holding planning_scene_monitor.read_only() is not enough: that lock is shared, so two threads
+               inside it can still run this call on the same scene at once.
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("check_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
@@ -364,7 +381,12 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
-           )")
+
+           Note:
+               Releases the GIL. Do not use the passed robot state from another Python thread during the call:
+               its collision transforms may be updated.
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("check_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
@@ -382,7 +404,12 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
-           )")
+
+           Note:
+               Releases the GIL. Do not use the passed robot state from another Python thread during the call:
+               its collision transforms may be updated.
+           )",
+           py::call_guard<py::gil_scoped_release>())
       // DEPRECATED! Use check_collision instead
       .def("check_collision_unpadded",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&>(
@@ -446,7 +473,14 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in collision otherwise false.
-           )")
+
+           Note:
+               Releases the GIL. Do not use this planning scene from another Python thread during the call:
+               it may update the collision transforms of the scene's current state.
+               Holding planning_scene_monitor.read_only() is not enough: that lock is shared, so two threads
+               inside it can still run this call on the same scene at once.
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("check_self_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
@@ -462,7 +496,12 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in self collision otherwise false.
-           )")
+
+           Note:
+               Releases the GIL. Do not use the passed robot state from another Python thread during the call:
+               its collision transforms may be updated.
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("check_self_collision",
            py::overload_cast<const collision_detection::CollisionRequest&, collision_detection::CollisionResult&,
@@ -480,7 +519,12 @@ void initPlanningScene(py::module& m)
 
 	   Returns:
                bool: true if state is in self collision otherwise false.
-           )")
+
+           Note:
+               Releases the GIL. Do not use the passed robot state from another Python thread during the call:
+               its collision transforms may be updated.
+           )",
+           py::call_guard<py::gil_scoped_release>())
 
       .def("save_geometry_to_file", &saveGeometryToFile, py::arg("file_path_and_name"),
            R"(
