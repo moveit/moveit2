@@ -16,14 +16,33 @@
  * @author methylDragon
  */
 
+#include <chrono>
 #include <thread>
 
 #include <gtest/gtest.h>
 #include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit/warehouse/moveit_message_storage.hpp>
+#include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/rclcpp.hpp>
 
 #include "move_group_fixture.hpp"
+
+namespace
+{
+
+// The trajectory cache calls MoveGroupInterface::getCurrentState() internally (e.g. to resolve
+// `is_diff` start states), which only waits one second for a complete robot state. On a loaded CI
+// machine, DDS discovery of /joint_states regularly takes longer than that, which made these tests
+// flake with "Failed to fetch current robot state". Prime the current state monitor here, with a
+// generous timeout, so those short internal waits always find an already-populated monitor.
+constexpr double CURRENT_STATE_WAIT_SECONDS = 10.0;
+
+// Bound how long the spin loop blocks while idle. Long enough to keep the thread asleep instead of
+// busy-waiting (which starves DDS discovery when several of these tests run in parallel), short
+// enough that TearDown() joins promptly.
+constexpr std::chrono::milliseconds SPIN_TIMEOUT(100);
+
+}  // namespace
 
 MoveGroupFixture::MoveGroupFixture()
   : node_(rclcpp::Node::make_shared("move_group_fixture")), move_group_name_("panda_arm")
@@ -49,6 +68,11 @@ void MoveGroupFixture::SetUp()
   db_ = moveit_warehouse::loadDatabase(node_);
   db_->setParams(":memory:", 1);
   ASSERT_TRUE(db_->connect());
+
+  ASSERT_TRUE(move_group_->getCurrentState(CURRENT_STATE_WAIT_SECONDS) != nullptr)
+      << "Timed out after " << CURRENT_STATE_WAIT_SECONDS
+      << "s waiting for a complete robot state on /joint_states. The trajectory cache cannot "
+         "resolve `is_diff` start states without one.";
 }
 
 void MoveGroupFixture::TearDown()
@@ -60,8 +84,10 @@ void MoveGroupFixture::TearDown()
 
 void MoveGroupFixture::spinNode()
 {
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node_);
   while (is_spinning_ && rclcpp::ok())
   {
-    rclcpp::spin_some(node_);
+    executor.spin_once(SPIN_TIMEOUT);
   }
 }
