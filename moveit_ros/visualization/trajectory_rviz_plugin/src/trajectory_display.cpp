@@ -37,10 +37,11 @@
 */
 
 #include <moveit/trajectory_rviz_plugin/trajectory_display.hpp>
-#include <rviz_common/properties/string_property.hpp>
+#include <rviz_common/properties/ros_topic_property.hpp>
 #include <moveit/utils/logger.hpp>
 
 #include <memory>
+#include <std_msgs/msg/string.hpp>
 
 namespace moveit_rviz_plugin
 {
@@ -50,9 +51,10 @@ TrajectoryDisplay::TrajectoryDisplay() : Display(), logger_(moveit::getLogger("m
 {
   // The robot description property is only needed when using the trajectory playback standalone (not within motion
   // planning plugin)
-  robot_description_property_ = new rviz_common::properties::StringProperty(
-      "Robot Description", "robot_description", "The name of the ROS parameter where the URDF for the robot is loaded",
-      this, SLOT(changedRobotDescription()), this);
+  robot_description_property_ = new rviz_common::properties::RosTopicProperty(
+      "Robot Description", "/robot_description", rosidl_generator_traits::data_type<std_msgs::msg::String>(),
+      "The topic on which the URDF for the robot is published as a std_msgs::msg::String", this,
+      SLOT(changedRobotDescription()), this);
 
   trajectory_visual_ = std::make_shared<TrajectoryVisualization>(this, this);
 }
@@ -70,6 +72,7 @@ void TrajectoryDisplay::onInitialize()
     return;
   }
   node_ = ros_node_abstraction->get_raw_node();
+  robot_description_property_->initialize(ros_node_abstraction);
   trajectory_visual_->onInitialize(node_, scene_node_, context_);
 }
 
@@ -82,7 +85,7 @@ void TrajectoryDisplay::loadRobotModel()
     if (!rdf_loader_->getURDF())
     {
       setStatus(rviz_common::properties::StatusProperty::Error, "Robot Model",
-                "Failed to load from parameter " + robot_description_property_->getString());
+                "Failed to load robot description from " + robot_description_property_->getString());
       return;
     }
     setStatus(rviz_common::properties::StatusProperty::Ok, "Robot Model", "Successfully loaded");

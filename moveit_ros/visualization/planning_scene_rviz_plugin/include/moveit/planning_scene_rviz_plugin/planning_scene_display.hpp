@@ -226,7 +226,7 @@ protected:
   rviz_common::properties::Property* robot_category_;
 
   rviz_common::properties::StringProperty* move_group_ns_property_;
-  rviz_common::properties::StringProperty* robot_description_property_;
+  rviz_common::properties::RosTopicProperty* robot_description_property_;
   rviz_common::properties::StringProperty* scene_name_property_;
   rviz_common::properties::BoolProperty* scene_enabled_property_;
   rviz_common::properties::BoolProperty* scene_robot_visual_enabled_property_;

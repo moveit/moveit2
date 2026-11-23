@@ -36,6 +36,9 @@
 
 #include <moveit/rdf_loader/synchronized_string_parameter.hpp>
 
+#include <algorithm>
+#include <cctype>
+
 namespace rdf_loader
 {
 std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<rclcpp::Node>& node,
@@ -45,6 +48,8 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
 {
   node_ = node;
   name_ = name;
+  // A topic name may be absolute, but parameter names may not start with '/'
+  param_name_ = (!name.empty() && name.front() == '/') ? name.substr(1) : name;
   parent_callback_ = parent_callback;
 
   if (getMainParameter())
@@ -62,7 +67,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
   }
 
   // Load topic parameters
-  std::string keep_open_param = name_ + "_continuous";
+  std::string keep_open_param = param_name_ + "_continuous";
   if (!node_->has_parameter(keep_open_param))
   {
     node_->declare_parameter(keep_open_param, rclcpp::ParameterType::PARAMETER_BOOL);
@@ -70,7 +75,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
   bool keep_open;
   node_->get_parameter_or(keep_open_param, keep_open, default_continuous_value);
 
-  std::string timeout_param = name_ + "_timeout";
+  std::string timeout_param = param_name_ + "_timeout";
   if (!node_->has_parameter(timeout_param))
   {
     node_->declare_parameter(timeout_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
@@ -84,7 +89,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
     RCLCPP_ERROR_ONCE(node_->get_logger(),
                       "Could not find parameter %s and did not receive %s via std_msgs::msg::String subscription "
                       "within %f seconds.",
-                      name_.c_str(), name_.c_str(), d_timeout);
+                      param_name_.c_str(), name_.c_str(), d_timeout);
   }
   if (!keep_open)
   {
@@ -96,19 +101,19 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
 bool SynchronizedStringParameter::getMainParameter()
 {
   // Check if the parameter is declared, declare it if it's not declared yet
-  if (!node_->has_parameter(name_))
+  if (!node_->has_parameter(param_name_))
   {
-    node_->declare_parameter(name_, rclcpp::ParameterType::PARAMETER_STRING);
+    node_->declare_parameter(param_name_, rclcpp::ParameterType::PARAMETER_STRING);
   }
 
-  node_->get_parameter_or(name_, content_, std::string());
+  node_->get_parameter_or(param_name_, content_, std::string());
 
   return !content_.empty();
 }
 
 bool SynchronizedStringParameter::shouldPublish()
 {
-  std::string publish_param = "publish_" + name_;
+  std::string publish_param = "publish_" + param_name_;
   bool publish_string;
   if (!node_->has_parameter(publish_param))
   {
@@ -120,7 +125,11 @@ bool SynchronizedStringParameter::shouldPublish()
 
 bool SynchronizedStringParameter::waitForMessage(const rclcpp::Duration& timeout)
 {
-  const auto nd_name = std::string(node_->get_name()).append("_ssp_").append(name_);
+  // Node names may only contain alphanumerics and '_', so sanitize the (possibly namespaced) topic name
+  std::string nd_name = std::string(node_->get_name()).append("_ssp_").append(param_name_);
+  std::replace_if(
+      nd_name.begin(), nd_name.end(), [](char c) { return !std::isalnum(static_cast<unsigned char>(c)) && c != '_'; },
+      '_');
   const auto temp_node = std::make_shared<rclcpp::Node>(nd_name, node_->get_namespace());
   string_subscriber_ = temp_node->create_subscription<std_msgs::msg::String>(
       name_,
