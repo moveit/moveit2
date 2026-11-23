@@ -51,6 +51,7 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
 
 // MoveIt
 #include <moveit/kinematics_base/kinematics_base.hpp>
@@ -146,8 +147,6 @@ private:
   const moveit::core::JointModelGroup* joint_model_group_{ nullptr };
 
   moveit::core::RobotStatePtr robot_state_;
-
-  int num_possible_redundant_joints_{ 0 };
 
   rclcpp::Client<moveit_msgs::srv::GetPositionIK>::SharedPtr ik_service_client_;
 

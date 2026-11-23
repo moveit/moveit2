@@ -34,47 +34,22 @@
 
 #include <gtest/gtest.h>
 
-#include <cstring>
-#include <new>
 #include <vector>
 
-#include <moveit_msgs/srv/get_position_ik.hpp>
 #include <moveit/srv_kinematics_plugin/srv_kinematics_plugin.hpp>
 
-using srv_kinematics_plugin::SrvKinematicsPlugin;
-
-class SrvKinematicsPluginRedundantJoints : public ::testing::Test
+// Callers use the public KinematicsBase interface; the override in SrvKinematicsPlugin is protected.
+TEST(SrvKinematicsPluginRedundantJoints, AcceptsEmptySet)
 {
-protected:
-  void SetUp() override
-  {
-    // Fill the storage with non-zero bytes, so a member the constructor leaves uninitialized holds garbage.
-    std::memset(storage_, 0x7f, sizeof(storage_));
-    plugin_ = new (storage_) SrvKinematicsPlugin();
-  }
-
-  void TearDown() override
-  {
-    plugin_->~SrvKinematicsPlugin();
-  }
-
-  // Callers use the public KinematicsBase interface; the override in SrvKinematicsPlugin is protected.
-  kinematics::KinematicsBase& base()
-  {
-    return *plugin_;
-  }
-
-  alignas(SrvKinematicsPlugin) unsigned char storage_[sizeof(SrvKinematicsPlugin)];
-  SrvKinematicsPlugin* plugin_{ nullptr };
-};
-
-TEST_F(SrvKinematicsPluginRedundantJoints, AcceptsEmptySet)
-{
-  EXPECT_TRUE(base().setRedundantJoints(std::vector<unsigned int>{}));
+  srv_kinematics_plugin::SrvKinematicsPlugin plugin;
+  kinematics::KinematicsBase& base = plugin;
+  EXPECT_TRUE(base.setRedundantJoints(std::vector<unsigned int>{}));
 }
 
-TEST_F(SrvKinematicsPluginRedundantJoints, RejectsAnyRedundantJoint)
+TEST(SrvKinematicsPluginRedundantJoints, RejectsAnyRedundantJoint)
 {
-  EXPECT_FALSE(base().setRedundantJoints(std::vector<unsigned int>{ 0 }));
-  EXPECT_FALSE(base().setRedundantJoints(std::vector<unsigned int>{ 0, 1 }));
+  srv_kinematics_plugin::SrvKinematicsPlugin plugin;
+  kinematics::KinematicsBase& base = plugin;
+  EXPECT_FALSE(base.setRedundantJoints(std::vector<unsigned int>{ 0 }));
+  EXPECT_FALSE(base.setRedundantJoints(std::vector<unsigned int>{ 0, 1 }));
 }
