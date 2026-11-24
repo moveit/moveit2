@@ -33,6 +33,8 @@
 #include <utility>
 #include <vector>
 
+#include <rclcpp/node_options.hpp>
+
 #include <rviz_common/properties/bool_property.hpp>
 #include <rviz_common/validate_floats.hpp>
 #include <rviz_common/display_context.hpp>

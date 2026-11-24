@@ -35,6 +35,7 @@ See our extensive [Tutorials and Documentation](https://moveit.picknik.ai/).
 - [Development Roadmap](https://moveit.ai/documentation/contributing/roadmap/)
 - [Future Release Dates](https://moveit.ai/#release-versions)
 - [MoveIt 2 Migration Guidelines](doc/MIGRATION_GUIDE.md)
+- [Distro Compatibility Policy](doc/DISTRO_COMPAT_POLICY.md)
 - [MoveIt 2 Migration Progress](https://docs.google.com/spreadsheets/d/1aPb3hNP213iPHQIYgcnCYh9cGFUlZmi_06E_9iTSsOI/edit?usp=sharing)
 
 ## Supporters
