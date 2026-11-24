@@ -55,6 +55,7 @@
 #include <rviz_common/properties/string_property.hpp>
 #include <rviz_default_plugins/robot/robot_link.hpp>
 #include <rviz_common/window_manager_interface.hpp>
+#include <rviz_common/logging.hpp>
 
 #include <rclcpp/qos.hpp>
 

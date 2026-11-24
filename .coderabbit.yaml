@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit configuration: https://docs.coderabbit.ai/reference/configuration
+# CodeRabbit also reads AGENTS.md, CLAUDE.md, GEMINI.md, and .claude/rules/ as code guidelines by default.
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  auto_review:
+    enabled: true
+    # Each push to a reviewed PR gets an incremental review of the new commits.
+    auto_incremental_review: true
+    # Drafts and PRs past this many reviewed commits need "@coderabbitai review".
+    drafts: false
+    auto_pause_after_reviewed_commits: 5
+  path_filters:
+    # Generated IKFast solver. CI also skips clang-tidy for IKFast plugins.
+    - "!moveit_planners/test_configs/prbt_ikfast_manipulator_plugin/src/prbt_manipulator_ikfast_solver.cpp"

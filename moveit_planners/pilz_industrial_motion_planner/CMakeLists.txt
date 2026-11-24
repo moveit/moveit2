@@ -26,7 +26,7 @@ find_package(tf2_kdl REQUIRED)
 find_package(tf2_ros REQUIRED)
 
 find_package(orocos_kdl REQUIRED)
-find_package(Boost REQUIRED COMPONENTS)
+find_package(Boost CONFIG REQUIRED COMPONENTS)
 
 # ##############################################################################
 # Build ##

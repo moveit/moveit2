@@ -130,7 +130,9 @@ public:
       }
     }
     else
+    {
       RCLCPP_ERROR(getLogger(), "No MoveGroup context created. Nothing will work.");
+    }
   }
 
   MoveGroupContextPtr getContext()
@@ -341,7 +343,9 @@ int main(int argc, char** argv)
     rclcpp::shutdown();
   }
   else
+  {
     RCLCPP_ERROR(nh->get_logger(), "Planning scene not configured");
+  }
 
   return 0;
 }

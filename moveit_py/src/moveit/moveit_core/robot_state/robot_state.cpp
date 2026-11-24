@@ -67,13 +67,13 @@ void update(moveit::core::RobotState* self, bool force, std::string& category)
 Eigen::MatrixXd getFrameTransform(const moveit::core::RobotState* self, std::string& frame_id)
 {
   bool frame_found;
-  auto transformation = self->getFrameTransform(frame_id, &frame_found);
+  const auto& transformation = self->getFrameTransform(frame_id, &frame_found);
   return transformation.matrix();
 }
 
 Eigen::MatrixXd getGlobalLinkTransform(const moveit::core::RobotState* self, std::string& link_name)
 {
-  auto transformation = self->getGlobalLinkTransform(link_name);
+  const auto& transformation = self->getGlobalLinkTransform(link_name);
   return transformation.matrix();
 }
 
@@ -450,7 +450,12 @@ void initRobotState(py::module& m)
                geometry_pose (geometry_msgs.msg.Pose): The pose of the end-effector to solve the inverse kinematics for.
                tip_name (str): The name of the link that is the tip of the end-effector.
                timeout (float): The amount of time to wait for the IK solution to be found.
-           )")
+
+           Note:
+               Releases the GIL. Do not use this robot state from another Python thread during the call:
+               it writes the joint values.
+           )",
+          py::call_guard<py::gil_scoped_release>())
 
       // Setting entire state values
       .def("set_to_default_values", py::overload_cast<>(&moveit::core::RobotState::setToDefaultValues),

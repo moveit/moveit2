@@ -216,7 +216,9 @@ mesh_filter::MeshHandle DepthImageOctomapUpdater::excludeShape(const shapes::Sha
     }
   }
   else
+  {
     RCLCPP_ERROR(logger_, "Mesh filter not yet initialized!");
+  }
   return h;
 }
 
@@ -370,7 +372,9 @@ void DepthImageOctomapUpdater::depthImageCallback(const sensor_msgs::msg::Image:
       }
     }
     else
+    {
       return;
+    }
   }
 
   if (!updateTransformCache(depth_msg->header.frame_id, depth_msg->header.stamp))

@@ -46,6 +46,7 @@
 #include <moveit_msgs/srv/servo_command_type.hpp>
 #include <moveit_servo/utils/datatypes.hpp>
 #include <rclcpp/client.hpp>
+#include <rclcpp/executors.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/publisher.hpp>
 #include <rclcpp/qos.hpp>

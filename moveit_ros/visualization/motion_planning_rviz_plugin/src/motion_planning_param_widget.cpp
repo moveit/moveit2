@@ -109,7 +109,9 @@ rviz_common::properties::Property* MotionPlanningParamWidget::createPropertyTree
       new rviz_common::properties::FloatProperty(key, value_double, QString(), root, SLOT(changedValue()), this);
     }
     else
+    {
       new rviz_common::properties::StringProperty(key, value, QString(), root, SLOT(changedValue()), this);
+    }
   }
   return root;
 }

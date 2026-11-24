@@ -8,10 +8,12 @@ moveit_package()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(Boost REQUIRED program_options)
-# rviz switched to Qt6 in version 15.1: https://github.com/ros2/rviz/pull/1635
+find_package(Boost CONFIG REQUIRED program_options)
+# rviz switched to Qt6 in 15.1.14: https://github.com/ros2/rviz/pull/1635
+# (merged 2025-12-08, first released in the 15.1.14 tag on 2025-12-17 -- 15.1.0
+# through 15.1.13 are still Qt5)
 find_package(rviz2 QUIET)
-if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1)
+if(rviz2_VERSION VERSION_GREATER_EQUAL 15.1.14)
   find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
   set(QT_VERSION_MAJOR 6)
   # Hint for transitive deps that use find_package(QT NAMES Qt6 Qt5 ...) which
@@ -90,7 +92,7 @@ install(
   DESTINATION include/moveit_setup_assistant)
 install(DIRECTORY include/ DESTINATION include/moveit_setup_assistant)
 
-ament_export_include_directories(include)
+ament_export_include_directories(include/moveit_setup_assistant)
 install(DIRECTORY launch DESTINATION share/moveit_setup_assistant)
 install(DIRECTORY resources DESTINATION share/moveit_setup_assistant)
 ament_export_targets(moveit_setup_assistantTargets HAS_LIBRARY_TARGET)

@@ -18,6 +18,7 @@
  */
 
 #include <chrono>
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -80,8 +81,6 @@ namespace
 {
 
 const std::string EXECUTION_TIME = "execution_time_s";
-const std::string FRACTION = "fraction";
-const std::string PLANNING_TIME = "planning_time_s";
 
 }  // namespace
 
