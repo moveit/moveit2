@@ -2,6 +2,22 @@
 Changelog for package moveit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.3 (2026-11-18)
+-------------------
+* Add @130s as a release maintainer (`#3948 <https://github.com/moveit/moveit2/issues/3948>`_)
+* Contributors: Isaac Saito
+
+2.15.2 (2026-09-16)
+-------------------
+
+2.15.1 (2026-08-29)
+-------------------
+
+2.15.0 (2026-08-12)
+-------------------
+* docs: Updated remaining links from moveit.ros.org to moveit.ai (`#3740 <https://github.com/moveit/moveit2/issues/3740>`_)
+* Contributors: Shivam Maurya
+
 2.14.1 (2025-09-09)
 -------------------
 * Update pre-commit-config (`#2805 <https://github.com/moveit/moveit2/issues/2805>`_)

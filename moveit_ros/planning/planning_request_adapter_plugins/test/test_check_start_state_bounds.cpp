@@ -50,7 +50,6 @@ class TestCheckStartStateBounds : public testing::Test
 protected:
   void SetUp() override
   {
-    rclcpp::init(0, nullptr);
     node_ = std::make_shared<rclcpp::Node>("test_check_start_state_bounds_adapter", "");
 
     // Load a robot model and place it in a planning scene.
@@ -63,11 +62,6 @@ protected:
         "moveit_core", "planning_interface::PlanningRequestAdapter");
     adapter_ = plugin_loader_->createUniqueInstance("default_planning_request_adapters/CheckStartStateBounds");
     adapter_->initialize(node_, "");
-  }
-
-  void TearDown() override
-  {
-    rclcpp::shutdown();
   }
 
   std::shared_ptr<rclcpp::Node> node_;
@@ -158,6 +152,9 @@ TEST_F(TestCheckStartStateBounds, TestContinuousJointFixedBounds)
 
 int main(int argc, char** argv)
 {
+  rclcpp::init(argc, argv);
   ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  const int result = RUN_ALL_TESTS();
+  rclcpp::shutdown();
+  return result;
 }

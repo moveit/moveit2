@@ -6,19 +6,20 @@ generate_parameter_library(
 add_library(moveit_kdl_kinematics_plugin SHARED
             src/kdl_kinematics_plugin.cpp src/chainiksolver_vel_mimic_svd.cpp)
 
-ament_target_dependencies(
+target_link_libraries(
   moveit_kdl_kinematics_plugin
-  rclcpp
-  random_numbers
-  pluginlib
-  moveit_core
-  moveit_msgs
-  orocos_kdl
-  kdl_parser
-  tf2_kdl
-  EIGEN3)
-
-target_link_libraries(moveit_kdl_kinematics_plugin kdl_kinematics_parameters)
+  kdl_kinematics_parameters
+  rclcpp::rclcpp
+  ${random_numbers_LIBRARIES}
+  pluginlib::pluginlib
+  moveit_core::moveit_core
+  ${moveit_msgs_TARGETS}
+  ${orocos_kdl_LIBRARIES}
+  kdl_parser::kdl_parser
+  tf2_kdl::tf2_kdl
+  Eigen3::Eigen)
+target_include_directories(moveit_kdl_kinematics_plugin
+                           PUBLIC ${random_numbers_INCLUDE_DIRS})
 
 # prevent pluginlib from using boost
 target_compile_definitions(moveit_kdl_kinematics_plugin
@@ -27,5 +28,12 @@ target_compile_definitions(moveit_kdl_kinematics_plugin
 # appropriate when building the dll but not consuming it.
 target_compile_definitions(moveit_kdl_kinematics_plugin
                            PRIVATE "MOVEIT_KDL_KINEMATICS_PLUGIN_BUILDING_DLL")
+
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_kdl_pseudoinverse test/test_pseudoinverse.cpp)
+  target_include_directories(test_kdl_pseudoinverse PRIVATE src)
+  target_link_libraries(test_kdl_pseudoinverse Eigen3::Eigen)
+endif()
 
 install(DIRECTORY include/ DESTINATION include/moveit_kinematics)

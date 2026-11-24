@@ -56,9 +56,8 @@ template <typename GeneratorT>
 class PlanningContextBase : public planning_interface::PlanningContext
 {
 public:
-  PlanningContextBase<GeneratorT>(const std::string& name, const std::string& group,
-                                  const moveit::core::RobotModelConstPtr& model,
-                                  const pilz_industrial_motion_planner::LimitsContainer& limits)
+  PlanningContextBase(const std::string& name, const std::string& group, const moveit::core::RobotModelConstPtr& model,
+                      const pilz_industrial_motion_planner::LimitsContainer& limits)
     : planning_interface::PlanningContext(name, group)
     , terminated_(false)
     , model_(model)

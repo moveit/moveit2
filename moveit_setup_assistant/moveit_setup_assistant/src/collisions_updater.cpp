@@ -34,6 +34,7 @@
 
 /* Author: Mathias Lüdtke */
 
+#include <cstdint>
 #include <moveit_setup_srdf_plugins/default_collisions.hpp>
 #include <moveit_setup_framework/data/package_settings_config.hpp>
 #include <moveit_setup_framework/data/srdf_config.hpp>

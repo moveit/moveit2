@@ -1188,7 +1188,9 @@ const AttachedBody* RobotState::getAttachedBody(const std::string& id) const
     return nullptr;
   }
   else
+  {
     return it->second.get();
+  }
 }
 
 void RobotState::attachBody(std::unique_ptr<AttachedBody> attached_body)
@@ -1308,7 +1310,9 @@ bool RobotState::clearAttachedBody(const std::string& id)
     return true;
   }
   else
+  {
     return false;
+  }
 }
 
 const Eigen::Isometry3d& RobotState::getFrameTransform(const std::string& frame_id, bool* frame_found)
@@ -1689,7 +1693,9 @@ bool RobotState::integrateVariableVelocity(const JointModelGroup* jmg, const Eig
     return constraint(this, jmg, &values[0]);
   }
   else
+  {
     return true;
+  }
 }
 
 bool RobotState::setFromIK(const JointModelGroup* jmg, const geometry_msgs::msg::Pose& pose, double timeout,
@@ -1876,7 +1882,9 @@ bool RobotState::setFromIK(const JointModelGroup* jmg, const EigenSTL::vector_Is
     return false;
   }
   else if (consistency_limit_sets.size() == 1)
+  {
     consistency_limits = consistency_limit_sets[0];
+  }
 
   const std::vector<std::string>& solver_tip_frames = solver->getTipFrames();
 
@@ -2334,10 +2342,14 @@ void RobotState::printStatePositionsWithJointLimits(const JointModelGroup* jmg, 
         marker_shown = true;
       }
       else
+      {
         out << '-';
+      }
     }
     if (!marker_shown)
+    {
       out << '|';
+    }
 
     // show max position
     out << " \t" << std::fixed << std::setprecision(5) << bound.max_position_ << "  \t" << joint->getName()
@@ -2375,7 +2387,9 @@ void RobotState::printStateInfo(std::ostream& out) const
     out << '\n';
   }
   else
+  {
     out << "  * Position: NULL\n";
+  }
 
   if (!velocity_.empty())
   {
@@ -2385,7 +2399,9 @@ void RobotState::printStateInfo(std::ostream& out) const
     out << '\n';
   }
   else
+  {
     out << "  * Velocity: NULL\n";
+  }
 
   if (has_acceleration_)
   {
@@ -2395,7 +2411,9 @@ void RobotState::printStateInfo(std::ostream& out) const
     out << '\n';
   }
   else
+  {
     out << "  * Acceleration: NULL\n";
+  }
 
   out << "  * Dirty Link Transforms: " << (dirty_link_transforms_ ? dirty_link_transforms_->getName() : "NULL\n");
   out << "  * Dirty Collision Body Transforms: "

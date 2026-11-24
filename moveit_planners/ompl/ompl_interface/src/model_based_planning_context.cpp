@@ -39,6 +39,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <cstdint>
 #include <moveit/ompl_interface/model_based_planning_context.hpp>
 #include <moveit/ompl_interface/detail/state_validity_checker.hpp>
 #include <moveit/ompl_interface/detail/constrained_sampler.hpp>

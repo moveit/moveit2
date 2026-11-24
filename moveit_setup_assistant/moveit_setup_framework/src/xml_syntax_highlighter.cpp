@@ -58,20 +58,26 @@ void XmlSyntaxHighlighter::addTag(const QString& tag, const QTextCharFormat& for
     });
   }
   else
+  {
     rule.parent = rules_.end();
+  }
 
   rules_.insert(std::make_pair(rules_.size(), rule));
 }
 
 XmlSyntaxHighlighter::Rules::const_iterator
-XmlSyntaxHighlighter::highlight(Rules::const_iterator active, QStringRef text, int start, bool search_end, int& end)
+XmlSyntaxHighlighter::highlight(Rules::const_iterator active, QStringView text, int start, bool search_end, int& end)
 {
   int offset = end;    // when passed, end indicates the end of the opening expression
   auto next = active;  // return value: active rule at end of text
 
   if (search_end)  // find end of active rule
   {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+    auto match = active->second.end.matchView(text);
+#else
     auto match = active->second.end.match(text);
+#endif
     // when returned, end indicates the end of the closing expression
     end = match.hasMatch() ? match.capturedEnd() : text.size();
     setFormat(start, end, active->second.format);
@@ -96,7 +102,11 @@ XmlSyntaxHighlighter::highlight(Rules::const_iterator active, QStringRef text, i
     offset = 0;   // (re)start at beginning of (clipped) text
     while (true)  // process all matches of rule
     {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+      auto match = rule.start.matchView(text, offset);
+#else
       auto match = rule.start.match(text, offset);
+#endif
       if (!match.hasMatch())
         break;
 
@@ -121,7 +131,7 @@ void XmlSyntaxHighlighter::highlightBlock(const QString& text)
 {
   Rules::const_iterator active = previousBlockState() < 0 ? rules_.end() : rules_.find(previousBlockState());
   int unused = 0;
-  active = highlight(active, QStringRef(&text, 0, text.size()), 0, active != rules_.cend(), unused);
+  active = highlight(active, QStringView(text), 0, active != rules_.cend(), unused);
   setCurrentBlockState(active != rules_.cend() ? active->first : -1);
 }
 

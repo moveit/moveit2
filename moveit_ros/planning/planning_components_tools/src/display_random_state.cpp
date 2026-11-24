@@ -138,7 +138,9 @@ int main(int argc, char** argv)
         }
       }
       else
+      {
         psm.getPlanningScene()->getCurrentStateNonConst().setToRandomPositions();
+      }
 
       moveit_msgs::msg::PlanningScene psmsg;
       psm.getPlanningScene()->getPlanningSceneMsg(psmsg);

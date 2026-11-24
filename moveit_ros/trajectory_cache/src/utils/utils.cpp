@@ -169,7 +169,7 @@ GetCartesianPath::Request constructGetCartesianPathRequest(MoveGroupInterface& m
 
   out.group_name = move_group.getName();
   out.max_velocity_scaling_factor = move_group.getMaxVelocityScalingFactor();
-  out.max_acceleration_scaling_factor = move_group.getMaxVelocityScalingFactor();
+  out.max_acceleration_scaling_factor = move_group.getMaxAccelerationScalingFactor();
 
   out.header.frame_id = move_group.getPoseReferenceFrame();
   out.waypoints = waypoints;

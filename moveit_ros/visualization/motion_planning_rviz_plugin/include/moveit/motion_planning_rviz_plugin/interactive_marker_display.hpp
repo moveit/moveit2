@@ -35,10 +35,16 @@
 
 #pragma once
 
+#include <chrono>
 #include <map>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
+
+#include <rclcpp/executors/single_threaded_executor.hpp>
+#include <rclcpp/node.hpp>
+#include <rclcpp/version.h>
 
 #include <visualization_msgs/msg/interactive_marker.hpp>
 #include <visualization_msgs/msg/interactive_marker_update.hpp>
@@ -81,8 +87,17 @@ public:
     private_executor_.reset();
   }
 
-  // Overrides from Display
+  // Overrides from Display.
+  // rviz_common 16.0.1 (Rolling) removed the deprecated (float, float) overload
+  // in favor of (std::chrono::nanoseconds, std::chrono::nanoseconds); see
+  // ros2/rviz#1533. Remove this branch when Kilted goes EOL.
+  // For Rolling, L-turtle, and newer
+#if RCLCPP_VERSION_GTE(30, 0, 0)
+  void update(std::chrono::nanoseconds wall_dt, std::chrono::nanoseconds ros_dt) override;
+  // For Kilted and older
+#else
   void update(float wall_dt, float ros_dt) override;
+#endif
 
   void reset() override;
 

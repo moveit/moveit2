@@ -53,7 +53,7 @@
 #include <rclcpp/time.hpp>
 #include <map>
 #include <memory>
-#include <queue>
+#include <unordered_set>
 #include <moveit/utils/logger.hpp>
 
 static const rclcpp::Duration CONTROLLER_INFORMATION_VALIDITY_AGE = rclcpp::Duration::from_seconds(1.0);
@@ -596,11 +596,12 @@ public:
     dependency_map_reverse_.clear();
     for (auto& controller : result->controller)
     {
-      if (controller.chain_connections.size() > 1)
+      if (isActive(controller) && controller.chain_connections.size() > 1)
       {
-        RCLCPP_ERROR_STREAM(getLogger(),
-                            "Controller with name %s chains to more than one controller. Chaining to more than "
-                            "one controller is not supported.");
+        RCLCPP_ERROR_STREAM(getLogger(), "Controller with name "
+                                             << controller.name
+                                             << " chains to more than one controller. "
+                                                "Chaining to more than one controller is not supported.");
         return false;
       }
       for (const auto& chained_controller : controller.chain_connections)
