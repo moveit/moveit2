@@ -140,6 +140,11 @@ public:
     return context_;
   }
 
+  std::shared_ptr<pluginlib::ClassLoader<MoveGroupCapability>> getCapabilityPluginLoader()
+  {
+    return capability_plugin_loader_;
+  }
+
 private:
   void configureCapabilities()
   {
@@ -230,6 +235,8 @@ private:
 int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
+
+  std::shared_ptr<pluginlib::ClassLoader<move_group::MoveGroupCapability>> capability_plugin_loader;
 
   rclcpp::NodeOptions opt;
   opt.allow_undeclared_parameters(true);
@@ -326,6 +333,7 @@ int main(int argc, char** argv)
     rclcpp::executors::MultiThreadedExecutor executor;
 
     move_group::MoveGroupExe mge(moveit_cpp, default_planning_pipeline, debug);
+    capability_plugin_loader = mge.getCapabilityPluginLoader();
 
     bool monitor_dynamics;
     if (nh->get_parameter("monitor_dynamics", monitor_dynamics) && monitor_dynamics)
