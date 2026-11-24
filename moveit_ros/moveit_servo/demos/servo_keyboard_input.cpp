@@ -47,6 +47,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <signal.h>
 #include <stdio.h>
+#include <thread>
 #ifndef WIN32
 #include <termios.h>
 #include <unistd.h>
@@ -137,6 +138,7 @@ class KeyboardServo
 {
 public:
   KeyboardServo();
+  ~KeyboardServo();
   int keyLoop();
 
 private:
@@ -151,6 +153,9 @@ private:
   std::shared_ptr<moveit_msgs::srv::ServoCommandType::Request> request_;
   double joint_vel_cmd_;
   std::string command_frame_id_;
+
+  // Owned by this object so it can be joined before nh_ (and this) are destroyed.
+  std::thread spin_thread_;
 };
 
 KeyboardServo::KeyboardServo() : joint_vel_cmd_(1.0), command_frame_id_{ "panda_link0" }
@@ -162,6 +167,16 @@ KeyboardServo::KeyboardServo() : joint_vel_cmd_(1.0), command_frame_id_{ "panda_
 
   // Client for switching input types
   switch_input_ = nh_->create_client<moveit_msgs::srv::ServoCommandType>("servo_node/switch_command_type");
+}
+
+KeyboardServo::~KeyboardServo()
+{
+  // Ensure the spin thread has fully exited (and is done touching nh_) before
+  // the rest of this object, including nh_, is torn down.
+  if (spin_thread_.joinable())
+  {
+    spin_thread_.join();
+  }
 }
 
 KeyboardReader input;
@@ -204,7 +219,9 @@ int KeyboardServo::keyLoop()
   bool publish_twist = false;
   bool publish_joint = false;
 
-  std::thread{ [this]() { return spin(); } }.detach();
+  // spin_thread_ is a member so it can be joined (in ~KeyboardServo) before this object is
+  // destroyed, avoiding a use-after-free of nh_ if the thread is still running spin_some().
+  spin_thread_ = std::thread{ [this]() { spin(); } };
 
   puts("Reading from keyboard");
   puts("---------------------------");
