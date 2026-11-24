@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_planning
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.3 (2026-11-18)
+-------------------
+* fix: synchronize TrajectoryExecutionManager::execution_complete\_ (`#3853 <https://github.com/moveit/moveit2/issues/3853>`_)
+* remove unused boost-filesystem (`#3644 <https://github.com/moveit/moveit2/issues/3644>`_)
+* Contributors: Dundy Pasupuleti, Michael Carlstrom
+
 2.15.2 (2026-09-16)
 -------------------
 * Give the controller spawners a parameter file (`#3851 <https://github.com/moveit/moveit2/issues/3851>`_)

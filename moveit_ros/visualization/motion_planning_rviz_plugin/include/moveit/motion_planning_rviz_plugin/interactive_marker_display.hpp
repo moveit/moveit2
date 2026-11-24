@@ -39,8 +39,11 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <thread>
 #include <vector>
 
+#include <rclcpp/executors/single_threaded_executor.hpp>
+#include <rclcpp/node.hpp>
 #include <rclcpp/version.h>
 
 #include <visualization_msgs/msg/interactive_marker.hpp>

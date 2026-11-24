@@ -2,6 +2,12 @@
 Changelog for package moveit_ros_trajectory_cache
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.3 (2026-11-18)
+-------------------
+* Fix forwarding of acceleration scaling factor (`#3896 <https://github.com/moveit/moveit2/issues/3896>`_)
+* De-flake trajectory_cache _with_move_group tests, take 2 (`#3859 <https://github.com/moveit/moveit2/issues/3859>`_)
+* Contributors: Nathan Brooks, RazvanApostuWF
+
 2.15.2 (2026-09-16)
 -------------------
 * Give the controller spawners a parameter file (`#3851 <https://github.com/moveit/moveit2/issues/3851>`_)
