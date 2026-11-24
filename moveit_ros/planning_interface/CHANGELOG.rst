@@ -2,6 +2,11 @@
 Changelog for package moveit_ros_planning_interface
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.15.3 (2026-11-18)
+-------------------
+* remove unused boost-filesystem (`#3644 <https://github.com/moveit/moveit2/issues/3644>`_)
+* Contributors: Michael Carlstrom
+
 2.15.2 (2026-09-16)
 -------------------
 * Give the controller spawners a parameter file (`#3851 <https://github.com/moveit/moveit2/issues/3851>`_)
