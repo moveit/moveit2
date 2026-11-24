@@ -104,7 +104,9 @@ void MoveGroupMoveAction::executeMoveCallback(const std::shared_ptr<MGActionGoal
     executeMoveCallbackPlanOnly(goal, action_res);
   }
   else
+  {
     executeMoveCallbackPlanAndExecute(goal, action_res);
+  }
 
   bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res->planned_trajectory);
   // @todo: Response messages

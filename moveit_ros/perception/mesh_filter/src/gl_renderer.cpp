@@ -411,7 +411,9 @@ void mesh_filter::GLRenderer::createGLContext()
     s_context.at(thread_id) = std::pair<unsigned, GLuint>(1, window_id);
   }
   else
+  {
     ++(context_it->second.first);
+  }
 }
 
 void mesh_filter::GLRenderer::deleteGLContext()

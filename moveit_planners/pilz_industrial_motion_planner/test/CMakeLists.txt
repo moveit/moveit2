@@ -3,7 +3,7 @@ find_package(ament_cmake_gmock REQUIRED)
 find_package(ros_testing REQUIRED)
 find_package(moveit_resources_prbt_support REQUIRED)
 find_package(moveit_resources_prbt_moveit_config REQUIRED)
-find_package(Boost REQUIRED thread)
+find_package(Boost CONFIG REQUIRED thread)
 
 find_package(${PROJECT_NAME}_testutils REQUIRED)
 
@@ -32,6 +32,13 @@ target_link_libraries(
   tf2_ros::tf2_ros
   ${orocos_kdl_LIBRARIES}
   Boost::headers)
+
+# Install to lib/ (on AMENT_PREFIX_PATH → LD_LIBRARY_PATH) so the installed
+# unit-test binaries resolve it on Resolute, where they otherwise fail at load
+# with "libpilz_industrial_motion_planner_test_utils.so: cannot open shared
+# object". Older distros tolerate this because the build-tree path remains
+# visible to the loader.
+install(TARGETS ${PROJECT_NAME}_test_utils LIBRARY DESTINATION lib)
 
 # Unit tests
 add_subdirectory(unit_tests)

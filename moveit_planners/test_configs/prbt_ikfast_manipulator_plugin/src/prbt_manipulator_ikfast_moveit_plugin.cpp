@@ -42,6 +42,12 @@
  */
 
 
+#include <cmath>
+#include <list>
+#include <vector>
+#include <limits>
+#include <complex>
+
 #include <Eigen/Geometry>
 #include <rclcpp/logger.hpp>
 #include <rclcpp/logging.hpp>

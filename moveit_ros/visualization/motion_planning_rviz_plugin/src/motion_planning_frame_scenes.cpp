@@ -184,7 +184,9 @@ void MotionPlanningFrame::saveQueryButtonClicked()
               }
             }
             else
+            {
               return;
+            }
           }
         }
         planning_display_->addBackgroundJob(

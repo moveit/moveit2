@@ -30,6 +30,35 @@ target_link_libraries(
   osqp::osqp
   srdfdom::srdfdom
   pluginlib::pluginlib)
+# OSQP shipped v1.0 in 2024 with a redesigned C API. Drive the source-code guard
+# from the include directory the osqp::osqp target actually resolved to, so that
+# a build environment with BOTH v0.6 (apt) and v1.0 (source-overlay) installed
+# sees a self-consistent compile+link (the header-probe fallback in the .hpp can
+# race the -I search order between the two installs). PUBLIC so consumers of
+# moveit_acceleration_filter (notably test_acceleration_filter) see the same
+# value — the guard controls a private member type of AccelerationLimitedPlugin,
+# so an ABI mismatch between the .so and its test would be UB.
+#
+# Not using osqp_VERSION here: on v1.0.0 the shipped `osqp-config-version.cmake`
+# sets `PACKAGE_VERSION "0.0.0"` (packaging bug), and v0.6.2 ships no
+# config-version file at all — so osqp_VERSION is unusable across both streams,
+# but for different reasons. Instead probe for a v1-only header inside the
+# include dir that osqp::osqp exposes. See #3786.
+get_target_property(_moveit_osqp_include_dirs osqp::osqp
+                    INTERFACE_INCLUDE_DIRECTORIES)
+set(_moveit_osqp_v1 0)
+foreach(_dir IN LISTS _moveit_osqp_include_dirs)
+  string(REGEX REPLACE "^\\$<BUILD_INTERFACE:(.*)>$" "\\1" _dir "${_dir}")
+  string(REGEX REPLACE "^\\$<INSTALL_INTERFACE:(.*)>$" "\\1" _dir "${_dir}")
+  if(EXISTS "${_dir}/osqp_api_types.h")
+    set(_moveit_osqp_v1 1)
+    break()
+  endif()
+endforeach()
+target_compile_definitions(moveit_acceleration_filter
+                           PUBLIC MOVEIT_OSQP_V1=${_moveit_osqp_v1})
+unset(_moveit_osqp_v1)
+unset(_moveit_osqp_include_dirs)
 
 add_library(moveit_butterworth_filter SHARED src/butterworth_filter.cpp)
 generate_export_header(moveit_butterworth_filter)
