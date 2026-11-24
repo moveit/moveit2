@@ -68,7 +68,7 @@ namespace moveit_rviz_plugin
 RobotStateDisplay::RobotStateDisplay() : Display(), update_state_(false)
 {
   robot_description_property_ = new rviz_common::properties::RosTopicProperty(
-      "Robot Description", "/robot_description", rosidl_generator_traits::name<std_msgs::msg::String>(),
+      "Robot Description", "robot_description", rosidl_generator_traits::name<std_msgs::msg::String>(),
       "The topic on which the URDF for the robot is published as a std_msgs::msg::String", this,
       SLOT(changedRobotDescription()), this);
 

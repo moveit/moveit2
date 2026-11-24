@@ -79,7 +79,8 @@ public:
   /** @brief Initialize the robot model from a string representation of the URDF and SRDF documents */
   RDFLoader(const std::string& urdf_string, const std::string& srdf_string);
 
-  /** @brief Get the resolved parameter name for the robot description */
+  /** @brief Get the parameter name for the robot description, without a leading '/'.
+   * Used as prefix for related parameters such as <name>_kinematics and <name>_planning */
   const std::string& getRobotDescription() const
   {
     return ros_name_;

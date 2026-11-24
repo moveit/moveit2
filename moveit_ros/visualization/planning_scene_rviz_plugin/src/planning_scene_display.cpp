@@ -85,7 +85,7 @@ PlanningSceneDisplay::PlanningSceneDisplay(bool listen_to_planning_scene, bool s
                                                                         "which the move_group node is running",
                                                                         this, SLOT(changedMoveGroupNS()), this);
   robot_description_property_ = new rviz_common::properties::RosTopicProperty(
-      "Robot Description", "/robot_description", rosidl_generator_traits::name<std_msgs::msg::String>(),
+      "Robot Description", "robot_description", rosidl_generator_traits::name<std_msgs::msg::String>(),
       "The topic on which the URDF for the robot is published as a std_msgs::msg::String", this,
       SLOT(changedRobotDescription()), this);
 

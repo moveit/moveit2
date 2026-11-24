@@ -52,7 +52,7 @@ TrajectoryDisplay::TrajectoryDisplay() : Display(), logger_(moveit::getLogger("m
   // The robot description property is only needed when using the trajectory playback standalone (not within motion
   // planning plugin)
   robot_description_property_ = new rviz_common::properties::RosTopicProperty(
-      "Robot Description", "/robot_description", rosidl_generator_traits::name<std_msgs::msg::String>(),
+      "Robot Description", "robot_description", rosidl_generator_traits::name<std_msgs::msg::String>(),
       "The topic on which the URDF for the robot is published as a std_msgs::msg::String", this,
       SLOT(changedRobotDescription()), this);
 
