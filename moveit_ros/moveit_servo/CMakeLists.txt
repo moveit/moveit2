@@ -292,6 +292,9 @@ if(BUILD_TESTING)
   add_ros_test(tests/launch/servo_ros_integration.test.py TIMEOUT 120 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 
+  add_ros_test(tests/launch/servo_shutdown_without_robot_state.test.py TIMEOUT
+               120)
+
 endif()
 
 ament_package()
