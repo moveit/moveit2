@@ -225,7 +225,8 @@ private:
 
   StatusCode servo_status_;
   // This needs to be threadsafe so it can be updated in realtime.
-  std::atomic<CommandType> expected_command_type_;
+  // Holds an invalid value until setCommandType() is called for the first time.
+  std::atomic<CommandType> expected_command_type_{ static_cast<CommandType>(-1) };
 
   servo::Params servo_params_;
   const rclcpp::Node::SharedPtr node_;
