@@ -74,10 +74,16 @@ struct Contact
 {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  /** \brief contact position */
+  /** \brief contact position, expressed in the reference frame of the collision environment.
+   *
+   *  For collision checks done through planning_scene::PlanningScene, this is the planning frame, which is the
+   *  model frame of the robot (moveit::core::RobotModel::getModelFrame()). */
   Eigen::Vector3d pos;
 
-  /** \brief normal unit vector at contact */
+  /** \brief normal unit vector at contact, expressed in the same frame as \e pos.
+   *
+   *  It points from \e body_name_1 towards \e body_name_2. CollisionEnvDistanceField does not compute contact normals,
+   *  so this value is not set for contacts from that collision environment. */
   Eigen::Vector3d normal;
 
   /** \brief depth (penetration between bodies) */
