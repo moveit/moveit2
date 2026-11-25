@@ -806,14 +806,13 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         planner_start_function(request, planner_data);
       }
 
-      moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params = {
-        .planner_id = planner_id,
-        .planning_pipeline = pipeline_entry.first,
-        .planning_attempts = request.num_planning_attempts,
-        .planning_time = request.allowed_planning_time,
-        .max_velocity_scaling_factor = request.max_velocity_scaling_factor,
-        .max_acceleration_scaling_factor = request.max_acceleration_scaling_factor
-      };
+      moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params;
+      plan_req_params.planner_id = planner_id;
+      plan_req_params.planning_pipeline = pipeline_entry.first;
+      plan_req_params.planning_attempts = request.num_planning_attempts;
+      plan_req_params.planning_time = request.allowed_planning_time;
+      plan_req_params.max_velocity_scaling_factor = request.max_velocity_scaling_factor;
+      plan_req_params.max_acceleration_scaling_factor = request.max_acceleration_scaling_factor;
 
       // Iterate runs
       for (int j = 0; j < options.runs; ++j)
@@ -901,14 +900,13 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
       moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters multi_pipeline_plan_request;
       for (const auto& pipeline_planner_id_pair : parallel_pipeline_entry.second)
       {
-        moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params = {
-          .planner_id = pipeline_planner_id_pair.second,
-          .planning_pipeline = pipeline_planner_id_pair.first,
-          .planning_attempts = request.num_planning_attempts,
-          .planning_time = request.allowed_planning_time,
-          .max_velocity_scaling_factor = request.max_velocity_scaling_factor,
-          .max_acceleration_scaling_factor = request.max_acceleration_scaling_factor
-        };
+        moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params;
+        plan_req_params.planner_id = pipeline_planner_id_pair.second;
+        plan_req_params.planning_pipeline = pipeline_planner_id_pair.first;
+        plan_req_params.planning_attempts = request.num_planning_attempts;
+        plan_req_params.planning_time = request.allowed_planning_time;
+        plan_req_params.max_velocity_scaling_factor = request.max_velocity_scaling_factor;
+        plan_req_params.max_acceleration_scaling_factor = request.max_acceleration_scaling_factor;
         multi_pipeline_plan_request.plan_request_parameter_vector.push_back(plan_req_params);
       }
 

@@ -46,7 +46,6 @@ target_link_libraries(
   moveit_ros_warehouse::moveit_ros_warehouse
   pluginlib::pluginlib
   ${EXTRA_LIB})
-target_compile_features(moveit_ros_benchmarks PRIVATE cxx_std_20)
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
 target_link_libraries(moveit_run_benchmark moveit_ros_benchmarks)
