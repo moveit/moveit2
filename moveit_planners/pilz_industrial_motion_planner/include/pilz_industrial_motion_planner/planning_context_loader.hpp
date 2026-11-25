@@ -102,13 +102,13 @@ protected:
   std::string alg_;
 
   /// True if limits are set
-  bool limits_set_;
+  bool limits_set_{ false };
 
   /// Limits to be used during planning
   pilz_industrial_motion_planner::LimitsContainer limits_;
 
   /// True if model is set
-  bool model_set_;
+  bool model_set_{ false };
 
   /// The robot model
   moveit::core::RobotModelConstPtr model_;
