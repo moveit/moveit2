@@ -304,16 +304,14 @@ double Path::getLength() const
 
 PathSegment* Path::getPathSegment(double& s) const
 {
-  std::list<std::unique_ptr<PathSegment>>::const_iterator it = path_segments_.begin();
-  std::list<std::unique_ptr<PathSegment>>::const_iterator next = it;
-  ++next;
-  while (next != path_segments_.end() && s >= (*next)->position_)
-  {
-    it = next;
-    ++next;
-  }
-  s -= (*it)->position_;
-  return (*it).get();
+  std::size_t segment = cached_segment_.load(std::memory_order_relaxed);
+  if (path_segments_[segment]->position_ > s)
+    segment = 0;
+  while (segment + 1 < path_segments_.size() && s >= path_segments_[segment + 1]->position_)
+    ++segment;
+  cached_segment_.store(segment, std::memory_order_relaxed);
+  s -= path_segments_[segment]->position_;
+  return path_segments_[segment].get();
 }
 
 Eigen::VectorXd Path::getConfig(double s) const
