@@ -90,6 +90,8 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
     private_executor_->cancel();
   if (private_executor_thread_.joinable())
     private_executor_thread_.join();
+  private_executor_.reset();
+  controller_mgr_node_.reset();
 }
 
 void TrajectoryExecutionManager::initialize()
