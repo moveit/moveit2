@@ -270,6 +270,7 @@ bool World::moveShapesInObject(const std::string& object_id, const EigenSTL::vec
   {
     if (shape_poses.size() == it->second->shapes_.size())
     {
+      ensureUnique(it->second);
       for (std::size_t i = 0; i < shape_poses.size(); ++i)
       {
         ASSERT_ISOMETRY(shape_poses[i])  // unsanitized input, could contain a non-isometry
@@ -377,6 +378,7 @@ bool World::setSubframesOfObject(const std::string& object_id, const moveit::cor
   {
     ASSERT_ISOMETRY(t.second)  // unsanitized input, could contain a non-isometry
   }
+  ensureUnique(obj_pair->second);
   obj_pair->second->subframe_poses_ = subframe_poses;
   obj_pair->second->global_subframe_poses_ = subframe_poses;
   updateGlobalPosesInternal(obj_pair->second, false, true);
