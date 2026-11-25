@@ -74,6 +74,11 @@ ConstrainedGoalSampler::ConstrainedGoalSampler(const ModelBasedPlanningContext* 
   startSampling();
 }
 
+ConstrainedGoalSampler::~ConstrainedGoalSampler()
+{
+  stopSampling();
+}
+
 bool ConstrainedGoalSampler::checkStateValidity(ob::State* new_goal, const moveit::core::RobotState& state,
                                                 bool verbose) const
 {
