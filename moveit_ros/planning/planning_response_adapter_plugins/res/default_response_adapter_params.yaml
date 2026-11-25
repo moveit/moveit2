@@ -26,3 +26,8 @@ default_response_adapter_parameters:
     description: "If contacts are found in the solution path, they can be published as markers to this topic (visualization_msgs::MarkerArray). An empty string disables the publisher.",
     default_value: "display_contacts",
   }
+  pad_self_collisions: {
+    type: bool,
+    description: "ValidateSolution: If true, the solution path is additionally checked for self-collisions using the padded robot (see planning scene monitor 'robot_padding' parameters).",
+    default_value: false,
+  }

@@ -68,6 +68,14 @@ ompl_interface::StateValidityChecker::StateValidityChecker(const ModelBasedPlann
   collision_request_with_distance_.group_name = planning_context_->getGroupName();
   collision_request_with_cost_.group_name = planning_context_->getGroupName();
 
+  // optionally check self-collisions using the padded robot (configured per group in ompl_planning.yaml)
+  const std::map<std::string, std::string>& config = planning_context_->getSpecificationConfig();
+  const auto it = config.find("pad_self_collisions");
+  const bool pad_self_collisions = (it != config.end()) && (it->second == "1" || it->second == "true");
+  collision_request_simple_.pad_self_collisions = pad_self_collisions;
+  collision_request_with_distance_.pad_self_collisions = pad_self_collisions;
+  collision_request_with_cost_.pad_self_collisions = pad_self_collisions;
+
   collision_request_simple_verbose_ = collision_request_simple_;
   collision_request_simple_verbose_.verbose = true;
 

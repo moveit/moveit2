@@ -10,3 +10,8 @@ default_request_adapter_parameters:
     description: "ValidateWorkspaceBounds: Default workspace bounds representing a cube around the robot's origin whose edge length this parameter defines.",
     default_value: 1000000000000.0, # TODO ideally, this should be inf or 1e308, but this notation is not working in version 0.3.8
   }
+  pad_self_collisions: {
+    type: bool,
+    description: "CheckStartStateCollision: If true, the start state is checked for self-collisions using the padded robot (see planning scene monitor 'robot_padding' parameters).",
+    default_value: false,
+  }
