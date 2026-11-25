@@ -160,12 +160,12 @@ private:
   /// clip q_delta such that joint limits will not be violated
   void clipToJointLimits(const KDL::JntArray& q, KDL::JntArray& q_delta, Eigen::ArrayXd& weighting) const;
 
-  bool initialized_;  ///< Internal variable that indicates whether solver is configured and ready
+  bool initialized_{ false };  ///< Internal variable that indicates whether solver is configured and ready
 
-  unsigned int dimension_;                             ///< Dimension of the group
+  unsigned int dimension_{ 0 };                        ///< Dimension of the group
   moveit_msgs::msg::KinematicSolverInfo solver_info_;  ///< Stores information for the inverse kinematics solver
 
-  const moveit::core::JointModelGroup* joint_model_group_;
+  const moveit::core::JointModelGroup* joint_model_group_{ nullptr };
   moveit::core::RobotStatePtr state_;
   KDL::Chain kdl_chain_;
   std::unique_ptr<KDL::ChainFkSolverPos> fk_solver_;

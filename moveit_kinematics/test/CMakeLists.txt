@@ -7,6 +7,9 @@ if(BUILD_TESTING)
   find_package(moveit_resources_panda_moveit_config REQUIRED)
   find_package(moveit_ros_planning REQUIRED)
 
+  ament_add_gtest(test_srv_kinematics_plugin test_srv_kinematics_plugin.cpp)
+  target_link_libraries(test_srv_kinematics_plugin moveit_srv_kinematics_plugin)
+
   ament_add_gtest_executable(test_kinematics_plugin test_kinematics_plugin.cpp)
   target_link_libraries(
     test_kinematics_plugin moveit_kdl_kinematics_plugin

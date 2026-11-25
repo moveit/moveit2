@@ -58,9 +58,7 @@ rclcpp::Logger getLogger()
 }
 }  // namespace
 
-SrvKinematicsPlugin::SrvKinematicsPlugin() : active_(false)
-{
-}
+SrvKinematicsPlugin::SrvKinematicsPlugin() = default;
 
 bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const moveit::core::RobotModel& robot_model,
                                      const std::string& group_name, const std::string& base_frame,
@@ -146,14 +144,9 @@ bool SrvKinematicsPlugin::initialize(const rclcpp::Node::SharedPtr& node, const 
 
 bool SrvKinematicsPlugin::setRedundantJoints(const std::vector<unsigned int>& redundant_joints)
 {
-  if (num_possible_redundant_joints_ < 0)
+  if (!redundant_joints.empty())
   {
-    RCLCPP_ERROR(getLogger(), "This group cannot have redundant joints");
-    return false;
-  }
-  if (int(redundant_joints.size()) > num_possible_redundant_joints_)
-  {
-    RCLCPP_ERROR(getLogger(), "This group can only have %d redundant joints", num_possible_redundant_joints_);
+    RCLCPP_ERROR(getLogger(), "This solver does not support redundant joints");
     return false;
   }
 

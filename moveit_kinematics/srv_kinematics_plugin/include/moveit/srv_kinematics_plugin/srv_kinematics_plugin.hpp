@@ -51,6 +51,7 @@
 #include <geometry_msgs/msg/pose.hpp>
 #include <moveit_msgs/msg/kinematic_solver_info.hpp>
 #include <moveit_msgs/msg/move_it_error_codes.hpp>
+#include <moveit_msgs/srv/get_position_ik.hpp>
 
 // MoveIt
 #include <moveit/kinematics_base/kinematics_base.hpp>
@@ -137,17 +138,15 @@ private:
 
   bool isRedundantJoint(unsigned int index) const;
 
-  bool active_; /** Internal variable that indicates whether solvers are configured and ready */
+  bool active_{ false }; /** Internal variable that indicates whether solvers are configured and ready */
 
   moveit_msgs::msg::KinematicSolverInfo ik_group_info_; /** Stores information for the inverse kinematics solver */
 
-  unsigned int dimension_; /** Dimension of the group */
+  unsigned int dimension_{ 0 }; /** Dimension of the group */
 
-  const moveit::core::JointModelGroup* joint_model_group_;
+  const moveit::core::JointModelGroup* joint_model_group_{ nullptr };
 
   moveit::core::RobotStatePtr robot_state_;
-
-  int num_possible_redundant_joints_;
 
   rclcpp::Client<moveit_msgs::srv::GetPositionIK>::SharedPtr ik_service_client_;
 
