@@ -79,8 +79,8 @@ rclcpp::Logger getLogger()
   return moveit::getLogger("moveit.planners.ompl.model_based_planning_context");
 }
 
-const moveit_msgs::msg::JointConstraint* findUnknownJointConstraint(
-    const moveit_msgs::msg::Constraints& constraints, const moveit::core::RobotModelConstPtr& robot_model)
+const moveit_msgs::msg::JointConstraint* findUnknownJointConstraint(const moveit_msgs::msg::Constraints& constraints,
+                                                                    const moveit::core::RobotModelConstPtr& robot_model)
 {
   const auto& variable_names = robot_model->getVariableNames();
   for (const auto& joint_constraint : constraints.joint_constraints)
