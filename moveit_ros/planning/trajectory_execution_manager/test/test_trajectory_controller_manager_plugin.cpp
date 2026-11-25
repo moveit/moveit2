@@ -44,7 +44,7 @@ public:
   {
   }
 
-  bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory&) override
+  bool sendTrajectory(const moveit_msgs::msg::RobotTrajectory& /*trajectory*/) override
   {
     return true;
   }
@@ -54,7 +54,7 @@ public:
     return true;
   }
 
-  bool waitForExecution(const rclcpp::Duration&) override
+  bool waitForExecution(const rclcpp::Duration& /*timeout*/) override
   {
     return true;
   }
@@ -68,11 +68,11 @@ public:
 class ControllerManager : public moveit_controller_manager::MoveItControllerManager
 {
 public:
-  void initialize(const rclcpp::Node::SharedPtr&) override
+  void initialize(const rclcpp::Node::SharedPtr& /*node*/) override
   {
   }
 
-  moveit_controller_manager::MoveItControllerHandlePtr getControllerHandle(const std::string&) override
+  moveit_controller_manager::MoveItControllerHandlePtr getControllerHandle(const std::string& /*name*/) override
   {
     return std::make_shared<ControllerHandle>();
   }
@@ -87,12 +87,12 @@ public:
     names = { "test_controller" };
   }
 
-  void getControllerJoints(const std::string&, std::vector<std::string>& joints) override
+  void getControllerJoints(const std::string& /*name*/, std::vector<std::string>& joints) override
   {
     joints = { "world-base-joint", "base-tool-joint" };
   }
 
-  ControllerState getControllerState(const std::string&) override
+  ControllerState getControllerState(const std::string& /*name*/) override
   {
     ControllerState state;
     state.active_ = true;
@@ -100,7 +100,8 @@ public:
     return state;
   }
 
-  bool switchControllers(const std::vector<std::string>&, const std::vector<std::string>&) override
+  bool switchControllers(const std::vector<std::string>& /*activate*/,
+                         const std::vector<std::string>& /*deactivate*/) override
   {
     return true;
   }
