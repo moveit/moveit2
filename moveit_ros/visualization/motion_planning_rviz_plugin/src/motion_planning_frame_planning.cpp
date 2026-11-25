@@ -151,7 +151,7 @@ bool MotionPlanningFrame::computeCartesianPlan()
     // Compute time parameterization to also provide velocities
     // https://groups.google.com/forum/#!topic/moveit-users/MOoFxy2exT4
     robot_trajectory::RobotTrajectory rt(move_group_->getRobotModel(), move_group_->getName());
-    rt.setRobotTrajectoryMsg(*move_group_->getCurrentState(), trajectory);
+    rt.setRobotTrajectoryMsg(planning_display_->getPlanningSceneRO()->getCurrentState(), trajectory);
     trajectory_processing::TimeOptimalTrajectoryGeneration time_parameterization;
     bool success = time_parameterization.computeTimeStamps(rt, ui_->velocity_scaling_factor->value(),
                                                            ui_->acceleration_scaling_factor->value());
