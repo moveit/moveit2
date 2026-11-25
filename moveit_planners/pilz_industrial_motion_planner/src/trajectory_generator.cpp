@@ -264,6 +264,7 @@ void TrajectoryGenerator::setSuccessResponse(const moveit::core::RobotState& sta
 
   res.trajectory = rt;
   res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  res.error_code.message.clear();
   res.planning_time = (clock_->now() - planning_start).seconds();
 }
 
@@ -313,6 +314,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   {
     RCLCPP_ERROR_STREAM(getLogger(), ex.what());
     res.error_code.val = ex.getErrorCode();
+    res.error_code.message = ex.what();
     setFailureResponse(planning_begin, res);
     return;
   }
@@ -325,6 +327,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   {
     RCLCPP_ERROR_STREAM(getLogger(), ex.what());
     res.error_code.val = ex.getErrorCode();
+    res.error_code.message = ex.what();
     setFailureResponse(planning_begin, res);
     return;
   }
@@ -338,6 +341,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   {
     RCLCPP_ERROR_STREAM(getLogger(), ex.what());
     res.error_code.val = ex.getErrorCode();
+    res.error_code.message = ex.what();
     setFailureResponse(planning_begin, res);
     return;
   }
@@ -351,6 +355,7 @@ void TrajectoryGenerator::generate(const planning_scene::PlanningSceneConstPtr& 
   {
     RCLCPP_ERROR_STREAM(getLogger(), ex.what());
     res.error_code.val = ex.getErrorCode();
+    res.error_code.message = ex.what();
     setFailureResponse(planning_begin, res);
     return;
   }

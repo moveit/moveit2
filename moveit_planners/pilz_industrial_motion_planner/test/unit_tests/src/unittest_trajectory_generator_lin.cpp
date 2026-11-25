@@ -326,6 +326,7 @@ TEST_F(TrajectoryGeneratorLINTest, LinPlannerLimitViolation)
   planning_interface::MotionPlanResponse res;
   lin_->generate(planning_scene_, lin.toRequest(), res);
   ASSERT_FALSE(res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  EXPECT_FALSE(res.error_code.message.empty());
 }
 
 /**
@@ -353,6 +354,9 @@ TEST_F(TrajectoryGeneratorLINTest, LinPlannerDiscontinuousJointTraj)
   planning_interface::MotionPlanResponse res;
   lin_->generate(planning_scene_, lin.toRequest(), res);
   ASSERT_FALSE(res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS);
+  EXPECT_NE(res.error_code.message.find("Failed to generate valid joint trajectory from the Cartesian path"),
+            std::string::npos);
+  EXPECT_NE(res.error_code.message.find("violated"), std::string::npos);
 }
 
 /**

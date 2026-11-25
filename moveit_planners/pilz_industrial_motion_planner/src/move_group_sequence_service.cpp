@@ -94,8 +94,10 @@ bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::R
         resolvePlanningPipeline(req->request.items[0].req.pipeline_id);
     if (!planning_pipeline)
     {
-      RCLCPP_ERROR_STREAM(getLogger(), "Could not load planning pipeline " << req->request.items[0].req.pipeline_id);
+      const std::string msg = "Could not load planning pipeline " + req->request.items[0].req.pipeline_id;
+      RCLCPP_ERROR_STREAM(getLogger(), msg);
       res->response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      res->response.error_code.message = msg;
       return false;
     }
 
@@ -107,6 +109,7 @@ bool MoveGroupSequenceService::plan(const moveit_msgs::srv::GetMotionSequence::R
     RCLCPP_ERROR_STREAM(getLogger(),
                         "Planner threw an exception (error code: " << ex.getErrorCode() << "): " << ex.what());
     res->response.error_code.val = ex.getErrorCode();
+    res->response.error_code.message = ex.what();
     return true;
   }
   // LCOV_EXCL_START // Keep moveit up even if lower parts throw

@@ -93,7 +93,12 @@ void PlanComponentsBuilder::blend(const planning_scene::PlanningSceneConstPtr& p
   pilz_industrial_motion_planner::TrajectoryBlendResponse blend_response;
   if (!blender_->blend(planning_scene, blend_request, blend_response))
   {
-    throw BlendingFailedException("Blending failed");
+    std::string msg = "Blending failed";
+    if (!blend_response.error_code.message.empty())
+    {
+      msg += ": " + blend_response.error_code.message;
+    }
+    throw BlendingFailedException(msg);
   }
 
   // Append the new trajectory elements

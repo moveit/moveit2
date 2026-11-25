@@ -255,7 +255,11 @@ CommandListManager::solveSequenceItems(const planning_scene::PlanningSceneConstP
     if (res.error_code.val != res.error_code.SUCCESS)
     {
       std::ostringstream os;
-      os << "Could not solve request\n";  // TODO(henning): re-enable "---\n" << req << "\n---\n";
+      os << "Could not solve request";  // TODO(henning): re-enable "---\n" << req << "\n---\n";
+      if (!res.error_code.message.empty())
+      {
+        os << ": " << res.error_code.message;
+      }
       throw PlanningPipelineException(os.str(), res.error_code.val);
     }
     motion_plan_responses.emplace_back(res);

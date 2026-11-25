@@ -70,8 +70,10 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
   std::size_t second_intersection_index;
   if (!searchIntersectionPoints(req, first_intersection_index, second_intersection_index))
   {
-    RCLCPP_ERROR(getLogger(), "Blend radius too large.");
+    const std::string msg = "Blend radius too large.";
+    RCLCPP_ERROR_STREAM(getLogger(), msg);
     res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    res.error_code.message = msg;
     return false;
   }
 
@@ -104,7 +106,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
   {
     // LCOV_EXCL_START
     RCLCPP_INFO(getLogger(), "Failed to generate joint trajectory for blending trajectory.");
-    res.error_code.val = error_code.val;
+    res.error_code = error_code;
     return false;
     // LCOV_EXCL_STOP
   }
@@ -139,6 +141,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::blend(
   res.second_trajectory->setWayPointDurationFromPrevious(0, sampling_time);
 
   res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+  res.error_code.message.clear();
   return true;
 }
 
@@ -151,8 +154,10 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
   // check planning group
   if (!req.first_trajectory->getRobotModel()->hasJointModelGroup(req.group_name))
   {
-    RCLCPP_ERROR_STREAM(getLogger(), "Unknown planning group: " << req.group_name);
+    const std::string msg = "Unknown planning group: " + req.group_name;
+    RCLCPP_ERROR_STREAM(getLogger(), msg);
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME;
+    error_code.message = msg;
     return false;
   }
 
@@ -160,15 +165,19 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
   if (!req.first_trajectory->getRobotModel()->hasLinkModel(req.link_name) &&
       !req.first_trajectory->getLastWayPoint().hasAttachedBody(req.link_name))
   {
-    RCLCPP_ERROR_STREAM(getLogger(), "Unknown link name: " << req.link_name);
+    const std::string msg = "Unknown link name: " + req.link_name;
+    RCLCPP_ERROR_STREAM(getLogger(), msg);
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_LINK_NAME;
+    error_code.message = msg;
     return false;
   }
 
   if (req.blend_radius <= 0)
   {
-    RCLCPP_ERROR(getLogger(), "Blending radius must be positive");
+    const std::string msg = "Blending radius must be positive";
+    RCLCPP_ERROR_STREAM(getLogger(), msg);
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    error_code.message = msg;
     return false;
   }
 
@@ -177,9 +186,11 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
   if (!pilz_industrial_motion_planner::isRobotStateEqual(
           req.first_trajectory->getLastWayPoint(), req.second_trajectory->getFirstWayPoint(), req.group_name, EPSILON))
   {
-    RCLCPP_ERROR_STREAM(getLogger(), "During blending the last point of the preceding and the first point of the "
-                                     "succeeding trajectory");
+    const std::string msg =
+        "During blending the last point of the preceding and the first point of the succeeding trajectory do not match";
+    RCLCPP_ERROR_STREAM(getLogger(), msg);
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    error_code.message = msg;
     return false;
   }
 
@@ -188,6 +199,7 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
                                                                      EPSILON, sampling_time))
   {
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    error_code.message = "Trajectories do not share the same uniform sampling time";
     return false;
   }
 
@@ -199,8 +211,10 @@ bool pilz_industrial_motion_planner::TrajectoryBlenderTransitionWindow::validate
       !pilz_industrial_motion_planner::isRobotStateStationary(req.second_trajectory->getFirstWayPoint(), req.group_name,
                                                               EPSILON))
   {
-    RCLCPP_ERROR(getLogger(), "Intersection point of the blending trajectories has non-zero velocities/accelerations.");
+    const std::string msg = "Intersection point of the blending trajectories has non-zero velocities/accelerations.";
+    RCLCPP_ERROR_STREAM(getLogger(), msg);
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    error_code.message = msg;
     return false;
   }
 
