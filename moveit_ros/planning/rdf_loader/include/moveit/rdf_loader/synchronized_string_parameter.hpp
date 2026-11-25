@@ -73,7 +73,8 @@ protected:
   void stringCallback(const std_msgs::msg::String::ConstSharedPtr& msg);
 
   std::shared_ptr<rclcpp::Node> node_;
-  std::string name_;
+  std::string name_;        // topic name, may be absolute (e.g. "/robot_description")
+  std::string param_name_;  // name_ without leading '/', used for parameter lookups
   StringCallback parent_callback_;
 
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr string_subscriber_;

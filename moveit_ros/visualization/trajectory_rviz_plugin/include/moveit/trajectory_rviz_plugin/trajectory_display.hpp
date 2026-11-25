@@ -43,6 +43,7 @@
 #include <rviz_common/display.hpp>
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/ros_integration/ros_node_abstraction_iface.hpp>
+#include <rviz_common/properties/ros_topic_property.hpp>
 
 #include <moveit/rviz_plugin_render_tools/trajectory_visualization.hpp>
 #ifndef Q_MOC_RUN
@@ -106,7 +107,7 @@ protected:
   moveit::core::RobotStatePtr robot_state_;
 
   // Properties
-  rviz_common::properties::StringProperty* robot_description_property_;
+  rviz_common::properties::RosTopicProperty* robot_description_property_;
 
   rclcpp::Node::SharedPtr node_;
   rclcpp::Logger logger_;

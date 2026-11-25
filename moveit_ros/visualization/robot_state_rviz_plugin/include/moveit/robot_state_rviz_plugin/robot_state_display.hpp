@@ -149,7 +149,7 @@ protected:
   std::map<std::string, std_msgs::msg::ColorRGBA> highlights_;
   bool update_state_;
 
-  rviz_common::properties::StringProperty* robot_description_property_;
+  rviz_common::properties::RosTopicProperty* robot_description_property_;
   rviz_common::properties::StringProperty* root_link_name_property_;
   rviz_common::properties::RosTopicProperty* robot_state_topic_property_;
   rviz_common::properties::FloatProperty* robot_alpha_property_;

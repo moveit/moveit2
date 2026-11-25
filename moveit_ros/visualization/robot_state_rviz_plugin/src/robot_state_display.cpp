@@ -39,6 +39,7 @@
 #include <moveit/utils/message_checks.hpp>
 
 #include <rclcpp/qos.hpp>
+#include <std_msgs/msg/string.hpp>
 
 // #include <rviz/visualization_manager.h>
 #include <rviz_default_plugins/robot/robot.hpp>
@@ -66,13 +67,13 @@ namespace moveit_rviz_plugin
 // ******************************************************************************************
 RobotStateDisplay::RobotStateDisplay() : Display(), update_state_(false)
 {
-  robot_description_property_ = new rviz_common::properties::StringProperty(
-      "Robot Description", "robot_description", "The name of the ROS parameter where the URDF for the robot is loaded",
-      this, SLOT(changedRobotDescription()), this);
+  robot_description_property_ = new rviz_common::properties::RosTopicProperty(
+      "Robot Description", "robot_description", rosidl_generator_traits::name<std_msgs::msg::String>(),
+      "The topic on which the URDF for the robot is published as a std_msgs::msg::String", this,
+      SLOT(changedRobotDescription()), this);
 
   robot_state_topic_property_ = new rviz_common::properties::RosTopicProperty(
-      "Robot State Topic", "display_robot_state",
-      rosidl_generator_traits::data_type<moveit_msgs::msg::DisplayRobotState>(),
+      "Robot State Topic", "display_robot_state", rosidl_generator_traits::name<moveit_msgs::msg::DisplayRobotState>(),
       "The topic on which the moveit_msgs::msg::DisplayRobotState messages are received", this,
       SLOT(changedRobotStateTopic()), this);
 
@@ -123,6 +124,7 @@ void RobotStateDisplay::onInitialize()
     RVIZ_COMMON_LOG_WARNING("Unable to lock weak_ptr from DisplayContext in RobotStateDisplay constructor");
     return;
   }
+  robot_description_property_->initialize(ros_node_abstraction);
   robot_state_topic_property_->initialize(ros_node_abstraction);
   node_ = ros_node_abstraction->get_raw_node();
   robot_ = std::make_shared<RobotStateVisualization>(scene_node_, context_, "Robot State", this);

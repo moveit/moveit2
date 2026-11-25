@@ -81,11 +81,17 @@ rclcpp::Logger getLogger()
 {
   return moveit::getLogger("moveit.ros.rdf_loader");
 }
+
+// ros_name may be an absolute topic name, but it is also used as a parameter prefix
+std::string toParameterName(const std::string& ros_name)
+{
+  return (!ros_name.empty() && ros_name.front() == '/') ? ros_name.substr(1) : ros_name;
+}
 }  // namespace
 
 RDFLoader::RDFLoader(const std::shared_ptr<rclcpp::Node>& node, const std::string& ros_name,
                      bool default_continuous_value, double default_timeout)
-  : ros_name_(ros_name)
+  : ros_name_(toParameterName(ros_name))
 {
   auto start = node->now();
 
