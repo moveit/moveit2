@@ -35,6 +35,7 @@
 /* Author: Ioan Sucan, E. Gil Jones */
 
 #include <moveit/kinematic_constraints/kinematic_constraint.hpp>
+#include <moveit/kinematic_constraints/utils.hpp>
 #include <gtest/gtest.h>
 #include <urdf_parser/urdf_parser.h>
 #include <fstream>
@@ -932,6 +933,27 @@ TEST_F(LoadPlanningModelsPr2, TestKinematicConstraintSetEquality)
   // but they are within this margin
   EXPECT_TRUE(kcs.equal(kcs2, .1));
   EXPECT_TRUE(kcs2.equal(kcs, .1));
+}
+
+TEST(MergeConstraints, IncompatibleJointConstraintsKeepFirst)
+{
+  moveit_msgs::msg::Constraints goal;
+  goal.joint_constraints.resize(1);
+  goal.joint_constraints[0].joint_name = "head_pan_joint";
+  goal.joint_constraints[0].position = 0.2;
+  goal.joint_constraints[0].tolerance_above = 0.05;
+  goal.joint_constraints[0].tolerance_below = 0.05;
+  goal.joint_constraints[0].weight = 1.0;
+
+  moveit_msgs::msg::Constraints path = goal;
+  path.joint_constraints[0].position = 0.0;
+  path.joint_constraints[0].tolerance_above = 0.01;
+  path.joint_constraints[0].tolerance_below = 0.01;
+
+  // the ranges do not overlap, so the first constraint takes precedence instead of being dropped
+  moveit_msgs::msg::Constraints merged = kinematic_constraints::mergeConstraints(goal, path);
+  ASSERT_EQ(merged.joint_constraints.size(), 1u);
+  EXPECT_EQ(merged.joint_constraints[0], goal.joint_constraints[0]);
 }
 
 int main(int argc, char** argv)
