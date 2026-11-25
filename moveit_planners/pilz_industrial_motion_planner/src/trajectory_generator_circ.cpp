@@ -222,8 +222,13 @@ void TrajectoryGeneratorCIRC::plan(const planning_scene::PlanningSceneConstPtr& 
                                plan_info.link_name, plan_info.start_joint_position, sampling_time, joint_trajectory,
                                error_code))
   {
-    throw CircTrajectoryConversionFailure("Failed to generate valid joint trajectory from the Cartesian path",
-                                          error_code.val);
+    std::ostringstream os;
+    os << "Failed to generate valid joint trajectory from the Cartesian path";
+    if (!error_code.message.empty())
+    {
+      os << ": " << error_code.message;
+    }
+    throw CircTrajectoryConversionFailure(os.str(), error_code.val);
   }
 }
 

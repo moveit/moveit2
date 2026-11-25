@@ -219,8 +219,10 @@ void MoveGroupSequenceAction::executeMoveCallbackPlanOnly(
         resolvePlanningPipeline(goal->request.items[0].req.pipeline_id);
     if (!planning_pipeline)
     {
-      RCLCPP_ERROR_STREAM(getLogger(), "Could not load planning pipeline " << goal->request.items[0].req.pipeline_id);
+      const std::string msg = "Could not load planning pipeline " + goal->request.items[0].req.pipeline_id;
+      RCLCPP_ERROR_STREAM(getLogger(), msg);
       action_res->response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      action_res->response.error_code.message = msg;
       return;
     }
 
@@ -232,6 +234,7 @@ void MoveGroupSequenceAction::executeMoveCallbackPlanOnly(
     RCLCPP_ERROR_STREAM(getLogger(), "> Planning pipeline threw an exception (error code: " << ex.getErrorCode()
                                                                                             << "): " << ex.what());
     action_res->response.error_code.val = ex.getErrorCode();
+    action_res->response.error_code.message = ex.what();
     return;
   }
   // LCOV_EXCL_START // Keep moveit up even if lower parts throw
@@ -239,6 +242,7 @@ void MoveGroupSequenceAction::executeMoveCallbackPlanOnly(
   {
     RCLCPP_ERROR(getLogger(), "Planning pipeline threw an exception: %s", ex.what());
     action_res->response.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    action_res->response.error_code.message = ex.what();
     return;
   }
   // LCOV_EXCL_STOP
@@ -278,7 +282,10 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
         resolvePlanningPipeline(req.items[0].req.pipeline_id);
     if (!planning_pipeline)
     {
-      RCLCPP_ERROR_STREAM(getLogger(), "Could not load planning pipeline " << req.items[0].req.pipeline_id);
+      const std::string msg = "Could not load planning pipeline " + req.items[0].req.pipeline_id;
+      RCLCPP_ERROR_STREAM(getLogger(), msg);
+      plan.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      plan.error_code.message = msg;
       return false;
     }
 
@@ -289,6 +296,7 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
     RCLCPP_ERROR_STREAM(getLogger(), "Planning pipeline threw an exception (error code: " << ex.getErrorCode()
                                                                                           << "): " << ex.what());
     plan.error_code.val = ex.getErrorCode();
+    plan.error_code.message = ex.what();
     return false;
   }
   // LCOV_EXCL_START // Keep MoveIt up even if lower parts throw
@@ -296,6 +304,7 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const moveit_msgs::msg::M
   {
     RCLCPP_ERROR_STREAM(getLogger(), "Planning pipeline threw an exception: " << ex.what());
     plan.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+    plan.error_code.message = ex.what();
     return false;
   }
   // LCOV_EXCL_STOP

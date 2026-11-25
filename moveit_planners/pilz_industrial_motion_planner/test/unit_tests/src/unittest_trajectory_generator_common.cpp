@@ -219,6 +219,7 @@ TYPED_TEST(TrajectoryGeneratorCommonTest, InvalidGroupName)
   this->req_.group_name = "foot";
   this->trajectory_generator_->generate(this->planning_scene_, this->req_, this->res_);
   EXPECT_EQ(moveit_msgs::msg::MoveItErrorCodes::INVALID_GROUP_NAME, this->res_.error_code.val);
+  EXPECT_NE(this->res_.error_code.message.find("Unknown planning group"), std::string::npos);
 }
 
 /**

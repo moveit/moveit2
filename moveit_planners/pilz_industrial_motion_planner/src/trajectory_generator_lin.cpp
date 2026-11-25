@@ -169,6 +169,10 @@ void TrajectoryGeneratorLIN::plan(const planning_scene::PlanningSceneConstPtr& s
   {
     std::ostringstream os;
     os << "Failed to generate valid joint trajectory from the Cartesian path";
+    if (!error_code.message.empty())
+    {
+      os << ": " << error_code.message;
+    }
     throw LinTrajectoryConversionFailure(os.str(), error_code.val);
   }
 }

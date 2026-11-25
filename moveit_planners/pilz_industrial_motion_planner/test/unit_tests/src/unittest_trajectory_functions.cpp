@@ -742,6 +742,11 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsWithS
 
   EXPECT_FALSE(pilz_industrial_motion_planner::verifySampleJointLimits(position_last, velocity_last, position_current,
                                                                        duration_last, duration_current, joint_limits));
+
+  std::string error_message;
+  EXPECT_FALSE(pilz_industrial_motion_planner::verifySampleJointLimits(
+      position_last, velocity_last, position_current, duration_last, duration_current, joint_limits, &error_message));
+  EXPECT_NE(error_message.find("Sample duration too small"), std::string::npos);
 }
 
 /**
@@ -775,6 +780,11 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsVeloc
 
   EXPECT_FALSE(pilz_industrial_motion_planner::verifySampleJointLimits(position_last, velocity_last, position_current,
                                                                        duration_last, duration_current, joint_limits));
+
+  std::string error_message;
+  EXPECT_FALSE(pilz_industrial_motion_planner::verifySampleJointLimits(
+      position_last, velocity_last, position_current, duration_last, duration_current, joint_limits, &error_message));
+  EXPECT_NE(error_message.find("Joint velocity limit of " + test_joint_name + " violated"), std::string::npos);
 }
 
 /**
@@ -818,6 +828,11 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsAccel
 
   EXPECT_FALSE(pilz_industrial_motion_planner::verifySampleJointLimits(position_last, velocity_last, position_current,
                                                                        duration_last, duration_current, joint_limits));
+
+  std::string error_message;
+  EXPECT_FALSE(pilz_industrial_motion_planner::verifySampleJointLimits(
+      position_last, velocity_last, position_current, duration_last, duration_current, joint_limits, &error_message));
+  EXPECT_NE(error_message.find("Joint acceleration limit of " + test_joint_name + " violated"), std::string::npos);
 }
 
 /**
@@ -861,6 +876,11 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsDecel
 
   EXPECT_FALSE(pilz_industrial_motion_planner::verifySampleJointLimits(position_last, velocity_last, position_current,
                                                                        duration_last, duration_current, joint_limits));
+
+  std::string error_message;
+  EXPECT_FALSE(pilz_industrial_motion_planner::verifySampleJointLimits(
+      position_last, velocity_last, position_current, duration_last, duration_current, joint_limits, &error_message));
+  EXPECT_NE(error_message.find("Joint deceleration limit of " + test_joint_name + " violated"), std::string::npos);
 }
 
 /**
@@ -901,6 +921,8 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testGenerateJointTrajectoryWithI
   EXPECT_FALSE(pilz_industrial_motion_planner::generateJointTrajectory(
       planning_scene_, joint_limits, kdl_trajectory, group_name, tcp_link_, initial_joint_position, sampling_time,
       joint_trajectory, error_code, check_self_collision));
+  EXPECT_EQ(error_code.val, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
+  EXPECT_FALSE(error_code.message.empty());
 
   std::map<std::string, double> initial_joint_velocity;
 
@@ -910,9 +932,12 @@ TEST_F(TrajectoryFunctionsTestFlangeAndGripper, testGenerateJointTrajectoryWithI
   pilz_industrial_motion_planner::CartesianTrajectoryPoint cart_traj_point;
   cart_traj.points.push_back(cart_traj_point);
 
+  error_code = moveit_msgs::msg::MoveItErrorCodes();
   EXPECT_FALSE(pilz_industrial_motion_planner::generateJointTrajectory(
       planning_scene_, joint_limits, cart_traj, group_name, tcp_link_, initial_joint_position, initial_joint_velocity,
       joint_trajectory, error_code, check_self_collision));
+  EXPECT_EQ(error_code.val, moveit_msgs::msg::MoveItErrorCodes::NO_IK_SOLUTION);
+  EXPECT_FALSE(error_code.message.empty());
 }
 
 /**

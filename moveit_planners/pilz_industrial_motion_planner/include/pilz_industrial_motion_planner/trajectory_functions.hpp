@@ -113,6 +113,18 @@ bool verifySampleJointLimits(const std::map<std::string, double>& position_last,
                              double duration_current, const JointLimitsContainer& joint_limits);
 
 /**
+ * @brief verify the velocity/acceleration limits of current sample (based on
+ * backward difference computation) and optionally return the failure reason
+ * @param error_message: optional output populated with the failure reason when returning false
+ * @return true if limits are satisfied
+ */
+bool verifySampleJointLimits(const std::map<std::string, double>& position_last,
+                             const std::map<std::string, double>& velocity_last,
+                             const std::map<std::string, double>& position_current, double duration_last,
+                             double duration_current, const JointLimitsContainer& joint_limits,
+                             std::string* error_message);
+
+/**
  * @brief Generate joint trajectory from a KDL Cartesian trajectory
  * @param scene: planning scene
  * @param joint_limits: joint limits

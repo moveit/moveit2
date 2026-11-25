@@ -158,6 +158,8 @@ CommandPlanner::getPlanningContext(const planning_scene::PlanningSceneConstPtr& 
   else
   {
     error_code.val = moveit_msgs::msg::MoveItErrorCodes::PLANNING_FAILED;
+    error_code.message =
+        "Failed to load planning context for planner_id '" + req.planner_id + "' and group '" + req.group_name + "'";
     return nullptr;
   }
 }
