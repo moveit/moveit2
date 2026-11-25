@@ -90,6 +90,15 @@ TrajectoryExecutionManager::~TrajectoryExecutionManager()
     private_executor_->cancel();
   if (private_executor_thread_.joinable())
     private_executor_thread_.join();
+
+  // Destroy the controller manager plugin and the node it was initialized with while the plugin's library is still
+  // loaded. Members are destroyed in reverse order of declaration, so controller_manager_loader_ would otherwise
+  // unload the library before controller_mgr_node_ is destroyed. The callback groups of that node keep weak pointers
+  // to the entities the plugin added to it (e.g. action clients), and the control blocks of those pointers are code
+  // of the plugin's library: releasing them after the library is unloaded is a segmentation fault.
+  controller_manager_.reset();
+  private_executor_.reset();
+  controller_mgr_node_.reset();
 }
 
 void TrajectoryExecutionManager::initialize()
