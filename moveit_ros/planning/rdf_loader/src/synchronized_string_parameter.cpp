@@ -65,7 +65,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
   std::string keep_open_param = name_ + "_continuous";
   if (!node_->has_parameter(keep_open_param))
   {
-    node_->declare_parameter(keep_open_param, rclcpp::ParameterType::PARAMETER_BOOL);
+    node_->declare_parameter(keep_open_param, false);
   }
   bool keep_open;
   node_->get_parameter_or(keep_open_param, keep_open, default_continuous_value);
@@ -73,7 +73,7 @@ std::string SynchronizedStringParameter::loadInitialValue(const std::shared_ptr<
   std::string timeout_param = name_ + "_timeout";
   if (!node_->has_parameter(timeout_param))
   {
-    node_->declare_parameter(timeout_param, rclcpp::ParameterType::PARAMETER_DOUBLE);
+    node_->declare_parameter(timeout_param, default_timeout);
   }
   double d_timeout;
   node_->get_parameter_or(timeout_param, d_timeout, default_timeout);  // ten second default
@@ -98,10 +98,24 @@ bool SynchronizedStringParameter::getMainParameter()
   // Check if the parameter is declared, declare it if it's not declared yet
   if (!node_->has_parameter(name_))
   {
-    node_->declare_parameter(name_, rclcpp::ParameterType::PARAMETER_STRING);
+    node_->declare_parameter(name_, std::string());
   }
 
   node_->get_parameter_or(name_, content_, std::string());
+
+  // A parameter that was declared for its descriptor but has no value is
+  // advertised as existing, while ros2 param get still fails. If neither a
+  // parameter nor the topic supplied a value, remove it again.
+  if (content_.empty() && node_->has_parameter(name_))
+  {
+    try
+    {
+      node_->undeclare_parameter(name_);
+    }
+    catch (const std::exception &)
+    {
+    }
+  }
 
   return !content_.empty();
 }
@@ -112,7 +126,7 @@ bool SynchronizedStringParameter::shouldPublish()
   bool publish_string;
   if (!node_->has_parameter(publish_param))
   {
-    node_->declare_parameter(publish_param, rclcpp::ParameterType::PARAMETER_BOOL);
+    node_->declare_parameter(publish_param, false);
   }
   node_->get_parameter_or(publish_param, publish_string, false);
   return publish_string;
