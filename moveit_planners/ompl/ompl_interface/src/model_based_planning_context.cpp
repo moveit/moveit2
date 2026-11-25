@@ -900,7 +900,6 @@ const moveit_msgs::msg::MoveItErrorCodes ModelBasedPlanningContext::solve(double
       ob::PlannerTerminationCondition ptc = constructPlannerTerminationCondition(timeout, start);
       registerTerminationCondition(ptc);
       int n = count / max_planning_threads_;
-      result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
       for (int i = 0; i < n && !ptc(); ++i)
       {
         ompl_parallel_plan_.clearPlanners();
@@ -919,11 +918,11 @@ const moveit_msgs::msg::MoveItErrorCodes ModelBasedPlanningContext::solve(double
           }
         }
 
-        bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
-        // Was this latest call successful too?
-        result.val = (result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && r) ?
-                         moveit_msgs::msg::MoveItErrorCodes::SUCCESS :
-                         moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+        // One successful batch is enough, the best solution of all batches is reported.
+        if (ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION)
+        {
+          result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+        }
       }
       n = count % max_planning_threads_;
       if (n && !ptc())
@@ -944,11 +943,11 @@ const moveit_msgs::msg::MoveItErrorCodes ModelBasedPlanningContext::solve(double
           }
         }
 
-        bool r = ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION;
-        // Was this latest call successful too?
-        result.val = (result.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS && r) ?
-                         moveit_msgs::msg::MoveItErrorCodes::SUCCESS :
-                         moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+        // One successful batch is enough, the best solution of all batches is reported.
+        if (ompl_parallel_plan_.solve(ptc, 1, count, hybridize_) == ompl::base::PlannerStatus::EXACT_SOLUTION)
+        {
+          result.val = moveit_msgs::msg::MoveItErrorCodes::SUCCESS;
+        }
       }
       last_plan_time_ = ompl::time::seconds(ompl::time::now() - start);
       unregisterTerminationCondition();
