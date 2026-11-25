@@ -2,7 +2,7 @@
 
 This document defines how the `main` branch of moveit2 supports several ROS 2 distributions at the same time. It has four topics:
 
-1. **Per-distro branches**: which source users and maintainers use for each distro, when a branch is cut, and how the branches are kept.
+1. **Per-distro branches**: which source users and maintainers use for each distro, when a branch is cut, how the branches are kept, and how versions stay separate after a fork.
 2. **Supporting multiple distros on `main`**: code patterns for differences between distros.
 3. **Dependencies without an apt binary**: what to do when a release exists in rosdistro but its binary package is not yet in the apt repository.
 4. **CI matrix policy**: how to add and remove distros in `.github/workflows/ci.yaml`.
@@ -28,6 +28,17 @@ When you cut a distro branch under the rule above, fork it from `main`. Make the
 2. **`docker.yaml`**: Keep only the `release`, `ci`, and `source` jobs. Set each `ROS_DISTRO` list to `[<distro>]`. Change `push` to `branches: [<distro>]`.
 3. **Delete** `prerelease.yaml`, `sonar.yaml`, and `docker.build.yaml`.
 4. **Run `docker.yaml` once** with `workflow_dispatch`, or push any commit to the branch. This builds the first `moveit/moveit2:<distro>-ci` image. Later CI runs on the branch then have an image to pull.
+
+### Versions and release tracks after a fork
+
+Each distro has its own minor version, for example Jazzy 2.12.x and Kilted 2.14.x. The new branch keeps the minor version it forked at and releases only patch versions from then on. **The first release from `main` after the fork must bump the minor version**, using `catkin_prepare_release --bump minor`. A patch release from `main` would take a version the branch needs for its own releases.
+
+Release tags in `moveit/moveit2` are shared by all distros. Bloom tracks and the tags in the release repository are kept per distro. If `main` and the branch release the same version, they need the same tag but on different commits, and the same version number would then describe two different APIs.
+
+- Jazzy forked at 2.12.0. The next release from `main` was 2.13.0, so the versions stayed separate.
+- Kilted forked at 2.14.0, and `main` went on releasing 2.14.x versions (2.14.1). The `kilted` branch's own releases then collided with tags already on `main`. The `kilted` track now uses `kilted-:{version}` tags to work around the collision.
+
+Also update the release repository, [`ros2-gbp/moveit2-release`](https://github.com/ros2-gbp/moveit2-release). In `tracks.yaml`, set the distro's track to `devel_branch: <distro>`. Its version is `:{auto}`, so bloom reads it from the `package.xml` files on that branch. Until you change it, the track still releases from `main`.
 
 ---
 
