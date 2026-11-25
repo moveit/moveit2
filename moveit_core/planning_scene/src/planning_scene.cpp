@@ -1552,6 +1552,15 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
     return false;
   }
 
+  if ((object.object.operation == moveit_msgs::msg::CollisionObject::ADD ||
+       object.object.operation == moveit_msgs::msg::CollisionObject::APPEND) &&
+      object.object.subframe_names.size() != object.object.subframe_poses.size())
+  {
+    RCLCPP_ERROR(getLogger(), "Attached collision object '%s' has %zu subframe names but %zu poses",
+                 object.object.id.c_str(), object.object.subframe_names.size(), object.object.subframe_poses.size());
+    return false;
+  }
+
   if (!robot_state_.has_value())  // there must be a parent in this case
   {
     robot_state_.emplace(moveit::core::RobotState(parent_->getCurrentState()));
@@ -1892,6 +1901,13 @@ bool PlanningScene::shapesAndPosesFromCollisionObjectMessage(const moveit_msgs::
 
 bool PlanningScene::processCollisionObjectAdd(const moveit_msgs::msg::CollisionObject& object)
 {
+  if (object.subframe_names.size() != object.subframe_poses.size())
+  {
+    RCLCPP_ERROR(getLogger(), "Collision object '%s' has %zu subframe names but %zu poses", object.id.c_str(),
+                 object.subframe_names.size(), object.subframe_poses.size());
+    return false;
+  }
+
   if (!knowsFrameTransform(object.header.frame_id))
   {
     RCLCPP_ERROR_STREAM(getLogger(), "Unknown frame: " << object.header.frame_id);
