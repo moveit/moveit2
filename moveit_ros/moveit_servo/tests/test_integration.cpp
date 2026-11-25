@@ -152,8 +152,9 @@ TEST_F(ServoCppFixture, PoseTest)
   status_next = servo_test_instance_->getStatus();
   ASSERT_EQ(status_next, moveit_servo::StatusCode::NO_WARNING);
 
-  // Check against manually verified value
-  constexpr double expected_delta = 0.003364;
+  // Check against manually verified value. It was 0.003364 while velocityScalingFactorForSingularity left its
+  // test step applied to robot_state, which the second getNextJointState call then started from.
+  constexpr double expected_delta = 0.003387;
   double delta = next_state.positions[6] - curr_state.positions[6];
   constexpr double tol = 1.0e-5;
   ASSERT_NEAR(delta, expected_delta, tol);
