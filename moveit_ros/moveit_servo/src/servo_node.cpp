@@ -86,16 +86,6 @@ ServoNode::ServoNode(const rclcpp::NodeOptions& options)
 {
   moveit::setNodeLoggerName(node_->get_name());
 
-  // Configure SCHED_FIFO and priority
-  if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
-  {
-    RCLCPP_INFO_STREAM(node_->get_logger(), "Enabled SCHED_FIFO and higher thread priority.");
-  }
-  else
-  {
-    RCLCPP_WARN_STREAM(node_->get_logger(), "Could not enable FIFO RT scheduling policy. Continuing with the default.");
-  }
-
   // Check if a realtime kernel is available
   if (!realtime_tools::has_realtime_kernel())
   {
@@ -335,6 +325,17 @@ std::optional<KinematicState> ServoNode::processPoseCommand(const moveit::core::
 
 void ServoNode::servoLoop()
 {
+  // Configure SCHED_FIFO and priority. Only the servo loop runs realtime; bring-up in the constructor
+  // might exceed RLIMIT_RTTIME if it ran under SCHED_FIFO.
+  if (realtime_tools::configure_sched_fifo(servo_params_.thread_priority))
+  {
+    RCLCPP_INFO_STREAM(node_->get_logger(), "Enabled SCHED_FIFO and higher thread priority.");
+  }
+  else
+  {
+    RCLCPP_WARN_STREAM(node_->get_logger(), "Could not enable FIFO RT scheduling policy. Continuing with the default.");
+  }
+
   moveit_msgs::msg::ServoStatus status_msg;
   std::optional<KinematicState> next_joint_state = std::nullopt;
   rclcpp::WallRate servo_frequency(1 / servo_params_.publish_period);
