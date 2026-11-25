@@ -23,4 +23,10 @@ if(BUILD_TESTING)
   target_link_libraries(test_check_start_state_bounds moveit_planning_pipeline
                         moveit_default_planning_request_adapter_plugins)
 
+
+  ament_add_gtest(test_check_start_state_collision
+                  test/test_check_start_state_collision.cpp)
+  target_link_libraries(test_check_start_state_collision moveit_planning_pipeline
+                        moveit_default_planning_request_adapter_plugins)
+
 endif()

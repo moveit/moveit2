@@ -39,6 +39,8 @@
 // ROS
 #include <rclcpp/rclcpp.hpp>
 
+#include <algorithm>
+
 // Testing
 #include <gtest/gtest.h>
 
@@ -96,6 +98,32 @@ TEST_F(PlanningSceneMonitorTest, TestPersistentScene)
   msg.is_diff = msg.robot_state.is_diff = false;
   planning_scene_monitor_->newPlanningSceneMessage(msg);
   EXPECT_EQ(scene, planning_scene_monitor_->getPlanningScene());
+}
+
+TEST(PlanningSceneMonitor, StopWorldGeometryMonitorStopsAllSubscriptions)
+{
+  const auto options =
+      rclcpp::NodeOptions()
+          .parameter_overrides({ { "robot_description", "<robot name='monitor'><link name='world'/></robot>" },
+                                 { "robot_description_semantic", "<robot name='monitor'/>" } })
+          .automatically_declare_parameters_from_overrides(true);
+  auto node = std::make_shared<rclcpp::Node>("world_geometry_monitor_test", options);
+  auto monitor = std::make_unique<planning_scene_monitor::PlanningSceneMonitor>(node, "robot_description");
+  ASSERT_TRUE(monitor->getPlanningScene());
+
+  const std::string collision_topic = "/test_collision_object";
+  const std::string world_topic = "/test_planning_scene_world";
+  monitor->startWorldGeometryMonitor(collision_topic, world_topic, false);
+
+  std::vector<std::string> topics;
+  monitor->getMonitoredTopics(topics);
+  EXPECT_NE(std::find(topics.begin(), topics.end(), collision_topic), topics.end());
+  EXPECT_NE(std::find(topics.begin(), topics.end(), world_topic), topics.end());
+
+  monitor->stopWorldGeometryMonitor();
+  monitor->getMonitoredTopics(topics);
+  EXPECT_EQ(std::find(topics.begin(), topics.end(), collision_topic), topics.end());
+  EXPECT_EQ(std::find(topics.begin(), topics.end(), world_topic), topics.end());
 }
 
 using UpdateType = planning_scene_monitor::PlanningSceneMonitor::SceneUpdateType;

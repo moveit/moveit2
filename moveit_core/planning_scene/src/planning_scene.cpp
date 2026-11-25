@@ -1659,7 +1659,10 @@ bool PlanningScene::processAttachedCollisionObjectMsg(const moveit_msgs::msg::At
                        "The object was replaced.",
                        object.object.id.c_str(), object.link_name.c_str());
         }
-        robot_state_.value().attachBody(object.object.id, object_pose_in_link, shapes, shape_poses, object.touch_links,
+        std::set<std::string> touch_links(object.touch_links.begin(), object.touch_links.end());
+        if (touch_links.empty())
+          touch_links.insert(object.link_name);
+        robot_state_.value().attachBody(object.object.id, object_pose_in_link, shapes, shape_poses, touch_links,
                                         object.link_name, object.detach_posture, subframe_poses);
         RCLCPP_DEBUG(getLogger(), "Attached object '%s' to link '%s'", object.object.id.c_str(),
                      object.link_name.c_str());

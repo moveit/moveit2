@@ -43,6 +43,7 @@ namespace
 {
 const std::vector<std::string> REQUEST_ADAPTERS{ "planning_pipeline_test/AlwaysSuccessRequestAdapter",
                                                  "planning_pipeline_test/AlwaysSuccessRequestAdapter" };
+const std::vector<std::string> FAILURE_REQUEST_ADAPTERS{ "planning_pipeline_test/AlwaysFailureRequestAdapter" };
 const std::vector<std::string> RESPONSE_ADAPTERS{ "planning_pipeline_test/AlwaysSuccessResponseAdapter",
                                                   "planning_pipeline_test/AlwaysSuccessResponseAdapter" };
 const std::vector<std::string> PLANNER_PLUGINS{ "planning_pipeline_test/DummyPlannerManager",
@@ -95,6 +96,20 @@ TEST_F(TestPlanningPipeline, HappyPath)
   const auto planning_scene_ptr = std::make_shared<planning_scene::PlanningScene>(robot_model_);
   EXPECT_TRUE(pipeline_ptr_->generatePlan(planning_scene_ptr, motion_plan_request, motion_plan_response));
   EXPECT_TRUE(motion_plan_response.error_code);
+}
+
+TEST_F(TestPlanningPipeline, PreservesRequestAdapterFailureDetails)
+{
+  pipeline_ptr_ = std::make_shared<planning_pipeline::PlanningPipeline>(robot_model_, node_, "", PLANNER_PLUGINS,
+                                                                        FAILURE_REQUEST_ADAPTERS, RESPONSE_ADAPTERS);
+  planning_interface::MotionPlanResponse response;
+  planning_interface::MotionPlanRequest request;
+  const auto scene = std::make_shared<planning_scene::PlanningScene>(robot_model_);
+
+  EXPECT_FALSE(pipeline_ptr_->generatePlan(scene, request, response));
+  EXPECT_EQ(response.error_code.val, moveit_msgs::msg::MoveItErrorCodes::START_STATE_INVALID);
+  EXPECT_EQ(response.error_code.message, "test failure");
+  EXPECT_EQ(response.error_code.source, "AlwaysFailureRequestAdapter");
 }
 
 TEST_F(TestPlanningPipeline, NoPlannerPluginConfigured)
