@@ -37,6 +37,7 @@
 #pragma once
 
 #include <gtest/gtest.h>
+#include <iomanip>
 #include <sstream>
 #include <Eigen/Geometry>
 

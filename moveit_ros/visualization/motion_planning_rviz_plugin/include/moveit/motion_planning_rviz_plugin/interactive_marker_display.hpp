@@ -45,6 +45,7 @@
 #include <rclcpp/executors/single_threaded_executor.hpp>
 #include <rclcpp/node.hpp>
 #include <rclcpp/version.h>
+#include <rclcpp/executors.hpp>
 
 #include <visualization_msgs/msg/interactive_marker.hpp>
 #include <visualization_msgs/msg/interactive_marker_update.hpp>
