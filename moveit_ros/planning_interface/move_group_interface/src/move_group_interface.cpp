@@ -753,18 +753,18 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    if (code != rclcpp_action::ResultCode::SUCCEEDED)
+    if (state->code != rclcpp_action::ResultCode::SUCCEEDED || !state->res)
     {
       RCLCPP_ERROR_STREAM(logger_, "MoveGroupInterface::plan() failed or timeout reached");
-      return res->error_code;
+      return state->res ? state->res->error_code : moveit::core::MoveItErrorCode::FAILURE;
     }
 
-    plan.trajectory = res->planned_trajectory;
-    plan.start_state = res->trajectory_start;
-    plan.planning_time = res->planning_time;
+    plan.trajectory = state->res->planned_trajectory;
+    plan.start_state = state->res->trajectory_start;
+    plan.planning_time = state->res->planning_time;
     RCLCPP_INFO(logger_, "time taken to generate plan: %g seconds", plan.planning_time);
 
-    return res->error_code;
+    return state->res->error_code;
   }
 
   moveit::core::MoveItErrorCode move(bool wait)
@@ -843,11 +843,12 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    if (code != rclcpp_action::ResultCode::SUCCEEDED)
+    if (state->code != rclcpp_action::ResultCode::SUCCEEDED || !state->res)
     {
       RCLCPP_ERROR_STREAM(logger_, "MoveGroupInterface::move() failed or timeout reached");
+      return state->res ? state->res->error_code : moveit::core::MoveItErrorCode::FAILURE;
     }
-    return res->error_code;
+    return state->res->error_code;
   }
 
   moveit::core::MoveItErrorCode execute(const moveit_msgs::msg::RobotTrajectory& trajectory, bool wait,
@@ -925,11 +926,12 @@ public:
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
-    if (code != rclcpp_action::ResultCode::SUCCEEDED)
+    if (state->code != rclcpp_action::ResultCode::SUCCEEDED || !state->res)
     {
       RCLCPP_ERROR_STREAM(logger_, "MoveGroupInterface::execute() failed or timeout reached");
+      return state->res ? state->res->error_code : moveit::core::MoveItErrorCode::FAILURE;
     }
-    return res->error_code;
+    return state->res->error_code;
   }
 
   double computeCartesianPath(const std::vector<geometry_msgs::msg::Pose>& waypoints, double step,
