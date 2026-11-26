@@ -44,6 +44,7 @@
 #include <moveit/utils/message_checks.hpp>
 #include <moveit/move_group/capability_names.hpp>
 #include <moveit/utils/logger.hpp>
+#include <moveit/utils/moveit_error_code.hpp>
 
 namespace move_group
 {
@@ -219,8 +220,13 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
         context_->planning_scene_monitor_->copyPlanningScene(goal->get_goal()->planning_options.planning_scene_diff);
     if (!planning_pipeline->generatePlan(scene, goal->get_goal()->request, res, context_->debug_))
     {
-      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed.");
-      res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      if (res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::SUCCESS ||
+          res.error_code.val == moveit_msgs::msg::MoveItErrorCodes::UNDEFINED)
+      {
+        res.error_code.val = moveit_msgs::msg::MoveItErrorCodes::FAILURE;
+      }
+      RCLCPP_ERROR(getLogger(), "Generating a plan with planning pipeline failed: %s",
+                   moveit::core::errorCodeToString(res.error_code).c_str());
     }
   }
   catch (std::exception& ex)
