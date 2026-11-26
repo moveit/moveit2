@@ -48,6 +48,13 @@ public:
 
   void initialize() override;
 
+protected:
+  bool isStateValid(const planning_scene_monitor::LockedPlanningSceneRO& ls, const moveit::core::RobotState& rs,
+                    const std::string& group_name, const moveit_msgs::msg::Constraints& constraints,
+                    std::vector<moveit_msgs::msg::ContactInformation>& contacts,
+                    std::vector<moveit_msgs::msg::CostSource>& cost_sources,
+                    std::vector<moveit_msgs::msg::ConstraintEvalResult>& constraint_result);
+
 private:
   bool computeService(const std::shared_ptr<rmw_request_id_t>& request_header,
                       const std::shared_ptr<moveit_msgs::srv::GetStateValidity::Request>& req,
