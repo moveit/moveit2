@@ -36,12 +36,13 @@
 
 /* Author: Ioan Sucan, Sachin Chitta */
 
+#include <atomic>
 #include <cstdint>
-#include <stdexcept>
-#include <sstream>
+#include <map>
 #include <memory>
 #include <mutex>
-#include <atomic>
+#include <sstream>
+#include <stdexcept>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/version.h>
@@ -218,13 +219,25 @@ public:
     try
     {
       std::lock_guard<std::mutex> sl(active_goal_mutex_);
-      if (move_action_client_ && active_move_goal_handle_)
+      if (move_action_client_)
       {
-        move_action_client_->async_cancel_goal(active_move_goal_handle_);
+        for (const auto& [goal_id, handle] : active_move_goal_handles_)
+        {
+          if (handle)
+          {
+            move_action_client_->async_cancel_goal(handle);
+          }
+        }
       }
-      if (execute_action_client_ && active_execute_goal_handle_)
+      if (execute_action_client_)
       {
-        execute_action_client_->async_cancel_goal(active_execute_goal_handle_);
+        for (const auto& [goal_id, handle] : active_execute_goal_handles_)
+        {
+          if (handle)
+          {
+            execute_action_client_->async_cancel_goal(handle);
+          }
+        }
       }
     }
     catch (...)
@@ -715,7 +728,7 @@ public:
           {
             RCLCPP_INFO(logger_, "Planning request accepted");
             std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_move_goal_handle_ = goal_handle;
+            active_move_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
           }
         };
     send_goal_opts.result_callback =
@@ -724,7 +737,7 @@ public:
           state->code = result.code;
           {
             std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_move_goal_handle_.reset();
+            active_move_goal_handles_.erase(result.goal_id);
           }
           state->done = true;
 
@@ -804,7 +817,7 @@ public:
           {
             RCLCPP_INFO(logger_, "Plan and Execute request accepted");
             std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_move_goal_handle_ = goal_handle;
+            active_move_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
           }
         };
     send_goal_opts.result_callback =
@@ -813,7 +826,7 @@ public:
           state->code = result.code;
           {
             std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_move_goal_handle_.reset();
+            active_move_goal_handles_.erase(result.goal_id);
           }
           state->done = true;
 
@@ -881,7 +894,7 @@ public:
           {
             RCLCPP_INFO(logger_, "Execute request accepted");
             std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_execute_goal_handle_ = goal_handle;
+            active_execute_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
           }
         };
     send_goal_opts.result_callback =
@@ -891,7 +904,7 @@ public:
           state->code = result.code;
           {
             std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_execute_goal_handle_.reset();
+            active_execute_goal_handles_.erase(result.goal_id);
           }
           state->done = true;
 
@@ -1299,8 +1312,10 @@ private:
 
   // Active goal handles (protected by mutex). Stored so they can be cancelled on destruction
   std::mutex active_goal_mutex_;
-  rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr active_move_goal_handle_;
-  rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr active_execute_goal_handle_;
+  std::map<rclcpp_action::GoalUUID, rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr>
+      active_move_goal_handles_;
+  std::map<rclcpp_action::GoalUUID, rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr>
+      active_execute_goal_handles_;
 
   // general planning params
   moveit_msgs::msg::RobotState considered_start_state_;
