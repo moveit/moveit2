@@ -349,7 +349,8 @@ KinematicState Servo::haltJoints(const std::vector<size_t>& joint_variables_to_h
 
   const bool all_joint_halt =
       (getCommandType() == CommandType::JOINT_JOG && servo_params_.halt_all_joints_in_joint_mode) ||
-      (getCommandType() == CommandType::TWIST && servo_params_.halt_all_joints_in_cartesian_mode);
+      ((getCommandType() == CommandType::TWIST || getCommandType() == CommandType::POSE) &&
+       servo_params_.halt_all_joints_in_cartesian_mode);
 
   if (all_joint_halt)
   {
