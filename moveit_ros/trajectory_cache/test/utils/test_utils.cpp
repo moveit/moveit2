@@ -144,42 +144,13 @@ class RestateInNewFrameParameterizedTest : public testing::WithParamInterface<Re
 };
 
 INSTANTIATE_TEST_SUITE_P(RestateInNewFrameParameterizedTests, RestateInNewFrameParameterizedTest,
-                         ValuesIn<RestateInNewFrameTestCase>({ {
-                                                                   .test_name = "TranslateAndRotate",
-                                                                   .translate = true,
-                                                                   .rotate = true,
-                                                                   .expected_translation_x = 2,
-                                                                   .expected_translation_y = 4,
-                                                                   .expected_translation_z = 6,
-                                                                   .expected_rotation_x = 0,
-                                                                   .expected_rotation_y = 0,
-                                                                   .expected_rotation_z = 0.707,
-                                                                   .expected_rotation_w = 0.707,
-                                                               },
-                                                               {
-                                                                   .test_name = "NullTranslationIgnoresTranslation",
-                                                                   .translate = false,
-                                                                   .rotate = true,
-                                                                   .expected_translation_x = 1,
-                                                                   .expected_translation_y = 2,
-                                                                   .expected_translation_z = 3,
-                                                                   .expected_rotation_x = 0,
-                                                                   .expected_rotation_y = 0,
-                                                                   .expected_rotation_z = 0.707,
-                                                                   .expected_rotation_w = 0.707,
-                                                               },
-                                                               {
-                                                                   .test_name = "NullRotationIgnoresRotation",
-                                                                   .translate = true,
-                                                                   .rotate = false,
-                                                                   .expected_translation_x = 2,
-                                                                   .expected_translation_y = 4,
-                                                                   .expected_translation_z = 6,
-                                                                   .expected_rotation_x = 0,
-                                                                   .expected_rotation_y = 0,
-                                                                   .expected_rotation_z = 0,
-                                                                   .expected_rotation_w = 1,
-                                                               } }),
+                         ValuesIn<RestateInNewFrameTestCase>({
+                             // { test_name, translate, rotate,
+                             //   expected_translation_{x,y,z}, expected_rotation_{x,y,z,w} }
+                             { "TranslateAndRotate", true, true, 2, 4, 6, 0, 0, 0.707, 0.707 },
+                             { "NullTranslationIgnoresTranslation", false, true, 1, 2, 3, 0, 0, 0.707, 0.707 },
+                             { "NullRotationIgnoresRotation", true, false, 2, 4, 6, 0, 0, 0, 1 },
+                         }),
                          [](const TestParamInfo<RestateInNewFrameParameterizedTest::ParamType>& info) {
                            return info.param.test_name;
                          });

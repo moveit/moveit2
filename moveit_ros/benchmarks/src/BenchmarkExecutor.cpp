@@ -806,7 +806,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
         planner_start_function(request, planner_data);
       }
 
-      moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params;
+      moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params{};
       plan_req_params.planner_id = planner_id;
       plan_req_params.planning_pipeline = pipeline_entry.first;
       plan_req_params.planning_attempts = request.num_planning_attempts;
@@ -900,7 +900,7 @@ void BenchmarkExecutor::runBenchmark(moveit_msgs::msg::MotionPlanRequest request
       moveit_cpp::PlanningComponent::MultiPipelinePlanRequestParameters multi_pipeline_plan_request;
       for (const auto& pipeline_planner_id_pair : parallel_pipeline_entry.second)
       {
-        moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params;
+        moveit_cpp::PlanningComponent::PlanRequestParameters plan_req_params{};
         plan_req_params.planner_id = pipeline_planner_id_pair.second;
         plan_req_params.planning_pipeline = pipeline_planner_id_pair.first;
         plan_req_params.planning_attempts = request.num_planning_attempts;
