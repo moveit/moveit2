@@ -37,6 +37,8 @@
 /* Author: Ioan Sucan, Sachin Chitta */
 
 #include <atomic>
+#include <chrono>
+#include <condition_variable>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -215,10 +217,18 @@ public:
     if (constraints_init_thread_)
       constraints_init_thread_->join();
 
-    // Attempt to cancel any active goals to avoid callbacks accessing destroyed state
+    // Attempt to cancel any active and in-flight goals to avoid callbacks accessing destroyed state
     try
     {
-      std::lock_guard<std::mutex> sl(active_goal_mutex_);
+      std::unique_lock<std::mutex> sl(active_goal_mutex_);
+      shutting_down_ = true;
+
+      // Bounded wait for in-flight goal submissions to receive response before stopping executor
+      if (in_flight_goal_requests_ > 0)
+      {
+        in_flight_cv_.wait_for(sl, std::chrono::seconds(2), [this] { return in_flight_goal_requests_ == 0; });
+      }
+
       if (move_action_client_)
       {
         for (const auto& [goal_id, handle] : active_move_goal_handles_)
@@ -719,6 +729,12 @@ public:
 
     send_goal_opts.goal_response_callback =
         [this, state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr& goal_handle) {
+          std::lock_guard<std::mutex> sl(active_goal_mutex_);
+          if (in_flight_goal_requests_ > 0)
+          {
+            --in_flight_goal_requests_;
+            in_flight_cv_.notify_all();
+          }
           if (!goal_handle)
           {
             state->done = true;
@@ -727,8 +743,14 @@ public:
           else
           {
             RCLCPP_INFO(logger_, "Planning request accepted");
-            std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_move_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
+            if (shutting_down_)
+            {
+              move_action_client_->async_cancel_goal(goal_handle);
+            }
+            else
+            {
+              active_move_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
+            }
           }
         };
     send_goal_opts.result_callback =
@@ -758,7 +780,31 @@ public:
           }
         };
 
-    auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
+    {
+      std::lock_guard<std::mutex> sl(active_goal_mutex_);
+      if (shutting_down_)
+      {
+        RCLCPP_ERROR(logger_, "Cannot plan: MoveGroupInterface is shutting down");
+        return moveit::core::MoveItErrorCode::FAILURE;
+      }
+      ++in_flight_goal_requests_;
+    }
+
+    std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> goal_handle_future;
+    try
+    {
+      goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
+    }
+    catch (...)
+    {
+      std::lock_guard<std::mutex> sl(active_goal_mutex_);
+      if (in_flight_goal_requests_ > 0)
+      {
+        --in_flight_goal_requests_;
+        in_flight_cv_.notify_all();
+      }
+      throw;
+    }
 
     // wait until send_goal_opts.result_callback is called
     while (!state->done)
@@ -808,6 +854,12 @@ public:
 
     send_goal_opts.goal_response_callback =
         [this, state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr& goal_handle) {
+          std::lock_guard<std::mutex> sl(active_goal_mutex_);
+          if (in_flight_goal_requests_ > 0)
+          {
+            --in_flight_goal_requests_;
+            in_flight_cv_.notify_all();
+          }
           if (!goal_handle)
           {
             state->done = true;
@@ -816,8 +868,14 @@ public:
           else
           {
             RCLCPP_INFO(logger_, "Plan and Execute request accepted");
-            std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_move_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
+            if (shutting_down_)
+            {
+              move_action_client_->async_cancel_goal(goal_handle);
+            }
+            else
+            {
+              active_move_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
+            }
           }
         };
     send_goal_opts.result_callback =
@@ -846,7 +904,31 @@ public:
               return;
           }
         };
-    auto goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
+    {
+      std::lock_guard<std::mutex> sl(active_goal_mutex_);
+      if (shutting_down_)
+      {
+        RCLCPP_ERROR(logger_, "Cannot move: MoveGroupInterface is shutting down");
+        return moveit::core::MoveItErrorCode::FAILURE;
+      }
+      ++in_flight_goal_requests_;
+    }
+
+    std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr> goal_handle_future;
+    try
+    {
+      goal_handle_future = move_action_client_->async_send_goal(goal, send_goal_opts);
+    }
+    catch (...)
+    {
+      std::lock_guard<std::mutex> sl(active_goal_mutex_);
+      if (in_flight_goal_requests_ > 0)
+      {
+        --in_flight_goal_requests_;
+        in_flight_cv_.notify_all();
+      }
+      throw;
+    }
     if (!wait)
       return moveit::core::MoveItErrorCode::SUCCESS;
 
@@ -885,6 +967,12 @@ public:
     send_goal_opts.goal_response_callback =
         [this,
          state](const rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr& goal_handle) {
+          std::lock_guard<std::mutex> sl(active_goal_mutex_);
+          if (in_flight_goal_requests_ > 0)
+          {
+            --in_flight_goal_requests_;
+            in_flight_cv_.notify_all();
+          }
           if (!goal_handle)
           {
             state->done = true;
@@ -893,8 +981,14 @@ public:
           else
           {
             RCLCPP_INFO(logger_, "Execute request accepted");
-            std::lock_guard<std::mutex> sl(active_goal_mutex_);
-            active_execute_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
+            if (shutting_down_)
+            {
+              execute_action_client_->async_cancel_goal(goal_handle);
+            }
+            else
+            {
+              active_execute_goal_handles_[goal_handle->get_goal_id()] = goal_handle;
+            }
           }
         };
     send_goal_opts.result_callback =
@@ -929,7 +1023,32 @@ public:
     goal.trajectory = trajectory;
     goal.controller_names = controllers;
 
-    auto goal_handle_future = execute_action_client_->async_send_goal(goal, send_goal_opts);
+    {
+      std::lock_guard<std::mutex> sl(active_goal_mutex_);
+      if (shutting_down_)
+      {
+        RCLCPP_ERROR(logger_, "Cannot execute: MoveGroupInterface is shutting down");
+        return moveit::core::MoveItErrorCode::FAILURE;
+      }
+      ++in_flight_goal_requests_;
+    }
+
+    std::shared_future<rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr>
+        goal_handle_future;
+    try
+    {
+      goal_handle_future = execute_action_client_->async_send_goal(goal, send_goal_opts);
+    }
+    catch (...)
+    {
+      std::lock_guard<std::mutex> sl(active_goal_mutex_);
+      if (in_flight_goal_requests_ > 0)
+      {
+        --in_flight_goal_requests_;
+        in_flight_cv_.notify_all();
+      }
+      throw;
+    }
     if (!wait)
       return moveit::core::MoveItErrorCode::SUCCESS;
 
@@ -1310,8 +1429,11 @@ private:
   // std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::Place>> place_action_client_;
   std::shared_ptr<rclcpp_action::Client<moveit_msgs::action::ExecuteTrajectory>> execute_action_client_;
 
-  // Active goal handles (protected by mutex). Stored so they can be cancelled on destruction
+  // Active and in-flight goal tracking (protected by mutex). Stored so they can be cancelled on destruction
   std::mutex active_goal_mutex_;
+  std::condition_variable in_flight_cv_;
+  bool shutting_down_ = false;
+  size_t in_flight_goal_requests_ = 0;
   std::map<rclcpp_action::GoalUUID, rclcpp_action::ClientGoalHandle<moveit_msgs::action::MoveGroup>::SharedPtr>
       active_move_goal_handles_;
   std::map<rclcpp_action::GoalUUID, rclcpp_action::ClientGoalHandle<moveit_msgs::action::ExecuteTrajectory>::SharedPtr>
