@@ -422,4 +422,17 @@ const std::vector<std::string>& SrvKinematicsPlugin::getVariableNames() const
   return joint_model_group_->getVariableNames();
 }
 
+bool SrvKinematicsPlugin::supportsGroup(const moveit::core::JointModelGroup* jmg, std::string* error_text_out) const
+{
+  if (!jmg)
+  {
+    if (error_text_out)
+    {
+      *error_text_out = "No joint model group provided";
+    }
+    return false;
+  }
+  return true;
+}
+
 }  // namespace srv_kinematics_plugin
