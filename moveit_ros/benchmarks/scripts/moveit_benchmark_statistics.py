@@ -393,6 +393,12 @@ def readBenchmarkLog(dbname, filenames):
     c.close()
 
 
+def isTrue(value):
+    """Return whether a BOOLEAN value from the database is true. MoveIt logs
+    booleans as "true"/"false", OMPL logs them as 1/0."""
+    return str(value).strip().lower() in ("1", "true")
+
+
 def plotAttribute(cur, planners, attribute, typename):
     """Create a plot for a particular attribute. It will include data for
     all planners that have data for this attribute."""
@@ -459,7 +465,9 @@ def plotAttribute(cur, planners, attribute, typename):
         ax.legend(loc="center left", bbox_to_anchor=(1, 0.5), prop=props)
     elif typename == "BOOLEAN":
         width = 0.5
-        measurementsPercentage = [sum(m) * 100.0 / len(m) for m in measurements]
+        measurementsPercentage = [
+            sum(isTrue(x) for x in m) * 100.0 / len(m) for m in measurements
+        ]
         ind = range(len(measurements))
         plt.bar(ind, measurementsPercentage, width)
 
@@ -476,11 +484,9 @@ def plotAttribute(cur, planners, attribute, typename):
         )  # Squish the plot into the upper 2/3 of the page.  Leave room for labels
     else:
         if int(matplotlibversion.split(".")[0]) < 1:
-            plt.boxplot(measurements, notch=0, sym="k+", vert=1, whis=1.5)
+            plt.boxplot(measurements, notch=0, sym="k+", whis=1.5)
         else:
-            plt.boxplot(
-                measurements, notch=0, sym="k+", vert=1, whis=1.5, bootstrap=1000
-            )
+            plt.boxplot(measurements, notch=0, sym="k+", whis=1.5, bootstrap=1000)
         ax.set_ylabel(attribute.replace("_", " "))
 
         # xtickNames = plt.xticks(labels, rotation=30, fontsize=10)
@@ -495,7 +501,7 @@ def plotAttribute(cur, planners, attribute, typename):
         for (
             tick
         ) in ax.xaxis.get_major_ticks():  # shrink the font size of the x tick labels
-            tick.label.set_fontsize(8)
+            tick.label1.set_fontsize(8)
         plt.subplots_adjust(
             bottom=0.3
         )  # Squish the plot into the upper 2/3 of the page.  Leave room for labels
@@ -616,10 +622,10 @@ def plotStatistics(dbname, fname):
             % experiment[0]
         )
         numRuns = [run[0] for run in c.fetchall()]
-        numRuns = numRuns[0] if len(set(numRuns)) == 1 else ",".join(numRuns)
+        numRuns = ", ".join(str(n) for n in sorted(set(numRuns)))
 
         plt.figtext(pagex, pagey, 'Experiment "%s"' % experiment[1])
-        plt.figtext(pagex, pagey - 0.05, "Number of averaged runs: %d" % numRuns)
+        plt.figtext(pagex, pagey - 0.05, "Number of averaged runs: %s" % numRuns)
         plt.figtext(
             pagex, pagey - 0.10, "Time limit per run: %g seconds" % experiment[2]
         )
@@ -784,9 +790,8 @@ if __name__ == "__main__":
     if options.view:
         computeViews(options.dbname)
 
-    # TODO(sjahr): This is currently broken and needs to be fixed
-    # if options.plot:
-    #    plotStatistics(options.dbname, options.plot)
+    if options.plot:
+        plotStatistics(options.dbname, options.plot)
 
     if options.mysqldb:
         saveAsMysql(options.dbname, options.mysqldb)

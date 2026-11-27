@@ -32,6 +32,10 @@
   <exec_depend>libboost-date-time</exec_depend>
   <exec_depend>moveit_configs_utils</exec_depend>
   <exec_depend>launch_param_builder</exec_depend>
+  <exec_depend>python3-matplotlib</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+
+  <test_depend>ament_cmake_pytest</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
