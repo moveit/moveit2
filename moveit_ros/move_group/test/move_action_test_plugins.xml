@@ -1,0 +1,12 @@
+<library path="move_action_test_plugins">
+  <class name="move_group_test/MockPlannerManager"
+         type="move_group_test::MockPlannerManager"
+         base_class_type="planning_interface::PlannerManager">
+    <description>Deterministic mock planner manager for MoveGroup action tests.</description>
+  </class>
+  <class name="move_group_test/MockControllerManager"
+         type="move_group_test::MockControllerManager"
+         base_class_type="moveit_controller_manager::MoveItControllerManager">
+    <description>Deterministic mock controller manager for MoveGroup action tests.</description>
+  </class>
+</library>

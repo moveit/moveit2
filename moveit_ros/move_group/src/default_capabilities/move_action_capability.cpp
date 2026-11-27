@@ -170,8 +170,9 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
   opt.replan_delay = goal->get_goal()->planning_options.replan_delay;
   opt.before_execution_callback_ = [this] { startMoveExecutionCallback(); };
 
-  opt.plan_callback = [this, &motion_plan_request](plan_execution::ExecutableMotionPlan& plan) {
-    return planUsingPlanningPipeline(motion_plan_request, plan);
+  double planning_time = 0.0;
+  opt.plan_callback = [this, &motion_plan_request, &planning_time](plan_execution::ExecutableMotionPlan& plan) {
+    return planUsingPlanningPipeline(motion_plan_request, plan, planning_time);
   };
 
   plan_execution::ExecutableMotionPlan plan;
@@ -188,6 +189,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanAndExecute(const std::shared_pt
   if (plan.executed_trajectory)
     plan.executed_trajectory->getRobotTrajectoryMsg(action_res->executed_trajectory);
   action_res->error_code = plan.error_code;
+  action_res->planning_time = planning_time;
 }
 
 void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGActionGoal>& goal,
@@ -235,7 +237,7 @@ void MoveGroupMoveAction::executeMoveCallbackPlanOnly(const std::shared_ptr<MGAc
 }
 
 bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::MotionPlanRequest& req,
-                                                    plan_execution::ExecutableMotionPlan& plan)
+                                                    plan_execution::ExecutableMotionPlan& plan, double& planning_time)
 {
   setMoveState(PLANNING, goal_);
 
@@ -266,6 +268,8 @@ bool MoveGroupMoveAction::planUsingPlanningPipeline(const planning_interface::Mo
     plan.plan_components[0].description = "plan";
   }
   plan.error_code = res.error_code;
+  // Accumulate planner-reported duration across replanning attempts (excludes execution and replan_delay).
+  planning_time += res.planning_time;
 
   return solved;
 }
