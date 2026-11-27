@@ -153,7 +153,83 @@ install(PROGRAMS scripts/load_map scripts/save_map
 pluginlib_export_plugin_description_file(
   moveit_ros_move_group default_capabilities_plugin_description.xml)
 
-if(BUILD_TESTING)
+# Process-group cleanup uses the POSIX platforms supported by CI.
+if(BUILD_TESTING AND UNIX)
+  find_package(ament_cmake_gtest REQUIRED)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  find_package(class_loader REQUIRED)
+  find_package(moveit_msgs REQUIRED)
+  find_package(sensor_msgs REQUIRED)
+  find_package(shape_msgs REQUIRED)
+
+  add_library(move_action_test_plugins SHARED test/move_action_test_plugins.cpp)
+  target_link_libraries(
+    move_action_test_plugins moveit_core::moveit_core ${moveit_msgs_TARGETS}
+    class_loader::class_loader rclcpp::rclcpp pluginlib::pluginlib)
+  set_target_properties(move_action_test_plugins
+                        PROPERTIES VERSION "${moveit_ros_move_group_VERSION}")
+  install(TARGETS move_action_test_plugins LIBRARY DESTINATION lib)
+  pluginlib_export_plugin_description_file(moveit_core
+                                           test/move_action_test_plugins.xml)
+
+  ament_add_gtest_executable(
+    test_move_action_planning_time test/test_move_action_planning_time.cpp
+    SKIP_LINKING_MAIN_LIBRARIES)
+  target_link_libraries(
+    test_move_action_planning_time
+    move_action_test_plugins
+    moveit_move_group_capabilities_base
+    moveit_core::moveit_core
+    moveit_ros_planning::moveit_ros_planning
+    ${moveit_msgs_TARGETS}
+    ${sensor_msgs_TARGETS}
+    ${shape_msgs_TARGETS}
+    pluginlib::pluginlib
+    rclcpp::rclcpp
+    rclcpp_action::rclcpp_action)
+
+  # One fresh executable per case: ROS/DDS are never initialized in a fork
+  # child.
+  foreach(
+    test_case IN
+    ITEMS PlanOnlyReportsPlanningTime
+          PlanAndExecuteReportsPlanningTime
+          AlreadySatisfiedGoalSkipsPlanningWithZeroTime
+          PlanningFailureReportsAttemptPlanningTime
+          ExecutionFailureReportsControlFailedAndPlanningTime
+          ReplanningReportsCumulativePlanningTime
+          SuccessfulFirstPlanInvalidatedThenFailedReplanExcludesExecAndDelay
+          CancellationDuringExecutionReportsCanceledAndPlanningTime
+          NoStalePlanningTimeAcrossRequests)
+    set(result_file
+        "${AMENT_TEST_RESULTS_DIR}/${PROJECT_NAME}/${test_case}.gtest.xml")
+    ament_add_test(
+      "test_move_action_planning_time.${test_case}"
+      COMMAND
+      "${Python3_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/test/run_move_action_test.py"
+      --timeout
+      30
+      "$<TARGET_FILE:test_move_action_planning_time>"
+      "--gtest_filter=MoveActionPlanningTimeTest.${test_case}"
+      "--gtest_output=xml:${result_file}"
+      RESULT_FILE
+      "${result_file}"
+      OUTPUT_FILE
+      "${CMAKE_BINARY_DIR}/move_action_test_logs/${test_case}.log"
+      TIMEOUT
+      40)
+  endforeach()
+
+  ament_add_test(
+    test_move_action_launcher
+    COMMAND
+    "${Python3_EXECUTABLE}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test/test_run_move_action_test.py"
+    GENERATE_RESULT_FOR_RETURN_CODE_ZERO
+    TIMEOUT
+    15)
+
   # TODO(henningkayser): enable rostests find_package(rostest REQUIRED) #
   # rostest under development in ROS2
   # https://github.com/moveit/moveit2/issues/23 this test is flaky

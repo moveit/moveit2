@@ -66,7 +66,7 @@ private:
   void setMoveState(MoveGroupState state, const std::shared_ptr<MGActionGoal>& goal);
 
   bool planUsingPlanningPipeline(const planning_interface::MotionPlanRequest& req,
-                                 plan_execution::ExecutableMotionPlan& plan);
+                                 plan_execution::ExecutableMotionPlan& plan, double& planning_time);
 
   std::shared_ptr<rclcpp_action::Server<MGAction>> execute_action_server_;
 
