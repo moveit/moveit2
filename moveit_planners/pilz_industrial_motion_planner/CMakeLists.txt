@@ -70,44 +70,51 @@ add_library(
 target_link_libraries(
   joint_limits_common
   cartesian_limits_parameters
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  moveit_core::moveit_utils
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
   moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  random_numbers::random_numbers
+  srdfdom::srdfdom
+  geometric_shapes::geometric_shapes
+  eigen_stl_containers::eigen_stl_containers
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 add_library(planning_context_loader_base SHARED src/planning_context_loader.cpp)
 target_link_libraries(
   planning_context_loader_base
   cartesian_limits_parameters
   joint_limits_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 add_library(
   trajectory_generation_common SHARED
@@ -117,22 +124,23 @@ target_link_libraries(
   trajectory_generation_common
   cartesian_limits_parameters
   joint_limits_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
   tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 add_library(command_list_manager SHARED src/command_list_manager.cpp
                                         src/plan_components_builder.cpp)
@@ -140,22 +148,23 @@ target_link_libraries(
   command_list_manager
   trajectory_generation_common
   joint_limits_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 # ##############################################################################
 # Plugins ##
@@ -167,22 +176,23 @@ target_link_libraries(
   pilz_industrial_motion_planner
   planning_context_loader_base
   joint_limits_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 add_library(
   planning_context_loader_ptp SHARED
@@ -193,22 +203,23 @@ target_link_libraries(
   planning_context_loader_base
   joint_limits_common
   trajectory_generation_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 add_library(
   planning_context_loader_lin SHARED
@@ -219,22 +230,23 @@ target_link_libraries(
   planning_context_loader_base
   joint_limits_common
   trajectory_generation_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 add_library(
   planning_context_loader_circ SHARED
@@ -245,22 +257,23 @@ target_link_libraries(
   planning_context_loader_base
   joint_limits_common
   trajectory_generation_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 add_library(
   planning_context_loader_polyline SHARED
@@ -272,22 +285,23 @@ target_link_libraries(
   planning_context_loader_base
   joint_limits_common
   trajectory_generation_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 add_library(sequence_capability SHARED src/move_group_sequence_action.cpp
                                        src/move_group_sequence_service.cpp)
@@ -296,22 +310,24 @@ target_link_libraries(
   joint_limits_common
   command_list_manager
   trajectory_generation_common
-  Eigen3::Eigen
-  ${geometry_msgs_TARGETS}
-  moveit_core::moveit_core
-  ${moveit_msgs_TARGETS}
-  moveit_ros_move_group::moveit_ros_move_group
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_eigen_kdl::tf2_eigen_kdl
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_kdl::tf2_kdl
-  tf2_ros::tf2_ros
-  ${orocos_kdl_LIBRARIES}
-  Boost::headers)
+  #Eigen3::Eigen
+  #${geometry_msgs_TARGETS}
+  #moveit_core::moveit_core
+  #${moveit_msgs_TARGETS}
+  ${moveit_ros_planning_interface_TARGETS}
+  #moveit_ros_move_group::moveit_ros_move_group
+  #moveit_ros_planning::moveit_ros_planning
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_eigen_kdl::tf2_eigen_kdl
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_kdl::tf2_kdl
+  #tf2_ros::tf2_ros
+  #${orocos_kdl_LIBRARIES}
+  #Boost::headers
+  )
 
 # ##############################################################################
 # Install ##
@@ -347,8 +363,8 @@ install(
 install(DIRECTORY include/ DESTINATION include/pilz_industrial_motion_planner)
 
 ament_export_include_directories(include/pilz_industrial_motion_planner)
-ament_export_targets(pilz_industrial_motion_plannerTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
+#ament_export_targets(pilz_industrial_motion_plannerTargets HAS_LIBRARY_TARGET)
+#ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS} orocos_kdl_vendor)
 
 if(BUILD_TESTING)
   # Include Tests

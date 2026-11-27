@@ -127,7 +127,7 @@ install(
   DESTINATION include/moveit_ros_planning)
 
 ament_export_targets(moveit_ros_planningTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+#ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 rclcpp_components_register_node(
   srdf_publisher_node PLUGIN "moveit_ros_planning::SrdfPublisher" EXECUTABLE
@@ -143,3 +143,4 @@ if(BUILD_TESTING)
 endif()
 
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
+

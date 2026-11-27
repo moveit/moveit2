@@ -10,38 +10,47 @@ target_link_libraries(moveit_print_planning_model_info
 add_executable(moveit_print_planning_scene_info
                src/print_planning_scene_info.cpp)
 target_link_libraries(moveit_print_planning_scene_info
-                      moveit_planning_scene_monitor rclcpp::rclcpp)
+                      moveit_planning_scene_monitor 
+                      #rclcpp::rclcpp
+                      )
 
 add_executable(moveit_display_random_state src/display_random_state.cpp)
 target_link_libraries(moveit_display_random_state moveit_planning_scene_monitor
-                      rclcpp::rclcpp)
+                      #rclcpp::rclcpp
+                      )
 
 add_executable(moveit_visualize_robot_collision_volume
                src/visualize_robot_collision_volume.cpp)
 target_link_libraries(
   moveit_visualize_robot_collision_volume
   PRIVATE moveit_planning_scene_monitor
-  PUBLIC rclcpp::rclcpp tf2_ros::tf2_ros)
+  #PUBLIC rclcpp::rclcpp tf2_ros::tf2_ros
+  )
 
 add_executable(moveit_evaluate_collision_checking_speed
                src/evaluate_collision_checking_speed.cpp)
 target_link_libraries(
   moveit_evaluate_collision_checking_speed moveit_planning_scene_monitor
-  rclcpp::rclcpp Boost::headers Boost::program_options)
+  #rclcpp::rclcpp Boost::headers
+  Boost::program_options
+  )
 
 if("${catkin_LIBRARIES}" MATCHES "moveit_collision_detection_bullet")
   add_executable(moveit_compare_collision_checking_speed_fcl_bullet
                  src/compare_collision_speed_checking_fcl_bullet.cpp)
   target_link_libraries(
     moveit_compare_collision_checking_speed_fcl_bullet
-    moveit_planning_scene_monitor ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+    moveit_planning_scene_monitor
+    #${catkin_LIBRARIES} ${Boost_LIBRARIES}
+    )
 endif()
 
 add_executable(moveit_publish_scene_from_text src/publish_scene_from_text.cpp)
 target_link_libraries(
   moveit_publish_scene_from_text
   PRIVATE moveit_planning_scene_monitor moveit_robot_model_loader
-  PUBLIC rclcpp::rclcpp)
+  #PUBLIC rclcpp::rclcpp
+  )
 
 install(
   TARGETS moveit_print_planning_model_info

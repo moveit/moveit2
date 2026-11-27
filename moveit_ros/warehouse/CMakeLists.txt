@@ -11,6 +11,8 @@ find_package(rclcpp REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(warehouse_ros REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
+#find_package(moveit_ros_planning_interface REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(tf2_ros REQUIRED)
 
@@ -27,7 +29,8 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     warehouse_ros
     moveit_ros_planning
     tf2_eigen
-    tf2_ros)
+    tf2_ros
+    )
 
 # Libraries
 add_library(
@@ -50,6 +53,9 @@ target_link_libraries(
   fmt::fmt
   Boost::headers
   moveit_core::moveit_core
+  moveit_core::moveit_planning_scene
+  #moveit_planning_scene_monitor::moveit_planning_scene_monitor
+  #moveit_ros_planning::moveit_planning_scene_monitor
   rclcpp::rclcpp
   warehouse_ros::warehouse_ros
   moveit_ros_planning::moveit_ros_planning

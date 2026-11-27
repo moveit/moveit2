@@ -49,13 +49,14 @@ target_include_directories(
                          $<INSTALL_INTERFACE:include/moveit_setup_core_plugins>)
 target_link_libraries(
   ${PROJECT_NAME}
-  ament_index_cpp::ament_index_cpp
-  moveit_ros_visualization::moveit_ros_visualization
+  #ament_index_cpp::ament_index_cpp
+  #moveit_ros_visualization::moveit_ros_visualization
   moveit_setup_framework::moveit_setup_framework
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  srdfdom::srdfdom
-  urdf::urdf)
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #srdfdom::srdfdom
+  #urdf::urdf
+  )
 
 install(
   TARGETS moveit_setup_core_plugins
@@ -69,7 +70,7 @@ install(FILES moveit_setup_framework_plugins.xml
         DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY include/ DESTINATION include/moveit_setup_core_plugins)
 
-ament_export_targets(moveit_setup_core_pluginsTargets HAS_LIBRARY_TARGET)
+#ament_export_targets(moveit_setup_core_pluginsTargets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework
                                          moveit_setup_framework_plugins.xml)
 

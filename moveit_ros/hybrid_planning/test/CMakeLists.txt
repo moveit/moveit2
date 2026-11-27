@@ -2,17 +2,18 @@ add_executable(cancel_action cancel_action.cpp)
 target_link_libraries(
   cancel_action
   PUBLIC moveit_core::moveit_core
-         ${moveit_msgs_TARGETS}
-         moveit_ros_planning::moveit_ros_planning
+         #${moveit_msgs_TARGETS}
+         #moveit_ros_planning::moveit_ros_planning
          moveit_ros_planning_interface::moveit_ros_planning_interface
-         pluginlib::pluginlib
-         rclcpp::rclcpp
-         rclcpp_action::rclcpp_action
-         rclcpp_components::component
-         ${std_msgs_TARGETS}
-         ${std_srvs_TARGETS}
-         tf2_ros::tf2_ros
-         ${trajectory_msgs_TARGETS})
+         #pluginlib::pluginlib
+         #rclcpp::rclcpp
+         #rclcpp_action::rclcpp_action
+         #rclcpp_components::component
+         #${std_msgs_TARGETS}
+         #${std_srvs_TARGETS}
+         #tf2_ros::tf2_ros
+         #${trajectory_msgs_TARGETS}
+         )
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

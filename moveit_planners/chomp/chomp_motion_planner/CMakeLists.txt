@@ -25,8 +25,13 @@ add_library(
 set_target_properties(chomp_motion_planner
                       PROPERTIES VERSION "${chomp_motion_planner_VERSION}")
 target_link_libraries(
-  chomp_motion_planner moveit_core::moveit_core rclcpp::rclcpp rsl::rsl
-  ${trajectory_msgs_TARGETS} ${visualization_msgs_TARGETS})
+  chomp_motion_planner
+  moveit_core::moveit_core
+  #rclcpp::rclcpp
+  #rsl::rsl
+  #${trajectory_msgs_TARGETS}
+  #${visualization_msgs_TARGETS}
+  )
 
 install(
   TARGETS chomp_motion_planner
@@ -39,6 +44,6 @@ install(
 install(DIRECTORY include/ DESTINATION include/chomp_motion_planner)
 
 ament_export_targets(chomp_motion_plannerTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_EXPORT_DEPENDS})
+#ament_export_dependencies(${THIS_PACKAGE_EXPORT_DEPENDS})
 
 ament_package()

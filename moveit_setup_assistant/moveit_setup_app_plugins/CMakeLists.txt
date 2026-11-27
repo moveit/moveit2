@@ -47,11 +47,12 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_setup_app_plugins>)
 target_link_libraries(
   moveit_setup_app_plugins
-  ament_index_cpp::ament_index_cpp
-  moveit_ros_visualization::moveit_ros_visualization
+  #ament_index_cpp::ament_index_cpp
+  #moveit_ros_visualization::moveit_ros_visualization
   moveit_setup_framework::moveit_setup_framework
-  pluginlib::pluginlib
-  rclcpp::rclcpp)
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  )
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
