@@ -34,6 +34,7 @@
 #include <vector>
 
 #include <rclcpp/node_options.hpp>
+#include <rclcpp/version.h>
 
 #include <rviz_common/properties/bool_property.hpp>
 #include <rviz_common/validate_floats.hpp>

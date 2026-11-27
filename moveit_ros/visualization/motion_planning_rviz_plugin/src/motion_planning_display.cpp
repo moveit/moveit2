@@ -72,6 +72,7 @@
 #include <moveit/utils/logger.hpp>
 
 #include <rclcpp/qos.hpp>
+#include <rclcpp/version.h>
 
 namespace moveit_rviz_plugin
 {

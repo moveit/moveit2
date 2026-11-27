@@ -36,8 +36,6 @@
 
 #include <functional>
 
-#include <rclcpp/version.h>
-
 #include <moveit/common_planning_interface_objects/common_objects.hpp>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame.hpp>
 #include <moveit/motion_planning_rviz_plugin/motion_planning_frame_joints_widget.hpp>
@@ -49,13 +47,7 @@
 
 #include <rviz_common/display_context.hpp>
 #include <rviz_common/frame_manager_iface.hpp>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/buffer.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/buffer.h>
-#endif
 
 #include <std_srvs/srv/empty.hpp>
 

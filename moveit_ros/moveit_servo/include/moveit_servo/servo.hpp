@@ -42,7 +42,6 @@
 #pragma once
 
 #include <rclcpp/logger.hpp>
-#include <rclcpp/version.h>
 
 #include <moveit_servo/collision_monitor.hpp>
 #include <moveit_servo/moveit_servo_lib_parameters.hpp>
@@ -54,13 +53,7 @@
 #include <pluginlib/class_loader.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/transform_listener.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/transform_listener.h>
-#endif
 #include <variant>
 #include <queue>
 

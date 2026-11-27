@@ -36,19 +36,12 @@
 
 #pragma once
 
-#include <rclcpp/version.h>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <moveit/macros/class_forward.hpp>
 #include <moveit/robot_interaction/locked_robot_state.hpp>
 #include <visualization_msgs/msg/interactive_marker_feedback.hpp>
 #include <interactive_markers/menu_handler.hpp>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/buffer.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/buffer.h>
-#endif
 
 namespace robot_interaction
 {

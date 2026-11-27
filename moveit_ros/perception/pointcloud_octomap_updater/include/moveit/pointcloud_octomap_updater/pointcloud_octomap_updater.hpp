@@ -38,21 +38,9 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/callback_group.hpp>
-#include <rclcpp/version.h>
-// For Rolling, Kilted, and newer
-#if RCLCPP_VERSION_GTE(29, 6, 0)
 #include <tf2_ros/message_filter.hpp>
 #include <tf2_ros/transform_listener.hpp>
-// For Jazzy and older
-#else
-#include <tf2_ros/message_filter.h>
-#include <tf2_ros/transform_listener.h>
-#endif
-#if RCLCPP_VERSION_GTE(28, 3, 3)  // Rolling
 #include <message_filters/subscriber.hpp>
-#else
-#include <message_filters/subscriber.h>
-#endif
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.hpp>
 #include <moveit/point_containment_filter/shape_mask.hpp>
