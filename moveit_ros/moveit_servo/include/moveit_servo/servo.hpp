@@ -42,7 +42,6 @@
 #pragma once
 
 #include <rclcpp/logger.hpp>
-#include <rclcpp/version.h>
 
 #include <moveit_servo/collision_monitor.hpp>
 #include <moveit_servo/moveit_servo_lib_parameters.hpp>

@@ -37,7 +37,6 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
 #include <tf2_ros/buffer.hpp>
 #include <tf2_ros/transform_listener.hpp>
 #include <moveit/macros/class_forward.hpp>

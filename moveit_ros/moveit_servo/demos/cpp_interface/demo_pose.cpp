@@ -44,7 +44,6 @@
 #include <moveit_servo/utils/common.hpp>
 #include <mutex>
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #include <tf2_ros/transform_listener.hpp>
 #include <moveit/utils/logger.hpp>

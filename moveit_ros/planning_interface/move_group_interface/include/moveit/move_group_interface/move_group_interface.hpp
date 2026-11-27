@@ -49,7 +49,6 @@
 #include <moveit_msgs/action/move_group.hpp>
 #include <moveit_msgs/action/execute_trajectory.hpp>
 #include <rclcpp/logger.hpp>
-#include <rclcpp/version.h>
 
 #include <moveit_msgs/msg/motion_plan_request.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>

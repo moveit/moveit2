@@ -42,7 +42,6 @@
 #include <moveit_msgs/srv/save_map.hpp>
 
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
 #include <tf2_ros/buffer.hpp>
 
 #include <functional>

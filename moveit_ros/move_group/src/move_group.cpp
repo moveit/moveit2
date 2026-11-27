@@ -34,8 +34,6 @@
 
 /* Author: Ioan Sucan */
 
-#include <rclcpp/version.h>
-
 #include <moveit/moveit_cpp/moveit_cpp.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <tf2_ros/transform_listener.hpp>

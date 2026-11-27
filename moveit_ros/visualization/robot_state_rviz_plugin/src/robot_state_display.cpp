@@ -39,6 +39,7 @@
 #include <moveit/utils/message_checks.hpp>
 
 #include <rclcpp/qos.hpp>
+#include <rclcpp/version.h>
 
 // #include <rviz/visualization_manager.h>
 #include <rviz_default_plugins/robot/robot.hpp>

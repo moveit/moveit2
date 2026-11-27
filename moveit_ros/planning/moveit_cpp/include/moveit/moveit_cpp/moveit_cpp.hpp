@@ -40,7 +40,6 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
 #include <moveit/controller_manager/controller_manager.hpp>
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/planning_pipeline/planning_pipeline.hpp>

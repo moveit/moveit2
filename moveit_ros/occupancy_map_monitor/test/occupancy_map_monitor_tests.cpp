@@ -38,7 +38,6 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <rclcpp/version.h>
 #include <tf2_ros/buffer.hpp>
 
 #include <memory>

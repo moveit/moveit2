@@ -21,8 +21,6 @@
 #include <string>
 #include <vector>
 
-#include <rclcpp/version.h>
-
 #include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <moveit_msgs/msg/robot_state.hpp>

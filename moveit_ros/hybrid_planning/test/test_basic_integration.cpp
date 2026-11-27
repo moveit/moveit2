@@ -41,7 +41,6 @@
 #include <moveit/planning_scene_monitor/planning_scene_monitor.hpp>
 #include <moveit/robot_state/conversions.hpp>
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <tf2_ros/buffer.hpp>
 

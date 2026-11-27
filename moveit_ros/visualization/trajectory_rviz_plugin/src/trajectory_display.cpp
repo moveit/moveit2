@@ -39,6 +39,7 @@
 #include <moveit/trajectory_rviz_plugin/trajectory_display.hpp>
 #include <rviz_common/properties/string_property.hpp>
 #include <moveit/utils/logger.hpp>
+#include <rclcpp/version.h>
 
 #include <memory>
 

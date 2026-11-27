@@ -37,7 +37,6 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
 #include <tf2_ros/buffer.hpp>
 #include <moveit/occupancy_map_monitor/occupancy_map_updater.hpp>
 #include <moveit/mesh_filter/mesh_filter.hpp>

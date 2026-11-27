@@ -45,7 +45,6 @@
 #include <boost/signals2.hpp>
 
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/version.h>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <tf2_msgs/msg/tf_message.hpp>
 #include <tf2_ros/buffer.hpp>

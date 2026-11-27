@@ -59,6 +59,7 @@
 
 #include <moveit/utils/rclcpp_utils.hpp>
 #include <moveit/utils/logger.hpp>
+#include <rclcpp/version.h>
 
 #include <cmath>
 

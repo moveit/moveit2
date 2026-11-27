@@ -35,7 +35,6 @@
 /* Author: Suat Gedikli */
 
 #include <moveit/mesh_filter/transform_provider.hpp>
-#include <rclcpp/version.h>
 #include <tf2_ros/buffer.hpp>
 #include <tf2_ros/transform_listener.hpp>
 #include <tf2_eigen/tf2_eigen.hpp>

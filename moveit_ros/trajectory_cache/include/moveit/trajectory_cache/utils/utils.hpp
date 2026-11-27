@@ -22,8 +22,6 @@
 #include <string>
 #include <vector>
 
-#include <rclcpp/version.h>
-
 #include <moveit/move_group_interface/move_group_interface.hpp>
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/robot_trajectory.hpp>
