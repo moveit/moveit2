@@ -68,4 +68,10 @@ install(DIRECTORY include/ DESTINATION include/moveit_ros_benchmarks)
 install(PROGRAMS scripts/moveit_benchmark_statistics.py
         DESTINATION lib/moveit_ros_benchmarks)
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(test_moveit_benchmark_statistics
+                        test/test_moveit_benchmark_statistics.py)
+endif()
+
 ament_package(CONFIG_EXTRAS ConfigExtras.cmake)
