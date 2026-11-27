@@ -9,15 +9,16 @@ add_library(moveit_kdl_kinematics_plugin SHARED
 target_link_libraries(
   moveit_kdl_kinematics_plugin
   kdl_kinematics_parameters
-  rclcpp::rclcpp
+  #rclcpp::rclcpp
   ${random_numbers_LIBRARIES}
-  pluginlib::pluginlib
+  #pluginlib::pluginlib
   moveit_core::moveit_core
   ${moveit_msgs_TARGETS}
-  ${orocos_kdl_LIBRARIES}
-  kdl_parser::kdl_parser
+  #${orocos_kdl_LIBRARIES}
+  #kdl_parser::kdl_parser
   tf2_kdl::tf2_kdl
-  Eigen3::Eigen)
+  #Eigen3::Eigen
+  )
 target_include_directories(moveit_kdl_kinematics_plugin
                            PUBLIC ${random_numbers_INCLUDE_DIRS})
 

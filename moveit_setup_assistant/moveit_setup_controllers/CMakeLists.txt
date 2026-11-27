@@ -3,6 +3,7 @@ project(moveit_setup_controllers LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
+find_package(moveit_core REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
@@ -22,9 +23,13 @@ else()
   find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
   set(QT_VERSION_MAJOR 5)
 endif()
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
+find_package(moveit_ros_visualization REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rviz_common REQUIRED)
 
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
@@ -52,9 +57,13 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
          $<INSTALL_INTERFACE:include/moveit_setup_controllers>)
 target_link_libraries(
-  moveit_setup_controllers ament_index_cpp::ament_index_cpp
-  moveit_setup_framework::moveit_setup_framework pluginlib::pluginlib
-  rclcpp::rclcpp)
+  moveit_setup_controllers 
+  #ament_index_cpp::ament_index_cpp
+  rviz_common::rviz_common
+  moveit_setup_framework::moveit_setup_framework
+  #pluginlib::pluginlib
+  rclcpp::rclcpp
+  )
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
@@ -77,7 +86,7 @@ install(FILES moveit_setup_framework_plugins.xml
 install(DIRECTORY include/ DESTINATION include/moveit_setup_controllers)
 install(DIRECTORY launch DESTINATION share/moveit_setup_controllers)
 
-ament_export_targets(moveit_setup_controllersTargets HAS_LIBRARY_TARGET)
+#ament_export_targets(moveit_setup_controllersTargets HAS_LIBRARY_TARGET)
 pluginlib_export_plugin_description_file(moveit_setup_framework
                                          moveit_setup_framework_plugins.xml)
 

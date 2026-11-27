@@ -54,13 +54,14 @@ target_include_directories(
 target_link_libraries(
   moveit_setup_assistant
   ${Boost_LIBRARIES}
-  ament_index_cpp::ament_index_cpp
+  #ament_index_cpp::ament_index_cpp
   moveit_setup_framework::moveit_setup_framework
-  moveit_setup_srdf_plugins::moveit_setup_srdf_plugins
-  pluginlib::pluginlib
+  #moveit_setup_srdf_plugins::moveit_setup_srdf_plugins
+  #pluginlib::pluginlib
   Qt${QT_VERSION_MAJOR}::Core
-  Qt${QT_VERSION_MAJOR}::Widgets
-  rclcpp::rclcpp)
+  #Qt${QT_VERSION_MAJOR}::Widgets
+  #rclcpp::rclcpp
+  )
 
 add_executable(moveit_setup_assistant_updater src/collisions_updater.cpp)
 target_include_directories(
@@ -71,13 +72,14 @@ target_include_directories(
 target_link_libraries(
   moveit_setup_assistant_updater
   ${Boost_LIBRARIES}
-  ament_index_cpp::ament_index_cpp
+  #ament_index_cpp::ament_index_cpp
   moveit_setup_framework::moveit_setup_framework
   moveit_setup_srdf_plugins::moveit_setup_srdf_plugins
-  pluginlib::pluginlib
-  Qt${QT_VERSION_MAJOR}::Core
-  Qt${QT_VERSION_MAJOR}::Widgets
-  rclcpp::rclcpp)
+  #pluginlib::pluginlib
+  #Qt${QT_VERSION_MAJOR}::Core
+  #Qt${QT_VERSION_MAJOR}::Widgets
+  #rclcpp::rclcpp
+  )
 
 set_target_properties(moveit_setup_assistant_updater
                       PROPERTIES OUTPUT_NAME collisions_updater PREFIX "")
@@ -95,7 +97,7 @@ install(DIRECTORY include/ DESTINATION include/moveit_setup_assistant)
 ament_export_include_directories(include/moveit_setup_assistant)
 install(DIRECTORY launch DESTINATION share/moveit_setup_assistant)
 install(DIRECTORY resources DESTINATION share/moveit_setup_assistant)
-ament_export_targets(moveit_setup_assistantTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+#ament_export_targets(moveit_setup_assistantTargets HAS_LIBRARY_TARGET)
+#ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 ament_package()

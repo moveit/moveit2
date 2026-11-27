@@ -79,7 +79,8 @@ set(THIS_PACKAGE_LIBRARIES
     moveit_point_containment_filter
     moveit_pointcloud_octomap_updater
     moveit_pointcloud_octomap_updater_core
-    moveit_semantic_world)
+    moveit_semantic_world
+    )
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     image_transport

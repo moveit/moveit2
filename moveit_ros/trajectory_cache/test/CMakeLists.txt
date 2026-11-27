@@ -11,30 +11,32 @@ if(BUILD_TESTING)
     warehouse_fixture PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
   target_link_libraries(
     warehouse_fixture
-    ${geometry_msgs_TARGETS}
+    #${geometry_msgs_TARGETS}
     moveit_ros_planning_interface::moveit_ros_planning_interface
-    moveit_ros_warehouse::moveit_ros_warehouse
-    rclcpp::rclcpp
-    tf2::tf2
-    tf2_ros::tf2_ros
-    ${trajectory_msgs_TARGETS}
-    warehouse_ros::warehouse_ros
-    warehouse_ros_sqlite::warehouse_ros_sqlite)
+    #moveit_ros_warehouse::moveit_ros_warehouse
+    #rclcpp::rclcpp
+    #tf2::tf2
+    #tf2_ros::tf2_ros
+    #${trajectory_msgs_TARGETS}
+    #warehouse_ros::warehouse_ros
+    #warehouse_ros_sqlite::warehouse_ros_sqlite
+    )
 
   add_library(move_group_fixture SHARED fixtures/move_group_fixture.cpp)
   target_include_directories(
     move_group_fixture PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>)
   target_link_libraries(
     move_group_fixture
-    ${geometry_msgs_TARGETS}
+    #${geometry_msgs_TARGETS}
     moveit_ros_planning_interface::moveit_ros_planning_interface
-    moveit_ros_warehouse::moveit_ros_warehouse
-    rclcpp::rclcpp
-    tf2::tf2
-    tf2_ros::tf2_ros
-    ${trajectory_msgs_TARGETS}
-    warehouse_ros::warehouse_ros
-    warehouse_ros_sqlite::warehouse_ros_sqlite)
+    #moveit_ros_warehouse::moveit_ros_warehouse
+    #rclcpp::rclcpp
+    #tf2::tf2
+    #tf2_ros::tf2_ros
+    #${trajectory_msgs_TARGETS}
+    #warehouse_ros::warehouse_ros
+    #warehouse_ros_sqlite::warehouse_ros_sqlite
+    )
 
   # Test utils library.
   #

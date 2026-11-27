@@ -7,8 +7,9 @@ target_link_libraries(
   moveit_planning_pipeline
   moveit_planning_pipeline_interfaces
   moveit_trajectory_execution_manager
-  rclcpp::rclcpp
-  moveit_core::moveit_core)
+  #rclcpp::rclcpp
+  #moveit_core::moveit_core
+  )
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)
 

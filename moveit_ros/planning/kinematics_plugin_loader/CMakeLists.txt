@@ -11,10 +11,11 @@ target_link_libraries(
   moveit_kinematics_plugin_loader
   moveit_rdf_loader
   kinematics_parameters
-  rclcpp::rclcpp
-  urdf::urdf
-  pluginlib::pluginlib
-  moveit_core::moveit_core)
+  #rclcpp::rclcpp
+  #urdf::urdf
+  #pluginlib::pluginlib
+  #moveit_core::moveit_core
+  )
 
 install(
   TARGETS kinematics_parameters

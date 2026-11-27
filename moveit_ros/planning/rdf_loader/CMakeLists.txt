@@ -23,3 +23,4 @@ install(DIRECTORY test/data test/launch
 # install( TARGETS test_rdf_integration boring_string_publisher ARCHIVE
 # DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION
 # lib/${PROJECT_NAME} ) endif()
+

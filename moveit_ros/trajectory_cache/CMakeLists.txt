@@ -61,14 +61,15 @@ generate_export_header(moveit_ros_trajectory_cache_features_lib)
 target_link_libraries(
   moveit_ros_trajectory_cache_features_lib
   moveit_ros_trajectory_cache_utils_lib
-  ${geometry_msgs_TARGETS}
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  moveit_ros_warehouse::moveit_ros_warehouse
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_ros::tf2_ros
-  ${trajectory_msgs_TARGETS}
-  warehouse_ros::warehouse_ros)
+  #${geometry_msgs_TARGETS}
+  #moveit_ros_planning_interface::moveit_ros_planning_interface
+  #moveit_ros_warehouse::moveit_ros_warehouse
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_ros::tf2_ros
+  #${trajectory_msgs_TARGETS}
+  #warehouse_ros::warehouse_ros
+  )
 target_include_directories(
   moveit_ros_trajectory_cache_features_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -84,14 +85,15 @@ target_link_libraries(
   moveit_ros_trajectory_cache_cache_insert_policies_lib
   moveit_ros_trajectory_cache_features_lib
   moveit_ros_trajectory_cache_utils_lib
-  ${geometry_msgs_TARGETS}
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  moveit_ros_warehouse::moveit_ros_warehouse
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_ros::tf2_ros
-  ${trajectory_msgs_TARGETS}
-  warehouse_ros::warehouse_ros)
+  #${geometry_msgs_TARGETS}
+  #moveit_ros_planning_interface::moveit_ros_planning_interface
+  #moveit_ros_warehouse::moveit_ros_warehouse
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_ros::tf2_ros
+  #${trajectory_msgs_TARGETS}
+  #warehouse_ros::warehouse_ros
+  )
 target_include_directories(
   moveit_ros_trajectory_cache_cache_insert_policies_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -105,14 +107,15 @@ target_link_libraries(
   moveit_ros_trajectory_cache_cache_insert_policies_lib
   moveit_ros_trajectory_cache_features_lib
   moveit_ros_trajectory_cache_utils_lib
-  ${geometry_msgs_TARGETS}
-  moveit_ros_planning_interface::moveit_ros_planning_interface
-  moveit_ros_warehouse::moveit_ros_warehouse
-  rclcpp::rclcpp
-  tf2::tf2
-  tf2_ros::tf2_ros
-  ${trajectory_msgs_TARGETS}
-  warehouse_ros::warehouse_ros)
+  #${geometry_msgs_TARGETS}
+  #moveit_ros_planning_interface::moveit_ros_planning_interface
+  #moveit_ros_warehouse::moveit_ros_warehouse
+  #rclcpp::rclcpp
+  #tf2::tf2
+  #tf2_ros::tf2_ros
+  #${trajectory_msgs_TARGETS}
+  #warehouse_ros::warehouse_ros
+  )
 target_include_directories(
   moveit_ros_trajectory_cache_lib
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
@@ -144,6 +147,6 @@ endforeach()
 
 add_subdirectory(test)
 
-ament_export_targets(moveit_ros_trajectory_cacheTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(${TRAJECTORY_CACHE_DEPENDENCIES})
+#ament_export_targets(moveit_ros_trajectory_cacheTargets HAS_LIBRARY_TARGET)
+#ament_export_dependencies(${TRAJECTORY_CACHE_DEPENDENCIES})
 ament_package()

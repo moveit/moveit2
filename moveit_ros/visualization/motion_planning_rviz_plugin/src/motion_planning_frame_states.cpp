@@ -43,6 +43,7 @@
 #include <QInputDialog>
 
 #include "ui_motion_planning_rviz_plugin_frame.h"
+#include <iomanip>
 
 namespace moveit_rviz_plugin
 {

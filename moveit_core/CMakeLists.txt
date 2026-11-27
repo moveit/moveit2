@@ -42,6 +42,21 @@ find_package(urdfdom REQUIRED)
 find_package(urdfdom_headers REQUIRED)
 find_package(visualization_msgs REQUIRED)
 
+
+if(Bullet_FOUND AND NOT TARGET Bullet::Bullet)
+  add_library(Bullet::Bullet INTERFACE IMPORTED)
+  set_target_properties(
+    Bullet::Bullet
+    PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${BULLET_INCLUDE_DIRS}"
+      INTERFACE_LINK_LIBRARIES "${BULLET_LIBRARIES}"
+  )
+endif()
+
+ADD_DEFINITIONS( -DBT_USE_DOUBLE_PRECISION=1 )
+
+
+
 # Finds Boost Components
 include(ConfigExtras.cmake)
 

@@ -10,8 +10,8 @@ set_target_properties(moveit_mesh_filter
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(
   moveit_mesh_filter
-  ${GL_LIBS}
-  ${SYSTEM_GL_LIBRARIES}
+  #${GL_LIBS}
+  #${SYSTEM_GL_LIBRARIES}
   rclcpp::rclcpp
   moveit_core::moveit_core
   geometric_shapes::geometric_shapes

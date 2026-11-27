@@ -9,6 +9,8 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(moveit_core REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(moveit_ros_planning REQUIRED)
 find_package(moveit_ros_warehouse REQUIRED)
 find_package(pluginlib REQUIRED)
@@ -37,14 +39,16 @@ endif()
 target_link_libraries(
   moveit_ros_benchmarks
   rclcpp::rclcpp
-  Boost::headers
-  Boost::date_time
-  tf2_eigen::tf2_eigen
-  moveit_core::moveit_core
+  ${moveit_msgs_TARGETS}
+  #Boost::headers
+  #Boost::date_time
+  #tf2_eigen::tf2_eigen
+  #moveit_core::moveit_core
   moveit_ros_planning::moveit_ros_planning
   moveit_ros_warehouse::moveit_ros_warehouse
-  pluginlib::pluginlib
-  ${EXTRA_LIB})
+  #pluginlib::pluginlib
+  #${EXTRA_LIB}
+  )
 
 add_executable(moveit_run_benchmark src/RunBenchmark.cpp)
 target_link_libraries(moveit_run_benchmark moveit_ros_benchmarks)

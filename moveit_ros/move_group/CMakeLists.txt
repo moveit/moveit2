@@ -39,7 +39,7 @@ target_link_libraries(
   fmt::fmt
   moveit_core::moveit_core
   moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  moveit_ros_planning::moveit_ros_planning
+  ${moveit_ros_planning_TARGETS}
   pluginlib::pluginlib
   rclcpp::rclcpp
   rclcpp_action::rclcpp_action
@@ -74,51 +74,54 @@ set_target_properties(moveit_move_group_default_capabilities
 target_link_libraries(
   moveit_move_group_default_capabilities
   moveit_move_group_capabilities_base
-  fmt::fmt
-  moveit_core::moveit_core
-  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_action::rclcpp_action
-  ${std_srvs_TARGETS}
-  tf2::tf2
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_ros::tf2_ros)
+  #fmt::fmt
+  #moveit_core::moveit_core
+  #moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  ${moveit_ros_planning_TARGETS}
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #rclcpp_action::rclcpp_action
+  #${std_srvs_TARGETS}
+  #tf2::tf2
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_ros::tf2_ros
+  )
 
 add_executable(move_group src/move_group.cpp)
 target_include_directories(move_group PUBLIC include)
 target_link_libraries(
   move_group
   moveit_move_group_capabilities_base
-  fmt::fmt
-  moveit_core::moveit_core
-  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_action::rclcpp_action
-  ${std_srvs_TARGETS}
-  tf2::tf2
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_ros::tf2_ros
-  Boost::headers)
+  #fmt::fmt
+  #moveit_core::moveit_core
+  #moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  #${moveit_ros_planning_TARGETS}
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #rclcpp_action::rclcpp_action
+  #${std_srvs_TARGETS}
+  #tf2::tf2
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_ros::tf2_ros
+  #Boost::headers
+  )
 
 add_executable(list_move_group_capabilities src/list_capabilities.cpp)
 target_link_libraries(
   list_move_group_capabilities
   moveit_move_group_capabilities_base
-  fmt::fmt
-  moveit_core::moveit_core
-  moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
-  moveit_ros_planning::moveit_ros_planning
-  pluginlib::pluginlib
-  rclcpp::rclcpp
-  rclcpp_action::rclcpp_action
-  ${std_srvs_TARGETS}
-  tf2::tf2
-  tf2_geometry_msgs::tf2_geometry_msgs
-  tf2_ros::tf2_ros)
+  #fmt::fmt
+  #moveit_core::moveit_core
+  #moveit_ros_occupancy_map_monitor::moveit_ros_occupancy_map_monitor
+  #${moveit_ros_planning_TARGETS}
+  #pluginlib::pluginlib
+  #rclcpp::rclcpp
+  #rclcpp_action::rclcpp_action
+  #${std_srvs_TARGETS}
+  #tf2::tf2
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  #tf2_ros::tf2_ros
+  )
 
 install(TARGETS move_group list_move_group_capabilities
         RUNTIME DESTINATION lib/moveit_ros_move_group)

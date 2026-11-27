@@ -41,12 +41,13 @@ set_target_properties(
 target_link_libraries(
   moveit_robot_interaction
   moveit_core::moveit_core
-  moveit_ros_planning::moveit_ros_planning
+  #moveit_ros_planning::moveit_ros_planning
   interactive_markers::interactive_markers
-  tf2::tf2
-  tf2_eigen::tf2_eigen
-  tf2_ros::tf2_ros
-  tf2_geometry_msgs::tf2_geometry_msgs)
+  #tf2::tf2
+  #tf2_eigen::tf2_eigen
+  #tf2_ros::tf2_ros
+  #tf2_geometry_msgs::tf2_geometry_msgs
+  )
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

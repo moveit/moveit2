@@ -59,18 +59,19 @@ target_include_directories(
 target_link_libraries(
   moveit_setup_framework
   PUBLIC ament_index_cpp::ament_index_cpp
-         fmt::fmt
+         #fmt::fmt
          moveit_core::moveit_core
          moveit_ros_planning::moveit_ros_planning
          moveit_ros_visualization::moveit_ros_visualization
-         pluginlib::pluginlib
+         #pluginlib::pluginlib
          Qt${QT_VERSION_MAJOR}::Core
          Qt${QT_VERSION_MAJOR}::Widgets
-         rclcpp::rclcpp
+         #rclcpp::rclcpp
          rviz_common::rviz_common
-         rviz_rendering::rviz_rendering
-         srdfdom::srdfdom
-         urdf::urdf)
+         #rviz_rendering::rviz_rendering
+         #srdfdom::srdfdom
+         #urdf::urdf
+         )
 
 install(DIRECTORY include/ DESTINATION include/moveit_setup_framework)
 install(FILES moveit_setup_framework_plugins.xml
@@ -88,16 +89,15 @@ install(
   INCLUDES
   DESTINATION include/moveit_setup_framework)
 
-ament_export_dependencies(fmt)
-ament_export_dependencies(rclcpp)
-ament_export_dependencies(Qt${QT_VERSION_MAJOR}Core
-                          Qt${QT_VERSION_MAJOR}Widgets)
-ament_export_dependencies(moveit_common)
-ament_export_dependencies(moveit_core)
-ament_export_dependencies(moveit_ros_planning)
+#ament_export_dependencies(fmt)
+#ament_export_dependencies(rclcpp)
+#ament_export_dependencies(Qt${QT_VERSION_MAJOR}Core  Qt${QT_VERSION_MAJOR}Widgets)
+#ament_export_dependencies(moveit_common)
+#ament_export_dependencies(moveit_core)
+#ament_export_dependencies(moveit_ros_planning)
 ament_export_dependencies(moveit_ros_visualization)
-ament_export_dependencies(rviz_common)
-ament_export_dependencies(rviz_rendering)
+#ament_export_dependencies(rviz_common)
+#ament_export_dependencies(rviz_rendering)
 pluginlib_export_plugin_description_file(moveit_setup_framework
                                          moveit_setup_framework_plugins.xml)
 

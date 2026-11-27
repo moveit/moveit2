@@ -5,6 +5,8 @@ set_target_properties(moveit_constraint_sampler_manager_loader
                       PROPERTIES VERSION "${${PROJECT_NAME}_VERSION}")
 target_link_libraries(
   moveit_constraint_sampler_manager_loader moveit_rdf_loader
-  moveit_core::moveit_core rclcpp::rclcpp Boost::headers pluginlib::pluginlib)
+  moveit_core::moveit_core 
+  #rclcpp::rclcpp Boost::headers pluginlib::pluginlib
+  )
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

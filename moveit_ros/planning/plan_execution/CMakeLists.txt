@@ -6,9 +6,10 @@ target_link_libraries(
   moveit_planning_pipeline
   moveit_planning_scene_monitor
   moveit_trajectory_execution_manager
-  moveit_core::moveit_core
-  rclcpp::rclcpp
-  Boost::headers
-  pluginlib::pluginlib)
+  #moveit_core::moveit_core
+  #rclcpp::rclcpp
+  #Boost::headers
+  #pluginlib::pluginlib
+  )
 
 install(DIRECTORY include/ DESTINATION include/moveit_ros_planning)

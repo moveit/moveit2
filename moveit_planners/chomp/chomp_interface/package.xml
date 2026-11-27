@@ -14,9 +14,8 @@
   <author email="gjones@willowgarage.com">Gil Jones</author>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+  <build_depend>chomp_motion_planner</build_depend>
   <depend>moveit_common</depend>
-
-  <depend>chomp_motion_planner</depend>
   <depend>moveit_core</depend>
   <depend>pluginlib</depend>
   <depend>rclcpp</depend>

@@ -52,8 +52,10 @@ if(BUILD_TESTING)
                              test/planning_scene_monitor_test.cpp)
   target_link_libraries(
     planning_scene_monitor_test moveit_planning_scene_monitor
-    moveit_core::moveit_core rclcpp::rclcpp ${moveit_msgs_TARGETS})
+    #moveit_core::moveit_core rclcpp::rclcpp ${moveit_msgs_TARGETS}
+    )
 
   add_ros_test(test/launch/planning_scene_monitor.test.py TIMEOUT 30 ARGS
                "test_binary_dir:=${CMAKE_CURRENT_BINARY_DIR}")
 endif()
+

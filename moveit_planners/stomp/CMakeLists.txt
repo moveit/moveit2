@@ -15,6 +15,7 @@ find_package(visualization_msgs REQUIRED)
 find_package(tf2_eigen REQUIRED)
 find_package(rsl REQUIRED)
 
+
 generate_parameter_library(stomp_moveit_parameters res/stomp_moveit.yaml)
 
 include_directories(include)
@@ -26,11 +27,14 @@ target_link_libraries(
   stomp_moveit_plugin
   stomp::stomp
   stomp_moveit_parameters
-  rsl::rsl
+  class_loader::class_loader
+  #rsl::rsl
   moveit_core::moveit_core
-  ${std_msgs_TARGETS}
-  tf2_eigen::tf2_eigen
-  ${visualization_msgs_TARGETS})
+  #${std_msgs_TARGETS}
+  #tf2_eigen::tf2_eigen
+  #${visualization_msgs_TARGETS}
+  #${moveit_ros_planning_interface_TARGETS}
+  )
 
 pluginlib_export_plugin_description_file(moveit_core
                                          stomp_moveit_plugin_description.xml)
@@ -44,8 +48,8 @@ install(
   INCLUDES
   DESTINATION include/moveit_planners_stomp)
 
-ament_export_targets(moveit_planners_stompTargets HAS_LIBRARY_TARGET)
-ament_export_dependencies(moveit_core stomp generate_parameter_library)
+#ament_export_targets(moveit_planners_stompTargets HAS_LIBRARY_TARGET)
+#ament_export_dependencies(moveit_core stomp generate_parameter_library)
 
 if(BUILD_TESTING)
   add_subdirectory(test)

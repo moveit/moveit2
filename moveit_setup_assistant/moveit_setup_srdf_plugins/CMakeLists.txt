@@ -3,6 +3,7 @@ project(moveit_setup_srdf_plugins LANGUAGES CXX)
 
 # Common cmake code applied to all moveit packages
 find_package(moveit_common REQUIRED)
+find_package(moveit_core REQUIRED)
 moveit_package()
 
 find_package(ament_cmake REQUIRED)
@@ -21,7 +22,10 @@ else()
   find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
   set(QT_VERSION_MAJOR 5)
 endif()
+find_package(rviz_common REQUIRED)
 find_package(moveit_setup_framework REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(moveit_ros_occupancy_map_monitor REQUIRED)
 find_package(pluginlib REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
@@ -64,7 +68,7 @@ target_include_directories(
          $<INSTALL_INTERFACE:include/moveit_setup_srdf_plugins>)
 target_link_libraries(
   moveit_setup_srdf_plugins moveit_setup_framework::moveit_setup_framework
-  pluginlib::pluginlib)
+  pluginlib::pluginlib rviz_common::rviz_common )
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)

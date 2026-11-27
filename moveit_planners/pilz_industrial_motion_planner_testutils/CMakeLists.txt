@@ -36,7 +36,8 @@ target_link_libraries(
   rclcpp::rclcpp
   moveit_core::moveit_core
   ${moveit_msgs_TARGETS}
-  tf2_eigen::tf2_eigen)
+  tf2_eigen::tf2_eigen
+  )
 
 # ##############################################################################
 # Install ##
@@ -54,8 +55,7 @@ install(
 install(DIRECTORY include/
         DESTINATION include/pilz_industrial_motion_planner_testutils)
 
-ament_export_targets(pilz_industrial_motion_planner_testutilsTargets
-                     HAS_LIBRARY_TARGET)
+ament_export_targets(pilz_industrial_motion_planner_testutilsTargets  HAS_LIBRARY_TARGET)
 ament_export_dependencies(rclcpp moveit_core moveit_msgs tf2_eigen)
 
 ament_package()
