@@ -326,7 +326,7 @@ void ConstraintsLibrary::loadConstraintApproximations(const std::string& path)
     moveit_msgs::msg::Constraints msg;
     hexToMsg(serialization, msg);
     auto* cass = new ConstraintApproximationStateStorage(context_->getOMPLSimpleSetup()->getStateSpace());
-    cass->load((std::string{ path }.append("/").append(filename)).c_str());
+    cass->load((std::string{ path }.append(1, '/').append(filename)).c_str());
     auto cap = std::make_shared<ConstraintApproximation>(group, state_space_parameterization, explicit_motions, msg,
                                                          filename, ompl::base::StateStoragePtr(cass), milestones);
     if (constraint_approximations_.find(cap->getName()) != constraint_approximations_.end())
